@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicSccProvider", "BasicSccProvider.csproj", "{ADECE07A-5D80-4950-9DA5-A681CE2F5106}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{A0417584-B3B4-4991-8435-4B86D643322B}"
+	ProjectSection(SolutionItems) = preProject
+		lib\DiffieHellman.dll = lib\DiffieHellman.dll
+		lib\GitSharp.Core.dll = lib\GitSharp.Core.dll
+		lib\GitSharp.dll = lib\GitSharp.dll
+		lib\ICSharpCode.SharpZipLib.dll = lib\ICSharpCode.SharpZipLib.dll
+		lib\Org.Mentalis.Security.dll = lib\Org.Mentalis.Security.dll
+		lib\Tamir.SharpSSH.dll = lib\Tamir.SharpSSH.dll
+		lib\Winterdom.IO.FileMap.dll = lib\Winterdom.IO.FileMap.dll
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ADECE07A-5D80-4950-9DA5-A681CE2F5106}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADECE07A-5D80-4950-9DA5-A681CE2F5106}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADECE07A-5D80-4950-9DA5-A681CE2F5106}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADECE07A-5D80-4950-9DA5-A681CE2F5106}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+		DebugSamples90.Connect = 1;Configure Project for VSIP Experimental Environment;ConfigVSIPDebug
+	EndGlobalSection
+EndGlobal

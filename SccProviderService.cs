@@ -19,7 +19,6 @@ namespace GitScc
         IVsSolutionEvents,
         IVsSolutionEvents2,
         IVsSccGlyphs,
-        IVsTrackProjectDocumentsEvents2,
         IDisposable
     {
         private bool _active = false;
@@ -86,6 +85,7 @@ namespace GitScc
             _active = false;
             _sccProvider.OnActiveStateChange();
 
+            CloseTracker();
             return VSConstants.S_OK;
         }
 
@@ -227,9 +227,14 @@ namespace GitScc
         /// </summary>
         public int GetGlyphTipText([InAttribute] IVsHierarchy phierHierarchy, [InAttribute] uint itemidNode, out string pbstrTooltipText)
         {
-            string fileName = GetFileName(phierHierarchy, itemidNode);
-            GitFileStatus status = _statusTracker.GetFileStatus(fileName);
-            pbstrTooltipText = status.ToString();
+            pbstrTooltipText = "";
+            IList<string> files = GetNodeFiles(phierHierarchy as IVsSccProject2, itemidNode);
+            if (files.Count == 0)
+            {
+                return VSConstants.S_OK;
+            }
+            GitFileStatus status = _statusTracker.GetFileStatus(files[0]);
+            pbstrTooltipText = status.ToString(); //TODO: use resources
             return VSConstants.S_OK;
         }
 
@@ -346,13 +351,13 @@ namespace GitScc
 
         private string solutionDirectoryName;
 
-        private string GetFileName(IVsHierarchy hierHierarchy, uint itemidNode)
-        {
-            if (hierHierarchy == null) return null;
-            string pvalue;
-            return hierHierarchy.GetCanonicalName(itemidNode, out pvalue) == VSConstants.S_OK ? //pvalue : null;
-                Path.Combine(solutionDirectoryName, pvalue) : null;
-        }
+        //private string GetFileName(IVsHierarchy hierHierarchy, uint itemidNode)
+        //{
+        //    if (hierHierarchy == null) return null;
+        //    string pvalue;
+        //    return hierHierarchy.GetCanonicalName(itemidNode, out pvalue) == VSConstants.S_OK ? //pvalue : null;
+        //        Path.Combine(solutionDirectoryName, pvalue) : null;
+        //}
 
         internal void OpenTracker()
         {
@@ -376,6 +381,7 @@ namespace GitScc
         private void CloseTracker()
         {
             _statusTracker.Close();
+            Refresh();
         }
 
         private void _statusTracker_OnGitRepoChanged(object sender, EventArgs e)
@@ -454,8 +460,36 @@ namespace GitScc
         {
             int hr;
             var sccProject2 = hierarchy as IVsSccProject2;
-            if (sccProject2 != null)
+
+            if (itemid == VSConstants.VSITEMID_ROOT)
             {
+                if (sccProject2 == null)
+                {
+                    // Note: The solution's hierarchy does not implement IVsSccProject2, IVsSccProject interfaces
+                    // It may be a pain to treat the solution as special case everywhere; a possible workaround is 
+                    // to implement a solution-wrapper class, that will implement IVsSccProject2, IVsSccProject and
+                    // IVsHierarhcy interfaces, and that could be used in provider's code wherever a solution is needed.
+                    // This approach could unify the treatment of solution and projects in the provider's code.
+
+                    string fileName = GetSolutionFileName();
+                    if (string.IsNullOrEmpty(fileName)) return;
+                    VsStateIcon[] rgsiGlyphs = new VsStateIcon[1];
+                    uint[] rgdwSccStatus = new uint[1];
+                    GetSccGlyph(1, new string[] { fileName }, rgsiGlyphs, rgdwSccStatus);
+                    hr = hierarchy.SetProperty(itemid, (int)__VSHPROPID.VSHPROPID_StateIconIndex, rgsiGlyphs[0]);
+                }
+                else
+                {
+                    // Refresh all the glyphs in the project; the project will call back GetSccGlyphs() 
+                    // with the files for each node that will need new glyph
+                    sccProject2.SccGlyphChanged(0, null, null, null);
+                }
+            }
+            else
+            {
+                // It may be easier/faster to simply refresh all the nodes in the project, 
+                // and let the project call back on GetSccGlyphs, but just for the sake of the demo, 
+                // let's refresh ourselves only one node at a time
                 IList<string> sccFiles = GetNodeFiles(sccProject2, itemid);
 
                 // We'll use for the node glyph just the Master file's status (ignoring special files of the node)
@@ -471,19 +505,25 @@ namespace GitScc
                     rguiAffectedNodes[0] = itemid;
                     sccProject2.SccGlyphChanged(1, rguiAffectedNodes, rgsiGlyphs, rgdwSccStatus);
                 }
-
-            }
-            else
-            {
-                string fileName = GetFileName(hierarchy, itemid);
-                if (string.IsNullOrEmpty(fileName)) return;
-                VsStateIcon[] rgsiGlyphs = new VsStateIcon[1];
-                uint[] rgdwSccStatus = new uint[1];
-                GetSccGlyph(1, new string[] { fileName }, rgsiGlyphs, rgdwSccStatus);
-                hr = hierarchy.SetProperty(itemid, (int)__VSHPROPID.VSHPROPID_StateIconIndex, rgsiGlyphs[0]);
             }
         }
 
+        /// <summary>
+        /// Returns the filename of the solution
+        /// </summary>
+        public string GetSolutionFileName()
+        {
+            IVsSolution sol = (IVsSolution) _sccProvider.GetService(typeof(SVsSolution));
+            string solutionDirectory, solutionFile, solutionUserOptions;
+            if (sol.GetSolutionInfo(out solutionDirectory, out solutionFile, out solutionUserOptions) == VSConstants.S_OK)
+            {
+                return solutionFile;
+            }
+            else
+            {
+                return null;
+            }
+        }
         /// <summary>
         /// Returns a list of source controllable files associated with the specified node
         /// </summary>
@@ -547,79 +587,6 @@ namespace GitScc
             }
 
             return sccFiles;
-        }
-        #endregion
-
-        #region IVsTrackProjectDocumentsEvents2
-
-        public int OnQueryAddFiles([InAttribute] IVsProject pProject, [InAttribute] int cFiles, [InAttribute] string[] rgpszMkDocuments, [InAttribute] VSQUERYADDFILEFLAGS[] rgFlags, [OutAttribute] VSQUERYADDFILERESULTS[] pSummaryResult, [OutAttribute] VSQUERYADDFILERESULTS[] rgResults)
-        {
-            return VSConstants.E_NOTIMPL;
-        }
-
-        /// <summary>
-        /// Implement this function to update the project scc glyphs when the items are added to the project.
-        /// If a project doesn't call GetSccGlyphs as they should do (as solution folder do), this will update correctly the glyphs when the project is controled
-        /// </summary>
-        public int OnAfterAddFilesEx([InAttribute] int cProjects, [InAttribute] int cFiles, [InAttribute] IVsProject[] rgpProjects, [InAttribute] int[] rgFirstIndices, [InAttribute] string[] rgpszMkDocuments, [InAttribute] VSADDFILEFLAGS[] rgFlags)
-        {          
-            return VSConstants.E_NOTIMPL;
-        }
-
-        public int OnQueryAddDirectories ([InAttribute] IVsProject pProject, [InAttribute] int cDirectories, [InAttribute] string[] rgpszMkDocuments, [InAttribute] VSQUERYADDDIRECTORYFLAGS[] rgFlags, [OutAttribute] VSQUERYADDDIRECTORYRESULTS[] pSummaryResult, [OutAttribute] VSQUERYADDDIRECTORYRESULTS[] rgResults)
-        {
-            return VSConstants.E_NOTIMPL;
-        }
-
-        public int OnAfterAddDirectoriesEx ([InAttribute] int cProjects, [InAttribute] int cDirectories, [InAttribute] IVsProject[] rgpProjects, [InAttribute] int[] rgFirstIndices, [InAttribute] string[] rgpszMkDocuments, [InAttribute] VSADDDIRECTORYFLAGS[] rgFlags)
-        {
-            return VSConstants.E_NOTIMPL;
-        }
-
-        public int OnQueryRemoveFiles([InAttribute] IVsProject pProject, [InAttribute] int cFiles, [InAttribute] string[] rgpszMkDocuments, [InAttribute] VSQUERYREMOVEFILEFLAGS[] rgFlags, [OutAttribute] VSQUERYREMOVEFILERESULTS[] pSummaryResult, [OutAttribute] VSQUERYREMOVEFILERESULTS[] rgResults)
-        {
-            return VSConstants.S_OK;
-        }
-
-        public int OnAfterRemoveFiles([InAttribute] int cProjects, [InAttribute] int cFiles, [InAttribute] IVsProject[] rgpProjects, [InAttribute] int[] rgFirstIndices, [InAttribute] string[] rgpszMkDocuments, [InAttribute] VSREMOVEFILEFLAGS[] rgFlags)
-        {
-            // The file deletes are not propagated into the store
-            return VSConstants.E_NOTIMPL;
-        }
-
-        public int OnQueryRemoveDirectories([InAttribute] IVsProject pProject, [InAttribute] int cDirectories, [InAttribute] string[] rgpszMkDocuments, [InAttribute] VSQUERYREMOVEDIRECTORYFLAGS[] rgFlags, [OutAttribute] VSQUERYREMOVEDIRECTORYRESULTS[] pSummaryResult, [OutAttribute] VSQUERYREMOVEDIRECTORYRESULTS[] rgResults)
-        {
-            return VSConstants.E_NOTIMPL;
-        }
-
-        public int OnAfterRemoveDirectories([InAttribute] int cProjects, [InAttribute] int cDirectories, [InAttribute] IVsProject[] rgpProjects, [InAttribute] int[] rgFirstIndices, [InAttribute] string[] rgpszMkDocuments, [InAttribute] VSREMOVEDIRECTORYFLAGS[] rgFlags)
-        {
-            return VSConstants.E_NOTIMPL;
-        }
-
-        public int OnQueryRenameFiles([InAttribute] IVsProject pProject, [InAttribute] int cFiles, [InAttribute] string[] rgszMkOldNames, [InAttribute] string[] rgszMkNewNames, [InAttribute] VSQUERYRENAMEFILEFLAGS[] rgFlags, [OutAttribute] VSQUERYRENAMEFILERESULTS[] pSummaryResult, [OutAttribute] VSQUERYRENAMEFILERESULTS[] rgResults)
-        {
-            return VSConstants.E_NOTIMPL;
-        }
-
-        public int OnAfterRenameFiles([InAttribute] int cProjects, [InAttribute] int cFiles, [InAttribute] IVsProject[] rgpProjects, [InAttribute] int[] rgFirstIndices, [InAttribute] string[] rgszMkOldNames, [InAttribute] string[] rgszMkNewNames, [InAttribute] VSRENAMEFILEFLAGS[] rgFlags)
-        {
-            return VSConstants.S_OK;
-        }
-
-        public int OnQueryRenameDirectories([InAttribute] IVsProject pProject, [InAttribute] int cDirs, [InAttribute] string[] rgszMkOldNames, [InAttribute] string[] rgszMkNewNames, [InAttribute] VSQUERYRENAMEDIRECTORYFLAGS[] rgFlags, [OutAttribute] VSQUERYRENAMEDIRECTORYRESULTS[] pSummaryResult, [OutAttribute] VSQUERYRENAMEDIRECTORYRESULTS[] rgResults)
-        {
-            return VSConstants.E_NOTIMPL;
-        }
-
-        public int OnAfterRenameDirectories([InAttribute] int cProjects, [InAttribute] int cDirs, [InAttribute] IVsProject[] rgpProjects, [InAttribute] int[] rgFirstIndices, [InAttribute] string[] rgszMkOldNames, [InAttribute] string[] rgszMkNewNames, [InAttribute] VSRENAMEDIRECTORYFLAGS[] rgFlags)
-        {
-            return VSConstants.E_NOTIMPL;
-        }
-
-        public int OnAfterSccStatusChanged([InAttribute] int cProjects, [InAttribute] int cFiles, [InAttribute] IVsProject[] rgpProjects, [InAttribute] int[] rgFirstIndices, [InAttribute] string[] rgpszMkDocuments, [InAttribute] uint[] rgdwSccStatus)
-        {
-            return VSConstants.E_NOTIMPL;
         }
         #endregion
     }

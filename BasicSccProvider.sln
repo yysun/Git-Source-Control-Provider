@@ -4,8 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{A0417584-B3B4-4991-8435-4B86D643322B}"
 	ProjectSection(SolutionItems) = preProject
 		lib\DiffieHellman.dll = lib\DiffieHellman.dll
-		lib\GitSharp.Core.dll = lib\GitSharp.Core.dll
-		lib\GitSharp.dll = lib\GitSharp.dll
 		lib\ICSharpCode.SharpZipLib.dll = lib\ICSharpCode.SharpZipLib.dll
 		lib\Org.Mentalis.Security.dll = lib\Org.Mentalis.Security.dll
 		lib\Tamir.SharpSSH.dll = lib\Tamir.SharpSSH.dll

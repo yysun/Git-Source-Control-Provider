@@ -113,6 +113,7 @@ namespace GitScc
             if (thisCommand != null)
             {
                  sccService.OpenTracker();
+                 sccService.Refresh();
             }
         }
 

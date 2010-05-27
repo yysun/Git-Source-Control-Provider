@@ -11,8 +11,8 @@ namespace GitScc
     {
         private RepositoryStatus repositoryStatus;
         private Uri workingFolderUri;
-        private FileSystemWatcher watcher;
-        private IgnoreRules ignoreRules;
+        //private FileSystemWatcher watcher;
+        //private IgnoreRules ignoreRules;
 
         public GitFileStatusTracker()
         {
@@ -30,12 +30,14 @@ namespace GitScc
                     var repo = new Repository(workingFolder);        
                     this.repositoryStatus = repo.Status;
                     this.workingFolderUri = new Uri(repo.WorkingDirectory+"\\");
-                    this.ignoreRules = new IgnoreRules(Path.Combine(repo.WorkingDirectory, GitSharp.Core.Constants.GITIGNORE_FILENAME));
-                    this.watcher = new FileSystemWatcher(workingFolder); //?
-                    this.watcher.IncludeSubdirectories = true;
-                    this.watcher.NotifyFilter = NotifyFilters.LastWrite;
-                    this.watcher.EnableRaisingEvents = true;
-                    this.watcher.Changed += new FileSystemEventHandler(watcher_Changed);
+                    //this.ignoreRules = new IgnoreRules(Path.Combine(repo.WorkingDirectory, GitSharp.Core.Constants.GITIGNORE_FILENAME));
+
+                    //this.watcher = new FileSystemWatcher(workingFolder + "\\" + GitSharp.Core.Constants.DOT_GIT); //?
+                    ////this.watcher = new FileSystemWatcher(workingFolder); //?
+
+                    //this.watcher.NotifyFilter = NotifyFilters.LastWrite;
+                    //this.watcher.EnableRaisingEvents = true;
+                    //this.watcher.Changed += new FileSystemEventHandler(watcher_Changed);
                 }
                 catch
                 {
@@ -54,11 +56,8 @@ namespace GitScc
             {
                 double delta = DateTime.Now.Subtract(TimeFired).TotalMilliseconds;
                 if (delta < 500) return;
-                
-                if (this.repositoryStatus.Untracked.Has(e.FullPath)) return; // change untracked file, it remains untrackered
-                if (this.repositoryStatus.Modified.Has(e.FullPath)) return;  // change modified file, it remains modified
 
-                if (IsIgnoredFile(e.FullPath)) return;
+                //if (IsIgnoredFile(e.FullPath)) return;
 
                 this.repositoryStatus.Update();
                 if (OnGitRepoChanged != null) OnGitRepoChanged(this, EventArgs.Empty);
@@ -77,24 +76,42 @@ namespace GitScc
             if (this.repositoryStatus != null) this.repositoryStatus.Repository.Close();
             this.repositoryStatus = null;
             this.workingFolderUri = null;
-            this.ignoreRules = null;
+            //this.ignoreRules = null;
 
-            if (this.watcher != null)
-            {
-                this.watcher.Changed -= new FileSystemEventHandler(watcher_Changed);
-                this.watcher.Dispose();
-            }
+            //if (this.watcher != null)
+            //{
+            //    this.watcher.Changed -= new FileSystemEventHandler(watcher_Changed);
+            //    this.watcher.Dispose();
+            //}
 
         }
 
-        private bool IsIgnoredFile(string fileName)
-        {
-            return this.ignoreRules.IgnoreFile(this.repositoryStatus.Repository.WorkingDirectory, fileName);
-        }
+        //private bool IsIgnoredFile(string fileName)
+        //{
+        //    try
+        //    {
+        //        if (Directory.Exists(fileName))
+        //        {
+        //            return this.ignoreRules.IgnoreDir(this.repositoryStatus.Repository.WorkingDirectory, fileName);
+        //        }
+        //        else if (File.Exists(fileName))
+        //        {
+        //            return this.ignoreRules.IgnoreDir(this.repositoryStatus.Repository.WorkingDirectory,
+        //                                              Path.GetDirectoryName(fileName)) ||
+        //                   this.ignoreRules.IgnoreFile(this.repositoryStatus.Repository.WorkingDirectory, fileName);
+        //        }
+        //        else
+        //            return true;
+        //    }
+        //    catch
+        //    {
+        //        return false;
+        //    }
+        //}
 
         public GitFileStatus GetFileStatus(string fileName)
         {
-            if (!HasGitRepository || string.IsNullOrEmpty(fileName) || !File.Exists(fileName) || IsIgnoredFile(fileName))
+            if (!HasGitRepository || string.IsNullOrEmpty(fileName) || !File.Exists(fileName))
                 return GitFileStatus.NotControlled;
 
             fileName = workingFolderUri.MakeRelativeUri(new Uri(fileName)).ToString();

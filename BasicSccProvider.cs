@@ -109,13 +109,10 @@ namespace GitScc
 
         private void OnSccCommand(object sender, EventArgs e)
         {
-            // Toggle the checked state of this command
             MenuCommand thisCommand = sender as MenuCommand;
             if (thisCommand != null)
             {
-                //thisCommand.Checked = !thisCommand.Checked;
-
-                sccService.Refresh();
+                 sccService.OpenTracker();
             }
         }
 

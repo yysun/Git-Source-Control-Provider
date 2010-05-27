@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.OLE.Interop;
 
 namespace GitScc
 {
@@ -18,6 +19,7 @@ namespace GitScc
         IVsSolutionEvents,
         IVsSolutionEvents2,
         IVsSccGlyphs,
+        IVsTrackProjectDocumentsEvents2,
         IDisposable
     {
         private bool _active = false;
@@ -31,7 +33,7 @@ namespace GitScc
         {
             _sccProvider = sccProvider;
             _statusTracker = new GitFileStatusTracker();
-            //_statusTracker.OnGitRepoChanged += new EventHandler(_statusTracker_OnGitRepoChanged);
+            _statusTracker.OnGitRepoChanged += new EventHandler(_statusTracker_OnGitRepoChanged);
 
             // Subscribe to solution events
             IVsSolution sol = (IVsSolution)_sccProvider.GetService(typeof(SVsSolution));
@@ -42,7 +44,7 @@ namespace GitScc
 
         public void Dispose()
         {
-            //_statusTracker.OnGitRepoChanged -= new EventHandler(_statusTracker_OnGitRepoChanged);          
+            _statusTracker.OnGitRepoChanged -= new EventHandler(_statusTracker_OnGitRepoChanged);          
 
             // Unregister from receiving solution events
             if (VSConstants.VSCOOKIE_NIL != _vsSolutionEventsCookie)
@@ -228,7 +230,6 @@ namespace GitScc
             string fileName = GetFileName(phierHierarchy, itemidNode);
             GitFileStatus status = _statusTracker.GetFileStatus(fileName);
             pbstrTooltipText = status.ToString();
-
             return VSConstants.S_OK;
         }
 
@@ -347,12 +348,13 @@ namespace GitScc
 
         private string GetFileName(IVsHierarchy hierHierarchy, uint itemidNode)
         {
+            if (hierHierarchy == null) return null;
             string pvalue;
             return hierHierarchy.GetCanonicalName(itemidNode, out pvalue) == VSConstants.S_OK ? //pvalue : null;
                 Path.Combine(solutionDirectoryName, pvalue) : null;
         }
 
-        private void OpenTracker()
+        internal void OpenTracker()
         {
             solutionDirectoryName = null;
 
@@ -376,10 +378,12 @@ namespace GitScc
             _statusTracker.Close();
         }
 
-        void _statusTracker_OnGitRepoChanged(object sender, EventArgs e)
+        private void _statusTracker_OnGitRepoChanged(object sender, EventArgs e)
         {
             Refresh();
         }
+
+        #region refresh
 
         internal void Refresh()
         {
@@ -448,36 +452,175 @@ namespace GitScc
 
         private void processNodeFunc(IVsHierarchy hierarchy, uint itemid)
         {
-            object pVal, p2, p3;
-            int hr = hierarchy.GetProperty(itemid, (int)__VSHPROPID.VSHPROPID_ParentHierarchy, out pVal);
-            hr = hierarchy.GetProperty(itemid, (int)__VSHPROPID.VSHPROPID_Parent, out p2);
-            hr = hierarchy.GetProperty(itemid, (int)__VSHPROPID.VSHPROPID_Name, out p3);
-
-            ////if (pVal == null || (int)p2 == -1)
-            if (pVal == null)
+            int hr;
+            var sccProject2 = hierarchy as IVsSccProject2;
+            if (sccProject2 != null)
             {
-                //string fileName = GetFileName(hierarchy, itemid);
-                //if (string.IsNullOrEmpty(fileName)) return;
-                //VsStateIcon[] rgsiGlyphs = new VsStateIcon[1];
-                //uint[] rgdwSccStatus = new uint[1];
-                //GetSccGlyph(1, new string[] { fileName }, rgsiGlyphs, rgdwSccStatus);
+                IList<string> sccFiles = GetNodeFiles(sccProject2, itemid);
 
-                var sccProject2 = hierarchy as IVsSccProject2;
-                if (sccProject2 != null)
+                // We'll use for the node glyph just the Master file's status (ignoring special files of the node)
+                if (sccFiles.Count > 0)
                 {
-                    //hr = sccProject2.SccGlyphChanged(1, new uint[] { itemid }, rgsiGlyphs, rgdwSccStatus);
-                    hr = sccProject2.SccGlyphChanged(0, null, null, null);
-                }
-                else
-                {
-                    string fileName = GetFileName(hierarchy, itemid);
-                    if (string.IsNullOrEmpty(fileName)) return;
+                    string[] rgpszFullPaths = new string[1];
+                    rgpszFullPaths[0] = sccFiles[0];
                     VsStateIcon[] rgsiGlyphs = new VsStateIcon[1];
                     uint[] rgdwSccStatus = new uint[1];
-                    GetSccGlyph(1, new string[] { fileName }, rgsiGlyphs, rgdwSccStatus);
-                     hr = hierarchy.SetProperty(itemid, (int)__VSHPROPID.VSHPROPID_StateIconIndex, rgsiGlyphs[0]);
+                    GetSccGlyph(1, rgpszFullPaths, rgsiGlyphs, rgdwSccStatus);
+
+                    uint[] rguiAffectedNodes = new uint[1];
+                    rguiAffectedNodes[0] = itemid;
+                    sccProject2.SccGlyphChanged(1, rguiAffectedNodes, rgsiGlyphs, rgdwSccStatus);
                 }
+
+            }
+            else
+            {
+                string fileName = GetFileName(hierarchy, itemid);
+                if (string.IsNullOrEmpty(fileName)) return;
+                VsStateIcon[] rgsiGlyphs = new VsStateIcon[1];
+                uint[] rgdwSccStatus = new uint[1];
+                GetSccGlyph(1, new string[] { fileName }, rgsiGlyphs, rgdwSccStatus);
+                hr = hierarchy.SetProperty(itemid, (int)__VSHPROPID.VSHPROPID_StateIconIndex, rgsiGlyphs[0]);
             }
         }
+
+        /// <summary>
+        /// Returns a list of source controllable files associated with the specified node
+        /// </summary>
+        private IList<string> GetNodeFiles(IVsSccProject2 pscp2, uint itemid)
+        {
+            // NOTE: the function returns only a list of files, containing both regular files and special files
+            // If you want to hide the special files (similar with solution explorer), you may need to return 
+            // the special files in a hastable (key=master_file, values=special_file_list)
+
+            // Initialize output parameters
+            IList<string> sccFiles = new List<string>();
+            if (pscp2 != null)
+            {
+                CALPOLESTR[] pathStr = new CALPOLESTR[1];
+                CADWORD[] flags = new CADWORD[1];
+
+                if (pscp2.GetSccFiles(itemid, pathStr, flags) == 0)
+                {
+                    for (int elemIndex = 0; elemIndex < pathStr[0].cElems; elemIndex++)
+                    {
+                        IntPtr pathIntPtr = Marshal.ReadIntPtr(pathStr[0].pElems, elemIndex);
+                        String path = Marshal.PtrToStringAuto(pathIntPtr);
+
+                        sccFiles.Add(path);
+
+                        // See if there are special files
+                        if (flags.Length > 0 && flags[0].cElems > 0)
+                        {
+                            int flag = Marshal.ReadInt32(flags[0].pElems, elemIndex);
+
+                            if (flag != 0)
+                            {
+                                // We have special files
+                                CALPOLESTR[] specialFiles = new CALPOLESTR[1];
+                                CADWORD[] specialFlags = new CADWORD[1];
+
+                                pscp2.GetSccSpecialFiles(itemid, path, specialFiles, specialFlags);
+                                for (int i = 0; i < specialFiles[0].cElems; i++)
+                                {
+                                    IntPtr specialPathIntPtr = Marshal.ReadIntPtr(specialFiles[0].pElems, i * IntPtr.Size);
+                                    String specialPath = Marshal.PtrToStringAuto(specialPathIntPtr);
+
+                                    sccFiles.Add(specialPath);
+                                    Marshal.FreeCoTaskMem(specialPathIntPtr);
+                                }
+
+                                if (specialFiles[0].cElems > 0)
+                                {
+                                    Marshal.FreeCoTaskMem(specialFiles[0].pElems);
+                                }
+                            }
+                        }
+
+                        Marshal.FreeCoTaskMem(pathIntPtr);
+                    }
+                    if (pathStr[0].cElems > 0)
+                    {
+                        Marshal.FreeCoTaskMem(pathStr[0].pElems);
+                    }
+                }
+            }
+
+            return sccFiles;
+        }
+        #endregion
+
+        #region IVsTrackProjectDocumentsEvents2
+
+        public int OnQueryAddFiles([InAttribute] IVsProject pProject, [InAttribute] int cFiles, [InAttribute] string[] rgpszMkDocuments, [InAttribute] VSQUERYADDFILEFLAGS[] rgFlags, [OutAttribute] VSQUERYADDFILERESULTS[] pSummaryResult, [OutAttribute] VSQUERYADDFILERESULTS[] rgResults)
+        {
+            return VSConstants.E_NOTIMPL;
+        }
+
+        /// <summary>
+        /// Implement this function to update the project scc glyphs when the items are added to the project.
+        /// If a project doesn't call GetSccGlyphs as they should do (as solution folder do), this will update correctly the glyphs when the project is controled
+        /// </summary>
+        public int OnAfterAddFilesEx([InAttribute] int cProjects, [InAttribute] int cFiles, [InAttribute] IVsProject[] rgpProjects, [InAttribute] int[] rgFirstIndices, [InAttribute] string[] rgpszMkDocuments, [InAttribute] VSADDFILEFLAGS[] rgFlags)
+        {          
+            return VSConstants.E_NOTIMPL;
+        }
+
+        public int OnQueryAddDirectories ([InAttribute] IVsProject pProject, [InAttribute] int cDirectories, [InAttribute] string[] rgpszMkDocuments, [InAttribute] VSQUERYADDDIRECTORYFLAGS[] rgFlags, [OutAttribute] VSQUERYADDDIRECTORYRESULTS[] pSummaryResult, [OutAttribute] VSQUERYADDDIRECTORYRESULTS[] rgResults)
+        {
+            return VSConstants.E_NOTIMPL;
+        }
+
+        public int OnAfterAddDirectoriesEx ([InAttribute] int cProjects, [InAttribute] int cDirectories, [InAttribute] IVsProject[] rgpProjects, [InAttribute] int[] rgFirstIndices, [InAttribute] string[] rgpszMkDocuments, [InAttribute] VSADDDIRECTORYFLAGS[] rgFlags)
+        {
+            return VSConstants.E_NOTIMPL;
+        }
+
+        public int OnQueryRemoveFiles([InAttribute] IVsProject pProject, [InAttribute] int cFiles, [InAttribute] string[] rgpszMkDocuments, [InAttribute] VSQUERYREMOVEFILEFLAGS[] rgFlags, [OutAttribute] VSQUERYREMOVEFILERESULTS[] pSummaryResult, [OutAttribute] VSQUERYREMOVEFILERESULTS[] rgResults)
+        {
+            return VSConstants.S_OK;
+        }
+
+        public int OnAfterRemoveFiles([InAttribute] int cProjects, [InAttribute] int cFiles, [InAttribute] IVsProject[] rgpProjects, [InAttribute] int[] rgFirstIndices, [InAttribute] string[] rgpszMkDocuments, [InAttribute] VSREMOVEFILEFLAGS[] rgFlags)
+        {
+            // The file deletes are not propagated into the store
+            return VSConstants.E_NOTIMPL;
+        }
+
+        public int OnQueryRemoveDirectories([InAttribute] IVsProject pProject, [InAttribute] int cDirectories, [InAttribute] string[] rgpszMkDocuments, [InAttribute] VSQUERYREMOVEDIRECTORYFLAGS[] rgFlags, [OutAttribute] VSQUERYREMOVEDIRECTORYRESULTS[] pSummaryResult, [OutAttribute] VSQUERYREMOVEDIRECTORYRESULTS[] rgResults)
+        {
+            return VSConstants.E_NOTIMPL;
+        }
+
+        public int OnAfterRemoveDirectories([InAttribute] int cProjects, [InAttribute] int cDirectories, [InAttribute] IVsProject[] rgpProjects, [InAttribute] int[] rgFirstIndices, [InAttribute] string[] rgpszMkDocuments, [InAttribute] VSREMOVEDIRECTORYFLAGS[] rgFlags)
+        {
+            return VSConstants.E_NOTIMPL;
+        }
+
+        public int OnQueryRenameFiles([InAttribute] IVsProject pProject, [InAttribute] int cFiles, [InAttribute] string[] rgszMkOldNames, [InAttribute] string[] rgszMkNewNames, [InAttribute] VSQUERYRENAMEFILEFLAGS[] rgFlags, [OutAttribute] VSQUERYRENAMEFILERESULTS[] pSummaryResult, [OutAttribute] VSQUERYRENAMEFILERESULTS[] rgResults)
+        {
+            return VSConstants.E_NOTIMPL;
+        }
+
+        public int OnAfterRenameFiles([InAttribute] int cProjects, [InAttribute] int cFiles, [InAttribute] IVsProject[] rgpProjects, [InAttribute] int[] rgFirstIndices, [InAttribute] string[] rgszMkOldNames, [InAttribute] string[] rgszMkNewNames, [InAttribute] VSRENAMEFILEFLAGS[] rgFlags)
+        {
+            return VSConstants.S_OK;
+        }
+
+        public int OnQueryRenameDirectories([InAttribute] IVsProject pProject, [InAttribute] int cDirs, [InAttribute] string[] rgszMkOldNames, [InAttribute] string[] rgszMkNewNames, [InAttribute] VSQUERYRENAMEDIRECTORYFLAGS[] rgFlags, [OutAttribute] VSQUERYRENAMEDIRECTORYRESULTS[] pSummaryResult, [OutAttribute] VSQUERYRENAMEDIRECTORYRESULTS[] rgResults)
+        {
+            return VSConstants.E_NOTIMPL;
+        }
+
+        public int OnAfterRenameDirectories([InAttribute] int cProjects, [InAttribute] int cDirs, [InAttribute] IVsProject[] rgpProjects, [InAttribute] int[] rgFirstIndices, [InAttribute] string[] rgszMkOldNames, [InAttribute] string[] rgszMkNewNames, [InAttribute] VSRENAMEDIRECTORYFLAGS[] rgFlags)
+        {
+            return VSConstants.E_NOTIMPL;
+        }
+
+        public int OnAfterSccStatusChanged([InAttribute] int cProjects, [InAttribute] int cFiles, [InAttribute] IVsProject[] rgpProjects, [InAttribute] int[] rgFirstIndices, [InAttribute] string[] rgpszMkDocuments, [InAttribute] uint[] rgdwSccStatus)
+        {
+            return VSConstants.E_NOTIMPL;
+        }
+        #endregion
     }
 }

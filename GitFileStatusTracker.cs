@@ -11,41 +11,42 @@ namespace GitScc
     {
         private RepositoryStatus repositoryStatus;
         private Uri workingFolderUri;
-        FileSystemWatcher watcher;
+        //private FileSystemWatcher watcher;
+        //private IgnoreRules ignoreRules;
 
         public GitFileStatusTracker()
         {
 
         }
-   
+
         public void Open(string workingFolder)
         {
             Close();
 
             if (!string.IsNullOrEmpty(workingFolder))
             {
-                var repo = new Repository(workingFolder);
-                if (Repository.IsValid(repo.WorkingDirectory))
+                try
                 {
+                    var repo = new Repository(workingFolder);        
                     this.repositoryStatus = repo.Status;
                     this.workingFolderUri = new Uri(repo.WorkingDirectory+"\\");
+                    //this.ignoreRules = new IgnoreRules(Path.Combine(repo.WorkingDirectory, GitSharp.Core.Constants.GITIGNORE_FILENAME));
 
-                    this.watcher = new FileSystemWatcher(repo.WorkingDirectory + "\\.git"); //?
-                    this.watcher.NotifyFilter = NotifyFilters.LastWrite;
-                    this.watcher.EnableRaisingEvents = true;
-                    this.watcher.Changed += new FileSystemEventHandler(watcher_Changed);
+                    //this.watcher = new FileSystemWatcher(workingFolder + "\\" + GitSharp.Core.Constants.DOT_GIT); //?
+                    ////this.watcher = new FileSystemWatcher(workingFolder); //?
+
+                    //this.watcher.NotifyFilter = NotifyFilters.LastWrite;
+                    //this.watcher.EnableRaisingEvents = true;
+                    //this.watcher.Changed += new FileSystemEventHandler(watcher_Changed);
+                }
+                catch
+                {
                 }
             }
-            else
-            {
-                this.repositoryStatus = null;
-                this.workingFolderUri = null;
-                this.watcher.Changed -= new FileSystemEventHandler(watcher_Changed);
-                this.watcher = null;
-            }
+
         }
 
-        private DateTime TimeFired; 
+        private DateTime TimeFired;
         public event EventHandler OnGitRepoChanged;
         private object locker = new object();
 
@@ -54,10 +55,12 @@ namespace GitScc
             lock (locker)
             {
                 double delta = DateTime.Now.Subtract(TimeFired).TotalMilliseconds;
-                if (OnGitRepoChanged == null || delta < 500) return;
-                
+                if (delta < 500) return;
+
+                //if (IsIgnoredFile(e.FullPath)) return;
+
                 this.repositoryStatus.Update();
-                OnGitRepoChanged(this, EventArgs.Empty);
+                if (OnGitRepoChanged != null) OnGitRepoChanged(this, EventArgs.Empty);
 
                 TimeFired = DateTime.Now;
             }
@@ -71,18 +74,46 @@ namespace GitScc
         public void Close()
         {
             if (this.repositoryStatus != null) this.repositoryStatus.Repository.Close();
-            
-            if (this.watcher != null)
-            {
-                this.watcher.Changed -= new FileSystemEventHandler(watcher_Changed);
-                this.watcher.Dispose();
-            }
+            this.repositoryStatus = null;
+            this.workingFolderUri = null;
+            //this.ignoreRules = null;
+
+            //if (this.watcher != null)
+            //{
+            //    this.watcher.Changed -= new FileSystemEventHandler(watcher_Changed);
+            //    this.watcher.Dispose();
+            //}
+
         }
+
+        //private bool IsIgnoredFile(string fileName)
+        //{
+        //    try
+        //    {
+        //        if (Directory.Exists(fileName))
+        //        {
+        //            return this.ignoreRules.IgnoreDir(this.repositoryStatus.Repository.WorkingDirectory, fileName);
+        //        }
+        //        else if (File.Exists(fileName))
+        //        {
+        //            return this.ignoreRules.IgnoreDir(this.repositoryStatus.Repository.WorkingDirectory,
+        //                                              Path.GetDirectoryName(fileName)) ||
+        //                   this.ignoreRules.IgnoreFile(this.repositoryStatus.Repository.WorkingDirectory, fileName);
+        //        }
+        //        else
+        //            return true;
+        //    }
+        //    catch
+        //    {
+        //        return false;
+        //    }
+        //}
 
         public GitFileStatus GetFileStatus(string fileName)
         {
-            if (!HasGitRepository || !File.Exists(fileName)) return GitFileStatus.NotControlled;
-            
+            if (!HasGitRepository || string.IsNullOrEmpty(fileName) || !File.Exists(fileName))
+                return GitFileStatus.NotControlled;
+
             fileName = workingFolderUri.MakeRelativeUri(new Uri(fileName)).ToString();
 
             if (this.repositoryStatus.Untracked.Has(fileName))

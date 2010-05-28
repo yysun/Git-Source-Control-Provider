@@ -18,12 +18,13 @@ namespace GitScc
         IVsSccManagerTooltip,
         IVsSolutionEvents,
         IVsSolutionEvents2,
+        IVsFileChangeEvents,
         IVsSccGlyphs,
         IDisposable
     {
         private bool _active = false;
         private BasicSccProvider _sccProvider = null;
-        private uint _vsSolutionEventsCookie;
+        private uint _vsSolutionEventsCookie, _vsIVsFileChangeEventsCookie;
 
         private GitFileStatusTracker _statusTracker = null;
 
@@ -32,19 +33,15 @@ namespace GitScc
         {
             _sccProvider = sccProvider;
             _statusTracker = new GitFileStatusTracker();
-            _statusTracker.OnGitRepoChanged += new EventHandler(_statusTracker_OnGitRepoChanged);
 
             // Subscribe to solution events
             IVsSolution sol = (IVsSolution)_sccProvider.GetService(typeof(SVsSolution));
             sol.AdviseSolutionEvents(this, out _vsSolutionEventsCookie);
-            Debug.Assert(VSConstants.VSCOOKIE_NIL != _vsSolutionEventsCookie);
 
         }
 
         public void Dispose()
-        {
-            _statusTracker.OnGitRepoChanged -= new EventHandler(_statusTracker_OnGitRepoChanged);          
-
+        {    
             // Unregister from receiving solution events
             if (VSConstants.VSCOOKIE_NIL != _vsSolutionEventsCookie)
             {
@@ -357,7 +354,12 @@ namespace GitScc
 
             if (!string.IsNullOrEmpty(solutionFileName))
             {
-                _statusTracker.Open(Path.GetDirectoryName(solutionFileName));
+
+                string pathGetsolution = Path.GetDirectoryName(solutionFileName);
+                _statusTracker.Open(pathGetsolution);
+
+                IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
+                fileChangeService.AdviseDirChange(pathGetsolution, 1, this, out _vsIVsFileChangeEventsCookie);
             }
         }
 
@@ -365,6 +367,11 @@ namespace GitScc
         private void CloseTracker()
         {
             _statusTracker.Close();
+            if (VSConstants.VSCOOKIE_NIL != _vsIVsFileChangeEventsCookie)
+            {
+                IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
+                fileChangeService.UnadviseDirChange(_vsIVsFileChangeEventsCookie);
+            }
         }
 
         private void _statusTracker_OnGitRepoChanged(object sender, EventArgs e)
@@ -555,6 +562,30 @@ namespace GitScc
             return sccFiles;
         }
 
+
+        #endregion
+
+        #region IVsFileChangeEvents
+
+        private DateTime lastTimeDirChangeFired;
+
+        public int DirectoryChanged(string pszDirectory)
+        {
+            double delta = DateTime.Now.Subtract(lastTimeDirChangeFired).TotalMilliseconds;
+            if (delta > 1000)
+            {
+                System.Threading.Thread.Sleep(100); 
+                _statusTracker.Update();
+                Refresh();
+            }
+            lastTimeDirChangeFired = DateTime.Now;
+            return VSConstants.S_OK;
+        }
+
+        public int FilesChanged(uint cChanges, string[] rgpszFile, uint[] rggrfChange)
+        {
+            return VSConstants.S_OK;
+        } 
 
         #endregion
     }

@@ -15,9 +15,10 @@ Features
 
 How to use
 ----------
-* Download and install Git and [Git Source Control Provider]:http://gitscc.codeplex.com/releases
-* Open Visual Studio and go to Tools -> Options.
-* Select Source Control in the tree view
+* Run Visual Studio. 
+* Go to Tools | Extension Manager, search online gallary for Git Source Control Provider and install. 
+* Go to Tools | Options. 
+* Select Source Control in the tree view.
 * Select Git Source Control Provider from the drop down list, and click OK.
 * Open your solution controlled by Git to see the file's status.
 
@@ -27,4 +28,4 @@ If the file status is out of sync, right click solution explorer items and selec
 
 What's coming
 -----------------
-[Project Roadmap]:http://gitscc.codeplex.com/wikipage?title=Project%20Roadmap&referringTitle=Home
+[Project Roadmap](http://gitscc.codeplex.com/wikipage?title=Project%20Roadmap)

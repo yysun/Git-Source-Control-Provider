@@ -76,10 +76,31 @@ namespace GitScc
             }
         }
 
-        internal void Update()
+        public void Update()
         {
             if (this.repositoryStatus!=null) 
                 this.repositoryStatus.Update();
+        }
+
+        public byte[] GetFileContent(string fileName)
+        {
+            if (!HasGitRepository || string.IsNullOrEmpty(fileName))
+                return null;
+
+            fileName = workingFolderUri.MakeRelativeUri(new Uri(fileName)).ToString();
+
+            Leaf leaf = null;
+
+            if (this.repositoryStatus != null &&
+                this.repositoryStatus.Repository != null &&
+                this.repositoryStatus.Repository.Head != null &&
+                this.repositoryStatus.Repository.Head.CurrentCommit != null &&
+                this.repositoryStatus.Repository.Head.CurrentCommit.Tree != null)
+            {
+                leaf = this.repositoryStatus.Repository.Head.CurrentCommit.Tree[fileName] as Leaf;
+            }
+
+            return leaf == null ? null : leaf.RawData;
         }
     }
 

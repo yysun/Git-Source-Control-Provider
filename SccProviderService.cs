@@ -588,5 +588,34 @@ namespace GitScc
         } 
 
         #endregion
+
+        internal void CompareSelectedFile()
+        {
+            
+        }
+
+        internal static string RunCommand(string exePath, string args)
+        {
+            var pinfo = new ProcessStartInfo(exePath)
+            {
+                Arguments = args,
+                CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+            };
+
+            using (var process = Process.Start(pinfo))
+            {
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                if (!string.IsNullOrWhiteSpace(error))
+                    throw new Exception(error);
+
+                return output;
+            }
+        }
     }
 }

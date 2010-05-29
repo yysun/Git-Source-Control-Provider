@@ -25,6 +25,7 @@ namespace GitScc
         public const int icmdSccCommandCommit = 0x102;
         public const int icmdSccCommandHistory = 0x103;
         public const int icmdSccCommandCompare = 0x104;
+        public const int icmdSccCommandUndo = 0x105;
 
         //public const int icmdViewToolWindow = 0x102;
         //public const int icmdToolWindowToolbarCommand = 0x103;

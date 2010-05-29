@@ -67,19 +67,24 @@ namespace GitScc
             if (mcs != null)
             {
                 CommandID cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommand);
-                MenuCommand menuCmd = new MenuCommand(new EventHandler(OnSccCommand), cmd);
+                MenuCommand menuCmd = new MenuCommand(new EventHandler(OnRefreshCommand), cmd);
                 mcs.AddCommand(menuCmd);
 
-                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandCommit);
-                menuCmd = new MenuCommand(new EventHandler(OnSccCommand), cmd);
-                mcs.AddCommand(menuCmd);
+                //cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandCommit);
+                //menuCmd = new MenuCommand(new EventHandler(OnSccCommand), cmd);
+                //mcs.AddCommand(menuCmd);
 
-                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandHistory);
-                menuCmd = new MenuCommand(new EventHandler(OnSccCommand), cmd);
-                mcs.AddCommand(menuCmd);
+                //cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandHistory);
+                //menuCmd = new MenuCommand(new EventHandler(OnSccCommand), cmd);
+                //mcs.AddCommand(menuCmd);
 
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandCompare);
                 var menu = new OleMenuCommand(new EventHandler(OnCompareCommand), cmd);
+                menu.BeforeQueryStatus += new EventHandler(menu_BeforeQueryStatus_Compare);
+                mcs.AddCommand(menu);
+
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandUndo);
+                menu = new OleMenuCommand(new EventHandler(OnUndoCommand), cmd);
                 menu.BeforeQueryStatus += new EventHandler(menu_BeforeQueryStatus_Compare);
                 mcs.AddCommand(menu);
             }
@@ -108,15 +113,19 @@ namespace GitScc
 
         #endregion
 
-        private void OnSccCommand(object sender, EventArgs e)
+        private void OnRefreshCommand(object sender, EventArgs e)
         {
-            sccService.OpenTracker();
             sccService.Refresh();
         }
 
         private void OnCompareCommand(object sender, EventArgs e)
         {
             sccService.CompareSelectedFile();
+        }
+
+        private void OnUndoCommand(object sender, EventArgs e)
+        {
+            sccService.UndoSelectedFile();
         }
 
         /// <summary>

@@ -46,8 +46,7 @@
       <Group guid="guidSccProviderCmdSet" id="igrpSourceControlCommands" priority="0x0000">
         <Parent guid="guidSccProviderCmdSet" id="imnuFileSourceControlMenu"/>
       </Group>
-  
-      
+       
       <!--<Group guid="guidSccProviderCmdSet" id="igrpSccMenuGroup" priority="0x0600">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS"/>
       </Group>-->
@@ -58,6 +57,7 @@
         <Parent guid="guidSccProviderCmdSet" id="imnuToolWindowToolbarMenu"/>
       </Group>-->
     </Groups>
+
     <Buttons>
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandCommit" priority="0x0100" type="Button">
         <!--<Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>-->
@@ -77,8 +77,7 @@
         </Strings>
       </Button>
 
-      <Button guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0101" type="Button">
-        <!--<Parent guid="guidSccProviderCmdSet" id="igrpSccMenuGroup"/>-->
+      <Button guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0104" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
@@ -87,8 +86,16 @@
         </Strings>
       </Button>
 
+      <Button guid="guidSccProviderCmdSet" id="icmdSccCommandUndo" priority="0x0105" type="Button">
+        <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <Strings>
+          <ButtonText>Undo file changes</ButtonText>
+        </Strings>
+      </Button>
+      
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommand" priority="0x0109" type="Button">
-        <!--<Parent guid="guidSccProviderCmdSet" id="igrpSccMenuGroup"/>-->
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
@@ -129,27 +136,7 @@
     <CommandPlacement guid="guidSccProviderCmdSet" id="imnuFileSourceControlMenu" priority="0x0000">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
     </CommandPlacement>
-
-    <!--<CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommand" priority="0x0001">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>
-    </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommand" priority="0x0001">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_SCC"/>
-    </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommand" priority="0x0001">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
-    </CommandPlacement>
-
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0000">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>
-    </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0000">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_SCC"/>
-    </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0000">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
-    </CommandPlacement>-->
-    
+   
   </CommandPlacements>
   <Symbols>
     <GuidSymbol name="guidSccProviderPkg" value="{C4128D99-2000-41D1-A6C3-704E6C1A3DE2}" />
@@ -158,6 +145,7 @@
       <IDSymbol name="icmdSccCommandCommit" value="0x102"/>
       <IDSymbol name="icmdSccCommandHistory" value="0x103"/>
       <IDSymbol name="icmdSccCommandCompare" value="0x104"/>
+      <IDSymbol name="icmdSccCommandUndo" value="0x105"/>     
       
       <!--<IDSymbol name="icmdViewToolWindow" value="0x102"/>
       <IDSymbol name="icmdToolWindowToolbarCommand" value="0x103"/>-->

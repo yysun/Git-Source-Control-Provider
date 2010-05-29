@@ -22,7 +22,7 @@ How to use
 * Select Git Source Control Provider from the drop down list, and click OK.
 * Open your solution controlled by Git to see the file's status.
 
-If the file status is out of sync, right click solution explorer items and select "Refresh Git File Status"
+Right click within solution explorer items and select "Git" to use git releated fuctions.
 
 ![context menu](http://gitscc.codeplex.com/Project/Download/FileDownload.aspx?DownloadId=123883)
 

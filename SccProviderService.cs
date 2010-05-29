@@ -244,7 +244,7 @@ namespace GitScc
         public int OnAfterOpenSolution([InAttribute] Object pUnkReserved, [InAttribute] int fNewSolution)
         {
             OpenTracker();
-            Refresh();
+            ReDrawStateGlyphs();
             return VSConstants.S_OK;
         }
 
@@ -378,6 +378,12 @@ namespace GitScc
         #region refresh
 
         internal void Refresh()
+        {
+            _statusTracker.Update();
+            ReDrawStateGlyphs();
+        }
+
+        internal void ReDrawStateGlyphs()
         {
             IVsHierarchy sol = (IVsHierarchy)_sccProvider.GetService(typeof(SVsSolution));
             EnumHierarchyItems(sol as IVsHierarchy, VSConstants.VSITEMID_ROOT, 0);
@@ -675,8 +681,7 @@ namespace GitScc
             double delta = DateTime.Now.Subtract(lastTimeDirChangeFired).TotalMilliseconds;
             if (delta > 1000)
             {
-                System.Threading.Thread.Sleep(100); 
-                _statusTracker.Update();
+                System.Threading.Thread.Sleep(100);
                 Refresh();
             }
             lastTimeDirChangeFired = DateTime.Now;
@@ -690,7 +695,7 @@ namespace GitScc
 
         #endregion
 
-        #region Compare
+        #region Compare and undo
 
         internal bool CanCompareSelectedFile
         {
@@ -757,6 +762,28 @@ namespace GitScc
                 return output;
             }
         } 
+
+
+        internal void UndoSelectedFile()
+        {
+            var fileName = GetSelectFileName();
+
+            GitFileStatus status = _statusTracker.GetFileStatus(fileName);
+            if (status == GitFileStatus.Modified || status == GitFileStatus.Staged)
+            {
+                if (MessageBox.Show("Are you sure you want to undo changes for " + Path.GetFileName(fileName) +
+                    " and store it from last commit? ", 
+                    "Undo Changes", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    var data = _statusTracker.GetFileContent(fileName);
+                    using (var binWriter = new BinaryWriter(File.Open(fileName, FileMode.Create)))
+                    {
+                        binWriter.Write(data ?? new byte[] { });
+                    }
+                }
+            }
+        }
+
         #endregion
     }
 }

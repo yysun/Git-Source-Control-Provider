@@ -31,6 +31,7 @@ namespace GitScc
 
         // Define the list of menus (these include toolbars)
         //public const int imnuToolWindowToolbarMenu = 0x200;
+        public const int imnuFileSourceControlMenu = 0x205;
 
         // Define the list of icons (use decimal numbers here, to match the resource IDs)
         public const int iiconProductIcon = 400;

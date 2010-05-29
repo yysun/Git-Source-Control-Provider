@@ -233,6 +233,7 @@ namespace GitScc
             }
             GitFileStatus status = _statusTracker.GetFileStatus(files[0]);
             pbstrTooltipText = status.ToString(); //TODO: use resources
+
             return VSConstants.S_OK;
         }
 
@@ -374,11 +375,6 @@ namespace GitScc
             }
         }
 
-        private void _statusTracker_OnGitRepoChanged(object sender, EventArgs e)
-        {
-            Refresh();
-        }
-
         #region refresh
 
         internal void Refresh()
@@ -453,6 +449,7 @@ namespace GitScc
         {
             string fileName = GetSolutionFileName();
             if (string.IsNullOrEmpty(fileName)) return;
+
             VsStateIcon[] rgsiGlyphs = new VsStateIcon[1];
             uint[] rgdwSccStatus = new uint[1];
             GetSccGlyph(1, new string[] { fileName }, rgsiGlyphs, rgdwSccStatus);
@@ -460,10 +457,19 @@ namespace GitScc
             // Set the solution's glyph directly in the hierarchy
             IVsHierarchy solHier = (IVsHierarchy)_sccProvider.GetService(typeof(SVsSolution));
             solHier.SetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_StateIconIndex, rgsiGlyphs[0]);
+
+            //string branch = _statusTracker.CurrentBranch;
+            //if (!string.IsNullOrEmpty(branch))
+            //{
+            //    caption += " - " + branch;
+            //}
+            //solHier.SetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_Caption, caption);
+
         }
 
         private void processNodeFunc(IVsHierarchy hierarchy, uint itemid)
         {
+
             var sccProject2 = hierarchy as IVsSccProject2;
 
             if (itemid == VSConstants.VSITEMID_ROOT)
@@ -558,10 +564,105 @@ namespace GitScc
                     }
                 }
             }
+            else if (itemid == VSConstants.VSITEMID_ROOT)
+            {
+                sccFiles.Add(GetSolutionFileName());
+            }
 
             return sccFiles;
         }
 
+        /// <summary>
+        /// Gets the list of directly selected VSITEMSELECTION objects
+        /// </summary>
+        /// <returns>A list of VSITEMSELECTION objects</returns>
+        private IList<VSITEMSELECTION> GetSelectedNodes()
+        {
+            // Retrieve shell interface in order to get current selection
+            IVsMonitorSelection monitorSelection = _sccProvider.GetService(typeof(IVsMonitorSelection)) as IVsMonitorSelection;
+
+            Debug.Assert(monitorSelection != null, "Could not get the IVsMonitorSelection object from the services exposed by this project");
+
+            if (monitorSelection == null)
+            {
+                throw new InvalidOperationException();
+            }
+
+            List<VSITEMSELECTION> selectedNodes = new List<VSITEMSELECTION>();
+            IntPtr hierarchyPtr = IntPtr.Zero;
+            IntPtr selectionContainer = IntPtr.Zero;
+            try
+            {
+                // Get the current project hierarchy, project item, and selection container for the current selection
+                // If the selection spans multiple hierachies, hierarchyPtr is Zero
+                uint itemid;
+                IVsMultiItemSelect multiItemSelect = null;
+                ErrorHandler.ThrowOnFailure(monitorSelection.GetCurrentSelection(out hierarchyPtr, out itemid, out multiItemSelect, out selectionContainer));
+
+                if (itemid != VSConstants.VSITEMID_SELECTION)
+                {
+                    // We only care if there are nodes selected in the tree
+                    if (itemid != VSConstants.VSITEMID_NIL)
+                    {
+                        if (hierarchyPtr == IntPtr.Zero)
+                        {
+                            // Solution is selected
+                            VSITEMSELECTION vsItemSelection;
+                            vsItemSelection.pHier = null;
+                            vsItemSelection.itemid = itemid;
+                            selectedNodes.Add(vsItemSelection);
+                        }
+                        else
+                        {
+                            IVsHierarchy hierarchy = (IVsHierarchy)Marshal.GetObjectForIUnknown(hierarchyPtr);
+                            // Single item selection
+                            VSITEMSELECTION vsItemSelection;
+                            vsItemSelection.pHier = hierarchy;
+                            vsItemSelection.itemid = itemid;
+                            selectedNodes.Add(vsItemSelection);
+                        }
+                    }
+                }
+                else
+                {
+                    if (multiItemSelect != null)
+                    {
+                        // This is a multiple item selection.
+
+                        //Get number of items selected and also determine if the items are located in more than one hierarchy
+                        uint numberOfSelectedItems;
+                        int isSingleHierarchyInt;
+                        ErrorHandler.ThrowOnFailure(multiItemSelect.GetSelectionInfo(out numberOfSelectedItems, out isSingleHierarchyInt));
+                        bool isSingleHierarchy = (isSingleHierarchyInt != 0);
+
+                        // Now loop all selected items and add them to the list 
+                        Debug.Assert(numberOfSelectedItems > 0, "Bad number of selected itemd");
+                        if (numberOfSelectedItems > 0)
+                        {
+                            VSITEMSELECTION[] vsItemSelections = new VSITEMSELECTION[numberOfSelectedItems];
+                            ErrorHandler.ThrowOnFailure(multiItemSelect.GetSelectedItems(0, numberOfSelectedItems, vsItemSelections));
+                            foreach (VSITEMSELECTION vsItemSelection in vsItemSelections)
+                            {
+                                selectedNodes.Add(vsItemSelection);
+                            }
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                if (hierarchyPtr != IntPtr.Zero)
+                {
+                    Marshal.Release(hierarchyPtr);
+                }
+                if (selectionContainer != IntPtr.Zero)
+                {
+                    Marshal.Release(selectionContainer);
+                }
+            }
+
+            return selectedNodes;
+        }
 
         #endregion
 
@@ -589,10 +690,49 @@ namespace GitScc
 
         #endregion
 
+        #region Compare
+
+        internal bool CanCompareSelectedFile
+        {
+            get
+            {
+                var fileName = GetSelectFileName();
+                GitFileStatus status = _statusTracker.GetFileStatus(fileName);
+                return status == GitFileStatus.Modified || status == GitFileStatus.Staged;
+            }
+        }
+
+        internal string GetSelectFileName()
+        {
+            var selectedNodes = GetSelectedNodes();
+            if (selectedNodes.Count <= 0) return null;
+
+            var files = GetNodeFiles(selectedNodes[0].pHier as IVsSccProject2, selectedNodes[0].itemid);
+            if (files.Count <= 0) return null;
+
+            return files[0];
+        }
+
         internal void CompareSelectedFile()
         {
-            
+            var fileName = GetSelectFileName();
+
+            GitFileStatus status = _statusTracker.GetFileStatus(fileName);
+            if (status == GitFileStatus.Modified || status == GitFileStatus.Staged)
+            {
+                string tempFile = Path.GetFileName(fileName);
+                tempFile = Path.Combine(Path.GetTempPath(), tempFile);
+
+                var data = _statusTracker.GetFileContent(fileName);
+                using (var binWriter = new BinaryWriter(File.Open(tempFile, FileMode.Create)))
+                {
+                    binWriter.Write(data ?? new byte[] { });
+                }
+
+                RunCommand("diffmerge.exe", "\"" + tempFile + "\" \"" + fileName + "\""); //TODO: make it an option
+            }
         }
+
 
         internal static string RunCommand(string exePath, string args)
         {
@@ -616,6 +756,7 @@ namespace GitScc
 
                 return output;
             }
-        }
+        } 
+        #endregion
     }
 }

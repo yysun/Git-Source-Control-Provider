@@ -27,8 +27,10 @@
       <Menu guid="guidSccProviderCmdSet" id="imnuFileSourceControlMenu" priority="0x0000" type="Menu">
         <!--<Parent guid="guidSccProviderCmdSet" id="igrpFileSourceControl"/>-->
         <Strings>
-          <ButtonText>GitSccMenu</ButtonText>
+          <ButtonText>Git</ButtonText>
           <CommandName>Git</CommandName>
+          <CommandFlag>TextChanges</CommandFlag>
+          <CommandFlag>TextIsAnchorCommand</CommandFlag>
         </Strings>
       </Menu>
 
@@ -58,7 +60,7 @@
     </Groups>
     <Buttons>
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandCommit" priority="0x0100" type="Button">
-        <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
+        <!--<Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>-->
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <Strings>
@@ -67,8 +69,7 @@
       </Button>
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandHistory" priority="0x0102" type="Button">
-        <!--<Parent guid="guidSccProviderCmdSet" id="igrpSccMenuGroup"/>-->
-        <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
+        <!--<Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>-->
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <Strings>
@@ -92,7 +93,7 @@
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <Strings>
-          <ButtonText>Refresh Git File Status</ButtonText>
+          <ButtonText>Refresh</ButtonText>
         </Strings>
       </Button>      
        
@@ -119,25 +120,35 @@
     </Bitmaps>
   </Commands>
   <CommandPlacements>
-    <!--<CommandPlacement guid="guidSccProviderCmdSet" id="imnuFileSourceControlMenu" priority="0x0000">
+    <CommandPlacement guid="guidSccProviderCmdSet" id="imnuFileSourceControlMenu" priority="0x0000">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>
     </CommandPlacement>
     <CommandPlacement guid="guidSccProviderCmdSet" id="imnuFileSourceControlMenu" priority="0x0000">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_SCC"/>
     </CommandPlacement>
     <CommandPlacement guid="guidSccProviderCmdSet" id="imnuFileSourceControlMenu" priority="0x0000">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
+    </CommandPlacement>
+
+    <!--<CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommand" priority="0x0001">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>
+    </CommandPlacement>
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommand" priority="0x0001">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_SCC"/>
+    </CommandPlacement>
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommand" priority="0x0001">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
+    </CommandPlacement>
+
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0000">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>
+    </CommandPlacement>
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0000">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_SCC"/>
+    </CommandPlacement>
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0000">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
     </CommandPlacement>-->
-
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommand" priority="0x0001">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>
-    </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommand" priority="0x0001">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_SCC"/>
-    </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommand" priority="0x0001">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
-    </CommandPlacement>
     
   </CommandPlacements>
   <Symbols>

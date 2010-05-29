@@ -102,6 +102,14 @@ namespace GitScc
 
             return leaf == null ? null : leaf.RawData;
         }
+
+        public string CurrentBranch
+        {
+            get
+            {
+                return this.HasGitRepository ? this.repositoryStatus.Repository.CurrentBranch.Name : "";
+            }
+        }
     }
 
     public static class HashSetExt

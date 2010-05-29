@@ -102,6 +102,7 @@
   <ItemGroup>
     <VSCTCompile Include="PkgCmd.vsct">
       <ResourceName>1000</ResourceName>
+      <SubType>Designer</SubType>
     </VSCTCompile>
     <None Include="ClassDiagram.cd" />
   </ItemGroup>

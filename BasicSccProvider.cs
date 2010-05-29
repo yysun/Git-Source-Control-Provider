@@ -10,6 +10,7 @@ using Microsoft.VisualStudio;
 
 using MsVsShell = Microsoft.VisualStudio.Shell;
 using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
+using Microsoft.VisualStudio.Shell;
 
 namespace GitScc
 {
@@ -78,24 +79,24 @@ namespace GitScc
                 mcs.AddCommand(menuCmd);
 
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandCompare);
-                menuCmd = new MenuCommand(new EventHandler(OnSccCommand), cmd);
-                mcs.AddCommand(menuCmd);
-
-                //// ToolWindow Command
-                //cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdViewToolWindow);
-                //menuCmd = new MenuCommand(new EventHandler(ViewToolWindow), cmd);
-                //mcs.AddCommand(menuCmd);
-
-                //    // ToolWindow's ToolBar Command
-                //    cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdToolWindowToolbarCommand);
-                //    menuCmd = new MenuCommand(new EventHandler(ToolWindowToolbarCommand), cmd);
-                //    mcs.AddCommand(menuCmd);
+                var menu = new OleMenuCommand(new EventHandler(OnCompareCommand), cmd);
+                menu.BeforeQueryStatus += new EventHandler(menu_BeforeQueryStatus_Compare);
+                mcs.AddCommand(menu);
             }
 
             // Register the provider with the source control manager
             // If the package is to become active, this will also callback on OnActiveStateChange and the menu commands will be enabled
             IVsRegisterScciProvider rscp = (IVsRegisterScciProvider)GetService(typeof(IVsRegisterScciProvider));
             rscp.RegisterSourceControlProvider(GuidList.guidSccProvider);
+        }
+
+        void menu_BeforeQueryStatus_Compare(object sender, EventArgs e)
+        {
+            OleMenuCommand menu = sender as OleMenuCommand;
+            if (menu != null)
+            {
+                menu.Enabled = sccService.CanCompareSelectedFile;
+            }
         }
 
         protected override void Dispose(bool disposing)
@@ -109,12 +110,13 @@ namespace GitScc
 
         private void OnSccCommand(object sender, EventArgs e)
         {
-            MenuCommand thisCommand = sender as MenuCommand;
-            if (thisCommand != null)
-            {
-                 sccService.OpenTracker();
-                 sccService.Refresh();
-            }
+            sccService.OpenTracker();
+            sccService.Refresh();
+        }
+
+        private void OnCompareCommand(object sender, EventArgs e)
+        {
+            sccService.CompareSelectedFile();
         }
 
         /// <summary>
@@ -144,29 +146,29 @@ namespace GitScc
             MsVsShell.OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as MsVsShell.OleMenuCommandService;
             if (mcs != null)
             {
-                CommandID cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommand);
-                MenuCommand menuCmd = mcs.FindCommand(cmd);
-                menuCmd.Supported = true;
-                menuCmd.Enabled = sccService.Active;
-                menuCmd.Visible = sccService.Active;
+                //CommandID cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommand);
+                //MenuCommand menuCmd = mcs.FindCommand(cmd);
+                //menuCmd.Supported = true;
+                //menuCmd.Enabled = sccService.Active;
+                //menuCmd.Visible = sccService.Active;
 
-                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandCommit);
-                menuCmd = mcs.FindCommand(cmd);
-                menuCmd.Supported = true;
-                menuCmd.Enabled = sccService.Active;
-                menuCmd.Visible = sccService.Active;
+                //cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandCommit);
+                //menuCmd = mcs.FindCommand(cmd);
+                //menuCmd.Supported = true;
+                //menuCmd.Enabled = sccService.Active;
+                //menuCmd.Visible = sccService.Active;
 
-                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandHistory);
-                menuCmd = mcs.FindCommand(cmd);
-                menuCmd.Supported = true;
-                menuCmd.Enabled = sccService.Active;
-                menuCmd.Visible = sccService.Active;
+                //cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandHistory);
+                //menuCmd = mcs.FindCommand(cmd);
+                //menuCmd.Supported = true;
+                //menuCmd.Enabled = sccService.Active;
+                //menuCmd.Visible = sccService.Active;
 
-                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandCompare);
-                menuCmd = mcs.FindCommand(cmd);
-                menuCmd.Supported = true;
-                menuCmd.Enabled = sccService.Active;
-                menuCmd.Visible = sccService.Active;
+                //cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandCompare);
+                //menuCmd = mcs.FindCommand(cmd);
+                //menuCmd.Supported = true;
+                //menuCmd.Enabled = sccService.Active;
+                //menuCmd.Visible = sccService.Active;
 
                 //    cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdViewToolWindow);
                 //    menuCmd = mcs.FindCommand(cmd);

@@ -11,6 +11,7 @@ using Microsoft.VisualStudio;
 using MsVsShell = Microsoft.VisualStudio.Shell;
 using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
 using Microsoft.VisualStudio.Shell;
+using System.IO;
 
 namespace GitScc
 {
@@ -58,6 +59,8 @@ namespace GitScc
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Entering Initialize() of: {0}", this.ToString()));
             base.Initialize();
 
+            LoadConfig();
+
             // Proffer the source control service implemented by the provider
             sccService = new SccProviderService(this);
             ((IServiceContainer)this).AddService(typeof(SccProviderService), sccService, true);
@@ -66,20 +69,22 @@ namespace GitScc
             MsVsShell.OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as MsVsShell.OleMenuCommandService;
             if (mcs != null)
             {
-                CommandID cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommand);
-                MenuCommand menuCmd = new MenuCommand(new EventHandler(OnRefreshCommand), cmd);
-                mcs.AddCommand(menuCmd);
+                CommandID cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandRefresh);
+                var menu = new OleMenuCommand(new EventHandler(OnRefreshCommand), cmd);
+                mcs.AddCommand(menu);
 
-                //cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandCommit);
-                //menuCmd = new MenuCommand(new EventHandler(OnSccCommand), cmd);
-                //mcs.AddCommand(menuCmd);
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandGitBash);
+                menu = new OleMenuCommand(new EventHandler(OnGitBashCommand), cmd);
+                menu.BeforeQueryStatus += new EventHandler(menu_BeforeQueryStatus_GitBash);
+                mcs.AddCommand(menu);
 
-                //cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandHistory);
-                //menuCmd = new MenuCommand(new EventHandler(OnSccCommand), cmd);
-                //mcs.AddCommand(menuCmd);
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandGitExtension);
+                menu = new OleMenuCommand(new EventHandler(OnGitExtensionCommand), cmd);
+                menu.BeforeQueryStatus += new EventHandler(menu_BeforeQueryStatus_GitExtension);
+                mcs.AddCommand(menu);
 
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandCompare);
-                var menu = new OleMenuCommand(new EventHandler(OnCompareCommand), cmd);
+                menu = new OleMenuCommand(new EventHandler(OnCompareCommand), cmd);
                 menu.BeforeQueryStatus += new EventHandler(menu_BeforeQueryStatus_Compare);
                 mcs.AddCommand(menu);
 
@@ -93,6 +98,54 @@ namespace GitScc
             // If the package is to become active, this will also callback on OnActiveStateChange and the menu commands will be enabled
             IVsRegisterScciProvider rscp = (IVsRegisterScciProvider)GetService(typeof(IVsRegisterScciProvider));
             rscp.RegisterSourceControlProvider(GuidList.guidSccProvider);
+        }
+
+        private void LoadConfig()
+        {
+            if (string.IsNullOrEmpty(gitBashPath))
+            {
+                gitBashPath = TryFindFile(new string[]{
+                    @"C:\Program Files\Git\bin\sh.exe",
+                    @"C:\Program Files (x86)\Git\bin\sh.exe",
+                });
+            }
+            if (string.IsNullOrEmpty(gitExtensionPath))
+            {
+                gitExtensionPath = TryFindFile(new string[]{
+                    @"C:\Program Files\GitExtensions\GitExtensions.exe",
+                    @"C:\Program Files (x86)\GitExtensions\GitExtensions.exe",
+                });
+            }
+            if (string.IsNullOrEmpty(difftoolPath)) difftoolPath = "diffmerge.exe";
+        }
+
+        private string TryFindFile(string[] paths)
+        {
+            foreach (var path in paths)
+            {
+                if (File.Exists(path)) return path;
+            }
+            return null;
+        }
+
+        string gitBashPath, gitExtensionPath, difftoolPath;
+
+        void menu_BeforeQueryStatus_GitExtension(object sender, EventArgs e)
+        {
+            OleMenuCommand menu = sender as OleMenuCommand;
+            if (menu != null)
+            {
+                menu.Enabled = !string.IsNullOrEmpty(gitExtensionPath) && File.Exists(gitExtensionPath);
+            }
+        }
+
+        void menu_BeforeQueryStatus_GitBash(object sender, EventArgs e)
+        {
+            OleMenuCommand menu = sender as OleMenuCommand;
+            if (menu != null)
+            {
+                menu.Enabled = !string.IsNullOrEmpty(gitBashPath) && File.Exists(gitBashPath);
+            }
         }
 
         void menu_BeforeQueryStatus_Compare(object sender, EventArgs e)
@@ -128,99 +181,78 @@ namespace GitScc
             sccService.UndoSelectedFile();
         }
 
-        /// <summary>
-        /// The function can be used to bring back the provider's toolwindow if it was previously closed
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        //private void ViewToolWindow(object sender, EventArgs e)
-        //{
-        //    this.ShowSccProviderToolWindow();
-        //}
+        private void OnGitBashCommand(object sender, EventArgs e)
+        {
+            RunDetatched("cmd.exe", string.Format("/c \"{0}\" --login -i", gitBashPath));
+        }
 
-        //private void ToolWindowToolbarCommand(object sender, EventArgs e)
-        //{
-        //    SccProviderToolWindow window = (SccProviderToolWindow)this.FindToolWindow(typeof(SccProviderToolWindow), 0, true);
+        private void OnGitExtensionCommand(object sender, EventArgs e)
+        {
+            RunCommand(gitExtensionPath, "");
+        }
 
-        //    if (window != null)
-        //    {
-        //        window.ToolWindowToolbarCommand();
-        //    }
-        //}
+        internal void RunDiffCommand(string file1, string file2)
+        {
+            RunCommand(difftoolPath, "\"" + file1 + "\" \"" + file2 + "\"");
+        }
 
         // This function is called by the IVsSccProvider service implementation when the active state of the provider changes
         // The package needs to show or hide the scc-specific commands 
         public virtual void OnActiveStateChange()
         {
-            MsVsShell.OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as MsVsShell.OleMenuCommandService;
-            if (mcs != null)
-            {
-                //CommandID cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommand);
-                //MenuCommand menuCmd = mcs.FindCommand(cmd);
-                //menuCmd.Supported = true;
-                //menuCmd.Enabled = sccService.Active;
-                //menuCmd.Visible = sccService.Active;
-
-                //cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandCommit);
-                //menuCmd = mcs.FindCommand(cmd);
-                //menuCmd.Supported = true;
-                //menuCmd.Enabled = sccService.Active;
-                //menuCmd.Visible = sccService.Active;
-
-                //cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandHistory);
-                //menuCmd = mcs.FindCommand(cmd);
-                //menuCmd.Supported = true;
-                //menuCmd.Enabled = sccService.Active;
-                //menuCmd.Visible = sccService.Active;
-
-                //cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandCompare);
-                //menuCmd = mcs.FindCommand(cmd);
-                //menuCmd.Supported = true;
-                //menuCmd.Enabled = sccService.Active;
-                //menuCmd.Visible = sccService.Active;
-
-                //    cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdViewToolWindow);
-                //    menuCmd = mcs.FindCommand(cmd);
-                //    menuCmd.Supported = true;
-                //    menuCmd.Enabled = sccService.Active;
-                //    menuCmd.Visible = sccService.Active;
-
-                //    cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdToolWindowToolbarCommand);
-                //    menuCmd = mcs.FindCommand(cmd);
-                //    menuCmd.Supported = true;
-                //    menuCmd.Enabled = sccService.Active;
-                //    menuCmd.Visible = sccService.Active;
-            }
-
-            //ShowSccProviderToolWindow();
-        }
-
-        private void ShowSccProviderToolWindow()
-        {
-            //MsVsShell.ToolWindowPane window = this.FindToolWindow(typeof(SccProviderToolWindow), 0, true);
-            //IVsWindowFrame windowFrame = null;
-            //if (window != null && window.Frame != null)
-            //{
-            //    windowFrame = (IVsWindowFrame)window.Frame;
-            //}
-            //if (windowFrame == null)
-            //{
-            //    throw new InvalidOperationException("No valid window frame object was returned from Toolwindow pane");
-            //}
-            //if (sccService.Active)
-            //{
-            //    ErrorHandler.ThrowOnFailure(windowFrame.Show());
-            //}
-            //else
-            //{
-            //    ErrorHandler.ThrowOnFailure(windowFrame.Hide());
-            //}
         }
 
         public new Object GetService(Type serviceType)
         {
             return base.GetService(serviceType);
         }
+
+        #region Run Command
+        internal string RunCommand(string cmd, string args)
+        {
+            var pinfo = new ProcessStartInfo(cmd)
+            {
+                Arguments = args,
+                CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                WorkingDirectory = Path.GetDirectoryName(sccService.GetSolutionFileName())
+            };
+
+            using (var process = Process.Start(pinfo))
+            {
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                if (!string.IsNullOrWhiteSpace(error))
+                    throw new Exception(error);
+
+                return output;
+            }
+        }
+
+        internal void RunDetatched(string cmd, string arguments)
+        {
+            using (Process process = new Process())
+            {
+                process.StartInfo.UseShellExecute = true;
+                process.StartInfo.ErrorDialog = false;
+                process.StartInfo.RedirectStandardOutput = false;
+                process.StartInfo.RedirectStandardInput = false;
+
+                process.StartInfo.CreateNoWindow = false;
+                process.StartInfo.FileName = cmd;
+                process.StartInfo.Arguments = arguments;
+                process.StartInfo.WorkingDirectory = Path.GetDirectoryName(sccService.GetSolutionFileName());
+                process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+                process.StartInfo.LoadUserProfile = true;
+
+                process.Start();
+            }
+        } 
+        #endregion
 
     }
 }

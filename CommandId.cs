@@ -21,9 +21,9 @@ namespace GitScc
     static class CommandId
     {
         // Define the list a set of public static members.
-        public const int icmdSccCommand = 0x101;
-        public const int icmdSccCommandCommit = 0x102;
-        public const int icmdSccCommandHistory = 0x103;
+        public const int icmdSccCommandRefresh = 0x101;
+        public const int icmdSccCommandGitBash = 0x102;
+        public const int icmdSccCommandGitExtension = 0x103;
         public const int icmdSccCommandCompare = 0x104;
         public const int icmdSccCommandUndo = 0x105;
 

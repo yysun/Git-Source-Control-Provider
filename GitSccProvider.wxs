@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='Windows-1252'?>
+<?define VisualStudioRegistryRoot = "Software\Microsoft\VisualStudio\9.0" ?>
+<!--
+C:\Users\Public\My Projects\GitScc\bin\Debug>"C:\Program Files\Microsoft Visual
+Studio 2008 SDK\VisualStudioIntegration\Tools\Bin\regpkg" /wixfile:..\..\DeployF
+ragment.wxs /codebase GitSccProvider.dll
+
+C:\Users\Public\My Projects\GitScc\bin\Debug>"C:\Program Files\Microsoft Visual
+Studio 2008 SDK\VisualStudioIntegration\Tools\wix\candle" GitSccProvider.wxs
+
+C:\Users\Public\My Projects\GitScc\bin\Debug>"C:\Program Files\Microsoft Visual
+Studio 2008 SDK\VisualStudioIntegration\Tools\wix\light" GitSccProvider.wixobj
+-->
+
+<Wix xmlns='http://schemas.microsoft.com/wix/2003/01/wi'>
+  <Product Name='Git Source Control Provider' Id='5BA8C20E-FA79-49e5-8370-9A41399C6009'
+    Language='1033' Codepage='1252' Version='0.4.1' Manufacturer='Yiyi Sun'>
+
+    <Package Id='FD611E26-3B04-4250-BB15-C688C35EE800' Keywords='Installer'
+      Description="Git Source Control Provider Installer"
+      Comments='Git Source Control Provider Installer' Manufacturer='Yiyi Sun'
+      InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
+
+    <Media Id='1' Cabinet='GitScc.cab' EmbedCab='yes' />
+
+    <!-- Properties -->
+    <Property Id="DEVENV_EXE_PATH">
+      <RegistrySearch Id="RegSearch_DevenvExe_Path" Root="HKLM" Key="$(var.VisualStudioRegistryRoot)\Setup\VS" Name="EnvironmentPath" Type="raw" />
+    </Property>
+
+    <!-- Launch conditions -->
+    <Condition Message="An administrator must approve or install [ProductName]."> Privileged </Condition>
+    <Condition Message="Git Source Control Provider requires Visual Studio 2008."> DEVENV_EXE_PATH </Condition>
+
+    <!-- Root directories -->
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder" Name="PFILES">
+        <Directory Id="INSTALLDIR" Name="GitScc" >
+          <Component Guid="85F702E4-299C-4686-AC1D-D7C0BC811F5B" Id="MainExecutable">
+            <File Id="GitSccProvider.dll" Name="GitScc~1.dll" LongName="GitSccProvider.dll" Source="GitSccProvider.dll" Vital="yes" DiskId="1" />
+            <!--<File Id="GitSccProvider.pkgdef" Name="GitScc~1.pkg" LongName="GitSccProvider.pkgdef" Source="GitSccProvider.pkgdef" Vital="yes" DiskId="1" />-->
+            <File Id="DiffieHellman.dll" Name="Diffie~1.dll" LongName="DiffieHellman.dll" Source="DiffieHellman.dll" Vital="yes" DiskId="1" /> 
+            <File Id="GitSharp.Core.dll" Name="GitSha~1.dll" LongName="GitSharp.Core.dll" Source="GitSharp.Core.dll" Vital="yes" DiskId="1" />
+            <File Id="GitSharp.dll" Name="GitSharp.dll" LongName="GitSharp.dll" Source="GitSharp.dll" Vital="yes" DiskId="1" />
+            <File Id="ICSharpCode.SharpZipLib.dll" Name="ICShar~1.dll" LongName="ICSharpCode.SharpZipLib.dll" Source="ICSharpCode.SharpZipLib.dll" Vital="yes" DiskId="1" />
+            <File Id="Org.Mentalis.Security.dll" Name="OrgMen~1.dll" LongName="Org.Mentalis.Security.dll" Source="Org.Mentalis.Security.dll" Vital="yes" DiskId="1" />
+            <File Id="Tamir.SharpSSH.dll" Name="TamirS~1.dll" LongName="Tamir.SharpSSH.dll" Source="Tamir.SharpSSH.dll" Vital="yes" DiskId="1" />
+            <File Id="Winterdom.IO.FileMap.dll" Name="Winter~1.dll" LongName="Winterdom.IO.FileMap.dll" Source="Winterdom.IO.FileMap.dll" Vital="yes" DiskId="1" />
+                  
+            <?include DeployFragment.wxs ?>
+          </Component>
+        </Directory>
+      </Directory>
+    </Directory>
+
+    <Feature Id='Complete' Level='1'>
+      <ComponentRef Id='MainExecutable' />
+    </Feature>
+
+    <InstallExecuteSequence>
+      <Custom Action="CA_DeployPackage" Before="InstallFinalize" />
+    </InstallExecuteSequence>
+
+    <CustomAction Id="CA_DeployPackage" Property="DEVENV_EXE_PATH" ExeCommand="/setup /nosetupvstemplates" Impersonate="no" Execute="deferred" />
+
+  </Product>
+</Wix>

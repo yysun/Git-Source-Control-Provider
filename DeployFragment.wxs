@@ -1,0 +1,53 @@
+<Include>
+
+  <Registry Root="HKLM" Key="Software\Microsoft\VisualStudio\9.0\SourceControlProviders\{c4128d99-0000-41d1-a6c3-704e6c1a3de2}" Value="Git Source Control Provider" Type="string">
+    <Registry Name="Service" Value="{c4128d99-1000-41d1-a6c3-704e6c1a3de2}" Type="string" />
+  </Registry>
+
+  <Registry Root="HKLM" Key="Software\Microsoft\VisualStudio\9.0\SourceControlProviders\{c4128d99-0000-41d1-a6c3-704e6c1a3de2}\Name" Value="#100" Type="string">
+    <Registry Name="Package" Value="{c4128d99-2000-41d1-a6c3-704e6c1a3de2}" Type="string" />
+  </Registry>
+
+  <Registry Root="HKLM" Key="Software\Microsoft\VisualStudio\9.0\ToolsOptionsPages\Source Control" Value="#106" Type="string">
+    <Registry Name="Package" Value="{c4128d99-2000-41d1-a6c3-704e6c1a3de2}" Type="string" />
+  </Registry>
+
+  <Registry Root="HKLM" Key="Software\Microsoft\VisualStudio\9.0\ToolsOptionsPages\Source Control\Git Source Control Provider Options" Value="#107" Type="string">
+    <Registry Name="Package" Value="{c4128d99-2000-41d1-a6c3-704e6c1a3de2}" Type="string" />
+    <Registry Name="Page" Value="{c4128d99-111e-4a5b-9834-076cb319ed59}" Type="string" />
+  </Registry>
+
+  <Registry Root="HKLM" Key="Software\Microsoft\VisualStudio\9.0\ToolsOptionsPages\Source Control\Git Source Control Provider Options\VisibilityCmdUIContexts">
+    <Registry Name="{c4128d99-0000-41d1-a6c3-704e6c1a3de2}" Value="1" Type="integer" />
+  </Registry>
+
+  <Registry Root="HKLM" Key="Software\Microsoft\VisualStudio\9.0\InstalledProducts\GitSccProvider" Value="#100" Type="string">
+    <Registry Name="Package" Value="{c4128d99-2000-41d1-a6c3-704e6c1a3de2}" Type="string" />
+    <Registry Name="ProductDetails" Value="#101" Type="string" />
+    <Registry Name="PID" Value="1.0.0.0" Type="string" />
+    <Registry Name="LogoID" Value="#400" Type="string" />
+  </Registry>
+
+  <Registry Root="HKLM" Key="Software\Microsoft\VisualStudio\9.0\Packages\{c4128d99-2000-41d1-a6c3-704e6c1a3de2}" Value="GitScc.BasicSccProvider, GitSccProvider, Version=1.0.3803.19703, Culture=neutral, PublicKeyToken=null" Type="string">
+    <Registry Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+    <Registry Name="Class" Value="GitScc.BasicSccProvider" Type="string" />
+    <Registry Name="CodeBase" Value="[#GitSccProvider.dll]" Type="string" />
+    <Registry Name="ID" Value="15261" Type="integer" />
+    <Registry Name="MinEdition" Value="Standard" Type="string" />
+    <Registry Name="ProductVersion" Value="0.1" Type="string" />
+    <Registry Name="ProductName" Value="Git Source Control Provider" Type="string" />
+    <Registry Name="CompanyName" Value="Yiyisun@hotmail.com" Type="string" />
+  </Registry>
+
+  <Registry Root="HKLM" Key="Software\Microsoft\VisualStudio\9.0\AutoLoadPackages\{c4128d99-0000-41d1-a6c3-704e6c1a3de2}">
+    <Registry Name="{c4128d99-2000-41d1-a6c3-704e6c1a3de2}" Value="0" Type="integer" />
+  </Registry>
+
+  <Registry Root="HKLM" Key="Software\Microsoft\VisualStudio\9.0\Menus">
+    <Registry Name="{c4128d99-2000-41d1-a6c3-704e6c1a3de2}" Value=", 1000, 1" Type="string" />
+  </Registry>
+
+  <Registry Root="HKLM" Key="Software\Microsoft\VisualStudio\9.0\Services\{c4128d99-1000-41d1-a6c3-704e6c1a3de2}" Value="{c4128d99-2000-41d1-a6c3-704e6c1a3de2}" Type="string">
+    <Registry Name="Name" Value="Git Source Control Service" Type="string" />
+  </Registry>
+</Include>

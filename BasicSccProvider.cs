@@ -28,8 +28,9 @@ namespace GitScc
     // Everytime the version number changes VS will automatically update the menus on startup; if the version doesn't change, you will need to run manually "devenv /setup /rootsuffix:Exp" to see VSCT changes reflected in IDE
     [MsVsShell.ProvideMenuResource(1000, 1)]
     // Register a sample options page visible as Tools/Options/SourceControl/SampleOptionsPage when the provider is active
-    //[MsVsShell.ProvideOptionPageAttribute(typeof(SccProviderOptions), "Source Control", "Sample Options Page Basic Provider", 106, 107, false)]
-    //[ProvideToolsOptionsPageVisibility("Source Control", "Sample Options Page Basic Provider", "ADC98052-0000-41D1-A6C3-704E6C1A3DE2")]
+    [MsVsShell.ProvideOptionPageAttribute(typeof(SccProviderOptions), "Source Control", "Git Source Control Provider Options", 106, 107, false)]
+    [ProvideToolsOptionsPageVisibility("Source Control", "Git Source Control Provider Options", "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
+
     // Register a sample tool window visible only when the provider is active
     //[MsVsShell.ProvideToolWindow(typeof(SccProviderToolWindow))]
     //[MsVsShell.ProvideToolWindowVisibility(typeof(SccProviderToolWindow), "ADC98052-0000-41D1-A6C3-704E6C1A3DE2")]
@@ -58,8 +59,6 @@ namespace GitScc
         {
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Entering Initialize() of: {0}", this.ToString()));
             base.Initialize();
-
-            LoadConfig();
 
             // Proffer the source control service implemented by the provider
             sccService = new SccProviderService(this);
@@ -100,41 +99,15 @@ namespace GitScc
             rscp.RegisterSourceControlProvider(GuidList.guidSccProvider);
         }
 
-        private void LoadConfig()
-        {
-            if (string.IsNullOrEmpty(gitBashPath))
-            {
-                gitBashPath = TryFindFile(new string[]{
-                    @"C:\Program Files\Git\bin\sh.exe",
-                    @"C:\Program Files (x86)\Git\bin\sh.exe",
-                });
-            }
-            if (string.IsNullOrEmpty(gitExtensionPath))
-            {
-                gitExtensionPath = TryFindFile(new string[]{
-                    @"C:\Program Files\GitExtensions\GitExtensions.exe",
-                    @"C:\Program Files (x86)\GitExtensions\GitExtensions.exe",
-                });
-            }
-            if (string.IsNullOrEmpty(difftoolPath)) difftoolPath = "diffmerge.exe";
-        }
+        #endregion
 
-        private string TryFindFile(string[] paths)
-        {
-            foreach (var path in paths)
-            {
-                if (File.Exists(path)) return path;
-            }
-            return null;
-        }
-
-        string gitBashPath, gitExtensionPath, difftoolPath;
-
+        #region menu commands
         void menu_BeforeQueryStatus_GitExtension(object sender, EventArgs e)
         {
             OleMenuCommand menu = sender as OleMenuCommand;
             if (menu != null)
             {
+                var gitExtensionPath = GitSccOptions.Current.GitExtensionPath;
                 menu.Enabled = !string.IsNullOrEmpty(gitExtensionPath) && File.Exists(gitExtensionPath);
             }
         }
@@ -144,6 +117,7 @@ namespace GitScc
             OleMenuCommand menu = sender as OleMenuCommand;
             if (menu != null)
             {
+                var gitBashPath = GitSccOptions.Current.GitBashPath;
                 menu.Enabled = !string.IsNullOrEmpty(gitBashPath) && File.Exists(gitBashPath);
             }
         }
@@ -164,8 +138,6 @@ namespace GitScc
             base.Dispose(disposing);
         }
 
-        #endregion
-
         private void OnRefreshCommand(object sender, EventArgs e)
         {
             sccService.Refresh();
@@ -183,18 +155,23 @@ namespace GitScc
 
         private void OnGitBashCommand(object sender, EventArgs e)
         {
+            var gitBashPath = GitSccOptions.Current.GitBashPath;
             RunDetatched("cmd.exe", string.Format("/c \"{0}\" --login -i", gitBashPath));
         }
 
         private void OnGitExtensionCommand(object sender, EventArgs e)
         {
-            RunCommand(gitExtensionPath, "");
+            var gitExtensionPath = GitSccOptions.Current.GitExtensionPath;
+            RunDetatched(gitExtensionPath, "");
         }
 
         internal void RunDiffCommand(string file1, string file2)
         {
+            var difftoolPath = GitSccOptions.Current.DifftoolPath;
             RunCommand(difftoolPath, "\"" + file1 + "\" \"" + file2 + "\"");
         }
+
+        #endregion
 
         // This function is called by the IVsSccProvider service implementation when the active state of the provider changes
         // The package needs to show or hide the scc-specific commands 

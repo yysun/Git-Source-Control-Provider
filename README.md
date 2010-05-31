@@ -21,10 +21,9 @@ How to use
 * Select Source Control in the tree view.
 * Select Git Source Control Provider from the drop down list, and click OK.
 * Open your solution controlled by Git to see the file's status.
+* Right click within solution explorer and select "Git" to use git releated fuctions.
 
-Right click within solution explorer items and select "Git" to use git releated fuctions.
-
-![context menu](http://gitscc.codeplex.com/Project/Download/FileDownload.aspx?DownloadId=123883)
+![context menu](http://gitscc.codeplex.com/Project/Download/FileDownload.aspx?DownloadId=124585)
 
 What's coming
 -----------------

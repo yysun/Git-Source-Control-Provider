@@ -1,15 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <!-- 
-  ***************************************************************************
-    Copyright (c) Microsoft Corporation. All rights reserved.
-    This code is licensed under the Visual Studio SDK license terms.
-    THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
-    ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
-    IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
-    PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
-  ***************************************************************************
-  -->
   <!-- Definition of the command and menus used by this sample -->
   <Extern href="stdidcmd.h"/>
   <Extern href="vsshlids.h"/>
@@ -73,7 +63,7 @@
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <Strings>
-          <ButtonText>Git Extension ...</ButtonText>
+          <ButtonText>Git Extensions ...</ButtonText>
         </Strings>
       </Button>
 

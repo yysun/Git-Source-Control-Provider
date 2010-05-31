@@ -349,6 +349,8 @@ namespace GitScc
 
         #endregion
 
+        #region open and close tracker
+
         internal void OpenTracker()
         {
             string solutionFileName = GetSolutionFileName();
@@ -364,7 +366,7 @@ namespace GitScc
             }
         }
 
-   
+
         private void CloseTracker()
         {
             _statusTracker.Close();
@@ -373,7 +375,9 @@ namespace GitScc
                 IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
                 fileChangeService.UnadviseDirChange(_vsIVsFileChangeEventsCookie);
             }
-        }
+        } 
+
+        #endregion
 
         #region refresh
 

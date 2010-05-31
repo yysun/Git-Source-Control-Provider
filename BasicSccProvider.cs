@@ -18,7 +18,7 @@ namespace GitScc
     /////////////////////////////////////////////////////////////////////////////
     // BasicSccProvider
     [MsVsShell.ProvideLoadKey("Standard", "0.1", "Git Source Control Provider", "Yiyisun@hotmail.com", 15261)]
-    [MsVsShell.DefaultRegistryRoot("Software\\Microsoft\\VisualStudio\\10.0Exp")]
+    [MsVsShell.DefaultRegistryRoot("Software\\Microsoft\\VisualStudio\\9.0Exp")]
     // Register the package to have information displayed in Help/About dialog box
     [MsVsShell.InstalledProductRegistration(false, "#100", "#101", "1.0.0.0", IconResourceID = CommandId.iiconProductIcon)]
     // Declare that resources for the package are to be found in the managed assembly resources, and not in a satellite dll
@@ -203,7 +203,7 @@ namespace GitScc
                 string error = process.StandardError.ReadToEnd();
                 process.WaitForExit();
 
-                if (!string.IsNullOrWhiteSpace(error))
+                if (!string.IsNullOrEmpty(error))
                     throw new Exception(error);
 
                 return output;

@@ -91,12 +91,29 @@ namespace GitScc
                 menu = new OleMenuCommand(new EventHandler(OnUndoCommand), cmd);
                 menu.BeforeQueryStatus += new EventHandler(menu_BeforeQueryStatus_Compare);
                 mcs.AddCommand(menu);
+
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandBranchName);
+                menu = new OleMenuCommand(new EventHandler(OnRefreshCommand), cmd);
+                menu.BeforeQueryStatus += new EventHandler(menu_BeforeQueryStatus_BranchName);
+                mcs.AddCommand(menu);
             }
 
             // Register the provider with the source control manager
             // If the package is to become active, this will also callback on OnActiveStateChange and the menu commands will be enabled
             IVsRegisterScciProvider rscp = (IVsRegisterScciProvider)GetService(typeof(IVsRegisterScciProvider));
             rscp.RegisterSourceControlProvider(GuidList.guidSccProvider);
+        }
+
+        void menu_BeforeQueryStatus_BranchName(object sender, EventArgs e)
+        {
+            OleMenuCommand menu = sender as OleMenuCommand;
+            if (menu != null)
+            {
+                menu.Checked = true;
+                menu.Text = string.IsNullOrEmpty(sccService.CurrentBranchName) ? 
+                    "Git" :
+                    "Git (" + sccService.CurrentBranchName + ")";
+            }
         }
 
         #endregion

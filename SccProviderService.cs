@@ -772,6 +772,11 @@ namespace GitScc
         {
             var dte = (DTE) _sccProvider.GetService(typeof(DTE));
             dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Caption = message;
-        } 
+        }
+
+        public string CurrentBranchName
+        {
+            get { return _statusTracker.CurrentBranch; }
+        }
     }
 }

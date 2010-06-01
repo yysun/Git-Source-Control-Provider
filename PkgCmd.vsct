@@ -14,13 +14,13 @@
         </Strings>
       </Menu>-->
 
-      <Menu guid="guidSccProviderCmdSet" id="imnuFileSourceControlMenu" priority="0x0000" type="Menu">
+      <Menu guid="guidSccProviderCmdSet" id="imnuFileSourceControlMenu" priority="0x0000" type="MenuControllerLatched">
         <!--<Parent guid="guidSccProviderCmdSet" id="igrpFileSourceControl"/>-->
+        <CommandFlag>TextChanges</CommandFlag>
+        <CommandFlag>TextIsAnchorCommand</CommandFlag>
         <Strings>
           <ButtonText>Git</ButtonText>
           <CommandName>Git</CommandName>
-          <CommandFlag>TextChanges</CommandFlag>
-          <CommandFlag>TextIsAnchorCommand</CommandFlag>
         </Strings>
       </Menu>
 
@@ -92,8 +92,20 @@
         <Strings>
           <ButtonText>Refresh</ButtonText>
         </Strings>
-      </Button>      
-       
+      </Button>
+
+      <Button guid="guidSccProviderCmdSet" id="icmdSccCommandBranchName" priority="0x0109" type="Button">
+        <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <CommandFlag>TextChanges</CommandFlag>
+        <Strings>
+          <ButtonText>Refresh</ButtonText>
+        </Strings>
+      </Button>
+
+      
+
       <!--<Button guid="guidSccProviderCmdSet" id="icmdViewToolWindow" priority="0x0100" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpViewToolWindowGroup"/>
         <CommandFlag>DynamicVisibility</CommandFlag>
@@ -135,7 +147,8 @@
       <IDSymbol name="icmdSccCommandGitBash" value="0x102"/>
       <IDSymbol name="icmdSccCommandGitExtension" value="0x103"/>
       <IDSymbol name="icmdSccCommandCompare" value="0x104"/>
-      <IDSymbol name="icmdSccCommandUndo" value="0x105"/>     
+      <IDSymbol name="icmdSccCommandUndo" value="0x105"/>
+      <IDSymbol name="icmdSccCommandBranchName" value="0x106"/>
       
       <!--<IDSymbol name="icmdViewToolWindow" value="0x102"/>
       <IDSymbol name="icmdToolWindowToolbarCommand" value="0x103"/>-->

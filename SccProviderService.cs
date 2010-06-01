@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.OLE.Interop;
+using EnvDTE;
 
 namespace GitScc
 {
@@ -468,12 +469,14 @@ namespace GitScc
             IVsHierarchy solHier = (IVsHierarchy)_sccProvider.GetService(typeof(SVsSolution));
             solHier.SetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_StateIconIndex, rgsiGlyphs[0]);
 
-            //string branch = _statusTracker.CurrentBranch;
-            //if (!string.IsNullOrEmpty(branch))
-            //{
-            //    caption += " - " + branch;
-            //}
-            //solHier.SetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_Caption, caption);
+            var caption = "Solution Explorer";
+            string branch = _statusTracker.CurrentBranch;
+            if (!string.IsNullOrEmpty(branch))
+            {
+                caption += " (" + branch + ")";
+            }
+
+            SetSolutionExplorerTitle(caption);
 
         }
 
@@ -763,5 +766,12 @@ namespace GitScc
         }
 
         #endregion
+
+
+        private void SetSolutionExplorerTitle(string message)
+        {
+            var dte = (DTE) _sccProvider.GetService(typeof(DTE));
+            dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Caption = message;
+        } 
     }
 }

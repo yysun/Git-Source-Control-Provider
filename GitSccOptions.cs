@@ -76,7 +76,7 @@ namespace GitScc
             if (string.IsNullOrEmpty(GitExtensionPath))
             {
                 GitExtensionPath = TryFindFile(new string[]{
-                    @"C:\Program Files\GitExtensions\GitExtensions.exe",
+                    @"C:\Program Files\Henk\GitExtensions\GitExtensions.exe",
                     @"C:\Program Files (x86)\GitExtensions\GitExtensions.exe",
                 });
             }

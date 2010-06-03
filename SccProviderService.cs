@@ -681,18 +681,22 @@ namespace GitScc
 
         #region IVsFileChangeEvents
 
-        private DateTime lastTimeDirChangeFired;
+        private DateTime lastTimeDirChangeFired = DateTime.Now;
+        private object locker = new object();
 
         public int DirectoryChanged(string pszDirectory)
         {
-            double delta = DateTime.Now.Subtract(lastTimeDirChangeFired).TotalMilliseconds;
-            if (delta > 1000)
+            lock (locker)
             {
-                System.Threading.Thread.Sleep(100);
-                Refresh();
+                double delta = DateTime.Now.Subtract(lastTimeDirChangeFired).TotalMilliseconds;
+                lastTimeDirChangeFired = DateTime.Now;
+                if (delta > 100)
+                {
+                    System.Threading.Thread.Sleep(1000);
+                    Refresh();
+                }
+                return VSConstants.S_OK;
             }
-            lastTimeDirChangeFired = DateTime.Now;
-            return VSConstants.S_OK;
         }
 
         public int FilesChanged(uint cChanges, string[] rgpszFile, uint[] rggrfChange)

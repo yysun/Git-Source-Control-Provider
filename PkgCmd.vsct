@@ -5,9 +5,9 @@
   <Extern href="msobtnid.h"/>
   <Commands package="guidSccProviderPkg">
     <Menus>
-      <Menu guid="guidSccProviderCmdSet" id="imnuFileSourceControlMenu" priority="0x0000" type="MenuController">
+      <Menu guid="guidSccProviderCmdSet" id="imnuFileSourceControlMenu" priority="0x0000" type="Menu">
         <CommandFlag>TextChanges</CommandFlag>
-        <CommandFlag>TextIsAnchorCommand</CommandFlag>
+        <!--<CommandFlag>TextIsAnchorCommand</CommandFlag>-->
         <Strings>
           <ButtonText>Git</ButtonText>
           <CommandName>Git</CommandName>
@@ -76,9 +76,9 @@
       </Button>
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandBranchName" priority="0x0109" type="Button">
-        <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
+        <!--<Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>-->
         <!--<Icon guid="guidSccProviderImages" id="iconGitBash" />-->
-        <CommandFlag>FixMenuController</CommandFlag>
+        <!--<CommandFlag>FixMenuController</CommandFlag>-->
         <CommandFlag>TextChanges</CommandFlag>
         <!--<CommandFlag>IconAndText</CommandFlag>-->
         <Strings>

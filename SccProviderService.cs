@@ -66,7 +66,7 @@ namespace GitScc
         // Make visible and enable if necessary scc related menu commands
         public int SetActive()
         {
-            Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Provider set active"));
+            Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Git Source Control Provider set active"));
             _active = true;
             _sccProvider.OnActiveStateChange();
 
@@ -79,7 +79,7 @@ namespace GitScc
         // Hides and disable scc related menu commands
         public int SetInactive()
         {
-            Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Provider set inactive"));
+            Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Git Source Control Provider set inactive"));
 
             _active = false;
             _sccProvider.OnActiveStateChange();
@@ -690,14 +690,19 @@ namespace GitScc
             {
                 double delta = DateTime.Now.Subtract(lastTimeDirChangeFired).TotalMilliseconds;
                 lastTimeDirChangeFired = DateTime.Now;
-                if (delta > 100)
+                Debug.WriteLine("Dir changed, delta: " + delta.ToString());
+
+                if (delta > 1000)
                 {
-                    System.Threading.Thread.Sleep(1000);
+                    System.Threading.Thread.Sleep(200);
+                    Debug.WriteLine("Dir changed, refresh Git: " + DateTime.Now.ToString());
                     Refresh();
+
                 }
                 return VSConstants.S_OK;
             }
         }
+
 
         public int FilesChanged(uint cChanges, string[] rgpszFile, uint[] rggrfChange)
         {

@@ -42,7 +42,7 @@ namespace GitScc
     [MsVsShell.ProvideAutoLoad("C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
     // Declare the package guid
     [Guid("C4128D99-2000-41D1-A6C3-704E6C1A3DE2")]
-    public class BasicSccProvider : MsVsShell.Package
+    public class BasicSccProvider : MsVsShell.Package //, IOleCommandTarget
     {
         private SccProviderService sccService = null;
 
@@ -109,11 +109,41 @@ namespace GitScc
             OleMenuCommand menu = sender as OleMenuCommand;
             if (menu != null)
             {
-                menu.Checked = true;
                 menu.Text = string.IsNullOrEmpty(sccService.CurrentBranchName) ? 
                     "Git" :
                     "Git (" + sccService.CurrentBranchName + ")";
             }
+        }
+
+        //int IOleCommandTarget.QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
+        //{
+        //    OLECMDTEXT cmdtxtStructure = (OLECMDTEXT)Marshal.PtrToStructure(pCmdText, typeof(OLECMDTEXT));
+        //    if (pguidCmdGroup.Equals(GuidList.guidSccProviderCmdSet) && prgCmds[0].cmdID == CommandId.imnuFileSourceControlMenu)
+        //    {
+        //        if (cmdtxtStructure.cmdtextf == (uint)OLECMDTEXTF.OLECMDTEXTF_NAME)
+        //        {
+        //            string menuText = string.IsNullOrEmpty(sccService.CurrentBranchName) ?
+        //                "Git" : "Git (" + sccService.CurrentBranchName + ")"; 
+        //            SetOleCmdText(pCmdText, menuText);
+        //        }
+        //    }
+        //    return VSConstants.S_OK;
+        //}
+
+        public void SetOleCmdText(IntPtr pCmdText, string text)
+        {
+            OLECMDTEXT CmdText = (OLECMDTEXT)Marshal.PtrToStructure(pCmdText, typeof(OLECMDTEXT));
+            char[] buffer = text.ToCharArray();
+            IntPtr pText = (IntPtr)((long)pCmdText + (long)Marshal.OffsetOf(typeof(OLECMDTEXT), "rgwz"));
+            IntPtr pCwActual = (IntPtr)((long)pCmdText + (long)Marshal.OffsetOf(typeof(OLECMDTEXT), "cwActual"));
+            // The max chars we copy is our string, or one less than the buffer size,
+            // since we need a null at the end.
+            int maxChars = (int)Math.Min(CmdText.cwBuf - 1, buffer.Length);
+            Marshal.Copy(buffer, 0, pText, maxChars);
+            // append a null
+            Marshal.WriteInt16((IntPtr)((long)pText + (long)maxChars * 2), (Int16)0);
+            // write out the length + null char
+            Marshal.WriteInt32(pCwActual, maxChars + 1);
         }
 
         #endregion

@@ -42,7 +42,7 @@ namespace GitScc
     [MsVsShell.ProvideAutoLoad("C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
     // Declare the package guid
     [Guid("C4128D99-2000-41D1-A6C3-704E6C1A3DE2")]
-    public class BasicSccProvider : MsVsShell.Package //, IOleCommandTarget
+    public class BasicSccProvider : MsVsShell.Package, IOleCommandTarget
     {
         private SccProviderService sccService = null;
 
@@ -69,33 +69,25 @@ namespace GitScc
             if (mcs != null)
             {
                 CommandID cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandRefresh);
-                var menu = new OleMenuCommand(new EventHandler(OnRefreshCommand), cmd);
+                var menu = new MenuCommand(new EventHandler(OnRefreshCommand), cmd);
                 mcs.AddCommand(menu);
 
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandGitBash);
-                menu = new OleMenuCommand(new EventHandler(OnGitBashCommand), cmd);
-                menu.BeforeQueryStatus += new EventHandler(menu_BeforeQueryStatus_GitBash);
+                menu = new MenuCommand(new EventHandler(OnGitBashCommand), cmd);
                 mcs.AddCommand(menu);
 
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandGitExtension);
-                menu = new OleMenuCommand(new EventHandler(OnGitExtensionCommand), cmd);
-                menu.BeforeQueryStatus += new EventHandler(menu_BeforeQueryStatus_GitExtension);
+                menu = new MenuCommand(new EventHandler(OnGitExtensionCommand), cmd);
                 mcs.AddCommand(menu);
 
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandCompare);
-                menu = new OleMenuCommand(new EventHandler(OnCompareCommand), cmd);
-                menu.BeforeQueryStatus += new EventHandler(menu_BeforeQueryStatus_Compare);
+                menu = new MenuCommand(new EventHandler(OnCompareCommand), cmd);
                 mcs.AddCommand(menu);
 
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandUndo);
-                menu = new OleMenuCommand(new EventHandler(OnUndoCommand), cmd);
-                menu.BeforeQueryStatus += new EventHandler(menu_BeforeQueryStatus_Compare);
+                menu = new MenuCommand(new EventHandler(OnUndoCommand), cmd);
                 mcs.AddCommand(menu);
 
-                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandBranchName);
-                menu = new OleMenuCommand(new EventHandler(OnRefreshCommand), cmd);
-                menu.BeforeQueryStatus += new EventHandler(menu_BeforeQueryStatus_BranchName);
-                mcs.AddCommand(menu);
             }
 
             // Register the provider with the source control manager
@@ -104,31 +96,75 @@ namespace GitScc
             rscp.RegisterSourceControlProvider(GuidList.guidSccProvider);
         }
 
-        void menu_BeforeQueryStatus_BranchName(object sender, EventArgs e)
+        protected override void Dispose(bool disposing)
         {
-            OleMenuCommand menu = sender as OleMenuCommand;
-            if (menu != null)
-            {
-                menu.Text = string.IsNullOrEmpty(sccService.CurrentBranchName) ? 
-                    "Git" :
-                    "Git (" + sccService.CurrentBranchName + ")";
-            }
+            Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Entering Dispose() of: {0}", this.ToString()));
+
+            base.Dispose(disposing);
         }
 
-        //int IOleCommandTarget.QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
-        //{
-        //    OLECMDTEXT cmdtxtStructure = (OLECMDTEXT)Marshal.PtrToStructure(pCmdText, typeof(OLECMDTEXT));
-        //    if (pguidCmdGroup.Equals(GuidList.guidSccProviderCmdSet) && prgCmds[0].cmdID == CommandId.imnuFileSourceControlMenu)
-        //    {
-        //        if (cmdtxtStructure.cmdtextf == (uint)OLECMDTEXTF.OLECMDTEXTF_NAME)
-        //        {
-        //            string menuText = string.IsNullOrEmpty(sccService.CurrentBranchName) ?
-        //                "Git" : "Git (" + sccService.CurrentBranchName + ")"; 
-        //            SetOleCmdText(pCmdText, menuText);
-        //        }
-        //    }
-        //    return VSConstants.S_OK;
-        //}
+        #endregion
+
+        #region menu commands
+        int IOleCommandTarget.QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
+        {
+            OLECMDF cmdf = OLECMDF.OLECMDF_SUPPORTED;
+
+            // All source control commands needs to be hidden and disabled when the provider is not active
+            if (!sccService.Active)
+            {
+                cmdf = cmdf | OLECMDF.OLECMDF_INVISIBLE;
+                cmdf = cmdf & ~(OLECMDF.OLECMDF_ENABLED);
+
+                prgCmds[0].cmdf = (uint)cmdf;
+                return VSConstants.S_OK;
+            }
+
+
+            // Process our Commands
+            switch (prgCmds[0].cmdID)
+            {
+                case CommandId.imnuFileSourceControlMenu:
+                    OLECMDTEXT cmdtxtStructure = (OLECMDTEXT)Marshal.PtrToStructure(pCmdText, typeof(OLECMDTEXT));
+                    if (cmdtxtStructure.cmdtextf == (uint)OLECMDTEXTF.OLECMDTEXTF_NAME)
+                    {
+                        string menuText = string.IsNullOrEmpty(sccService.CurrentBranchName) ?
+                            "Git" : "Git (" + sccService.CurrentBranchName + ")";
+
+                        SetOleCmdText(pCmdText, menuText);
+                    }
+                    break;
+
+                case CommandId.icmdSccCommandGitBash:
+                    var gitBashPath = GitSccOptions.Current.GitBashPath;
+                    if (!string.IsNullOrEmpty(gitBashPath) && File.Exists(gitBashPath))
+                    {
+                        cmdf |= OLECMDF.OLECMDF_ENABLED;
+                    }
+                    break;
+
+                case CommandId.icmdSccCommandGitExtension:
+                    var gitExtensionPath = GitSccOptions.Current.GitExtensionPath;
+                    if (!string.IsNullOrEmpty(gitExtensionPath) && File.Exists(gitExtensionPath))
+                    {
+                        cmdf |= OLECMDF.OLECMDF_ENABLED;
+                    }
+                    break;
+                
+                case CommandId.icmdSccCommandUndo:
+                case CommandId.icmdSccCommandCompare:
+                    if (sccService.CanCompareSelectedFile) cmdf |= OLECMDF.OLECMDF_ENABLED;
+                    break;
+
+                default:
+                    cmdf |= OLECMDF.OLECMDF_ENABLED;
+                    break;
+            }
+
+
+            prgCmds[0].cmdf = (uint) (cmdf);
+            return VSConstants.S_OK;
+        }
 
         public void SetOleCmdText(IntPtr pCmdText, string text)
         {
@@ -144,45 +180,6 @@ namespace GitScc
             Marshal.WriteInt16((IntPtr)((long)pText + (long)maxChars * 2), (Int16)0);
             // write out the length + null char
             Marshal.WriteInt32(pCwActual, maxChars + 1);
-        }
-
-        #endregion
-
-        #region menu commands
-        void menu_BeforeQueryStatus_GitExtension(object sender, EventArgs e)
-        {
-            OleMenuCommand menu = sender as OleMenuCommand;
-            if (menu != null)
-            {
-                var gitExtensionPath = GitSccOptions.Current.GitExtensionPath;
-                menu.Enabled = !string.IsNullOrEmpty(gitExtensionPath) && File.Exists(gitExtensionPath);
-            }
-        }
-
-        void menu_BeforeQueryStatus_GitBash(object sender, EventArgs e)
-        {
-            OleMenuCommand menu = sender as OleMenuCommand;
-            if (menu != null)
-            {
-                var gitBashPath = GitSccOptions.Current.GitBashPath;
-                menu.Enabled = !string.IsNullOrEmpty(gitBashPath) && File.Exists(gitBashPath);
-            }
-        }
-
-        void menu_BeforeQueryStatus_Compare(object sender, EventArgs e)
-        {
-            OleMenuCommand menu = sender as OleMenuCommand;
-            if (menu != null)
-            {
-                menu.Enabled = sccService.CanCompareSelectedFile;
-            }
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Entering Dispose() of: {0}", this.ToString()));
-
-            base.Dispose(disposing);
         }
 
         private void OnRefreshCommand(object sender, EventArgs e)

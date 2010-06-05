@@ -7,7 +7,6 @@
     <Menus>
       <Menu guid="guidSccProviderCmdSet" id="imnuFileSourceControlMenu" priority="0x0000" type="Menu">
         <CommandFlag>TextChanges</CommandFlag>
-        <!--<CommandFlag>TextIsAnchorCommand</CommandFlag>-->
         <Strings>
           <ButtonText>Git</ButtonText>
           <CommandName>Git</CommandName>
@@ -22,10 +21,8 @@
     <Buttons>
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandGitBash" priority="0x0104" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
-        <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
-        <CommandFlag>IconAndText</CommandFlag>
         <Strings>
           <ButtonText>Git Bash ...</ButtonText>
         </Strings>
@@ -33,10 +30,8 @@
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandGitExtension" priority="0x0105" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
-        <Icon guid="guidSccProviderImages" id="iconGitExt" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
-        <CommandFlag>IconAndText</CommandFlag>
         <Strings>
           <ButtonText>Git Extensions ...</ButtonText>
         </Strings>
@@ -74,18 +69,6 @@
           <ButtonText>Refresh</ButtonText>
         </Strings>
       </Button>
-
-      <Button guid="guidSccProviderCmdSet" id="icmdSccCommandBranchName" priority="0x0109" type="Button">
-        <!--<Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>-->
-        <!--<Icon guid="guidSccProviderImages" id="iconGitBash" />-->
-        <!--<CommandFlag>FixMenuController</CommandFlag>-->
-        <CommandFlag>TextChanges</CommandFlag>
-        <!--<CommandFlag>IconAndText</CommandFlag>-->
-        <Strings>
-          <ButtonText>Git</ButtonText>
-          <CommandName>icmdSccCommandBranchName</CommandName>
-        </Strings>
-      </Button>
     </Buttons>
     <Bitmaps>
       <Bitmap guid="guidSccProviderImages" href="Resources\Images_32bit.bmp" usedList="iconGitBash, iconGitExt, iconUncheckout, iconCompare, iconRefresh"/>
@@ -110,8 +93,7 @@
       <IDSymbol name="icmdSccCommandGitExtension" value="0x103"/>
       <IDSymbol name="icmdSccCommandCompare" value="0x104"/>
       <IDSymbol name="icmdSccCommandUndo" value="0x105"/>
-      <IDSymbol name="icmdSccCommandBranchName" value="0x106"/>
-      <IDSymbol name="imnuFileSourceControlMenu" value="0x200"/>
+      <IDSymbol name="imnuFileSourceControlMenu" value="0x205"/>
       <IDSymbol name="igrpSourceControlCommands" value="0x301"/>
     </GuidSymbol>
     <GuidSymbol name="guidSccProviderImages" value="{495089FD-A8CA-4260-8EB1-794E2956B625}" >

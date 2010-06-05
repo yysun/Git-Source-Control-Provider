@@ -11,6 +11,7 @@ namespace GitScc
     {
         private RepositoryStatus repositoryStatus;
         private Uri workingFolderUri;
+        private string workingFolder;
 
         public GitFileStatusTracker()
         {
@@ -21,6 +22,7 @@ namespace GitScc
         {
             Close();
 
+            this.workingFolder = workingFolder;
             if (!string.IsNullOrEmpty(workingFolder) && Repository.IsValid(workingFolder))
             {
                 try
@@ -78,6 +80,11 @@ namespace GitScc
 
         public void Update()
         {
+            if (!string.IsNullOrEmpty(workingFolder))
+            {
+                Open(this.workingFolder);
+            }
+
             if (this.repositoryStatus!=null) 
                 this.repositoryStatus.Update();
         }

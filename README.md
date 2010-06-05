@@ -12,6 +12,12 @@ Features
 * Displays file status in solution explorer
 * Enable/disable plug-in through visual studio's source control plug-in selection
 * No source code control information stored in solution or project file.
+* Compare file with last commit. 
+* Undo file changes (restore file from last commit). 
+* Launch Git Bash. 
+* Launch Git Extensions. 
+* Options page.
+
 
 How to use
 ----------

@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.OLE.Interop;
+using EnvDTE;
 
 namespace GitScc
 {
@@ -65,7 +66,7 @@ namespace GitScc
         // Make visible and enable if necessary scc related menu commands
         public int SetActive()
         {
-            Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Provider set active"));
+            Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Git Source Control Provider set active"));
             _active = true;
             _sccProvider.OnActiveStateChange();
 
@@ -78,7 +79,7 @@ namespace GitScc
         // Hides and disable scc related menu commands
         public int SetInactive()
         {
-            Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Provider set inactive"));
+            Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Git Source Control Provider set inactive"));
 
             _active = false;
             _sccProvider.OnActiveStateChange();
@@ -468,12 +469,14 @@ namespace GitScc
             IVsHierarchy solHier = (IVsHierarchy)_sccProvider.GetService(typeof(SVsSolution));
             solHier.SetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_StateIconIndex, rgsiGlyphs[0]);
 
-            //string branch = _statusTracker.CurrentBranch;
-            //if (!string.IsNullOrEmpty(branch))
-            //{
-            //    caption += " - " + branch;
-            //}
-            //solHier.SetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_Caption, caption);
+            var caption = "Solution Explorer";
+            string branch = _statusTracker.CurrentBranch;
+            if (!string.IsNullOrEmpty(branch))
+            {
+                caption += " (" + branch + ")";
+            }
+
+            SetSolutionExplorerTitle(caption);
 
         }
 
@@ -678,19 +681,28 @@ namespace GitScc
 
         #region IVsFileChangeEvents
 
-        private DateTime lastTimeDirChangeFired;
+        private DateTime lastTimeDirChangeFired = DateTime.Now;
+        private object locker = new object();
 
         public int DirectoryChanged(string pszDirectory)
         {
-            double delta = DateTime.Now.Subtract(lastTimeDirChangeFired).TotalMilliseconds;
-            if (delta > 1000)
+            lock (locker)
             {
-                System.Threading.Thread.Sleep(100);
-                Refresh();
+                double delta = DateTime.Now.Subtract(lastTimeDirChangeFired).TotalMilliseconds;
+                lastTimeDirChangeFired = DateTime.Now;
+                Debug.WriteLine("Dir changed, delta: " + delta.ToString());
+
+                if (delta > 1000)
+                {
+                    System.Threading.Thread.Sleep(200);
+                    Debug.WriteLine("Dir changed, refresh Git: " + DateTime.Now.ToString());
+                    Refresh();
+
+                }
+                return VSConstants.S_OK;
             }
-            lastTimeDirChangeFired = DateTime.Now;
-            return VSConstants.S_OK;
         }
+
 
         public int FilesChanged(uint cChanges, string[] rgpszFile, uint[] rggrfChange)
         {
@@ -763,5 +775,17 @@ namespace GitScc
         }
 
         #endregion
+
+
+        private void SetSolutionExplorerTitle(string message)
+        {
+            var dte = (DTE) _sccProvider.GetService(typeof(DTE));
+            dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Caption = message;
+        }
+
+        public string CurrentBranchName
+        {
+            get { return _statusTracker.CurrentBranch; }
+        }
     }
 }

@@ -30,6 +30,7 @@ namespace GitScc
         private GitFileStatusTracker _statusTracker = null;
 
         #region SccProvider Service initialization/unitialization
+
         public SccProviderService(BasicSccProvider sccProvider)
         {
             _sccProvider = sccProvider;
@@ -786,6 +787,14 @@ namespace GitScc
         public string CurrentBranchName
         {
             get { return _statusTracker.CurrentBranch; }
+        }
+
+        public bool IsSolutionGitControlled
+        {
+            get
+            {
+                return _statusTracker.HasGitRepository;
+            }
         }
     }
 }

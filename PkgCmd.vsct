@@ -5,7 +5,7 @@
   <Extern href="msobtnid.h"/>
   <Commands package="guidSccProviderPkg">
     <Menus>
-      <Menu guid="guidSccProviderCmdSet" id="imnuFileSourceControlMenu" priority="0x0000" type="Menu">
+      <Menu guid="guidSccProviderCmdSet" id="imnuGitSourceControlMenu" priority="0x0000" type="Menu">
         <CommandFlag>TextChanges</CommandFlag>
         <Strings>
           <ButtonText>Git</ButtonText>
@@ -15,11 +15,11 @@
     </Menus>
     <Groups>    
       <Group guid="guidSccProviderCmdSet" id="igrpSourceControlCommands" priority="0x0000">
-        <Parent guid="guidSccProviderCmdSet" id="imnuFileSourceControlMenu"/>
+        <Parent guid="guidSccProviderCmdSet" id="imnuGitSourceControlMenu"/>
       </Group>
     </Groups>
     <Buttons>
-      <Button guid="guidSccProviderCmdSet" id="icmdSccCommandGitBash" priority="0x0104" type="Button">
+      <Button guid="guidSccProviderCmdSet" id="icmdSccCommandGitBash" priority="0x0105" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
@@ -27,8 +27,7 @@
           <ButtonText>Git Bash ...</ButtonText>
         </Strings>
       </Button>
-
-      <Button guid="guidSccProviderCmdSet" id="icmdSccCommandGitExtension" priority="0x0105" type="Button">
+      <Button guid="guidSccProviderCmdSet" id="icmdSccCommandGitExtension" priority="0x0106" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
@@ -36,7 +35,6 @@
           <ButtonText>Git Extensions ...</ButtonText>
         </Strings>
       </Button>
-
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0101" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
         <Icon guid="guidSccProviderImages" id="iconCompare" />
@@ -47,7 +45,6 @@
           <ButtonText>Compare ...</ButtonText>
         </Strings>
       </Button>
-
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandUndo" priority="0x0102" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
         <Icon guid="guidSccProviderImages" id="iconUncheckout" />
@@ -57,9 +54,8 @@
         <Strings>
           <ButtonText>Undo file changes</ButtonText>
         </Strings>
-      </Button>
-      
-      <Button guid="guidSccProviderCmdSet" id="icmdSccCommandRefresh" priority="0x0103" type="Button">
+      </Button> 
+      <Button guid="guidSccProviderCmdSet" id="icmdSccCommandRefresh" priority="0x0104" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
         <Icon guid="guidSccProviderImages" id="iconRefresh" />
         <CommandFlag>DynamicVisibility</CommandFlag>
@@ -69,19 +65,31 @@
           <ButtonText>Refresh</ButtonText>
         </Strings>
       </Button>
+
+      <Button guid="guidSccProviderCmdSet" id="icmdSccCommandPendingChanges" priority="0x0103" type="Button">
+        <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
+        <!--<Icon guid="guidSccProviderImages" id="iconRefresh" /-->
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <!--<CommandFlag>IconAndText</CommandFlag>-->
+        <Strings>
+          <ButtonText>Pending Changes</ButtonText>
+        </Strings>
+      </Button>
+
     </Buttons>
     <Bitmaps>
       <Bitmap guid="guidSccProviderImages" href="Resources\Images_32bit.bmp" usedList="iconGitBash, iconGitExt, iconUncheckout, iconCompare, iconRefresh"/>
     </Bitmaps>
   </Commands>
   <CommandPlacements>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="imnuFileSourceControlMenu" priority="0x0000">
+    <CommandPlacement guid="guidSccProviderCmdSet" id="imnuGitSourceControlMenu" priority="0x0000">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>
     </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="imnuFileSourceControlMenu" priority="0x0000">
+    <CommandPlacement guid="guidSccProviderCmdSet" id="imnuGitSourceControlMenu" priority="0x0000">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_SCC"/>
     </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="imnuFileSourceControlMenu" priority="0x0000">
+    <CommandPlacement guid="guidSccProviderCmdSet" id="imnuGitSourceControlMenu" priority="0x0000">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
     </CommandPlacement> 
   </CommandPlacements>
@@ -93,7 +101,10 @@
       <IDSymbol name="icmdSccCommandGitExtension" value="0x103"/>
       <IDSymbol name="icmdSccCommandCompare" value="0x104"/>
       <IDSymbol name="icmdSccCommandUndo" value="0x105"/>
-      <IDSymbol name="imnuFileSourceControlMenu" value="0x205"/>
+      <IDSymbol name="icmdSccCommandInit" value="0x106"/>
+      <IDSymbol name="icmdSccCommandPendingChanges" value="0x107"/>
+      
+      <IDSymbol name="imnuGitSourceControlMenu" value="0x205"/>
       <IDSymbol name="igrpSourceControlCommands" value="0x301"/>
     </GuidSymbol>
     <GuidSymbol name="guidSccProviderImages" value="{495089FD-A8CA-4260-8EB1-794E2956B625}" >

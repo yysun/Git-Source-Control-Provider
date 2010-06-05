@@ -30,10 +30,9 @@ namespace GitScc
     // Register a sample options page visible as Tools/Options/SourceControl/SampleOptionsPage when the provider is active
     [MsVsShell.ProvideOptionPageAttribute(typeof(SccProviderOptions), "Source Control", "Git Source Control Provider Options", 106, 107, false)]
     [ProvideToolsOptionsPageVisibility("Source Control", "Git Source Control Provider Options", "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
-
     // Register a sample tool window visible only when the provider is active
-    //[MsVsShell.ProvideToolWindow(typeof(SccProviderToolWindow))]
-    //[MsVsShell.ProvideToolWindowVisibility(typeof(SccProviderToolWindow), "ADC98052-0000-41D1-A6C3-704E6C1A3DE2")]
+    [MsVsShell.ProvideToolWindow(typeof(SccProviderToolWindow), Style = VsDockStyle.Linked, Orientation = ToolWindowOrientation.Bottom)]
+    [MsVsShell.ProvideToolWindowVisibility(typeof(SccProviderToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
     // Register the source control provider's service (implementing IVsScciProvider interface)
     [MsVsShell.ProvideService(typeof(SccProviderService), ServiceName = "Git Source Control Service")]
     // Register the source control provider to be visible in Tools/Options/SourceControl/Plugin dropdown selector
@@ -88,6 +87,10 @@ namespace GitScc
                 menu = new MenuCommand(new EventHandler(OnUndoCommand), cmd);
                 mcs.AddCommand(menu);
 
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandPendingChanges);
+                menu = new MenuCommand(new EventHandler(Exec_icmdViewToolWindow), cmd);
+                mcs.AddCommand(menu);
+
             }
 
             // Register the provider with the source control manager
@@ -124,7 +127,7 @@ namespace GitScc
             // Process our Commands
             switch (prgCmds[0].cmdID)
             {
-                case CommandId.imnuFileSourceControlMenu:
+                case CommandId.imnuGitSourceControlMenu:
                     OLECMDTEXT cmdtxtStructure = (OLECMDTEXT)Marshal.PtrToStructure(pCmdText, typeof(OLECMDTEXT));
                     if (cmdtxtStructure.cmdtextf == (uint)OLECMDTEXTF.OLECMDTEXTF_NAME)
                     {
@@ -154,6 +157,10 @@ namespace GitScc
                 case CommandId.icmdSccCommandUndo:
                 case CommandId.icmdSccCommandCompare:
                     if (sccService.CanCompareSelectedFile) cmdf |= OLECMDF.OLECMDF_ENABLED;
+                    break;
+
+                case CommandId.icmdSccCommandPendingChanges:
+                    if (sccService.IsSolutionGitControlled) cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
 
                 default:
@@ -213,6 +220,21 @@ namespace GitScc
         {
             var difftoolPath = GitSccOptions.Current.DifftoolPath;
             RunCommand(difftoolPath, "\"" + file1 + "\" \"" + file2 + "\"");
+        }
+
+        // The function can be used to bring back the provider's toolwindow if it was previously closed
+        private void Exec_icmdViewToolWindow(object sender, EventArgs e)
+        {
+            ToolWindowPane window = this.FindToolWindow(typeof(SccProviderToolWindow), 0, true);
+            IVsWindowFrame windowFrame = null;
+            if (window != null && window.Frame != null)
+            {
+                windowFrame = (IVsWindowFrame)window.Frame;
+            }
+            if (windowFrame != null)
+            {
+                ErrorHandler.ThrowOnFailure(windowFrame.Show());
+            }
         }
 
         #endregion

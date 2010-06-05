@@ -123,5 +123,14 @@ namespace GitScc {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Git Pending Changes.
+        /// </summary>
+        internal static string ToolWindowCaption {
+            get {
+                return ResourceManager.GetString("ToolWindowCaption", resourceCulture);
+            }
+        }
     }
 }

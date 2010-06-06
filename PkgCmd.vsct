@@ -21,16 +21,20 @@
     <Buttons>
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandGitBash" priority="0x0105" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
+        <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
+        <CommandFlag>IconAndText</CommandFlag>
         <Strings>
           <ButtonText>Git Bash ...</ButtonText>
         </Strings>
       </Button>
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandGitExtension" priority="0x0106" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
+        <Icon guid="guidSccProviderImages" id="iconGitExt" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
+        <CommandFlag>IconAndText</CommandFlag>
         <Strings>
           <ButtonText>Git Extensions ...</ButtonText>
         </Strings>
@@ -52,7 +56,7 @@
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>Undo file changes</ButtonText>
+          <ButtonText>Undo File Changes</ButtonText>
         </Strings>
       </Button> 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandRefresh" priority="0x0104" type="Button">
@@ -68,10 +72,10 @@
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandPendingChanges" priority="0x0103" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
-        <!--<Icon guid="guidSccProviderImages" id="iconRefresh" /-->
+        <Icon guid="guidSccProviderImages" id="iconPendingChanges" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
-        <!--<CommandFlag>IconAndText</CommandFlag>-->
+        <CommandFlag>IconAndText</CommandFlag>
         <Strings>
           <ButtonText>Pending Changes</ButtonText>
         </Strings>
@@ -79,7 +83,7 @@
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandInit" priority="0x0000" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
-        <!--<Icon guid="guidSccProviderImages" id="iconRefresh" /-->
+        <!--<Icon guid="guidSccProviderImages" id="iconRefresh" />-->
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <!--<CommandFlag>IconAndText</CommandFlag>-->
@@ -90,7 +94,7 @@
 
     </Buttons>
     <Bitmaps>
-      <Bitmap guid="guidSccProviderImages" href="Resources\Images_32bit.bmp" usedList="iconGitBash, iconGitExt, iconUncheckout, iconCompare, iconRefresh"/>
+      <Bitmap guid="guidSccProviderImages" href="Resources\Images_32bit.bmp" usedList="iconGitBash, iconGitExt, iconUncheckout, iconCompare, iconRefresh, iconPendingChanges"/>
     </Bitmaps>
   </Commands>
   <CommandPlacements>
@@ -124,6 +128,7 @@
       <IDSymbol name="iconUncheckout" value="3"/>
       <IDSymbol name="iconCompare" value="4"/>
       <IDSymbol name="iconRefresh" value="5"/>
+      <IDSymbol name="iconPendingChanges" value="6"/>    
     </GuidSymbol>
   </Symbols>
 </CommandTable>

@@ -55,7 +55,7 @@ namespace GitScc
                 return GitFileStatus.NotControlled;
 
             fileName = workingFolderUri.MakeRelativeUri(new Uri(fileName)).ToString();
-
+            fileName = fileName.Replace("%20", " ");
             if (this.repositoryStatus.Untracked.Has(fileName))
             {
                 return GitFileStatus.UnTrackered;

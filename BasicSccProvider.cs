@@ -31,7 +31,7 @@ namespace GitScc
     [MsVsShell.ProvideOptionPageAttribute(typeof(SccProviderOptions), "Source Control", "Git Source Control Provider Options", 106, 107, false)]
     [ProvideToolsOptionsPageVisibility("Source Control", "Git Source Control Provider Options", "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
     // Register a sample tool window visible only when the provider is active
-    [MsVsShell.ProvideToolWindow(typeof(SccProviderToolWindow), Style = VsDockStyle.Linked, Orientation = ToolWindowOrientation.Bottom)]
+    [MsVsShell.ProvideToolWindow(typeof(SccProviderToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
     [MsVsShell.ProvideToolWindowVisibility(typeof(SccProviderToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
     // Register the source control provider's service (implementing IVsScciProvider interface)
     [MsVsShell.ProvideService(typeof(SccProviderService), ServiceName = "Git Source Control Service")]
@@ -89,6 +89,10 @@ namespace GitScc
 
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandPendingChanges);
                 menu = new MenuCommand(new EventHandler(Exec_icmdViewToolWindow), cmd);
+                mcs.AddCommand(menu);
+
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandInit);
+                menu = new MenuCommand(new EventHandler(OnInitCommand), cmd);
                 mcs.AddCommand(menu);
 
             }
@@ -153,7 +157,7 @@ namespace GitScc
                         cmdf |= OLECMDF.OLECMDF_ENABLED;
                     }
                     break;
-                
+
                 case CommandId.icmdSccCommandUndo:
                 case CommandId.icmdSccCommandCompare:
                     if (sccService.CanCompareSelectedFile) cmdf |= OLECMDF.OLECMDF_ENABLED;
@@ -163,13 +167,20 @@ namespace GitScc
                     if (sccService.IsSolutionGitControlled) cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
 
+                case CommandId.icmdSccCommandInit:
+                    if (!sccService.IsSolutionGitControlled) 
+                        cmdf |= OLECMDF.OLECMDF_ENABLED;
+                    else 
+                        cmdf |= OLECMDF.OLECMDF_INVISIBLE;
+                    break;
+
                 default:
                     cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
             }
 
 
-            prgCmds[0].cmdf = (uint) (cmdf);
+            prgCmds[0].cmdf = (uint)(cmdf);
             return VSConstants.S_OK;
         }
 
@@ -237,6 +248,10 @@ namespace GitScc
             }
         }
 
+        private void OnInitCommand(object sender, EventArgs e)
+        {
+            sccService.InitRepo();
+        }
         #endregion
 
         // This function is called by the IVsSccProvider service implementation when the active state of the provider changes
@@ -294,7 +309,7 @@ namespace GitScc
 
                 process.Start();
             }
-        } 
+        }
         #endregion
 
     }

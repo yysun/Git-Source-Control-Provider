@@ -796,5 +796,14 @@ namespace GitScc
                 return _statusTracker.HasGitRepository;
             }
         }
+
+        internal void InitRepo()
+        {
+            if (MessageBox.Show("Are you sure you want to create a local repository for this solution?",
+                    "Init Repository", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                _statusTracker.Init();
+            }
+        }
     }
 }

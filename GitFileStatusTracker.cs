@@ -117,6 +117,14 @@ namespace GitScc
                 return this.HasGitRepository ? this.repositoryStatus.Repository.CurrentBranch.Name : "";
             }
         }
+
+        internal void Init()
+        {
+            if (!this.HasGitRepository)
+            {
+                Repository.Init(this.workingFolder);
+            }
+        }
     }
 
     public static class HashSetExt

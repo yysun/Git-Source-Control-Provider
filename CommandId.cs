@@ -17,6 +17,7 @@ namespace GitScc
         public const int icmdSccCommandUndo = 0x105;
         public const int icmdSccCommandInit = 0x106;
         public const int icmdSccCommandPendingChanges = 0x107;
+        public const int icmdSccCommandHistory = 0x108;
 
         // Define the list of menus (these include toolbars)
         //public const int imnuToolWindowToolbarMenu = 0x200;

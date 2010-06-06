@@ -109,6 +109,24 @@ namespace GitScc {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Git History.
+        /// </summary>
+        internal static string HistoryToolWindowCaption {
+            get {
+                return ResourceManager.GetString("HistoryToolWindowCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Git Pending Changes.
+        /// </summary>
+        internal static string PendingChangesToolWindowCaption {
+            get {
+                return ResourceManager.GetString("PendingChangesToolWindowCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Git Source Control Provider.
         /// </summary>
         internal static string ProviderName {
@@ -121,15 +139,6 @@ namespace GitScc {
             get {
                 object obj = ResourceManager.GetObject("SccGlyphs", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Git Pending Changes.
-        /// </summary>
-        internal static string ToolWindowCaption {
-            get {
-                return ResourceManager.GetString("ToolWindowCaption", resourceCulture);
             }
         }
     }

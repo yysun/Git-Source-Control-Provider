@@ -31,8 +31,10 @@ namespace GitScc
     [MsVsShell.ProvideOptionPageAttribute(typeof(SccProviderOptions), "Source Control", "Git Source Control Provider Options", 106, 107, false)]
     [ProvideToolsOptionsPageVisibility("Source Control", "Git Source Control Provider Options", "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
     // Register a sample tool window visible only when the provider is active
-    [MsVsShell.ProvideToolWindow(typeof(SccProviderToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
-    [MsVsShell.ProvideToolWindowVisibility(typeof(SccProviderToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
+    [MsVsShell.ProvideToolWindow(typeof(PendingChangesToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
+    [MsVsShell.ProvideToolWindowVisibility(typeof(PendingChangesToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
+    [MsVsShell.ProvideToolWindow(typeof(HistoryToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
+    [MsVsShell.ProvideToolWindowVisibility(typeof(HistoryToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
     // Register the source control provider's service (implementing IVsScciProvider interface)
     [MsVsShell.ProvideService(typeof(SccProviderService), ServiceName = "Git Source Control Service")]
     // Register the source control provider to be visible in Tools/Options/SourceControl/Plugin dropdown selector
@@ -88,13 +90,16 @@ namespace GitScc
                 mcs.AddCommand(menu);
 
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandPendingChanges);
-                menu = new MenuCommand(new EventHandler(Exec_icmdViewToolWindow), cmd);
+                menu = new MenuCommand(new EventHandler(ShowPendingChangesWindow), cmd);
+                mcs.AddCommand(menu);
+
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandHistory);
+                menu = new MenuCommand(new EventHandler(ShowHistoryWindow), cmd);
                 mcs.AddCommand(menu);
 
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandInit);
                 menu = new MenuCommand(new EventHandler(OnInitCommand), cmd);
                 mcs.AddCommand(menu);
-
             }
 
             // Register the provider with the source control manager
@@ -163,6 +168,7 @@ namespace GitScc
                     if (sccService.CanCompareSelectedFile) cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
 
+                case CommandId.icmdSccCommandHistory:
                 case CommandId.icmdSccCommandPendingChanges:
                     if (sccService.IsSolutionGitControlled) cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
@@ -233,10 +239,19 @@ namespace GitScc
             RunCommand(difftoolPath, "\"" + file1 + "\" \"" + file2 + "\"");
         }
 
-        // The function can be used to bring back the provider's toolwindow if it was previously closed
-        private void Exec_icmdViewToolWindow(object sender, EventArgs e)
+        private void ShowPendingChangesWindow(object sender, EventArgs e)
         {
-            ToolWindowPane window = this.FindToolWindow(typeof(SccProviderToolWindow), 0, true);
+            ShowToolWindow(typeof(PendingChangesToolWindow));
+        }
+
+        private void ShowHistoryWindow(object sender, EventArgs e)
+        {
+            ShowToolWindow(typeof(HistoryToolWindow));
+        }
+
+        private void ShowToolWindow(Type type)
+        {
+            ToolWindowPane window = this.FindToolWindow(type, 0, true);
             IVsWindowFrame windowFrame = null;
             if (window != null && window.Frame != null)
             {

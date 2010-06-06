@@ -14,18 +14,17 @@ using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
 namespace GitScc
 {
-    /// <summary>
-    /// Summary description for SccProviderToolWindow.
-    /// </summary>
-    [Guid("75EDECF4-68D8-4B7B-92A9-5915461DA6D9")]
-    public class SccProviderToolWindow : ToolWindowPane
+
+    [Guid("9175DE5D-630E-4E7B-A352-CFFD6132553C")]
+    public class HistoryToolWindow : ToolWindowPane
     {
         //private SccProviderToolWindowControl control;
 
-        public SccProviderToolWindow() :base(null)
+        public HistoryToolWindow()
+            : base(null)
         {
             // set the window title
-            this.Caption = Resources.ResourceManager.GetString("ToolWindowCaption");
+            this.Caption = Resources.ResourceManager.GetString("HistoryToolWindowCaption");
 
             //// set the CommandID for the window ToolBar
             //this.ToolBar = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdToolWindowToolbarCommand);
@@ -39,10 +38,7 @@ namespace GitScc
             // This is the user control hosted by the tool window; Note that, even if this class implements IDisposable,
             // we are not calling Dispose on this object. This is because ToolWindowPane calls Dispose on 
             // the object returned by the Content property.
-            base.Content = new PendingChangesView();
-
-            
-
+            base.Content = new HistoryView();
 
         }
     }

@@ -69,8 +69,12 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HistoryToolWindow.cs" />
     <Compile Include="GitFileStatusTracker.cs" />
     <Compile Include="GitSccOptions.cs" />
+    <Compile Include="HistoryView.xaml.cs">
+      <DependentUpon>HistoryView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PendingChangesView.xaml.cs">
       <DependentUpon>PendingChangesView.xaml</DependentUpon>
     </Compile>
@@ -93,9 +97,12 @@
     </Compile>
     <Compile Include="SccProviderService.cs" />
     <Compile Include="GitFileStatus.cs" />
-    <Compile Include="SccProviderToolWindow.cs" />
+    <Compile Include="PendingChangesToolWindow.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="HistoryToolWindow.resx">
+      <DependentUpon>HistoryToolWindow.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources.resx">
       <SubType>Designer</SubType>
       <Generator>ResXFileCodeGenerator</Generator>
@@ -105,8 +112,8 @@
     <EmbeddedResource Include="SccProviderOptionsControl.resx">
       <DependentUpon>SccProviderOptionsControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SccProviderToolWindow.resx">
-      <DependentUpon>SccProviderToolWindow.cs</DependentUpon>
+    <EmbeddedResource Include="PendingChangesToolWindow.resx">
+      <DependentUpon>PendingChangesToolWindow.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -142,6 +149,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="HistoryView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="PendingChangesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -5,6 +5,25 @@
   <Extern href="msobtnid.h"/>
   <Commands package="guidSccProviderPkg">
     <Menus>
+      
+      <Menu guid="guidSccProviderCmdSet" id="imnuHistoryToolWindowToolbarMenu" priority="0x0000" type="ToolWindowToolbar">
+        <Parent guid="guidSccProviderCmdSet" id="imnuHistoryToolWindowToolbarMenu"/>
+        <CommandFlag>TextChanges</CommandFlag>
+        <Strings>
+          <ButtonText>Git Commands</ButtonText>
+          <CommandName>GitCommands</CommandName>
+        </Strings>
+      </Menu>
+
+      <Menu guid="guidSccProviderCmdSet" id="imnuPendingChangesToolWindowToolbarMenu" priority="0x0000" type="ToolWindowToolbar">
+        <Parent guid="guidSccProviderCmdSet" id="imnuPendingChangesToolWindowToolbarMenu"/>
+        <CommandFlag>TextChanges</CommandFlag>
+        <Strings>
+          <ButtonText>Git Commands</ButtonText>
+          <CommandName>GitCommands</CommandName>
+        </Strings>
+      </Menu>
+      
       <Menu guid="guidSccProviderCmdSet" id="imnuGitSourceControlMenu" priority="0x0000" type="Menu">
         <CommandFlag>TextChanges</CommandFlag>
         <Strings>
@@ -12,11 +31,21 @@
           <CommandName>Git</CommandName>
         </Strings>
       </Menu>
+      
     </Menus>
     <Groups>    
       <Group guid="guidSccProviderCmdSet" id="igrpSourceControlCommands" priority="0x0000">
         <Parent guid="guidSccProviderCmdSet" id="imnuGitSourceControlMenu"/>
       </Group>
+
+      <Group guid="guidSccProviderCmdSet" id="igrpHistoryToolWindowToolbarGroup" priority="0x0100">
+        <Parent guid="guidSccProviderCmdSet" id="imnuHistoryToolWindowToolbarMenu"/>
+      </Group>
+
+      <Group guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup" priority="0x0100">
+        <Parent guid="guidSccProviderCmdSet" id="imnuPendingChangesToolWindowToolbarMenu"/>
+      </Group>
+
     </Groups>
     <Buttons>
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandGitBash" priority="0x0106" type="Button">
@@ -103,12 +132,35 @@
         </Strings>
       </Button>
 
+      <Button guid="guidSccProviderCmdSet" id="icmdPendingChangesCommit" priority="0x0000" type="Button">
+        <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
+        <!--<Icon guid="guidSccProviderImages" id="iconRefresh" />-->
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <!--<CommandFlag>IconAndText</CommandFlag>-->
+        <Strings>
+          <ButtonText>Commit</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidSccProviderCmdSet" id="icmdPendingChangesAmend" priority="0x0001" type="Button">
+        <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
+        <!--<Icon guid="guidSccProviderImages" id="iconRefresh" />-->
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <!--<CommandFlag>IconAndText</CommandFlag>-->
+        <Strings>
+          <ButtonText>Amend Last Commit</ButtonText>
+        </Strings>
+      </Button>
+
     </Buttons>
     <Bitmaps>
       <Bitmap guid="guidSccProviderImages" href="Resources\Images_32bit.bmp" 
               usedList="iconGitBash, iconGitExt, iconUncheckout, iconCompare, iconRefresh, iconPendingChanges, iconHistory"/>
     </Bitmaps>
   </Commands>
+  
   <CommandPlacements>
     <CommandPlacement guid="guidSccProviderCmdSet" id="imnuGitSourceControlMenu" priority="0x0000">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>
@@ -118,8 +170,30 @@
     </CommandPlacement>
     <CommandPlacement guid="guidSccProviderCmdSet" id="imnuGitSourceControlMenu" priority="0x0000">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
-    </CommandPlacement> 
+    </CommandPlacement>
+
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandRefresh" priority="0x0007">
+      <Parent guid="guidSccProviderCmdSet" id="igrpHistoryToolWindowToolbarGroup"/>
+    </CommandPlacement>
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandGitBash" priority="0x0008">
+      <Parent guid="guidSccProviderCmdSet" id="igrpHistoryToolWindowToolbarGroup"/>
+    </CommandPlacement>
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandGitExtension" priority="0x0009">
+      <Parent guid="guidSccProviderCmdSet" id="igrpHistoryToolWindowToolbarGroup"/>
+    </CommandPlacement>
+
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandRefresh" priority="0x0007">
+      <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
+    </CommandPlacement>
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandGitBash" priority="0x0008">
+      <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
+    </CommandPlacement>
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandGitExtension" priority="0x0009">
+      <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
+    </CommandPlacement>
+    
   </CommandPlacements>
+  
   <Symbols>
     <GuidSymbol name="guidSccProviderPkg" value="{C4128D99-2000-41D1-A6C3-704E6C1A3DE2}" />
     <GuidSymbol name="guidSccProviderCmdSet" value="{C4A089DA-E640-438d-A977-815C267CA76D}" >
@@ -133,6 +207,16 @@
       <IDSymbol name="icmdSccCommandHistory" value="0x108"/>
       <IDSymbol name="imnuGitSourceControlMenu" value="0x205"/>
       <IDSymbol name="igrpSourceControlCommands" value="0x301"/>
+
+      <IDSymbol name="imnuHistoryToolWindowToolbarMenu" value="0x200"/>
+      <IDSymbol name="igrpHistoryToolWindowToolbarGroup" value="0x201"/>
+
+      <IDSymbol name="imnuPendingChangesToolWindowToolbarMenu" value="0x202"/>
+      <IDSymbol name="igrpPendingChangesToolWindowToolbarGroup" value="0x203"/>
+
+      <IDSymbol name="icmdPendingChangesCommit" value="0x111"/>
+      <IDSymbol name="icmdPendingChangesAmend" value="0x112"/>
+
     </GuidSymbol>
     <GuidSymbol name="guidSccProviderImages" value="{495089FD-A8CA-4260-8EB1-794E2956B625}" >
       <IDSymbol name="iconGitBash" value="1"/>

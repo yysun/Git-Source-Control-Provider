@@ -29,7 +29,7 @@ namespace GitScc
             this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption");
 
             //// set the CommandID for the window ToolBar
-            //this.ToolBar = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdToolWindowToolbarCommand);
+            this.ToolBar = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.imnuPendingChangesToolWindowToolbarMenu);
                                                                                     
             // set the icon for the frame
             this.BitmapResourceID = CommandId.ibmpToolWindowsImages;  // bitmap strip resource ID
@@ -42,6 +42,26 @@ namespace GitScc
             // the object returned by the Content property.
             base.Content = new PendingChangesView();
 
+            OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
+            
+            var cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesCommit);
+            var menu = new MenuCommand(new EventHandler(OnCommitCommand), cmd);
+            mcs.AddCommand(menu);
+
+            cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesAmend);
+            menu = new MenuCommand(new EventHandler(OnAmendCommitCommand), cmd);
+            mcs.AddCommand(menu);
+        }
+
+
+        private void OnCommitCommand(object sender, EventArgs e)
+        {
+            MessageBox.Show("Commit");
+        }
+
+        private void OnAmendCommitCommand(object sender, EventArgs e)
+        {
+            MessageBox.Show("Amend Commit");
         }
     }
 }

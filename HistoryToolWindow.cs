@@ -26,8 +26,8 @@ namespace GitScc
             // set the window title
             this.Caption = Resources.ResourceManager.GetString("HistoryToolWindowCaption");
 
-            //// set the CommandID for the window ToolBar
-            //this.ToolBar = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdToolWindowToolbarCommand);
+            // set the CommandID for the window ToolBar
+            this.ToolBar = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.imnuHistoryToolWindowToolbarMenu);
                                                                                     
             // set the icon for the frame
             this.BitmapResourceID = CommandId.ibmpToolWindowsImages;  // bitmap strip resource ID

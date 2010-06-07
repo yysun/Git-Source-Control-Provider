@@ -19,8 +19,14 @@ namespace GitScc
         public const int icmdSccCommandPendingChanges = 0x107;
         public const int icmdSccCommandHistory = 0x108;
 
+
+        public const int icmdPendingChangesCommit = 0x111;
+        public const int icmdPendingChangesAmend = 0x112;
+
         // Define the list of menus (these include toolbars)
-        //public const int imnuToolWindowToolbarMenu = 0x200;
+        public const int imnuHistoryToolWindowToolbarMenu = 0x200;
+        public const int imnuPendingChangesToolWindowToolbarMenu = 0x202;
+
         public const int imnuGitSourceControlMenu = 0x205;
 
         // Define the list of icons (use decimal numbers here, to match the resource IDs)

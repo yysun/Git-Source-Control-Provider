@@ -53,11 +53,9 @@ namespace GitScc
             mcs.AddCommand(menu);
         }
 
-        
-
         private void OnCommitCommand(object sender, EventArgs e)
         {
-            MessageBox.Show("Commit");
+            control.Commit();
         }
 
         private void OnAmendCommitCommand(object sender, EventArgs e)
@@ -68,6 +66,9 @@ namespace GitScc
         internal void Refresh(GitFileStatusTracker tracker)
         {
             control.Refresh(tracker);
+
+            this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption") +
+                (tracker.HasGitRepository ? " (" + tracker.CurrentBranch + ")" : "");
         }
     }
 }

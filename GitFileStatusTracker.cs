@@ -182,6 +182,29 @@ namespace GitScc
             if (!this.HasGitRepository) return;
             this.repositoryStatus.Repository.Commit(message);
         }
+
+        internal string DiffFile(string fileName)
+        {
+            if (!HasGitRepository || string.IsNullOrEmpty(fileName))
+                return null;
+
+            fileName = Path.Combine(this.workingFolder, fileName);
+
+            return fileName;
+
+            //if (Diff.IsBinary(fileName) == true)
+            //{
+            //    return "Binary files a/ and b/ differ";
+            //}
+
+            //if(this.repositoryStatus.Added.Has(fileName))
+
+            //var a = Encoding.Unicode.GetString(GetFileContent(fileName)); 
+            //var b = File.ReadAllText(fileName);
+            
+            //var diff = new Diff(a, b);
+            //return diff.ToString();
+        }
     }
 
     public static class HashSetExt

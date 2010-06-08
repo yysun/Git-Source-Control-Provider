@@ -72,5 +72,27 @@ namespace GitScc
 
         }
 
+        private void dataGrid1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selectedItem = this.dataGrid1.SelectedCells[0].Item as GitFile;
+            if (selectedItem == null) return;
+            var fileName = selectedItem.FileName;
+
+            this.textBoxDiff.Text = tracker.DiffFile(fileName);
+        }
+
+        internal void Commit()
+        {
+            if (string.IsNullOrWhiteSpace(this.textBoxComments.Text))
+            {
+                MessageBox.Show("Please enter comments for the commit.", "Commit", 
+                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
+            tracker.Commit(this.textBoxComments.Text);
+
+            this.textBoxComments.Text = "";
+        }
     }
 }

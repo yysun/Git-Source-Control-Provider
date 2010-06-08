@@ -51,7 +51,7 @@
             
             <DataGrid AutoGenerateColumns="False" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="dataGrid1" VerticalAlignment="Stretch"
                       GridLinesVisibility="None"  Foreground="#FF333333" Sorting="dataGrid1_Sorting"
-                      SelectionMode="Single">
+                      SelectionMode="Single" SelectionChanged="dataGrid1_SelectionChanged">
                 
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="Staged">

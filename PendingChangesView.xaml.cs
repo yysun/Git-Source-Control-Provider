@@ -19,9 +19,22 @@ namespace GitScc
     /// </summary>
     public partial class PendingChangesView : UserControl
     {
+        private GitFileStatusTracker tracker;
+
         public PendingChangesView()
         {
             InitializeComponent();
+        }
+
+        internal void Refresh(GitFileStatusTracker tracker)
+        {
+            this.tracker = tracker;
+            this.dataGrid1.ItemsSource = tracker.ChangedFiles;
+        }
+
+        private void checkBoxStaged_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

@@ -20,7 +20,7 @@ namespace GitScc
     [Guid("75EDECF4-68D8-4B7B-92A9-5915461DA6D9")]
     public class PendingChangesToolWindow : ToolWindowPane
     {
-        //private SccProviderToolWindowControl control;
+        private PendingChangesView control;
 
         public PendingChangesToolWindow()
             : base(null)
@@ -35,12 +35,12 @@ namespace GitScc
             this.BitmapResourceID = CommandId.ibmpToolWindowsImages;  // bitmap strip resource ID
             this.BitmapIndex = CommandId.iconSccProviderToolWindow;   // index in the bitmap strip
 
-            //control = new UserControl();
+            control = new PendingChangesView();
 
             // This is the user control hosted by the tool window; Note that, even if this class implements IDisposable,
             // we are not calling Dispose on this object. This is because ToolWindowPane calls Dispose on 
             // the object returned by the Content property.
-            base.Content = new PendingChangesView();
+            base.Content = control;
 
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             
@@ -53,6 +53,7 @@ namespace GitScc
             mcs.AddCommand(menu);
         }
 
+        
 
         private void OnCommitCommand(object sender, EventArgs e)
         {
@@ -62,6 +63,11 @@ namespace GitScc
         private void OnAmendCommitCommand(object sender, EventArgs e)
         {
             MessageBox.Show("Amend Commit");
+        }
+
+        internal void Refresh(GitFileStatusTracker tracker)
+        {
+            control.Refresh(tracker);
         }
     }
 }

@@ -327,5 +327,20 @@ namespace GitScc
         }
         #endregion
 
+
+        internal void OnSccStatusChanged(GitFileStatusTracker tracker)
+        {
+            var pendingChangesToolWindow = GetToolWindowPane<PendingChangesToolWindow>();
+            if (pendingChangesToolWindow != null)
+            {
+                pendingChangesToolWindow.Refresh(tracker);
+            }
+        }
+
+        private T GetToolWindowPane<T>()  where T: ToolWindowPane
+        {
+            return (T) this.FindToolWindow(typeof(T), 0, true);
+        }
+
     }
 }

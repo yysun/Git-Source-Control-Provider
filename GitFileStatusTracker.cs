@@ -118,7 +118,36 @@ namespace GitScc
             }
         }
 
-        internal void Init()
+        public IEnumerable<GitFile> ChangedFiles
+        {
+            get
+            {
+                if (!HasGitRepository) yield break; 
+
+                foreach (var fa in this.repositoryStatus.Added)
+                {
+                    yield return new GitFile { Status = GitFileStatus.Added, FileName = fa, Staged = true };
+                }
+                foreach (var fm in this.repositoryStatus.Modified)
+                {
+                    yield return new GitFile { Status = GitFileStatus.Modified, FileName = fm };
+                }
+                foreach (var fd in this.repositoryStatus.Removed)
+                {
+                    yield return new GitFile { Status = GitFileStatus.Deleted, FileName = fd };
+                }
+                foreach (var fs in this.repositoryStatus.Staged)
+                {
+                    yield return new GitFile { Status = GitFileStatus.Staged, FileName = fs, Staged = true };
+                }
+                foreach (var fu in this.repositoryStatus.Untracked)
+                {
+                    yield return new GitFile { Status = GitFileStatus.UnTrackered, FileName = fu };
+                }
+            }
+        }
+
+        public void Init()
         {
             if (!this.HasGitRepository)
             {

@@ -366,6 +366,8 @@ namespace GitScc
                 IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
                 fileChangeService.AdviseDirChange(pathGetsolution, 1, this, out _vsIVsFileChangeEventsCookie);
             }
+
+            //_sccProvider.OnSccStatusChanged(_statusTracker);
         }
 
 
@@ -377,6 +379,8 @@ namespace GitScc
                 IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
                 fileChangeService.UnadviseDirChange(_vsIVsFileChangeEventsCookie);
             }
+
+            _sccProvider.OnSccStatusChanged(_statusTracker);
         } 
 
         #endregion
@@ -683,27 +687,25 @@ namespace GitScc
         #region IVsFileChangeEvents
 
         private DateTime lastTimeDirChangeFired = DateTime.Now;
-        private object locker = new object();
+        //private object locker = new object();
+        //locker is not needed, because the DirectoryChanged event is already on current UI thread
 
         public int DirectoryChanged(string pszDirectory)
         {
-            lock (locker)
+            double delta = DateTime.Now.Subtract(lastTimeDirChangeFired).TotalMilliseconds;
+            lastTimeDirChangeFired = DateTime.Now;
+            Debug.WriteLine("Dir changed, delta: " + delta.ToString());
+
+            if (delta > 1000)
             {
-                double delta = DateTime.Now.Subtract(lastTimeDirChangeFired).TotalMilliseconds;
-                lastTimeDirChangeFired = DateTime.Now;
-                Debug.WriteLine("Dir changed, delta: " + delta.ToString());
+                System.Threading.Thread.Sleep(200);
+                Debug.WriteLine("Dir changed, refresh Git: " + DateTime.Now.ToString());
+                Refresh();
 
-                if (delta > 1000)
-                {
-                    System.Threading.Thread.Sleep(200);
-                    Debug.WriteLine("Dir changed, refresh Git: " + DateTime.Now.ToString());
-                    Refresh();
-
-                }
-                return VSConstants.S_OK;
+                _sccProvider.OnSccStatusChanged(this._statusTracker);
             }
+            return VSConstants.S_OK;
         }
-
 
         public int FilesChanged(uint cChanges, string[] rgpszFile, uint[] rggrfChange)
         {

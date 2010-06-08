@@ -11,6 +11,14 @@ namespace GitScc
         Trackered,
         Modified,
         Staged,
-        //Deleted,
+        Deleted,
+        Added,
+    }
+
+    public class GitFile
+    {
+        public GitFileStatus Status { get; set; }
+        public string FileName { get; set; }
+        public bool Staged { get; set; }
     }
 }

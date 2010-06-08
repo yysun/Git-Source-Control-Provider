@@ -86,13 +86,14 @@ namespace GitScc
 
         public void Update()
         {
-            if (!string.IsNullOrEmpty(workingFolder))
+            if (!HasGitRepository)
             {
-                Open(this.workingFolder);
+                if(!string.IsNullOrEmpty(workingFolder)) Open(this.workingFolder);
             }
-
-            if (this.repositoryStatus!=null) 
+            else
+            {
                 this.repositoryStatus.Update();
+            }
         }
 
         public byte[] GetFileContent(string fileName)

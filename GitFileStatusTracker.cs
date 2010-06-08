@@ -48,7 +48,12 @@ namespace GitScc
             this.repositoryStatus = null;
             this.workingFolderUri = null;
         }
-
+        
+        /// <summary>
+        /// This function is for solution explorer. It does not take care of removed and missing files.
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
         public GitFileStatus GetFileStatus(string fileName)
         {
             if (!HasGitRepository || string.IsNullOrEmpty(fileName) || !File.Exists(fileName))
@@ -56,6 +61,7 @@ namespace GitScc
 
             fileName = workingFolderUri.MakeRelativeUri(new Uri(fileName)).ToString();
             fileName = fileName.Replace("%20", " ");
+
             if (this.repositoryStatus.Untracked.Has(fileName))
             {
                 return GitFileStatus.UnTrackered;
@@ -126,19 +132,23 @@ namespace GitScc
 
                 foreach (var fa in this.repositoryStatus.Added)
                 {
-                    yield return new GitFile { Status = GitFileStatus.Added, FileName = fa, Staged = true };
+                    yield return new GitFile { Status = GitFileStatus.Added, FileName = fa, IsStaged = true };
                 }
-                foreach (var fm in this.repositoryStatus.Modified)
+                foreach (var fe in this.repositoryStatus.Modified)
                 {
-                    yield return new GitFile { Status = GitFileStatus.Modified, FileName = fm };
+                    yield return new GitFile { Status = GitFileStatus.Modified, FileName = fe };
+                }
+                foreach (var fm in this.repositoryStatus.Missing)
+                {
+                    yield return new GitFile { Status = GitFileStatus.Deleted, FileName = fm };
                 }
                 foreach (var fd in this.repositoryStatus.Removed)
                 {
-                    yield return new GitFile { Status = GitFileStatus.Deleted, FileName = fd };
+                    yield return new GitFile { Status = GitFileStatus.Deleted, FileName = fd, IsStaged = true };
                 }
                 foreach (var fs in this.repositoryStatus.Staged)
                 {
-                    yield return new GitFile { Status = GitFileStatus.Staged, FileName = fs, Staged = true };
+                    yield return new GitFile { Status = GitFileStatus.Staged, FileName = fs, IsStaged = true };
                 }
                 foreach (var fu in this.repositoryStatus.Untracked)
                 {
@@ -147,12 +157,30 @@ namespace GitScc
             }
         }
 
-        public void Init()
+        internal void Init()
         {
             if (!this.HasGitRepository)
             {
                 Repository.Init(this.workingFolder);
             }
+        }
+
+        internal void StageFile(string fileName)
+        {
+            if (!this.HasGitRepository) return;
+            this.repositoryStatus.Repository.Index.Stage(fileName);
+        }
+
+        internal void UnStageFile(string fileName)
+        {
+            if (!this.HasGitRepository) return;
+            this.repositoryStatus.Repository.Index.Unstage(fileName);
+        }
+
+        internal void Commit(string message)
+        {
+            if (!this.HasGitRepository) return;
+            this.repositoryStatus.Repository.Commit(message);
         }
     }
 

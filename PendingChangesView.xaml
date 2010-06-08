@@ -43,27 +43,33 @@
             <GridSplitter Grid.Row="1" Grid.ColumnSpan="2"
                       VerticalAlignment="Top" HorizontalAlignment="Stretch" Name="gridSplitter2" Height="4" />
 
-            <Label Content="Changed Files:" Height="28" HorizontalAlignment="Left" Name="label3" VerticalAlignment="Center" 
+            <Label Content="Changed Files (select to add file to stage/index):" Height="28" HorizontalAlignment="Left" Name="label3" VerticalAlignment="Center" 
                Margin="12,0,0,0" Foreground="#FF333333" Grid.Row="2"/>
 
             <TextBox HorizontalAlignment="Stretch" Name="textBoxComments" VerticalAlignment="Stretch" Margin="10,0,10,10" 
                      TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible"/>
             
             <DataGrid AutoGenerateColumns="False" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="dataGrid1" VerticalAlignment="Stretch"
-                      GridLinesVisibility="None"  Foreground="#FF333333"
+                      GridLinesVisibility="None"  Foreground="#FF333333" Sorting="dataGrid1_Sorting"
                       SelectionMode="Single">
                 
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="Staged">
+                        <DataGridTemplateColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <CheckBox Name="checkBoxAllStaged" Click="checkBoxAllStaged_Click"  
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.HeaderTemplate>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <CheckBox Name="checkBoxStaged" Click="checkBoxStaged_Click" IsChecked="{Binding Status}"
+                                <CheckBox Name="checkBoxStaged" Click="checkBoxStaged_Click" IsChecked="{Binding IsStaged}"
                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTextColumn Header="Status" Binding="{Binding Status}"  />
-                    <DataGridTextColumn Header="File" Binding="{Binding FileName}"  />                    
+                    <DataGridTextColumn Header="File" Binding="{Binding FileName}" />                    
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

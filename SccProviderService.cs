@@ -227,12 +227,15 @@ namespace GitScc
         public int GetGlyphTipText([InAttribute] IVsHierarchy phierHierarchy, [InAttribute] uint itemidNode, out string pbstrTooltipText)
         {
             pbstrTooltipText = "";
+/*
             IList<string> files = GetNodeFiles(phierHierarchy as IVsSccProject2, itemidNode);
             if (files.Count == 0)
             {
                 return VSConstants.S_OK;
             }
             GitFileStatus status = _statusTracker.GetFileStatus(files[0]);
+*/
+            GitFileStatus status = _statusTracker.GetFileStatus(GetFileName(phierHierarchy, itemidNode));
             pbstrTooltipText = status.ToString(); //TODO: use resources
 
             return VSConstants.S_OK;
@@ -516,6 +519,32 @@ namespace GitScc
                 return null;
             }
         }
+
+        private string GetFileName(IVsHierarchy hierHierarchy, uint itemidNode)
+        {
+            // -- fix bug http://gitscc.codeplex.com/workitem/13497
+            IVsSolution sol = (IVsSolution)_sccProvider.GetService(typeof(SVsSolution));
+            string solutionDirectory, solutionFile, solutionUserOptions, pvalue;
+            if (sol.GetSolutionInfo(out solutionDirectory, out solutionFile, out solutionUserOptions) != VSConstants.S_OK) return null;
+
+            if (itemidNode == VSConstants.VSITEMID_ROOT)
+            {
+                if (hierHierarchy == null)
+                    return Path.Combine(solutionDirectory, solutionFile);
+                else
+                {
+                    var files = GetNodeFiles(hierHierarchy as IVsSccProject2, itemidNode);
+                    return files.Count <= 0 ? null : files[0];
+                }
+            }
+            else
+            {
+                return hierHierarchy.GetCanonicalName(itemidNode, out pvalue) == VSConstants.S_OK ?
+                    Path.Combine(solutionDirectory, pvalue) : null;
+            }
+            // --
+        }
+
         /// <summary>
         /// Returns a list of source controllable files associated with the specified node
         /// </summary>
@@ -537,8 +566,9 @@ namespace GitScc
                     for (int elemIndex = 0; elemIndex < pathStr[0].cElems; elemIndex++)
                     {
                         IntPtr pathIntPtr = Marshal.ReadIntPtr(pathStr[0].pElems, elemIndex);
-                        String path = Marshal.PtrToStringAuto(pathIntPtr);
 
+
+                        String path = Marshal.PtrToStringAuto(pathIntPtr);
                         sccFiles.Add(path);
 
                         // See if there are special files
@@ -570,6 +600,7 @@ namespace GitScc
                         }
 
                         Marshal.FreeCoTaskMem(pathIntPtr);
+
                     }
                     if (pathStr[0].cElems > 0)
                     {
@@ -584,6 +615,7 @@ namespace GitScc
 
             return sccFiles;
         }
+
 
         /// <summary>
         /// Gets the list of directly selected VSITEMSELECTION objects
@@ -727,11 +759,14 @@ namespace GitScc
         {
             var selectedNodes = GetSelectedNodes();
             if (selectedNodes.Count <= 0) return null;
-
+/*
             var files = GetNodeFiles(selectedNodes[0].pHier as IVsSccProject2, selectedNodes[0].itemid);
             if (files.Count <= 0) return null;
 
             return files[0];
+*/
+
+            return GetFileName(selectedNodes[0].pHier, selectedNodes[0].itemid);
         }
 
         internal void CompareSelectedFile()

@@ -80,13 +80,7 @@ namespace GitScc
 
         public void Update()
         {
-            if (!string.IsNullOrEmpty(workingFolder))
-            {
-                Open(this.workingFolder);
-            }
-
-            if (this.repositoryStatus!=null) 
-                this.repositoryStatus.Update();
+            if (!string.IsNullOrEmpty(workingFolder)) Open(this.workingFolder);
         }
 
         public byte[] GetFileContent(string fileName)

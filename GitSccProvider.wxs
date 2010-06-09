@@ -13,11 +13,11 @@ Studio 2008 SDK\VisualStudioIntegration\Tools\wix\light" GitSccProvider.wixobj
 -->
 
 <Wix xmlns='http://schemas.microsoft.com/wix/2003/01/wi'>
-  <Product Name='Git Source Control Provider' Id='79878908-D2FE-4931-BAF8-F54E93F7BF9F' 
-    Language='1033' Codepage='1252' Version='0.5.2' Manufacturer='Yiyi Sun'
+  <Product Name='Git Source Control Provider' Id='19E8FCCC-3471-40da-9028-A24D5D936AD4' 
+    Language='1033' Codepage='1252' Version='0.5.3' Manufacturer='Yiyi Sun'
     UpgradeCode='675B7214-244E-4a51-96C4-26DBB2C779A5'>
     
-    <Package Id='F6018B32-D57A-4b3f-8352-D6C0A4D2AC8F' Keywords='Installer'
+    <Package Id='5B23B731-089A-431d-B629-C74DD5AA0B6B' Keywords='Installer'
       Description="Git Source Control Provider Installer"
       Comments='Git Source Control Provider Installer' Manufacturer='Yiyi Sun'
       InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />

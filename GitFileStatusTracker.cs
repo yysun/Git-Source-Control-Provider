@@ -80,13 +80,7 @@ namespace GitScc
 
         public void Update()
         {
-            if (!string.IsNullOrEmpty(workingFolder))
-            {
-                Open(this.workingFolder);
-            }
-
-            if (this.repositoryStatus!=null) 
-                this.repositoryStatus.Update();
+            if (!string.IsNullOrEmpty(workingFolder)) Open(this.workingFolder);
         }
 
         public byte[] GetFileContent(string fileName)
@@ -104,7 +98,11 @@ namespace GitScc
                 this.repositoryStatus.Repository.Head.CurrentCommit != null &&
                 this.repositoryStatus.Repository.Head.CurrentCommit.Tree != null)
             {
-                leaf = this.repositoryStatus.Repository.Head.CurrentCommit.Tree[fileName] as Leaf;
+
+                leaf = this.repositoryStatus.Repository.Head.CurrentCommit.Tree.Leaves.Where(
+                       l => string.Compare(l.Name, fileName, true) == 0).FirstOrDefault();
+
+                //leaf = this.repositoryStatus.Repository.Head.CurrentCommit.Tree[fileName] as Leaf;
             }
 
             return leaf == null ? null : leaf.RawData;

@@ -360,11 +360,18 @@ namespace GitScc
             if (!string.IsNullOrEmpty(solutionFileName))
             {
 
-                string pathGetsolution = Path.GetDirectoryName(solutionFileName);
-                _statusTracker.Open(pathGetsolution);
+                string solutionDirectory = Path.GetDirectoryName(solutionFileName);
+                _statusTracker.Open(solutionDirectory);
 
                 IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
-                fileChangeService.AdviseDirChange(pathGetsolution, 1, this, out _vsIVsFileChangeEventsCookie);
+                fileChangeService.AdviseDirChange(solutionDirectory, 1, this, out _vsIVsFileChangeEventsCookie);
+
+                // VS writes to .suo file when file closed, which triggers the tracker updates
+                // try to suppress events of .suo changed
+                string solutionUserFile = Path.Combine(solutionDirectory,
+                    Path.GetFileNameWithoutExtension(solutionFileName) + ".suo");
+
+                fileChangeService.IgnoreFile(0, solutionUserFile, 1);
             }
 
             //_sccProvider.OnSccStatusChanged();

@@ -45,6 +45,7 @@ namespace GitScc
     [Guid("C4128D99-2000-41D1-A6C3-704E6C1A3DE2")]
     public class BasicSccProvider : MsVsShell.Package, IOleCommandTarget
     {
+        private GitFileStatusTracker statusTracker;
         private SccProviderService sccService = null;
 
         public BasicSccProvider()
@@ -61,8 +62,9 @@ namespace GitScc
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Entering Initialize() of: {0}", this.ToString()));
             base.Initialize();
 
-            // Proffer the source control service implemented by the provider
-            sccService = new SccProviderService(this);
+            statusTracker = new GitFileStatusTracker();
+            sccService = new SccProviderService(this, statusTracker);
+
             ((IServiceContainer)this).AddService(typeof(SccProviderService), sccService, true);
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
@@ -264,7 +266,7 @@ namespace GitScc
 
                 if (window is PendingChangesToolWindow)
                 {
-                    ((PendingChangesToolWindow)window).Refresh(sccService._statusTracker);
+                    ((PendingChangesToolWindow)window).Refresh(statusTracker);
                 }
             }
         }
@@ -338,7 +340,7 @@ namespace GitScc
             var pendingChangesToolWindow = GetToolWindowPane<PendingChangesToolWindow>();
             if (pendingChangesToolWindow != null)
             {
-                pendingChangesToolWindow.Refresh(sccService._statusTracker);
+                pendingChangesToolWindow.Refresh(statusTracker);
             }
         }
 

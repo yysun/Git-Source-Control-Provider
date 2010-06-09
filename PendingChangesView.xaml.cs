@@ -51,6 +51,7 @@ namespace GitScc
 
         private void checkBoxStaged_Click(object sender, RoutedEventArgs e)
         {
+            if (this.dataGrid1.SelectedCells.Count == 0) return;
             var selectedItem = this.dataGrid1.SelectedCells[0].Item as GitFile;
             if (selectedItem == null) return;
 
@@ -74,6 +75,7 @@ namespace GitScc
 
         private void dataGrid1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (this.dataGrid1.SelectedCells.Count == 0) return;
             var selectedItem = this.dataGrid1.SelectedCells[0].Item as GitFile;
             if (selectedItem == null) return;
             var fileName = selectedItem.FileName;

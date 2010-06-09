@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using GitSharp;
+using System.Diagnostics;
 
 namespace GitScc
 {
@@ -206,22 +207,55 @@ namespace GitScc
             if (!HasGitRepository || string.IsNullOrEmpty(fileName))
                 return null;
 
-            fileName = Path.Combine(this.workingFolder, fileName);
+            //GitSharp has not implemented diff yet
 
-            return fileName;
+            if (this.repositoryStatus.Removed.Has(fileName) ||
+                this.repositoryStatus.Added.Has(fileName) ||
+                this.repositoryStatus.Staged.Has(fileName))
+            {
+                return RunCommand(string.Format("diff --cached --unified=3 -- \"{0}\"", fileName));
+            }
+            else if (this.repositoryStatus.Missing.Has(fileName) ||
+                 this.repositoryStatus.Modified.Has(fileName))
+            {
+                return RunCommand(string.Format("diff --unified=3 -- \"{0}\"", fileName));
+            }
+            else
+            {
+                byte[] bytes = File.ReadAllBytes(Path.Combine(this.workingFolder, fileName));
 
-            //if (Diff.IsBinary(fileName) == true)
-            //{
-            //    return "Binary files a/ and b/ differ";
-            //}
+                return Diff.IsBinary(bytes) == true ? "[Binary Content]" :
+                    Encoding.UTF8.GetString(bytes); //TODO: assuming UTF8?
+            }
+        }
 
-            //if(this.repositoryStatus.Added.Has(fileName))
 
-            //var a = Encoding.Unicode.GetString(GetFileContent(fileName)); 
-            //var b = File.ReadAllText(fileName);
-            
-            //var diff = new Diff(a, b);
-            //return diff.ToString();
+        private string RunCommand(string args)
+        {
+            var cmd = Path.Combine(Path.GetDirectoryName(GitSccOptions.Current.GitBashPath), 
+                                   "git.exe");
+
+            var pinfo = new ProcessStartInfo(cmd)
+            {
+                Arguments = args,
+                CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                WorkingDirectory = this.workingFolder
+            };
+
+            using (var process = Process.Start(pinfo))
+            {
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                if (!string.IsNullOrWhiteSpace(error))
+                    throw new Exception(error);
+
+                return output;
+            }
         }
     }
 

@@ -2,7 +2,10 @@
 using System.IO;
 using GitScc;
 using GitSharp;
+using GitSharp.Core.Diff;
+using GitSharp.Core.Patch;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Text;
 
 namespace BasicSccProvider.Tests
 {
@@ -155,6 +158,41 @@ namespace BasicSccProvider.Tests
             Assert.AreEqual(lines[0], newlines[0]);
             Assert.AreEqual(lines[1], newlines[1]);
             Assert.AreEqual(lines[2], newlines[2]);
+        }
+
+        [TestMethod]
+        public void DiffTest()
+        {
+            FileHeader fileHeader = new FileHeader(Encoding.UTF8.GetBytes(
+@"diff --git a/a b/a
+index 5f079a5..b45b652 100644
+--- a/a
++++ b/a"), 0);
+            
+            DiffFormatter fmt = new DiffFormatter();
+            var memoryStream = new MemoryStream();
+
+            var a = new RawText(Encoding.UTF8.GetBytes(@"
+1
+2
+3"
+                ));
+            
+            var b = new RawText(Encoding.UTF8.GetBytes(@"
+3
+4
+5"
+                ));
+
+            fmt.format(memoryStream, fileHeader, a, b);
+
+            var sr = new StreamReader(memoryStream);
+            Console.WriteLine(sr.ReadToEnd());
+        }
+
+        private static byte[] ReadFile(string fileName)
+        {
+            return File.ReadAllBytes(fileName);
         }
     }
 }

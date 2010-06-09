@@ -10,6 +10,7 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.OLE.Interop;
 using EnvDTE;
+using System.Runtime.ExceptionServices;
 
 namespace GitScc
 {
@@ -227,14 +228,17 @@ namespace GitScc
         public int GetGlyphTipText([InAttribute] IVsHierarchy phierHierarchy, [InAttribute] uint itemidNode, out string pbstrTooltipText)
         {
             pbstrTooltipText = "";
+/*
             IList<string> files = GetNodeFiles(phierHierarchy as IVsSccProject2, itemidNode);
             if (files.Count == 0)
             {
                 return VSConstants.S_OK;
             }
             GitFileStatus status = _statusTracker.GetFileStatus(files[0]);
+ */
+            GitFileStatus status = _statusTracker.GetFileStatus(GetFileName(phierHierarchy, itemidNode));
             pbstrTooltipText = status.ToString(); //TODO: use resources
-
+           
             return VSConstants.S_OK;
         }
 
@@ -527,9 +531,24 @@ namespace GitScc
                 return null;
             }
         }
+
+        private string GetFileName(IVsHierarchy hierHierarchy, uint itemidNode)
+        {
+            IVsSolution sol = (IVsSolution)_sccProvider.GetService(typeof(SVsSolution));
+            string solutionDirectory, solutionFile, solutionUserOptions, pvalue;
+            if (sol.GetSolutionInfo(out solutionDirectory, out solutionFile, out solutionUserOptions) != VSConstants.S_OK) return null;
+
+            return hierHierarchy.GetCanonicalName(itemidNode, out pvalue) == VSConstants.S_OK ? 
+                Path.Combine(solutionDirectory, pvalue) : null;
+        }
+
+        /*
+         * the floowing function caused bug http://gitscc.codeplex.com/workitem/13497
+         *
         /// <summary>
         /// Returns a list of source controllable files associated with the specified node
         /// </summary>
+        [HandleProcessCorruptedStateExceptions]
         private IList<string> GetNodeFiles(IVsSccProject2 pscp2, uint itemid)
         {
             // NOTE: the function returns only a list of files, containing both regular files and special files
@@ -548,9 +567,11 @@ namespace GitScc
                     for (int elemIndex = 0; elemIndex < pathStr[0].cElems; elemIndex++)
                     {
                         IntPtr pathIntPtr = Marshal.ReadIntPtr(pathStr[0].pElems, elemIndex);
-                        String path = Marshal.PtrToStringAuto(pathIntPtr);
 
+
+                        String path = Marshal.PtrToStringAuto(pathIntPtr);
                         sccFiles.Add(path);
+
 
                         // See if there are special files
                         if (flags.Length > 0 && flags[0].cElems > 0)
@@ -579,8 +600,6 @@ namespace GitScc
                                 }
                             }
                         }
-
-                        Marshal.FreeCoTaskMem(pathIntPtr);
                     }
                     if (pathStr[0].cElems > 0)
                     {
@@ -595,6 +614,7 @@ namespace GitScc
 
             return sccFiles;
         }
+        */
 
         /// <summary>
         /// Gets the list of directly selected VSITEMSELECTION objects
@@ -736,11 +756,14 @@ namespace GitScc
         {
             var selectedNodes = GetSelectedNodes();
             if (selectedNodes.Count <= 0) return null;
-
+/*
             var files = GetNodeFiles(selectedNodes[0].pHier as IVsSccProject2, selectedNodes[0].itemid);
             if (files.Count <= 0) return null;
 
             return files[0];
+ */
+
+            return GetFileName(selectedNodes[0].pHier, selectedNodes[0].itemid);
         }
 
         internal void CompareSelectedFile()

@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 using IServiceProvider = System.IServiceProvider;
 using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+using Microsoft.VisualStudio;
 
 namespace GitScc
 {
@@ -65,6 +66,8 @@ namespace GitScc
 
         internal void Refresh(GitFileStatusTracker tracker)
         {
+            if (((IVsWindowFrame)this.Frame).IsVisible() == VSConstants.S_FALSE) return;
+
             control.Refresh(tracker);
 
             this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption") +

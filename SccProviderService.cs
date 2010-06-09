@@ -27,7 +27,7 @@ namespace GitScc
         private BasicSccProvider _sccProvider = null;
         private uint _vsSolutionEventsCookie, _vsIVsFileChangeEventsCookie;
 
-        private GitFileStatusTracker _statusTracker = null;
+        internal GitFileStatusTracker _statusTracker = null;
 
         #region SccProvider Service initialization/unitialization
 
@@ -367,7 +367,7 @@ namespace GitScc
                 fileChangeService.AdviseDirChange(pathGetsolution, 1, this, out _vsIVsFileChangeEventsCookie);
             }
 
-            //_sccProvider.OnSccStatusChanged(_statusTracker);
+            //_sccProvider.OnSccStatusChanged();
         }
 
 
@@ -380,7 +380,7 @@ namespace GitScc
                 fileChangeService.UnadviseDirChange(_vsIVsFileChangeEventsCookie);
             }
 
-            _sccProvider.OnSccStatusChanged(_statusTracker);
+            _sccProvider.OnSccStatusChanged();
         } 
 
         #endregion
@@ -702,7 +702,7 @@ namespace GitScc
                 Debug.WriteLine("Dir changed, refresh Git: " + DateTime.Now.ToString());
                 Refresh();
 
-                _sccProvider.OnSccStatusChanged(this._statusTracker);
+                _sccProvider.OnSccStatusChanged();
             }
             return VSConstants.S_OK;
         }

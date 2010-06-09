@@ -209,6 +209,7 @@ namespace GitScc
         private void OnRefreshCommand(object sender, EventArgs e)
         {
             sccService.Refresh();
+            OnSccStatusChanged();
         }
 
         private void OnCompareCommand(object sender, EventArgs e)
@@ -260,6 +261,11 @@ namespace GitScc
             if (windowFrame != null)
             {
                 ErrorHandler.ThrowOnFailure(windowFrame.Show());
+
+                if (window is PendingChangesToolWindow)
+                {
+                    ((PendingChangesToolWindow)window).Refresh(sccService._statusTracker);
+                }
             }
         }
 
@@ -327,13 +333,12 @@ namespace GitScc
         }
         #endregion
 
-
-        internal void OnSccStatusChanged(GitFileStatusTracker tracker)
+        internal void OnSccStatusChanged()
         {
             var pendingChangesToolWindow = GetToolWindowPane<PendingChangesToolWindow>();
             if (pendingChangesToolWindow != null)
             {
-                pendingChangesToolWindow.Refresh(tracker);
+                pendingChangesToolWindow.Refresh(sccService._statusTracker);
             }
         }
 

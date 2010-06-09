@@ -80,21 +80,50 @@ namespace GitScc
             if (selectedItem == null) return;
             var fileName = selectedItem.FileName;
 
-            this.textBoxDiff.Text = tracker.DiffFile(fileName);
+            this.textBoxDiff.Document.Blocks.Clear();
+
+            var content = tracker.DiffFile(fileName);
+            foreach (var line in content.Split('\n'))
+            {
+
+                TextRange range = new TextRange(this.textBoxDiff.Document.ContentEnd, this.textBoxDiff.Document.ContentEnd); 
+                range.Text = line.Replace("\r", "") + "\r";
+
+                if (line.StartsWith("+"))
+                {
+                    range.ApplyPropertyValue(TextElement.BackgroundProperty, new SolidColorBrush(Color.FromArgb(128, 166, 255, 166)));
+                }
+                else if (line.StartsWith("-"))
+                {
+                    range.ApplyPropertyValue(TextElement.BackgroundProperty, new SolidColorBrush(Color.FromArgb(128, 255, 166, 166)));
+                }
+                else
+                {
+                    range.ApplyPropertyValue(TextElement.BackgroundProperty, null);
+                }
+
+                //this.textBoxDiff.AppendText(line);
+            }
+ 
         }
 
         internal void Commit()
         {
-            if (string.IsNullOrWhiteSpace(this.textBoxComments.Text))
+            TextRange textRange = new TextRange(
+                this.textBoxComments.Document.ContentStart,
+                this.textBoxComments.Document.ContentEnd);
+
+            var comments = textRange.Text;
+
+            if (string.IsNullOrWhiteSpace(comments))
             {
                 MessageBox.Show("Please enter comments for the commit.", "Commit", 
                     MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
 
-            tracker.Commit(this.textBoxComments.Text);
-
-            this.textBoxComments.Text = "";
+            tracker.Commit(comments);
+            this.textBoxComments.Document.Blocks.Clear();
         }
     }
 }

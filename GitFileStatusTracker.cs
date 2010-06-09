@@ -169,13 +169,30 @@ namespace GitScc
         internal void StageFile(string fileName)
         {
             if (!this.HasGitRepository) return;
-            this.repositoryStatus.Repository.Index.Stage(fileName);
+            if (this.repositoryStatus.Missing.Has(fileName))
+            {
+                this.repositoryStatus.Repository.Index.Remove(fileName);
+            }
+            else
+            {
+                this.repositoryStatus.Repository.Index.Stage(fileName);
+            }
         }
 
         internal void UnStageFile(string fileName)
         {
             if (!this.HasGitRepository) return;
-            this.repositoryStatus.Repository.Index.Unstage(fileName);
+
+            if (this.repositoryStatus.Removed.Has(fileName))
+            {
+                var content = ((Leaf)this.repositoryStatus.Repository.Head.CurrentCommit.Tree[fileName]).RawData;
+                var filepath = Encoding.UTF8.GetBytes(fileName);
+                this.repositoryStatus.Repository.Index.AddContent(filepath, content);
+            }
+            else
+            {
+                this.repositoryStatus.Repository.Index.Unstage(fileName);
+            }
         }
 
         internal void Commit(string message)

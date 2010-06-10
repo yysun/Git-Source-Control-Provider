@@ -98,11 +98,7 @@ namespace GitScc
                 this.repositoryStatus.Repository.Head.CurrentCommit != null &&
                 this.repositoryStatus.Repository.Head.CurrentCommit.Tree != null)
             {
-
-                leaf = this.repositoryStatus.Repository.Head.CurrentCommit.Tree.Leaves.Where(
-                       l => string.Compare(l.Name, fileName, true) == 0).FirstOrDefault();
-
-                //leaf = this.repositoryStatus.Repository.Head.CurrentCommit.Tree[fileName] as Leaf;
+                leaf = this.repositoryStatus.Repository.Head.CurrentCommit.Tree[fileName] as Leaf;
             }
 
             return leaf == null ? null : leaf.RawData;

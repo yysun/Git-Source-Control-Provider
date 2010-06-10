@@ -130,8 +130,8 @@ namespace GitScc
                     OLECMDTEXT cmdtxtStructure = (OLECMDTEXT)Marshal.PtrToStructure(pCmdText, typeof(OLECMDTEXT));
                     if (cmdtxtStructure.cmdtextf == (uint)OLECMDTEXTF.OLECMDTEXTF_NAME)
                     {
-                        string menuText = string.IsNullOrEmpty(sccService.CurrentBranchName) ?
-                            "Git" : "Git (" + sccService.CurrentBranchName + ")";
+                        string menuText = string.IsNullOrEmpty(statusTracker.CurrentBranch) ?
+                            "Git" : "Git (" + statusTracker.CurrentBranch + ")";
 
                         SetOleCmdText(pCmdText, menuText);
                     }

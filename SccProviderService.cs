@@ -5,11 +5,12 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows.Forms;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.OLE.Interop;
 using EnvDTE;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio.Shell.Interop;
 
 namespace GitScc
 {
@@ -519,31 +520,52 @@ namespace GitScc
                 return null;
             }
         }
+        
+        private string GetProjectFileName(IVsHierarchy hierHierarchy)
+        {
+            var files = GetNodeFiles(hierHierarchy as IVsSccProject2, VSConstants.VSITEMID_ROOT);
+            return files.Count <= 0 ? null : files[0];
+        }
 
         private string GetFileName(IVsHierarchy hierHierarchy, uint itemidNode)
         {
-            // -- fix bug http://gitscc.codeplex.com/workitem/13497
-            IVsSolution sol = (IVsSolution)_sccProvider.GetService(typeof(SVsSolution));
-            string solutionDirectory, solutionFile, solutionUserOptions, pvalue;
-            if (sol.GetSolutionInfo(out solutionDirectory, out solutionFile, out solutionUserOptions) != VSConstants.S_OK) return null;
-
             if (itemidNode == VSConstants.VSITEMID_ROOT)
             {
                 if (hierHierarchy == null)
-                    return Path.Combine(solutionDirectory, solutionFile);
+                    return GetSolutionFileName();
                 else
-                {
-                    var files = GetNodeFiles(hierHierarchy as IVsSccProject2, itemidNode);
-                    return files.Count <= 0 ? null : files[0];
-                }
+                    return GetProjectFileName(hierHierarchy);
             }
             else
             {
-                return hierHierarchy.GetCanonicalName(itemidNode, out pvalue) == VSConstants.S_OK ?
-                    Path.Combine(solutionDirectory, pvalue) : null;
+                string fileName = null;
+                if (hierHierarchy.GetCanonicalName(itemidNode, out fileName) != VSConstants.S_OK) return null;
+                return GetCaseSensitiveFileName(fileName);
             }
-            // --
         }
+
+        private static string GetCaseSensitiveFileName(string fileName)
+        {
+            if (fileName == null || !File.Exists(fileName)) return null;
+
+            try
+            {
+                StringBuilder sb = new StringBuilder(1024);
+                GetShortPathName(fileName, sb, 1024);
+                GetLongPathName(sb.ToString(), sb, 1024);
+                return sb.ToString();
+            }
+            catch { }
+
+            return fileName;
+        }
+
+        [DllImport("kernel32.dll")]
+        static extern uint GetShortPathName(string longpath, StringBuilder sb, int buffer);
+
+        [DllImport("kernel32.dll")]
+        static extern uint GetLongPathName(string shortpath, StringBuilder sb, int buffer);
+
 
         /// <summary>
         /// Returns a list of source controllable files associated with the specified node

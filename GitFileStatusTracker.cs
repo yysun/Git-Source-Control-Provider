@@ -87,13 +87,7 @@ namespace GitScc
 
         public void Update()
         {
-            if (!HasGitRepository)
-            {
-                if(!string.IsNullOrEmpty(workingFolder)) Open(this.workingFolder);
-            }
-            else
-            {
-                this.repositoryStatus.Update();
+            if (!string.IsNullOrEmpty(workingFolder)) Open(this.workingFolder);
             }
         }
 

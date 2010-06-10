@@ -235,7 +235,7 @@ namespace GitScc
                 return VSConstants.S_OK;
             }
             GitFileStatus status = _statusTracker.GetFileStatus(files[0]);
- */
+*/
             GitFileStatus status = _statusTracker.GetFileStatus(GetFileName(phierHierarchy, itemidNode));
             pbstrTooltipText = status.ToString(); //TODO: use resources
            
@@ -534,17 +534,29 @@ namespace GitScc
 
         private string GetFileName(IVsHierarchy hierHierarchy, uint itemidNode)
         {
+            // -- fix bug http://gitscc.codeplex.com/workitem/13497
             IVsSolution sol = (IVsSolution)_sccProvider.GetService(typeof(SVsSolution));
             string solutionDirectory, solutionFile, solutionUserOptions, pvalue;
             if (sol.GetSolutionInfo(out solutionDirectory, out solutionFile, out solutionUserOptions) != VSConstants.S_OK) return null;
 
-            return hierHierarchy.GetCanonicalName(itemidNode, out pvalue) == VSConstants.S_OK ? 
-                Path.Combine(solutionDirectory, pvalue) : null;
+            if (itemidNode == VSConstants.VSITEMID_ROOT)
+            {
+                if (hierHierarchy == null)
+                    return Path.Combine(solutionDirectory, solutionFile);
+                else
+                {
+                    var files = GetNodeFiles(hierHierarchy as IVsSccProject2, itemidNode);
+                    return files.Count <= 0 ? null : files[0];
+                }
+            }
+            else
+            {
+                return hierHierarchy.GetCanonicalName(itemidNode, out pvalue) == VSConstants.S_OK ?
+                    Path.Combine(solutionDirectory, pvalue) : null;
+            }
+            // --
         }
 
-        /*
-         * the floowing function caused bug http://gitscc.codeplex.com/workitem/13497
-         *
         /// <summary>
         /// Returns a list of source controllable files associated with the specified node
         /// </summary>
@@ -600,6 +612,9 @@ namespace GitScc
                                 }
                             }
                         }
+
+                        Marshal.FreeCoTaskMem(pathIntPtr);
+
                     }
                     if (pathStr[0].cElems > 0)
                     {
@@ -614,7 +629,7 @@ namespace GitScc
 
             return sccFiles;
         }
-        */
+
 
         /// <summary>
         /// Gets the list of directly selected VSITEMSELECTION objects
@@ -761,7 +776,7 @@ namespace GitScc
             if (files.Count <= 0) return null;
 
             return files[0];
- */
+*/
 
             return GetFileName(selectedNodes[0].pHier, selectedNodes[0].itemid);
         }

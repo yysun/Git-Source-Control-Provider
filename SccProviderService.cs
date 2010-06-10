@@ -26,16 +26,15 @@ namespace GitScc
     {
         private bool _active = false;
         private BasicSccProvider _sccProvider = null;
+        private GitFileStatusTracker _statusTracker = null;
         private uint _vsSolutionEventsCookie, _vsIVsFileChangeEventsCookie;
 
-        private GitFileStatusTracker _statusTracker = null;
-
         #region SccProvider Service initialization/unitialization
-        public SccProviderService(BasicSccProvider sccProvider)
+        public SccProviderService(BasicSccProvider sccProvider, GitFileStatusTracker statusTracker)
         {
-            _sccProvider = sccProvider;
-            _statusTracker = new GitFileStatusTracker();
-
+            this._sccProvider = sccProvider;
+            this._statusTracker = statusTracker;
+            
             // Subscribe to solution events
             IVsSolution sol = (IVsSolution)_sccProvider.GetService(typeof(SVsSolution));
             sol.AdviseSolutionEvents(this, out _vsSolutionEventsCookie);
@@ -363,11 +362,17 @@ namespace GitScc
             if (!string.IsNullOrEmpty(solutionFileName))
             {
 
-                string pathGetsolution = Path.GetDirectoryName(solutionFileName);
-                _statusTracker.Open(pathGetsolution);
+                string solutionPath = Path.GetDirectoryName(solutionFileName);
+                _statusTracker.Open(solutionPath);
 
-                IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
-                fileChangeService.AdviseDirChange(pathGetsolution, 1, this, out _vsIVsFileChangeEventsCookie);
+                _vsIVsFileChangeEventsCookie = VSConstants.VSCOOKIE_NIL;
+                solutionPath = _statusTracker.GitWorkingDirectory;
+
+                if (!string.IsNullOrEmpty(solutionPath))
+                {
+                    IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
+                    fileChangeService.AdviseDirChange(solutionPath, 1, this, out _vsIVsFileChangeEventsCookie);
+                }
             }
         }
 

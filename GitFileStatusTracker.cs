@@ -11,7 +11,7 @@ namespace GitScc
     {
         private RepositoryStatus repositoryStatus;
         private Uri workingFolderUri;
-        private string workingFolder;
+        private string solutionFolder;
 
         public GitFileStatusTracker()
         {
@@ -22,8 +22,8 @@ namespace GitScc
         {
             Close();
 
-            this.workingFolder = workingFolder;
-            if (!string.IsNullOrEmpty(workingFolder) && Repository.IsValid(workingFolder))
+            this.solutionFolder = workingFolder;
+            if (!string.IsNullOrEmpty(workingFolder))
             {
                 try
                 {
@@ -37,6 +37,11 @@ namespace GitScc
             }
         }
 
+        public string GitWorkingDirectory
+        {
+            get { return this.repositoryStatus != null ? 
+                this.repositoryStatus.Repository.WorkingDirectory : null; }
+        }
         public bool HasGitRepository
         {
             get { return this.repositoryStatus != null; }
@@ -80,7 +85,7 @@ namespace GitScc
 
         public void Update()
         {
-            if (!string.IsNullOrEmpty(workingFolder)) Open(this.workingFolder);
+            if (!string.IsNullOrEmpty(solutionFolder)) Open(this.solutionFolder);
         }
 
         public byte[] GetFileContent(string fileName)

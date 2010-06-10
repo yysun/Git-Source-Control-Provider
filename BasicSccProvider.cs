@@ -44,6 +44,7 @@ namespace GitScc
     [Guid("C4128D99-2000-41D1-A6C3-704E6C1A3DE2")]
     public class BasicSccProvider : MsVsShell.Package, IOleCommandTarget
     {
+        private GitFileStatusTracker statusTracker;
         private SccProviderService sccService = null;
 
         public BasicSccProvider()
@@ -60,8 +61,9 @@ namespace GitScc
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Entering Initialize() of: {0}", this.ToString()));
             base.Initialize();
 
-            // Proffer the source control service implemented by the provider
-            sccService = new SccProviderService(this);
+            statusTracker = new GitFileStatusTracker();
+            sccService = new SccProviderService(this, statusTracker);
+
             ((IServiceContainer)this).AddService(typeof(SccProviderService), sccService, true);
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
@@ -214,7 +216,6 @@ namespace GitScc
             var difftoolPath = GitSccOptions.Current.DifftoolPath;
             RunCommand(difftoolPath, "\"" + file1 + "\" \"" + file2 + "\"");
         }
-
         #endregion
 
         // This function is called by the IVsSccProvider service implementation when the active state of the provider changes
@@ -238,7 +239,7 @@ namespace GitScc
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
-                WorkingDirectory = Path.GetDirectoryName(sccService.GetSolutionFileName())
+                WorkingDirectory = this.statusTracker.GitWorkingDirectory,
             };
 
             using (var process = Process.Start(pinfo))
@@ -266,7 +267,7 @@ namespace GitScc
                 process.StartInfo.CreateNoWindow = false;
                 process.StartInfo.FileName = cmd;
                 process.StartInfo.Arguments = arguments;
-                process.StartInfo.WorkingDirectory = Path.GetDirectoryName(sccService.GetSolutionFileName());
+                process.StartInfo.WorkingDirectory = this.statusTracker.GitWorkingDirectory;
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                 process.StartInfo.LoadUserProfile = true;
 
@@ -274,6 +275,5 @@ namespace GitScc
             }
         } 
         #endregion
-
     }
 }

@@ -33,14 +33,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Program Files\Microsoft Visual Studio 9.0\Common7\IDE\PublicAssemblies\EnvDTE.dll</HintPath>
     </Reference>
-    <Reference Include="GitSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\GitSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="GitSharp.Core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\GitSharp.Core.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.VisualStudio.OLE.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.VisualStudio.Shell.9.0" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -110,6 +102,12 @@
     <None Include="MakeMsi.bat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="GitSharp.Core\GitSharp.Core.csproj">
+      <Project>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</Project>
+      <Name>GitSharp.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <!--

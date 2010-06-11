@@ -96,30 +96,34 @@ namespace BasicSccProvider.Tests
             tracker.Open(tempFolder);
 
             string[] lines = { "First line", "Second line", "Third line" };
-            File.WriteAllLines(tempFile, lines);
 
+            File.WriteAllLines(tempFile, lines);
             tracker.Update();
             Assert.AreEqual(GitFileStatus.UnTrackered, tracker.GetFileStatus(tempFile));
 
             using (var repo = new Repository(tempFolder))
             {
                 repo.Index.Add(tempFile);
-
                 tracker.Update();
-                Assert.AreEqual(GitFileStatus.Staged, tracker.GetFileStatus(tempFile));
+                Assert.AreEqual(GitFileStatus.Added, tracker.GetFileStatus(tempFile));
 
                 repo.Index.CommitChanges("test", new Author("test", "test@test.test"));
-
                 tracker.Update();
                 Assert.AreEqual(GitFileStatus.Trackered, tracker.GetFileStatus(tempFile));
 
+                File.WriteAllText(tempFile, "changed text");
+                Assert.AreEqual(GitFileStatus.Modified, tracker.GetFileStatus(tempFile));
+
+                File.Delete(tempFile);
+                tracker.Update();
+                Assert.AreEqual(GitFileStatus.Missing, tracker.GetFileStatus(tempFile));
+
+                repo.Index.Remove(tempFile);
+                tracker.Update();
+                Assert.AreEqual(GitFileStatus.Removed, tracker.GetFileStatus(tempFile));
+
                 repo.Close();
             }
-
-            File.WriteAllText(tempFile, "changed text");
-            
-            tracker.Update();
-            Assert.AreEqual(GitFileStatus.Modified, tracker.GetFileStatus(tempFile));
         }
 
         [TestMethod]

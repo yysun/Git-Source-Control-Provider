@@ -11,7 +11,6 @@ using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell.Interop;
-using System.Runtime.ExceptionServices;
 
 namespace GitScc
 {
@@ -23,24 +22,30 @@ namespace GitScc
         IVsSolutionEvents2,
         IVsFileChangeEvents,
         IVsSccGlyphs,
-        IDisposable
+        IDisposable,
+        IVsUpdateSolutionEvents2
     {
         private bool _active = false;
         private BasicSccProvider _sccProvider = null;
         private GitFileStatusTracker _statusTracker = null;
-        private uint _vsSolutionEventsCookie, _vsIVsFileChangeEventsCookie;
+        private uint _vsSolutionEventsCookie, _vsIVsFileChangeEventsCookie, _vsIVsUpdateSolutionEventsCookie;
 
         #region SccProvider Service initialization/unitialization
-
         public SccProviderService(BasicSccProvider sccProvider, GitFileStatusTracker statusTracker)
         {
             this._sccProvider = sccProvider;
             this._statusTracker = statusTracker;
-            
+
             // Subscribe to solution events
             IVsSolution sol = (IVsSolution)_sccProvider.GetService(typeof(SVsSolution));
             sol.AdviseSolutionEvents(this, out _vsSolutionEventsCookie);
 
+            var sbm = _sccProvider.GetService(typeof(SVsSolutionBuildManager)) as IVsSolutionBuildManager2;
+            if (sbm != null)
+            {
+                sbm.AdviseUpdateSolutionEvents(this, out _vsIVsUpdateSolutionEventsCookie);
+            }
+            
         }
 
         public void Dispose()
@@ -51,6 +56,12 @@ namespace GitScc
                 IVsSolution sol = (IVsSolution)_sccProvider.GetService(typeof(SVsSolution));
                 sol.UnadviseSolutionEvents(_vsSolutionEventsCookie);
                 _vsSolutionEventsCookie = VSConstants.VSCOOKIE_NIL;
+            }
+
+            if (VSConstants.VSCOOKIE_NIL != _vsIVsUpdateSolutionEventsCookie)
+            {
+                var sbm = _sccProvider.GetService(typeof(SVsSolutionBuildManager)) as IVsSolutionBuildManager2;
+                sbm.UnadviseUpdateSolutionEvents(_vsIVsUpdateSolutionEventsCookie);
             }
         }
         #endregion
@@ -155,13 +166,14 @@ namespace GitScc
 
                 case GitFileStatus.UnTrackered:
                     //rgsiGlyphs[0] = VsStateIcon.STATEICON_CHECKEDOUT;
-                    rgsiGlyphs[0] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.PendingAdd);
+                    rgsiGlyphs[0] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Untracked);
                     if (rgdwSccStatus != null)
                     {
                         rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_CHECKEDOUT;
                     }
                     break;
 
+                case GitFileStatus.Added:
                 case GitFileStatus.Staged:
                     //rgsiGlyphs[0] = VsStateIcon.STATEICON_CHECKEDOUT;
                     rgsiGlyphs[0] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Staged);
@@ -239,7 +251,7 @@ namespace GitScc
 */
             GitFileStatus status = _statusTracker.GetFileStatus(GetFileName(phierHierarchy, itemidNode));
             pbstrTooltipText = status.ToString(); //TODO: use resources
-           
+
             return VSConstants.S_OK;
         }
 
@@ -316,7 +328,7 @@ namespace GitScc
         // Indexes of icons in our custom image list
         enum CustomSccGlyphs
         {
-            PendingAdd = 0,
+            Untracked = 0,
             Staged = 1,
         };
 
@@ -364,21 +376,18 @@ namespace GitScc
             if (!string.IsNullOrEmpty(solutionFileName))
             {
 
-                string solutionDirectory = Path.GetDirectoryName(solutionFileName);
-                _statusTracker.Open(solutionDirectory);
+                string solutionPath = Path.GetDirectoryName(solutionFileName);
+                _statusTracker.Open(solutionPath);
 
-                IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
-                fileChangeService.AdviseDirChange(solutionDirectory, 1, this, out _vsIVsFileChangeEventsCookie);
+                _vsIVsFileChangeEventsCookie = VSConstants.VSCOOKIE_NIL;
+                solutionPath = _statusTracker.GitWorkingDirectory ?? solutionPath;
 
-                // VS writes to .suo file when file closed, which triggers the tracker updates
-                // try to suppress events of .suo changed
-                string solutionUserFile = Path.Combine(solutionDirectory,
-                    Path.GetFileNameWithoutExtension(solutionFileName) + ".suo");
-
-                fileChangeService.IgnoreFile(0, solutionUserFile, 1);
+                if (!string.IsNullOrEmpty(solutionPath))
+                {
+                    IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
+                    fileChangeService.AdviseDirChange(solutionPath, 1, this, out _vsIVsFileChangeEventsCookie);
+                }
             }
-
-            //_sccProvider.OnSccStatusChanged();
         }
 
 
@@ -390,8 +399,6 @@ namespace GitScc
                 IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
                 fileChangeService.UnadviseDirChange(_vsIVsFileChangeEventsCookie);
             }
-
-            _sccProvider.OnSccStatusChanged();
         } 
 
         #endregion
@@ -400,6 +407,7 @@ namespace GitScc
 
         internal void Refresh()
         {
+            isBuilding = false;
             _statusTracker.Update();
             ReDrawStateGlyphs();
         }
@@ -582,7 +590,6 @@ namespace GitScc
         /// <summary>
         /// Returns a list of source controllable files associated with the specified node
         /// </summary>
-        [HandleProcessCorruptedStateExceptions]
         private IList<string> GetNodeFiles(IVsSccProject2 pscp2, uint itemid)
         {
             // NOTE: the function returns only a list of files, containing both regular files and special files
@@ -605,7 +612,6 @@ namespace GitScc
 
                         String path = Marshal.PtrToStringAuto(pathIntPtr);
                         sccFiles.Add(path);
-
 
                         // See if there are special files
                         if (flags.Length > 0 && flags[0].cElems > 0)
@@ -750,11 +756,11 @@ namespace GitScc
         #region IVsFileChangeEvents
 
         private DateTime lastTimeDirChangeFired = DateTime.Now;
-        //private object locker = new object();
-        //locker is not needed, because the DirectoryChanged event is already on current UI thread
 
         public int DirectoryChanged(string pszDirectory)
         {
+            if (isBuilding) return VSConstants.S_OK;
+
             double delta = DateTime.Now.Subtract(lastTimeDirChangeFired).TotalMilliseconds;
             lastTimeDirChangeFired = DateTime.Now;
             Debug.WriteLine("Dir changed, delta: " + delta.ToString());
@@ -765,10 +771,10 @@ namespace GitScc
                 Debug.WriteLine("Dir changed, refresh Git: " + DateTime.Now.ToString());
                 Refresh();
 
-                _sccProvider.OnSccStatusChanged();
             }
             return VSConstants.S_OK;
         }
+
 
         public int FilesChanged(uint cChanges, string[] rgpszFile, uint[] rggrfChange)
         {
@@ -845,17 +851,58 @@ namespace GitScc
 
         #endregion
 
-
         private void SetSolutionExplorerTitle(string message)
         {
             var dte = (DTE) _sccProvider.GetService(typeof(DTE));
             dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Caption = message;
         }
 
-        public string CurrentBranchName
+        bool isBuilding = false;
+        
+        #region IVsUpdateSolutionEvents2 Members
+
+        public int OnActiveProjectCfgChange(IVsHierarchy pIVsHierarchy)
         {
-            get { return _statusTracker.CurrentBranch; }
+            return VSConstants.S_OK;
         }
+
+        public int UpdateProjectCfg_Begin(IVsHierarchy pHierProj, IVsCfg pCfgProj, IVsCfg pCfgSln, uint dwAction, ref int pfCancel)
+        {
+            return VSConstants.S_OK;
+        }
+
+        public int UpdateProjectCfg_Done(IVsHierarchy pHierProj, IVsCfg pCfgProj, IVsCfg pCfgSln, uint dwAction, int fSuccess, int fCancel)
+        {
+            return VSConstants.S_OK;
+        }
+
+        public int UpdateSolution_Begin(ref int pfCancelUpdate)
+        {
+            Debug.WriteLine("Build begin ...");
+
+            isBuilding = true;
+            return VSConstants.S_OK;
+        }
+
+        public int UpdateSolution_Cancel()
+        {
+            return VSConstants.S_OK;
+        }
+
+        public int UpdateSolution_Done(int fSucceeded, int fModified, int fCancelCommand)
+        {
+            Debug.WriteLine("Build done ...");
+
+            isBuilding = false;
+            return VSConstants.S_OK;
+        }
+
+        public int UpdateSolution_StartUpdate(ref int pfCancelUpdate)
+        {
+            return VSConstants.S_OK;
+        }
+
+        #endregion
 
         public bool IsSolutionGitControlled
         {
@@ -873,5 +920,6 @@ namespace GitScc
                 _statusTracker.Init();
             }
         }
+ 
     }
 }

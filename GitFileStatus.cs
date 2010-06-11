@@ -11,9 +11,10 @@ namespace GitScc
         Trackered,
         Modified,
         Staged,
-        Deleted,
+        Removed,
         Added,
         Missing,
+        MergeConflict
     }
 
     public class GitFile

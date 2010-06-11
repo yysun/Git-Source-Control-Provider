@@ -34,7 +34,7 @@ namespace GitScc
     [MsVsShell.ProvideToolWindow(typeof(PendingChangesToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
     [MsVsShell.ProvideToolWindowVisibility(typeof(PendingChangesToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
     [MsVsShell.ProvideToolWindow(typeof(HistoryToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
-    [MsVsShell.ProvideToolWindowVisibility(typeof(HistoryToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
+    [MsVsShell.ProvideToolWindowVisibility(typeof(HistoryToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]  
     // Register the source control provider's service (implementing IVsScciProvider interface)
     [MsVsShell.ProvideService(typeof(SccProviderService), ServiceName = "Git Source Control Service")]
     // Register the source control provider to be visible in Tools/Options/SourceControl/Plugin dropdown selector
@@ -142,8 +142,8 @@ namespace GitScc
                     OLECMDTEXT cmdtxtStructure = (OLECMDTEXT)Marshal.PtrToStructure(pCmdText, typeof(OLECMDTEXT));
                     if (cmdtxtStructure.cmdtextf == (uint)OLECMDTEXTF.OLECMDTEXTF_NAME)
                     {
-                        string menuText = string.IsNullOrEmpty(sccService.CurrentBranchName) ?
-                            "Git" : "Git (" + sccService.CurrentBranchName + ")";
+                        string menuText = string.IsNullOrEmpty(statusTracker.CurrentBranch) ?
+                            "Git" : "Git (" + statusTracker.CurrentBranch + ")";
 
                         SetOleCmdText(pCmdText, menuText);
                     }
@@ -164,7 +164,7 @@ namespace GitScc
                         cmdf |= OLECMDF.OLECMDF_ENABLED;
                     }
                     break;
-
+                
                 case CommandId.icmdSccCommandUndo:
                 case CommandId.icmdSccCommandCompare:
                     if (sccService.CanCompareSelectedFile) cmdf |= OLECMDF.OLECMDF_ENABLED;
@@ -176,9 +176,9 @@ namespace GitScc
                     break;
 
                 case CommandId.icmdSccCommandInit:
-                    if (!sccService.IsSolutionGitControlled) 
+                    if (!sccService.IsSolutionGitControlled)
                         cmdf |= OLECMDF.OLECMDF_ENABLED;
-                    else 
+                    else
                         cmdf |= OLECMDF.OLECMDF_INVISIBLE;
                     break;
 
@@ -188,7 +188,7 @@ namespace GitScc
             }
 
 
-            prgCmds[0].cmdf = (uint)(cmdf);
+            prgCmds[0].cmdf = (uint) (cmdf);
             return VSConstants.S_OK;
         }
 
@@ -298,7 +298,8 @@ namespace GitScc
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
-                WorkingDirectory = Path.GetDirectoryName(sccService.GetSolutionFileName())
+                WorkingDirectory = this.statusTracker.GitWorkingDirectory ??
+                    Path.GetDirectoryName(sccService.GetSolutionFileName())
             };
 
             using (var process = Process.Start(pinfo))
@@ -307,7 +308,7 @@ namespace GitScc
                 string error = process.StandardError.ReadToEnd();
                 process.WaitForExit();
 
-                if (!string.IsNullOrWhiteSpace(error))
+                if (!string.IsNullOrEmpty(error))
                     throw new Exception(error);
 
                 return output;
@@ -326,13 +327,14 @@ namespace GitScc
                 process.StartInfo.CreateNoWindow = false;
                 process.StartInfo.FileName = cmd;
                 process.StartInfo.Arguments = arguments;
-                process.StartInfo.WorkingDirectory = Path.GetDirectoryName(sccService.GetSolutionFileName());
+                process.StartInfo.WorkingDirectory = this.statusTracker.GitWorkingDirectory ??
+                    Path.GetDirectoryName(sccService.GetSolutionFileName());
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                 process.StartInfo.LoadUserProfile = true;
 
                 process.Start();
             }
-        }
+        } 
         #endregion
 
         internal void OnSccStatusChanged()
@@ -344,10 +346,9 @@ namespace GitScc
             }
         }
 
-        private T GetToolWindowPane<T>()  where T: ToolWindowPane
+        private T GetToolWindowPane<T>() where T : ToolWindowPane
         {
-            return (T) this.FindToolWindow(typeof(T), 0, true);
+            return (T)this.FindToolWindow(typeof(T), 0, true);
         }
-
     }
 }

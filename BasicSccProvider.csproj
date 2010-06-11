@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GitFileStatusTracker.cs" />
+    <Compile Include="GitProject.cs" />
     <Compile Include="GitSccOptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BasicSccProvider.cs" />

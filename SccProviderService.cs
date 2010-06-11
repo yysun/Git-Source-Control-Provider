@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
@@ -27,20 +28,20 @@ namespace GitScc
     {
         private bool _active = false;
         private BasicSccProvider _sccProvider = null;
-        private GitFileStatusTracker _statusTracker = null;
+        private List<GitProject> projects;
         private uint _vsSolutionEventsCookie, _vsIVsFileChangeEventsCookie, _vsIVsUpdateSolutionEventsCookie;
 
         #region SccProvider Service initialization/unitialization
-        public SccProviderService(BasicSccProvider sccProvider, GitFileStatusTracker statusTracker)
+        public SccProviderService(BasicSccProvider sccProvider, List<GitProject> projects)
         {
             this._sccProvider = sccProvider;
-            this._statusTracker = statusTracker;
+            this.projects = projects;
 
             // Subscribe to solution events
-            IVsSolution sol = (IVsSolution)_sccProvider.GetService(typeof(SVsSolution));
+            IVsSolution sol = (IVsSolution)sccProvider.GetService(typeof(SVsSolution));
             sol.AdviseSolutionEvents(this, out _vsSolutionEventsCookie);
 
-            var sbm = _sccProvider.GetService(typeof(SVsSolutionBuildManager)) as IVsSolutionBuildManager2;
+            var sbm = sccProvider.GetService(typeof(SVsSolutionBuildManager)) as IVsSolutionBuildManager2;
             if (sbm != null)
             {
                 sbm.AdviseUpdateSolutionEvents(this, out _vsIVsUpdateSolutionEventsCookie);
@@ -83,7 +84,7 @@ namespace GitScc
             _active = true;
             _sccProvider.OnActiveStateChange();
 
-            OpenTracker();
+            //OpenTracker();
             RefreshSolutionNode();
             return VSConstants.S_OK;
         }
@@ -144,7 +145,7 @@ namespace GitScc
             Debug.Assert(cFiles == 1, "Only getting one file icon at a time is supported");
             // Return the icons and the status. While the status is a combination a flags, we'll return just values 
             // with one bit set, to make life easier for GetSccGlyphsFromStatus
-            GitFileStatus status = _statusTracker.GetFileStatus(rgpszFullPaths[0]);
+            GitFileStatus status = GetFileStatus(rgpszFullPaths[0]);
 
             switch (status)
             {
@@ -164,7 +165,7 @@ namespace GitScc
                     }
                     break;
 
-                case GitFileStatus.UnTrackered:
+                case GitFileStatus.New:
                     //rgsiGlyphs[0] = VsStateIcon.STATEICON_CHECKEDOUT;
                     rgsiGlyphs[0] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Untracked);
                     if (rgdwSccStatus != null)
@@ -185,6 +186,22 @@ namespace GitScc
 
                 case GitFileStatus.NotControlled:
                     rgsiGlyphs[0] = VsStateIcon.STATEICON_BLANK;
+                    if (rgdwSccStatus != null)
+                    {
+                        rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_NOTCONTROLLED;
+                    }
+                    break;
+
+                case GitFileStatus.Ignored:
+                    rgsiGlyphs[0] = VsStateIcon.STATEICON_EXCLUDEDFROMSCC;
+                    if (rgdwSccStatus != null)
+                    {
+                        rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_NOTCONTROLLED;
+                    }
+                    break;
+
+                case GitFileStatus.MergeConflict:
+                    rgsiGlyphs[0] = VsStateIcon.STATEICON_DISABLED;
                     if (rgdwSccStatus != null)
                     {
                         rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_NOTCONTROLLED;
@@ -241,20 +258,10 @@ namespace GitScc
         public int GetGlyphTipText([InAttribute] IVsHierarchy phierHierarchy, [InAttribute] uint itemidNode, out string pbstrTooltipText)
         {
             pbstrTooltipText = "";
-/*
-            IList<string> files = GetNodeFiles(phierHierarchy as IVsSccProject2, itemidNode);
-            if (files.Count == 0)
-            {
-                return VSConstants.S_OK;
-            }
-            GitFileStatus status = _statusTracker.GetFileStatus(files[0]);
-*/
-            GitFileStatus status = _statusTracker.GetFileStatus(GetFileName(phierHierarchy, itemidNode));
+            GitFileStatus status = GetFileStatus(phierHierarchy, itemidNode);
             pbstrTooltipText = status.ToString(); //TODO: use resources
-
             return VSConstants.S_OK;
         }
-
         #endregion
 
         #region IVsSolutionEvents interface functions
@@ -262,7 +269,6 @@ namespace GitScc
         public int OnAfterOpenSolution([InAttribute] Object pUnkReserved, [InAttribute] int fNewSolution)
         {
             OpenTracker();
-            ReDrawStateGlyphs();
             return VSConstants.S_OK;
         }
 
@@ -371,57 +377,57 @@ namespace GitScc
 
         internal void OpenTracker()
         {
-            string solutionFileName = GetSolutionFileName();
+            CloseTracker();
+
+            IVsHierarchy sol = (IVsHierarchy)_sccProvider.GetService(typeof(SVsSolution));
+            
+            EnumHierarchyItems(sol, VSConstants.VSITEMID_ROOT, 0,
+                (h, id) => AddProject(h)
+            );
+
+            var solutionFileName = GetSolutionFileName();
 
             if (!string.IsNullOrEmpty(solutionFileName))
             {
-
-                string solutionPath = Path.GetDirectoryName(solutionFileName);
-                _statusTracker.Open(solutionPath);
-
-                _vsIVsFileChangeEventsCookie = VSConstants.VSCOOKIE_NIL;
-                solutionPath = _statusTracker.GitWorkingDirectory ?? solutionPath;
-
-                if (!string.IsNullOrEmpty(solutionPath))
+                var monitorFolder = Path.GetDirectoryName(solutionFileName);
+                if (projects.Count > 0)
                 {
-                    IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
-                    fileChangeService.AdviseDirChange(solutionPath, 1, this, out _vsIVsFileChangeEventsCookie);
+                    var prj = projects.Where(p => p.Tracker.HasGitRepository && p.Tracker.GitWorkingDirectory.Length < monitorFolder.Length)
+                        .OrderBy(p=>p.Tracker.GitWorkingDirectory.Length)
+                        .FirstOrDefault();
+                    if (prj != null) monitorFolder = prj.Tracker.GitWorkingDirectory;
                 }
+
+                IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
+                fileChangeService.AdviseDirChange(monitorFolder, 1, this, out _vsIVsFileChangeEventsCookie);
+
+                Debug.WriteLine("Git Source Control Provider: Monitoring: " + monitorFolder);
             }
         }
 
-
         private void CloseTracker()
         {
-            _statusTracker.Close();
+            foreach (var project in projects)
+            {
+                project.Tracker.Close();
+            }
+            projects.Clear();
+
             if (VSConstants.VSCOOKIE_NIL != _vsIVsFileChangeEventsCookie)
             {
                 IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
                 fileChangeService.UnadviseDirChange(_vsIVsFileChangeEventsCookie);
             }
+
+            _vsIVsFileChangeEventsCookie = VSConstants.VSCOOKIE_NIL;
         } 
 
         #endregion
 
-        #region refresh
+        #region EnumHierarchyItems
 
-        internal void Refresh()
+        private void EnumHierarchyItems(IVsHierarchy hierarchy, uint itemid, int recursionLevel, Action<IVsHierarchy, uint> action)
         {
-            isBuilding = false;
-            _statusTracker.Update();
-            ReDrawStateGlyphs();
-        }
-
-        internal void ReDrawStateGlyphs()
-        {
-            IVsHierarchy sol = (IVsHierarchy)_sccProvider.GetService(typeof(SVsSolution));
-            EnumHierarchyItems(sol as IVsHierarchy, VSConstants.VSITEMID_ROOT, 0);
-        }
-
-
-        private void EnumHierarchyItems(IVsHierarchy hierarchy, uint itemid, int recursionLevel)
-        {
-
             if (recursionLevel > 1) return;
 
             int hr;
@@ -436,14 +442,14 @@ namespace GitScc
                 Marshal.Release(nestedHierarchyObj);
                 if (nestedHierarchy != null)
                 {
-                    EnumHierarchyItems(nestedHierarchy, nestedItemId, recursionLevel);
+                    EnumHierarchyItems(nestedHierarchy, nestedItemId, recursionLevel, action);
                 }
             }
             else
             {
                 object pVar;
 
-                processNodeFunc(hierarchy, itemid);
+                action(hierarchy, itemid);
 
                 recursionLevel++;
 
@@ -453,7 +459,7 @@ namespace GitScc
                     uint childId = GetItemId(pVar);
                     while (childId != VSConstants.VSITEMID_NIL)
                     {
-                        EnumHierarchyItems(hierarchy, childId, recursionLevel);
+                        EnumHierarchyItems(hierarchy, childId, recursionLevel, action);
                         hr = hierarchy.GetProperty(childId, (int)__VSHPROPID.VSHPROPID_NextVisibleSibling, out pVar);
                         if (VSConstants.S_OK == hr)
                         {
@@ -494,14 +500,19 @@ namespace GitScc
             solHier.SetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_StateIconIndex, rgsiGlyphs[0]);
 
             var caption = "Solution Explorer";
-            string branch = _statusTracker.CurrentBranch;
+            string branch = CurrentBranchName;
             if (!string.IsNullOrEmpty(branch))
             {
                 caption += " (" + branch + ")";
             }
 
             SetSolutionExplorerTitle(caption);
+        }
 
+        private void SetSolutionExplorerTitle(string message)
+        {
+            var dte = (DTE)_sccProvider.GetService(typeof(DTE));
+            dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Caption = message;
         }
 
         private void processNodeFunc(IVsHierarchy hierarchy, uint itemid)
@@ -543,6 +554,8 @@ namespace GitScc
         
         private string GetProjectFileName(IVsHierarchy hierHierarchy)
         {
+            if (!(hierHierarchy is IVsSccProject2)) return GetSolutionFileName();
+
             var files = GetNodeFiles(hierHierarchy as IVsSccProject2, VSConstants.VSITEMID_ROOT);
             return files.Count <= 0 ? null : files[0];
         }
@@ -755,6 +768,15 @@ namespace GitScc
 
         #region IVsFileChangeEvents
 
+        internal void Refresh()
+        {
+            OpenTracker();
+            IVsHierarchy sol = (IVsHierarchy)_sccProvider.GetService(typeof(SVsSolution));
+            EnumHierarchyItems(sol as IVsHierarchy, VSConstants.VSITEMID_ROOT, 0,
+                (h, id) => processNodeFunc(h, id)
+            );
+        }
+
         private DateTime lastTimeDirChangeFired = DateTime.Now;
 
         public int DirectoryChanged(string pszDirectory)
@@ -763,18 +785,14 @@ namespace GitScc
 
             double delta = DateTime.Now.Subtract(lastTimeDirChangeFired).TotalMilliseconds;
             lastTimeDirChangeFired = DateTime.Now;
-            Debug.WriteLine("Dir changed, delta: " + delta.ToString());
 
             if (delta > 1000)
             {
                 System.Threading.Thread.Sleep(200);
-                Debug.WriteLine("Dir changed, refresh Git: " + DateTime.Now.ToString());
                 Refresh();
-
             }
             return VSConstants.S_OK;
         }
-
 
         public int FilesChanged(uint cChanges, string[] rgpszFile, uint[] rggrfChange)
         {
@@ -790,7 +808,7 @@ namespace GitScc
             get
             {
                 var fileName = GetSelectFileName();
-                GitFileStatus status = _statusTracker.GetFileStatus(fileName);
+                GitFileStatus status = GetFileStatus(fileName);
                 return status == GitFileStatus.Modified || status == GitFileStatus.Staged;
             }
         }
@@ -799,67 +817,43 @@ namespace GitScc
         {
             var selectedNodes = GetSelectedNodes();
             if (selectedNodes.Count <= 0) return null;
-/*
-            var files = GetNodeFiles(selectedNodes[0].pHier as IVsSccProject2, selectedNodes[0].itemid);
-            if (files.Count <= 0) return null;
-
-            return files[0];
-*/
-
             return GetFileName(selectedNodes[0].pHier, selectedNodes[0].itemid);
         }
 
         internal void CompareSelectedFile()
         {
             var fileName = GetSelectFileName();
-
-            GitFileStatus status = _statusTracker.GetFileStatus(fileName);
+            GitFileStatus status = GetFileStatus(fileName);
             if (status == GitFileStatus.Modified || status == GitFileStatus.Staged)
             {
                 string tempFile = Path.GetFileName(fileName);
                 tempFile = Path.Combine(Path.GetTempPath(), tempFile);
-
-                var data = _statusTracker.GetFileContent(fileName);
-                using (var binWriter = new BinaryWriter(File.Open(tempFile, FileMode.Create)))
-                {
-                    binWriter.Write(data ?? new byte[] { });
-                }
-
+                SaveFileFromRepository(fileName, tempFile);
                 _sccProvider.RunDiffCommand(tempFile, fileName);
             }
         }
 
+
         internal void UndoSelectedFile()
         {
             var fileName = GetSelectFileName();
-
-            GitFileStatus status = _statusTracker.GetFileStatus(fileName);
+            GitFileStatus status = GetFileStatus(fileName);
             if (status == GitFileStatus.Modified || status == GitFileStatus.Staged)
             {
                 if (MessageBox.Show("Are you sure you want to undo changes for " + Path.GetFileName(fileName) +
                     " and store it from last commit? ", 
                     "Undo Changes", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
-                    var data = _statusTracker.GetFileContent(fileName);
-                    using (var binWriter = new BinaryWriter(File.Open(fileName, FileMode.Create)))
-                    {
-                        binWriter.Write(data ?? new byte[] { });
-                    }
+                    SaveFileFromRepository(fileName, fileName);
                 }
             }
         }
 
         #endregion
 
-        private void SetSolutionExplorerTitle(string message)
-        {
-            var dte = (DTE) _sccProvider.GetService(typeof(DTE));
-            dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Caption = message;
-        }
-
-        bool isBuilding = false;
-        
         #region IVsUpdateSolutionEvents2 Members
+        
+        bool isBuilding = false;
 
         public int OnActiveProjectCfgChange(IVsHierarchy pIVsHierarchy)
         {
@@ -878,8 +872,7 @@ namespace GitScc
 
         public int UpdateSolution_Begin(ref int pfCancelUpdate)
         {
-            Debug.WriteLine("Build begin ...");
-
+            Debug.WriteLine("Git Source Control Provider: suppress refresh before build...");
             isBuilding = true;
             return VSConstants.S_OK;
         }
@@ -891,8 +884,7 @@ namespace GitScc
 
         public int UpdateSolution_Done(int fSucceeded, int fModified, int fCancelCommand)
         {
-            Debug.WriteLine("Build done ...");
-
+            Debug.WriteLine("Git Source Control Provider: resume refresh after build...");
             isBuilding = false;
             return VSConstants.S_OK;
         }
@@ -903,6 +895,102 @@ namespace GitScc
         }
 
         #endregion
- 
+
+        #region project trackers
+        private void AddProject(IVsHierarchy pHierarchy)
+        {
+            string projectName = GetProjectFileName(pHierarchy);
+
+            if (string.IsNullOrEmpty(projectName)) return;
+            string projectDirecoty = Path.GetDirectoryName(projectName).ToLower();
+
+            var tracker = new GitFileStatusTracker(projectDirecoty);
+
+            if (!tracker.HasGitRepository ||
+                projects.Any(p => p.Tracker.HasGitRepository && p.Tracker.GitWorkingDirectory == tracker.GitWorkingDirectory))
+            {
+                tracker.Close();
+                return;
+            }
+
+            var project = new GitProject
+            {
+                ProjectDirectory = projectDirecoty,
+            };
+
+            project.Tracker = tracker;
+
+            Debug.WriteLine("Git Source Control Provider: Adding git tracker: " + project.ProjectDirectory);
+            projects.Add(project);
+        }
+
+        internal string CurrentBranchName
+        {
+            get
+            {
+                return CurrentTracker == null ? null : CurrentTracker.CurrentBranch;
+            }
+        }
+
+        internal string CurrentGitWorkingDirectory
+        {
+            get
+            {
+                return CurrentTracker == null ? null : CurrentTracker.GitWorkingDirectory;
+            }
+        }
+
+        internal GitFileStatusTracker CurrentTracker
+        {
+            get
+            {
+                string fileName = GetSelectFileName();
+                if (string.IsNullOrEmpty(fileName))
+                {
+                    if (projects.Count == 0) return projects[0].Tracker;
+                }
+                return GetTracker(fileName);
+            }
+        }
+
+        internal GitFileStatusTracker GetSolutionTracker()
+        {
+            return GetTracker(GetSolutionFileName());
+        }
+
+        internal GitFileStatusTracker GetTracker(string fileName)
+        {
+            if (string.IsNullOrEmpty(fileName)) return null;
+
+            var project = projects.OrderByDescending(p=>p.ProjectDirectory.Length)
+                .Where(p => fileName.ToLower().IndexOf(p.ProjectDirectory) == 0).FirstOrDefault();
+            return project == null ? null : project.Tracker;
+        }
+
+
+        private GitFileStatus GetFileStatus(string fileName)
+        {
+            var tracker = GetTracker(fileName);
+            return tracker == null ? GitFileStatus.NotControlled:
+                tracker.GetFileStatus(fileName);
+        }
+
+        private GitFileStatus GetFileStatus(IVsHierarchy phierHierarchy, uint itemidNode)
+        {
+            var fileName = GetFileName(phierHierarchy, itemidNode);
+            return GetFileStatus(fileName); 
+        }
+
+        private void SaveFileFromRepository(string fileName, string tempFile)
+        {
+            var tracker = CurrentTracker;
+            if (tracker == null) return;
+            var data = tracker.GetFileContent(fileName);
+            using (var binWriter = new BinaryWriter(File.Open(tempFile, FileMode.Create)))
+            {
+                binWriter.Write(data ?? new byte[] { });
+            }
+        }
+        #endregion
     }
 }

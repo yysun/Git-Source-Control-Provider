@@ -14,6 +14,7 @@ namespace GitScc
         Removed,
         Added,
         Missing,
-        MergeConflict
+        MergeConflict,
+        Ignored
     }
 }

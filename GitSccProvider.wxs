@@ -13,11 +13,11 @@ Studio 2008 SDK\VisualStudioIntegration\Tools\wix\light" GitSccProvider.wixobj
 -->
 
 <Wix xmlns='http://schemas.microsoft.com/wix/2003/01/wi'>
-  <Product Name='Git Source Control Provider' Id='19E8FCCC-3471-40da-9028-A24D5D936AD4' 
-    Language='1033' Codepage='1252' Version='0.5.4' Manufacturer='Yiyi Sun'
+  <Product Name='Git Source Control Provider' Id='E14F6856-ED38-4174-8677-BBDF8D9C2350' 
+    Language='1033' Codepage='1252' Version='0.5.5' Manufacturer='Yiyi Sun'
     UpgradeCode='675B7214-244E-4a51-96C4-26DBB2C779A5'>
     
-    <Package Id='5B23B731-089A-431d-B629-C74DD5AA0B6B' Keywords='Installer'
+    <Package Id='BAE6FB2C-87E5-46a8-9F7A-27EC05769816' Keywords='Installer'
       Description="Git Source Control Provider Installer"
       Comments='Git Source Control Provider Installer' Manufacturer='Yiyi Sun'
       InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
@@ -42,7 +42,7 @@ Studio 2008 SDK\VisualStudioIntegration\Tools\wix\light" GitSccProvider.wixobj
             <!--<File Id="GitSccProvider.pkgdef" Name="GitScc~1.pkg" LongName="GitSccProvider.pkgdef" Source="GitSccProvider.pkgdef" Vital="yes" DiskId="1" />-->
             <File Id="DiffieHellman.dll" Name="Diffie~1.dll" LongName="DiffieHellman.dll" Source="DiffieHellman.dll" Vital="yes" DiskId="1" /> 
             <File Id="GitSharp.Core.dll" Name="GitSha~1.dll" LongName="GitSharp.Core.dll" Source="GitSharp.Core.dll" Vital="yes" DiskId="1" />
-            <File Id="GitSharp.dll" Name="GitSharp.dll" LongName="GitSharp.dll" Source="GitSharp.dll" Vital="yes" DiskId="1" />
+            <!--<File Id="GitSharp.dll" Name="GitSharp.dll" LongName="GitSharp.dll" Source="GitSharp.dll" Vital="yes" DiskId="1" />-->
             <File Id="ICSharpCode.SharpZipLib.dll" Name="ICShar~1.dll" LongName="ICSharpCode.SharpZipLib.dll" Source="ICSharpCode.SharpZipLib.dll" Vital="yes" DiskId="1" />
             <File Id="Org.Mentalis.Security.dll" Name="OrgMen~1.dll" LongName="Org.Mentalis.Security.dll" Source="Org.Mentalis.Security.dll" Vital="yes" DiskId="1" />
             <File Id="Tamir.SharpSSH.dll" Name="TamirS~1.dll" LongName="Tamir.SharpSSH.dll" Source="Tamir.SharpSSH.dll" Vital="yes" DiskId="1" />

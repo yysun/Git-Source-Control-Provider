@@ -44,6 +44,7 @@ namespace GitScc
     [Guid("C4128D99-2000-41D1-A6C3-704E6C1A3DE2")]
     public class BasicSccProvider : MsVsShell.Package, IOleCommandTarget
     {
+        private GitFileStatusTracker statusTracker;
         private SccProviderService sccService = null;
 
         public BasicSccProvider()
@@ -60,8 +61,9 @@ namespace GitScc
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Entering Initialize() of: {0}", this.ToString()));
             base.Initialize();
 
-            // Proffer the source control service implemented by the provider
-            sccService = new SccProviderService(this);
+            statusTracker = new GitFileStatusTracker();
+            sccService = new SccProviderService(this, statusTracker);
+
             ((IServiceContainer)this).AddService(typeof(SccProviderService), sccService, true);
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
@@ -128,8 +130,8 @@ namespace GitScc
                     OLECMDTEXT cmdtxtStructure = (OLECMDTEXT)Marshal.PtrToStructure(pCmdText, typeof(OLECMDTEXT));
                     if (cmdtxtStructure.cmdtextf == (uint)OLECMDTEXTF.OLECMDTEXTF_NAME)
                     {
-                        string menuText = string.IsNullOrEmpty(sccService.CurrentBranchName) ?
-                            "Git" : "Git (" + sccService.CurrentBranchName + ")";
+                        string menuText = string.IsNullOrEmpty(statusTracker.CurrentBranch) ?
+                            "Git" : "Git (" + statusTracker.CurrentBranch + ")";
 
                         SetOleCmdText(pCmdText, menuText);
                     }
@@ -214,7 +216,6 @@ namespace GitScc
             var difftoolPath = GitSccOptions.Current.DifftoolPath;
             RunCommand(difftoolPath, "\"" + file1 + "\" \"" + file2 + "\"");
         }
-
         #endregion
 
         // This function is called by the IVsSccProvider service implementation when the active state of the provider changes
@@ -238,7 +239,8 @@ namespace GitScc
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
-                WorkingDirectory = Path.GetDirectoryName(sccService.GetSolutionFileName())
+                WorkingDirectory = this.statusTracker.GitWorkingDirectory ??
+                    Path.GetDirectoryName(sccService.GetSolutionFileName())
             };
 
             using (var process = Process.Start(pinfo))
@@ -247,7 +249,7 @@ namespace GitScc
                 string error = process.StandardError.ReadToEnd();
                 process.WaitForExit();
 
-                if (!string.IsNullOrWhiteSpace(error))
+                if (!string.IsNullOrEmpty(error))
                     throw new Exception(error);
 
                 return output;
@@ -266,7 +268,8 @@ namespace GitScc
                 process.StartInfo.CreateNoWindow = false;
                 process.StartInfo.FileName = cmd;
                 process.StartInfo.Arguments = arguments;
-                process.StartInfo.WorkingDirectory = Path.GetDirectoryName(sccService.GetSolutionFileName());
+                process.StartInfo.WorkingDirectory = this.statusTracker.GitWorkingDirectory ??
+                    Path.GetDirectoryName(sccService.GetSolutionFileName());
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                 process.StartInfo.LoadUserProfile = true;
 
@@ -274,6 +277,5 @@ namespace GitScc
             }
         } 
         #endregion
-
     }
 }

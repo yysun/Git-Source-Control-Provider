@@ -35,16 +35,17 @@ namespace GitScc
         {
             this._sccProvider = sccProvider;
             this._statusTracker = statusTracker;
-            
+
             // Subscribe to solution events
             IVsSolution sol = (IVsSolution)_sccProvider.GetService(typeof(SVsSolution));
             sol.AdviseSolutionEvents(this, out _vsSolutionEventsCookie);
-            
+
             var sbm = _sccProvider.GetService(typeof(SVsSolutionBuildManager)) as IVsSolutionBuildManager2;
             if (sbm != null)
             {
                 sbm.AdviseUpdateSolutionEvents(this, out _vsIVsUpdateSolutionEventsCookie);
             }
+            
         }
 
         public void Dispose()
@@ -165,13 +166,14 @@ namespace GitScc
 
                 case GitFileStatus.UnTrackered:
                     //rgsiGlyphs[0] = VsStateIcon.STATEICON_CHECKEDOUT;
-                    rgsiGlyphs[0] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.PendingAdd);
+                    rgsiGlyphs[0] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Untracked);
                     if (rgdwSccStatus != null)
                     {
                         rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_CHECKEDOUT;
                     }
                     break;
 
+                case GitFileStatus.Added:
                 case GitFileStatus.Staged:
                     //rgsiGlyphs[0] = VsStateIcon.STATEICON_CHECKEDOUT;
                     rgsiGlyphs[0] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Staged);
@@ -326,7 +328,7 @@ namespace GitScc
         // Indexes of icons in our custom image list
         enum CustomSccGlyphs
         {
-            PendingAdd = 0,
+            Untracked = 0,
             Staged = 1,
         };
 
@@ -378,7 +380,7 @@ namespace GitScc
                 _statusTracker.Open(solutionPath);
 
                 _vsIVsFileChangeEventsCookie = VSConstants.VSCOOKIE_NIL;
-                solutionPath = _statusTracker.GitWorkingDirectory;
+                solutionPath = _statusTracker.GitWorkingDirectory ?? solutionPath;
 
                 if (!string.IsNullOrEmpty(solutionPath))
                 {
@@ -855,7 +857,6 @@ namespace GitScc
             dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Caption = message;
         }
 
-
         bool isBuilding = false;
         
         #region IVsUpdateSolutionEvents2 Members
@@ -902,5 +903,6 @@ namespace GitScc
         }
 
         #endregion
+ 
     }
 }

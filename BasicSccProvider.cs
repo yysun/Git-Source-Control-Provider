@@ -239,7 +239,8 @@ namespace GitScc
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
-                WorkingDirectory = this.statusTracker.GitWorkingDirectory,
+                WorkingDirectory = this.statusTracker.GitWorkingDirectory ??
+                    Path.GetDirectoryName(sccService.GetSolutionFileName())
             };
 
             using (var process = Process.Start(pinfo))
@@ -267,7 +268,8 @@ namespace GitScc
                 process.StartInfo.CreateNoWindow = false;
                 process.StartInfo.FileName = cmd;
                 process.StartInfo.Arguments = arguments;
-                process.StartInfo.WorkingDirectory = this.statusTracker.GitWorkingDirectory;
+                process.StartInfo.WorkingDirectory = this.statusTracker.GitWorkingDirectory ??
+                    Path.GetDirectoryName(sccService.GetSolutionFileName());
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                 process.StartInfo.LoadUserProfile = true;
 

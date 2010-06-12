@@ -3,66 +3,73 @@ using System.Collections.Generic;
 using System.IO;
 using GitSharp.Core;
 using System.Diagnostics;
+using System.Timers;
 
 namespace GitScc
 {
-    public class GitFileStatusTracker
+    public class GitFileStatusTracker : IDisposable
     {
-        private string solutionFolder;
+        private string initFolder;
 
         private Repository repository;
         private Tree commitTree;
         private GitIndex index;
+        //private IgnoreHandler ignoreHandler;
+
         private Dictionary<string, GitFileStatus> cache;
 
-        public GitFileStatusTracker()
+        public GitFileStatusTracker(string workingFolder)
         {
             cache = new Dictionary<string, GitFileStatus>();
+            this.initFolder = workingFolder;           
+            Refresh();
         }
 
-        public void Open(string solutionFolder)
+        public void Refresh()
         {
-            Close();
-
-            this.solutionFolder = solutionFolder;
-
-            if (!string.IsNullOrEmpty(solutionFolder))
+            cache.Clear();
+            if (!string.IsNullOrEmpty(initFolder))
             {
                 try
                 {
-                    this.repository = Repository.Open(solutionFolder);
-                    var id = repository.Resolve("HEAD");
-                    var commit = repository.MapCommit(id);
-                    commitTree = (commit != null ? commit.TreeEntry : new Tree(repository));
-                    index = repository.Index;
-                    index.RereadIfNecessary();
+                    this.repository = Repository.Open(initFolder);
+
+                    if (this.repository != null)
+                    {
+                        var id = repository.Resolve("HEAD");
+                        var commit = repository.MapCommit(id);
+                        this.commitTree = (commit != null ? commit.TreeEntry : new Tree(repository));
+                        this.index = repository.Index;
+                        this.index.RereadIfNecessary();
+                        //this.ignoreHandler = new IgnoreHandler(repository);
+                        //this.watcher = new FileSystemWatcher(this.repository.WorkingDirectory.FullName);
+                    }
                 }
-                catch
+                catch(Exception ex)
                 {
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            if (this.repository != null) this.repository.Close();
         }
 
         public string GitWorkingDirectory
         {
             get
             {
-                return this.repository != null ?
-                this.repository.WorkingDirectory.FullName : null;
+                return this.repository == null ? null :
+                    this.repository.WorkingDirectory.FullName;
             }
         }
+
         public bool HasGitRepository
         {
             get { return this.repository != null; }
         }
 
-        public void Close()
-        {
-            cache.Clear();
-
-            if (this.repository != null) this.repository.Close();
-            this.repository = null;
-        }
 
         public GitFileStatus GetFileStatus(string fileName)
         {
@@ -73,20 +80,21 @@ namespace GitScc
             {
                 var status = GetFileStatusNoCache(fileName);
                 cache.Add(fileName, status);
-
-                Debug.WriteLine(string.Format("GetFileStatus {0} - {1}", fileName, status));
+                //Debug.WriteLine(string.Format("GetFileStatus {0} - {1}", fileName, status));
+                return status;
             }
-            return cache[fileName];
+            else
+            {
+                return cache[fileName];
+            }
         }
 
         private GitFileStatus GetFileStatusNoCache(string fileName)
         {
-           
-
             var fileNameRel = GetRelativeFileName(fileName);
 
-            TreeEntry treeEntry = commitTree.FindBlobMember(fileNameRel);
-            GitIndex.Entry indexEntry = index.GetEntry(fileNameRel);
+            TreeEntry treeEntry = this.commitTree.FindBlobMember(fileNameRel);
+            GitIndex.Entry indexEntry = this.index.GetEntry(fileNameRel);
             
             //the order of 'if' below is important
             if (indexEntry != null)
@@ -122,10 +130,15 @@ namespace GitScc
                 {
                     return GitFileStatus.Removed;
                 }
-
                 if (File.Exists(fileName))
                 {
-                    return GitFileStatus.UnTrackered;
+                    //remove the ingore check for better performance
+                    //if (this.ignoreHandler.IsIgnored(fileName))
+                    //{
+                    //    return GitFileStatus.Ignored;
+                    //}
+
+                    return GitFileStatus.New;
                 }
             }
             
@@ -138,11 +151,6 @@ namespace GitScc
             fileName = workingFolderUri.MakeRelativeUri(new Uri(fileName)).ToString();
             fileName = fileName.Replace("%20", " ");
             return fileName;
-        }
-
-        public void Update()
-        {
-            if (!string.IsNullOrEmpty(solutionFolder)) Open(this.solutionFolder);
         }
 
         public byte[] GetFileContent(string fileName)
@@ -168,13 +176,17 @@ namespace GitScc
                 return this.HasGitRepository ? this.repository.getBranch() : "";
             }
         }
-    }
 
-    //public static class HashSetExt
-    //{
-    //    public static bool Has(this HashSet<string> hashSet, string value)
-    //    {
-    //        return hashSet.Any(s => string.Compare(s, value, true) == 0);
-    //    }
-    //}
+        internal static string GetRepositoryDirectory(string folder)
+        {
+            var repository = Repository.Open(folder);
+            return repository == null ? null :
+            repository.WorkingDirectory.FullName;
+        }
+
+        public override string ToString()
+        {
+            return repository == null ? "[no repo]" : repository.WorkingDirectory.FullName;
+        }
+    }
 }

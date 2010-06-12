@@ -12,6 +12,7 @@ using MsVsShell = Microsoft.VisualStudio.Shell;
 using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
 using Microsoft.VisualStudio.Shell;
 using System.IO;
+using System.Collections.Generic;
 
 namespace GitScc
 {
@@ -44,7 +45,7 @@ namespace GitScc
     [Guid("C4128D99-2000-41D1-A6C3-704E6C1A3DE2")]
     public class BasicSccProvider : MsVsShell.Package, IOleCommandTarget
     {
-        private GitFileStatusTracker statusTracker;
+        private List<GitFileStatusTracker> projects;
         private SccProviderService sccService = null;
 
         public BasicSccProvider()
@@ -61,8 +62,8 @@ namespace GitScc
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Entering Initialize() of: {0}", this.ToString()));
             base.Initialize();
 
-            statusTracker = new GitFileStatusTracker();
-            sccService = new SccProviderService(this, statusTracker);
+            projects = new List<GitFileStatusTracker>();
+            sccService = new SccProviderService(this, projects);
 
             ((IServiceContainer)this).AddService(typeof(SccProviderService), sccService, true);
 
@@ -130,8 +131,8 @@ namespace GitScc
                     OLECMDTEXT cmdtxtStructure = (OLECMDTEXT)Marshal.PtrToStructure(pCmdText, typeof(OLECMDTEXT));
                     if (cmdtxtStructure.cmdtextf == (uint)OLECMDTEXTF.OLECMDTEXTF_NAME)
                     {
-                        string menuText = string.IsNullOrEmpty(statusTracker.CurrentBranch) ?
-                            "Git" : "Git (" + statusTracker.CurrentBranch + ")";
+                        string menuText = string.IsNullOrEmpty(sccService.CurrentBranchName) ?
+                            "Git" : "Git (" + sccService.CurrentBranchName + ")";
 
                         SetOleCmdText(pCmdText, menuText);
                     }
@@ -239,7 +240,7 @@ namespace GitScc
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
-                WorkingDirectory = this.statusTracker.GitWorkingDirectory ??
+                WorkingDirectory = sccService.CurrentGitWorkingDirectory ??
                     Path.GetDirectoryName(sccService.GetSolutionFileName())
             };
 
@@ -268,7 +269,7 @@ namespace GitScc
                 process.StartInfo.CreateNoWindow = false;
                 process.StartInfo.FileName = cmd;
                 process.StartInfo.Arguments = arguments;
-                process.StartInfo.WorkingDirectory = this.statusTracker.GitWorkingDirectory ??
+                process.StartInfo.WorkingDirectory = sccService.CurrentGitWorkingDirectory ??
                     Path.GetDirectoryName(sccService.GetSolutionFileName());
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                 process.StartInfo.LoadUserProfile = true;

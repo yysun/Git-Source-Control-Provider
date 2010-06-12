@@ -7,13 +7,14 @@ namespace GitScc
     public enum GitFileStatus
     {
         NotControlled,
-        UnTrackered,
+        New,
         Trackered,
         Modified,
         Staged,
         Removed,
         Added,
         Missing,
-        MergeConflict
+        MergeConflict,
+        Ignored
     }
 }

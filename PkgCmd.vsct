@@ -21,8 +21,10 @@
     <Buttons>
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandGitBash" priority="0x0104" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
+        <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
+        <CommandFlag>IconAndText</CommandFlag>
         <Strings>
           <ButtonText>Git Bash ...</ButtonText>
         </Strings>
@@ -30,8 +32,10 @@
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandGitExtension" priority="0x0105" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
+        <Icon guid="guidSccProviderImages" id="iconGitExt" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
+        <CommandFlag>IconAndText</CommandFlag>
         <Strings>
           <ButtonText>Git Extensions ...</ButtonText>
         </Strings>

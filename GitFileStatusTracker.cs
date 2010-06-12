@@ -7,30 +7,27 @@ using System.Timers;
 
 namespace GitScc
 {
-    public class GitFileStatusTracker
+    public class GitFileStatusTracker : IDisposable
     {
         private string initFolder;
 
         private Repository repository;
         private Tree commitTree;
         private GitIndex index;
-        private IgnoreHandler ignoreHandler;
+        //private IgnoreHandler ignoreHandler;
 
         private Dictionary<string, GitFileStatus> cache;
 
         public GitFileStatusTracker(string workingFolder)
         {
-            this.initFolder = workingFolder;
             cache = new Dictionary<string, GitFileStatus>();
-
+            this.initFolder = workingFolder;           
             Refresh();
         }
 
         public void Refresh()
         {
-
-            Close();
-
+            cache.Clear();
             if (!string.IsNullOrEmpty(initFolder))
             {
                 try
@@ -43,24 +40,20 @@ namespace GitScc
                         var commit = repository.MapCommit(id);
                         this.commitTree = (commit != null ? commit.TreeEntry : new Tree(repository));
                         this.index = repository.Index;
-                        this.index.Read();
-                        this.ignoreHandler = new IgnoreHandler(repository);
+                        this.index.RereadIfNecessary();
+                        //this.ignoreHandler = new IgnoreHandler(repository);
                         //this.watcher = new FileSystemWatcher(this.repository.WorkingDirectory.FullName);
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
                 }
             }
         }
 
-        public void Close()
+        public void Dispose()
         {
-            cache.Clear();
-
             if (this.repository != null) this.repository.Close();
-            this.repository = null;
-
         }
 
         public string GitWorkingDirectory
@@ -139,10 +132,11 @@ namespace GitScc
                 }
                 if (File.Exists(fileName))
                 {
-                    if (this.ignoreHandler.IsIgnored(fileName))
-                    {
-                        return GitFileStatus.Ignored;
-                    }
+                    //remove the ingore check for better performance
+                    //if (this.ignoreHandler.IsIgnored(fileName))
+                    //{
+                    //    return GitFileStatus.Ignored;
+                    //}
 
                     return GitFileStatus.New;
                 }
@@ -181,6 +175,18 @@ namespace GitScc
             {
                 return this.HasGitRepository ? this.repository.getBranch() : "";
             }
+        }
+
+        internal static string GetRepositoryDirectory(string folder)
+        {
+            var repository = Repository.Open(folder);
+            return repository == null ? null :
+            repository.WorkingDirectory.FullName;
+        }
+
+        public override string ToString()
+        {
+            return repository == null ? "[no repo]" : repository.WorkingDirectory.FullName;
         }
     }
 }

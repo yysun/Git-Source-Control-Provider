@@ -45,7 +45,7 @@ namespace GitScc
     [Guid("C4128D99-2000-41D1-A6C3-704E6C1A3DE2")]
     public class BasicSccProvider : MsVsShell.Package, IOleCommandTarget
     {
-        private List<GitProject> projects;
+        private List<GitFileStatusTracker> projects;
         private SccProviderService sccService = null;
 
         public BasicSccProvider()
@@ -62,7 +62,7 @@ namespace GitScc
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Entering Initialize() of: {0}", this.ToString()));
             base.Initialize();
 
-            projects = new List<GitProject>();
+            projects = new List<GitFileStatusTracker>();
             sccService = new SccProviderService(this, projects);
 
             ((IServiceContainer)this).AddService(typeof(SccProviderService), sccService, true);

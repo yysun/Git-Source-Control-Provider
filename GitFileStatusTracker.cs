@@ -179,9 +179,11 @@ namespace GitScc
 
         internal static string GetRepositoryDirectory(string folder)
         {
-            var repository = Repository.Open(folder);
-            return repository == null ? null :
-            repository.WorkingDirectory.FullName;
+            var repository = (!string.IsNullOrEmpty(folder) && Directory.Exists(folder)) ?
+                Repository.Open(folder) : null;
+            
+            return repository == null ? null : repository.WorkingDirectory.FullName;
+
         }
 
         public override string ToString()

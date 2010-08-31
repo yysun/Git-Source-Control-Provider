@@ -376,7 +376,7 @@ namespace GitScc
 
         private void EnumHierarchyItems(IVsHierarchy hierarchy, uint itemid, int recursionLevel, Action<IVsHierarchy, uint> action)
         {
-            if (recursionLevel > 1) return;
+            //if (recursionLevel > 1) return;
 
             int hr;
             IntPtr nestedHierarchyObj;
@@ -396,9 +396,16 @@ namespace GitScc
             else
             {
                 object pVar;
-
                 action(hierarchy, itemid);
 
+//#if(DEBUG)
+//                object pval = null;
+//                hierarchy.GetProperty(itemid, (int)__VSHPROPID.VSHPROPID_Name, out pval);
+//                if(pval!=null)
+//                {
+//                    Debug.WriteLine("==== Enum Hierarchy Item:" + pval.ToString());
+//                }
+//#endif
                 recursionLevel++;
 
                 hr = hierarchy.GetProperty(itemid, (int)__VSHPROPID.VSHPROPID_FirstVisibleChild, out pVar);
@@ -480,16 +487,19 @@ namespace GitScc
                     // with the files for each node that will need new glyph
                     sccProject2.SccGlyphChanged(0, null, null, null);
 
-                    //object pval = null;
-                    //hierarchy.GetProperty(itemid, (int)__VSHPROPID.VSHPROPID_Caption, out pval);
-
-                    //string caption = pval.ToString();
-
-                    //if (caption != "Solution Items")
-                    //{
-                    //    hierarchy.SetProperty(itemid, (int)__VSHPROPID.VSHPROPID_Caption, caption + " (!!)");
-                    //}
                 }
+            }
+            else
+            {
+#if(DEBUG)
+                object pval = null;
+                hierarchy.GetProperty(itemid, (int)__VSHPROPID.VSHPROPID_Name, out pval);
+                if (pval != null)
+                {
+                    Debug.WriteLine("==== SccGlyph Change Hierarchy Item (not ROOT):" + pval.ToString());
+                }
+#endif
+
             }
         }
 
@@ -515,7 +525,15 @@ namespace GitScc
             if (!(hierHierarchy is IVsSccProject2)) return GetSolutionFileName();
 
             var files = GetNodeFiles(hierHierarchy as IVsSccProject2, VSConstants.VSITEMID_ROOT);
-            return files.Count <= 0 ? null : files[0];
+            string fileName = files.Count <= 0 ? null : files[0];
+
+            //try hierHierarchy.GetCanonicalName to get project name for web site
+            if (fileName == null)
+            {
+                if (hierHierarchy.GetCanonicalName(VSConstants.VSITEMID_ROOT, out fileName) != VSConstants.S_OK) return null;
+                return GetCaseSensitiveFileName(fileName);
+            }
+            return fileName;
         }
 
         private string GetFileName(IVsHierarchy hierHierarchy, uint itemidNode)
@@ -537,16 +555,20 @@ namespace GitScc
 
         private static string GetCaseSensitiveFileName(string fileName)
         {
-            if (fileName == null || !File.Exists(fileName)) return fileName;
+            if (fileName == null) return fileName;
 
-            try
+            if (Directory.Exists(fileName) || File.Exists(fileName))
             {
-                StringBuilder sb = new StringBuilder(1024);
-                GetShortPathName(fileName, sb, 1024);
-                GetLongPathName(sb.ToString(), sb, 1024);
-                return sb.ToString();
+
+                try
+                {
+                    StringBuilder sb = new StringBuilder(1024);
+                    GetShortPathName(fileName, sb, 1024);
+                    GetLongPathName(sb.ToString(), sb, 1024);
+                    return sb.ToString();
+                }
+                catch { }
             }
-            catch { }
 
             return fileName;
         }
@@ -740,7 +762,7 @@ namespace GitScc
                 monitorFolder = Path.GetDirectoryName(solutionFileName);
                 IVsHierarchy sol = (IVsHierarchy)_sccProvider.GetService(typeof(SVsSolution));
                 EnumHierarchyItems(sol, VSConstants.VSITEMID_ROOT, 0,
-                    (h, id) => AddProject(h)
+                    (h, id) => {if(id==VSConstants.VSITEMID_ROOT) AddProject(h);} //only add project nodes
                 );
 
                 if (monitorFolder != lastMinotorFolder)
@@ -927,14 +949,18 @@ namespace GitScc
             if (string.IsNullOrEmpty(projectName)) return;
             string projectDirecotry = Path.GetDirectoryName(projectName);
 
+            Debug.WriteLine("==== Adding project: " + projectDirecotry);
+
             string gitfolder = GitFileStatusTracker.GetRepositoryDirectory(projectDirecotry);
 
             if (string.IsNullOrEmpty(gitfolder) ||
-                trackers.Any(t => t.HasGitRepository && t.GitWorkingDirectory == gitfolder)) return;
+                trackers.Any(t => t.HasGitRepository && 
+                             string.Compare(t.GitWorkingDirectory, gitfolder, true)==0)) return;
             
             if (gitfolder.Length < monitorFolder.Length) monitorFolder = gitfolder;
             trackers.Add(new GitFileStatusTracker(gitfolder));
-            //Debug.WriteLine("Git Source Control Provider: Added git tracker: " + gitfolder);
+            
+            Debug.WriteLine("==== Added git tracker: " + gitfolder);
            
         }
 

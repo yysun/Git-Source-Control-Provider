@@ -12,6 +12,7 @@ using MsVsShell = Microsoft.VisualStudio.Shell;
 using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
 using Microsoft.VisualStudio.Shell;
 using System.IO;
+using System.Collections.Generic;
 
 namespace GitScc
 {
@@ -41,11 +42,15 @@ namespace GitScc
     [ProvideSourceControlProvider("Git Source Control Provider", "#100")]
     // Pre-load the package when the command UI context is asserted (the provider will be automatically loaded after restarting the shell if it was active last time the shell was shutdown)
     [MsVsShell.ProvideAutoLoad("C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
+
+    //UICONTEXT_SolutionExists
+    //[ProvideAutoLoad("{f1536ef8-92ec-443c-9ed7-fdadf150da82}")]
+
     // Declare the package guid
     [Guid("C4128D99-2000-41D1-A6C3-704E6C1A3DE2")]
     public class BasicSccProvider : MsVsShell.Package, IOleCommandTarget
     {
-        private GitFileStatusTracker statusTracker;
+        private List<GitFileStatusTracker> projects;
         private SccProviderService sccService = null;
 
         public BasicSccProvider()
@@ -62,8 +67,8 @@ namespace GitScc
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Entering Initialize() of: {0}", this.ToString()));
             base.Initialize();
 
-            statusTracker = new GitFileStatusTracker();
-            sccService = new SccProviderService(this, statusTracker);
+            projects = new List<GitFileStatusTracker>();
+            sccService = new SccProviderService(this, projects);
 
             ((IServiceContainer)this).AddService(typeof(SccProviderService), sccService, true);
 
@@ -142,8 +147,8 @@ namespace GitScc
                     OLECMDTEXT cmdtxtStructure = (OLECMDTEXT)Marshal.PtrToStructure(pCmdText, typeof(OLECMDTEXT));
                     if (cmdtxtStructure.cmdtextf == (uint)OLECMDTEXTF.OLECMDTEXTF_NAME)
                     {
-                        string menuText = string.IsNullOrEmpty(statusTracker.CurrentBranch) ?
-                            "Git" : "Git (" + statusTracker.CurrentBranch + ")";
+                        string menuText = string.IsNullOrEmpty(sccService.CurrentBranchName) ?
+                            "Git" : "Git (" + sccService.CurrentBranchName + ")";
 
                         SetOleCmdText(pCmdText, menuText);
                     }
@@ -241,7 +246,6 @@ namespace GitScc
             var difftoolPath = GitSccOptions.Current.DifftoolPath;
             RunCommand(difftoolPath, "\"" + file1 + "\" \"" + file2 + "\"");
         }
-
         private void ShowPendingChangesWindow(object sender, EventArgs e)
         {
             ShowToolWindow(typeof(PendingChangesToolWindow));
@@ -266,7 +270,7 @@ namespace GitScc
 
                 if (window is PendingChangesToolWindow)
                 {
-                    ((PendingChangesToolWindow)window).Refresh(statusTracker);
+                    //((PendingChangesToolWindow)window).Refresh(statusTracker);
                 }
             }
         }
@@ -298,7 +302,7 @@ namespace GitScc
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
-                WorkingDirectory = this.statusTracker.GitWorkingDirectory ??
+                WorkingDirectory = sccService.CurrentGitWorkingDirectory ??
                     Path.GetDirectoryName(sccService.GetSolutionFileName())
             };
 
@@ -327,7 +331,7 @@ namespace GitScc
                 process.StartInfo.CreateNoWindow = false;
                 process.StartInfo.FileName = cmd;
                 process.StartInfo.Arguments = arguments;
-                process.StartInfo.WorkingDirectory = this.statusTracker.GitWorkingDirectory ??
+                process.StartInfo.WorkingDirectory = sccService.CurrentGitWorkingDirectory ??
                     Path.GetDirectoryName(sccService.GetSolutionFileName());
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                 process.StartInfo.LoadUserProfile = true;
@@ -342,7 +346,7 @@ namespace GitScc
             var pendingChangesToolWindow = GetToolWindowPane<PendingChangesToolWindow>();
             if (pendingChangesToolWindow != null)
             {
-                pendingChangesToolWindow.Refresh(statusTracker);
+                //pendingChangesToolWindow.Refresh(statusTracker);
             }
         }
 

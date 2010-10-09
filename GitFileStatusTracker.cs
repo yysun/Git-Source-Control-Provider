@@ -3,66 +3,73 @@ using System.Collections.Generic;
 using System.IO;
 using GitSharp.Core;
 using System.Diagnostics;
+using System.Timers;
 
 namespace GitScc
 {
-    public class GitFileStatusTracker
+    public class GitFileStatusTracker : IDisposable
     {
-        private string solutionFolder;
+        private string initFolder;
 
         private Repository repository;
         private Tree commitTree;
         private GitIndex index;
+        //private IgnoreHandler ignoreHandler;
+
         private Dictionary<string, GitFileStatus> cache;
 
-        public GitFileStatusTracker()
+        public GitFileStatusTracker(string workingFolder)
         {
             cache = new Dictionary<string, GitFileStatus>();
+            this.initFolder = workingFolder;
+            Refresh();
         }
 
-        public void Open(string solutionFolder)
+        public void Refresh()
         {
-            Close();
-
-            this.solutionFolder = solutionFolder;
-
-            if (!string.IsNullOrEmpty(solutionFolder))
+            cache.Clear();
+            if (!string.IsNullOrEmpty(initFolder))
             {
                 try
                 {
-                    this.repository = Repository.Open(solutionFolder);
-                    var id = repository.Resolve("HEAD");
-                    var commit = repository.MapCommit(id);
-                    commitTree = (commit != null ? commit.TreeEntry : new Tree(repository));
-                    index = repository.Index;
-                    index.RereadIfNecessary();
+                    this.repository = Repository.Open(initFolder);
+
+                    if (this.repository != null)
+                    {
+                        var id = repository.Resolve("HEAD");
+                        var commit = repository.MapCommit(id);
+                        this.commitTree = (commit != null ? commit.TreeEntry : new Tree(repository));
+                        this.index = repository.Index;
+                        this.index.RereadIfNecessary();
+                        //this.ignoreHandler = new IgnoreHandler(repository);
+                        //this.watcher = new FileSystemWatcher(this.repository.WorkingDirectory.FullName);
+                    }
                 }
-                catch
+                catch (Exception ex)
                 {
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            if (this.repository != null) this.repository.Close();
         }
 
         public string GitWorkingDirectory
         {
             get
             {
-                return this.repository != null ?
-                this.repository.WorkingDirectory.FullName : null;
+                return this.repository == null ? null :
+                    this.repository.WorkingDirectory.FullName;
             }
         }
+
         public bool HasGitRepository
         {
             get { return this.repository != null; }
         }
 
-        public void Close()
-        {
-            cache.Clear();
-
-            if (this.repository != null) this.repository.Close();
-            this.repository = null;
-        }
 
         public GitFileStatus GetFileStatus(string fileName)
         {
@@ -73,21 +80,22 @@ namespace GitScc
             {
                 var status = GetFileStatusNoCache(fileName);
                 cache.Add(fileName, status);
-
-                Debug.WriteLine(string.Format("GetFileStatus {0} - {1}", fileName, status));
+                //Debug.WriteLine(string.Format("GetFileStatus {0} - {1}", fileName, status));
+                return status;
             }
-            return cache[fileName];
+            else
+            {
+                return cache[fileName];
+            }
         }
 
         private GitFileStatus GetFileStatusNoCache(string fileName)
         {
-           
-
             var fileNameRel = GetRelativeFileName(fileName);
 
-            TreeEntry treeEntry = commitTree.FindBlobMember(fileNameRel);
-            GitIndex.Entry indexEntry = index.GetEntry(fileNameRel);
-            
+            TreeEntry treeEntry = this.commitTree.FindBlobMember(fileNameRel);
+            GitIndex.Entry indexEntry = this.index.GetEntry(fileNameRel);
+
             //the order of 'if' below is important
             if (indexEntry != null)
             {
@@ -98,7 +106,7 @@ namespace GitScc
                 if (treeEntry != null && !treeEntry.Id.Equals(indexEntry.ObjectId))
                 {
                     return GitFileStatus.Staged;
-                }            
+                }
                 if (!File.Exists(fileName))
                 {
                     return GitFileStatus.Missing;
@@ -122,13 +130,18 @@ namespace GitScc
                 {
                     return GitFileStatus.Removed;
                 }
-
                 if (File.Exists(fileName))
                 {
-                    return GitFileStatus.UnTrackered;
+                    //remove the ingore check for better performance
+                    //if (this.ignoreHandler.IsIgnored(fileName))
+                    //{
+                    //    return GitFileStatus.Ignored;
+                    //}
+
+                    return GitFileStatus.New;
                 }
             }
-            
+
             return GitFileStatus.NotControlled;
         }
 
@@ -140,11 +153,6 @@ namespace GitScc
             return fileName;
         }
 
-        public void Update()
-        {
-            if (!string.IsNullOrEmpty(solutionFolder)) Open(this.solutionFolder);
-        }
-
         public byte[] GetFileContent(string fileName)
         {
             if (!HasGitRepository || string.IsNullOrEmpty(fileName))
@@ -153,12 +161,12 @@ namespace GitScc
             fileName = GetRelativeFileName(fileName);
 
             var entry = commitTree.FindBlobMember(fileName);
-            if(entry!=null)
+            if (entry != null)
             {
                 var blob = repository.OpenBlob(entry.Id);
-                if(blob!=null) return blob.CachedBytes;
-            }        
-            return null ;
+                if (blob != null) return blob.CachedBytes;
+            }
+            return null;
         }
 
         public string CurrentBranch
@@ -169,139 +177,40 @@ namespace GitScc
             }
         }
 
-        public IEnumerable<GitFile> ChangedFiles
+        internal static string GetRepositoryDirectory(string folder)
         {
-            get
-            {
-                if (!HasGitRepository) yield break;
+            var repository = (!string.IsNullOrEmpty(folder) && Directory.Exists(folder)) ?
+                Repository.Open(folder) : null;
 
-                //foreach (var fa in this.repositoryStatus.Added)
-                //{
-                //    yield return new GitFile { Status = GitFileStatus.Added, FileName = fa, IsStaged = true };
-                //}
-                //foreach (var fe in this.repositoryStatus.Modified)
-                //{
-                //    yield return new GitFile { Status = GitFileStatus.Modified, FileName = fe };
-                //}
-                //foreach (var fm in this.repositoryStatus.Missing)
-                //{
-                //    yield return new GitFile { Status = GitFileStatus.Deleted, FileName = fm };
-                //}
-                //foreach (var fd in this.repositoryStatus.Removed)
-                //{
-                //    yield return new GitFile { Status = GitFileStatus.Deleted, FileName = fd, IsStaged = true };
-                //}
-                //foreach (var fs in this.repositoryStatus.Staged)
-                //{
-                //    yield return new GitFile { Status = GitFileStatus.Staged, FileName = fs, IsStaged = true };
-                //}
-                //foreach (var fu in this.repositoryStatus.Untracked)
-                //{
-                //    yield return new GitFile { Status = GitFileStatus.UnTrackered, FileName = fu };
-                //}
-            }
+            return repository == null ? null : repository.WorkingDirectory.FullName;
+
         }
 
-        internal void Init()
+        public override string ToString()
         {
-            if (!this.HasGitRepository)
-            {
-                this.repository = new Repository(new DirectoryInfo(this.solutionFolder));
-                this.repository.Create(false);
-            }
+            return repository == null ? "[no repo]" : repository.WorkingDirectory.FullName;
+        }
+
+        public System.Collections.IEnumerable ChangedFiles { get; set; }
+
+        internal void UnStageFile(string fileName)
+        {
+            throw new NotImplementedException();
         }
 
         internal void StageFile(string fileName)
         {
-            //if (!this.HasGitRepository) return;
-            //if (this.repositoryStatus.Missing.Has(fileName))
-            //{
-            //    this.repositoryStatus.Repository.Index.Remove(fileName);
-            //}
-            //else
-            //{
-            //    this.repositoryStatus.Repository.Index.Stage(fileName);
-            //}
-        }
-
-        internal void UnStageFile(string fileName)
-        {
-            if (!this.HasGitRepository) return;
-
-            //if (this.repositoryStatus.Removed.Has(fileName))
-            //{
-            //    var content = ((Leaf)this.repositoryStatus.Repository.Head.CurrentCommit.Tree[fileName]).RawData;
-            //    var filepath = Encoding.UTF8.GetBytes(fileName);
-            //    this.repositoryStatus.Repository.Index.AddContent(filepath, content);
-            //}
-            //else
-            //{
-            //    this.repositoryStatus.Repository.Index.Unstage(fileName);
-            //}
-        }
-
-        internal void Commit(string message)
-        {
-            if (!this.HasGitRepository) return;
-            //this.repositoryStatus.Repository.Commit(message);
+            throw new NotImplementedException();
         }
 
         internal string DiffFile(string fileName)
         {
-            if (!HasGitRepository || string.IsNullOrEmpty(fileName))
-                return null;
-
-            //GitSharp has not implemented diff yet
-
-            //if (this.repositoryStatus.Removed.Has(fileName) ||
-            //    this.repositoryStatus.Added.Has(fileName) ||
-            //    this.repositoryStatus.Staged.Has(fileName))
-            //{
-            //    return RunCommand(string.Format("diff --cached --unified=3 -- \"{0}\"", fileName));
-            //}
-            //else if (this.repositoryStatus.Missing.Has(fileName) ||
-            //     this.repositoryStatus.Modified.Has(fileName))
-            //{
-            //    return RunCommand(string.Format("diff --unified=3 -- \"{0}\"", fileName));
-            //}
-            //else
-            //{
-            //    byte[] bytes = File.ReadAllBytes(Path.Combine(this.workingFolder, fileName));
-
-            //    return Diff.IsBinary(bytes) == true ? "[Binary Content]" :
-            //        Encoding.UTF8.GetString(bytes); //TODO: assuming UTF8?
-            //}
-
-            return "";
+            throw new NotImplementedException();
         }
 
-
-        private string RunCommand(string args)
+        internal void Commit(string comments)
         {
-            var cmd = Path.Combine(Path.GetDirectoryName(GitSccOptions.Current.GitBashPath),
-                                   "git.exe");
-
-            var pinfo = new ProcessStartInfo(cmd)
-            {
-                Arguments = args,
-                CreateNoWindow = true,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                WorkingDirectory = this.repository.WorkingDirectory.FullName
-            };
-
-            using (var process = Process.Start(pinfo))
-            {
-                string output = process.StandardOutput.ReadToEnd();
-                string error = process.StandardError.ReadToEnd();
-                process.WaitForExit();
-
-                if (!string.IsNullOrWhiteSpace(error))
-                    throw new Exception(error);
-
-                return output;
-            }
+            throw new NotImplementedException();
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
@@ -27,20 +28,20 @@ namespace GitScc
     {
         private bool _active = false;
         private BasicSccProvider _sccProvider = null;
-        private GitFileStatusTracker _statusTracker = null;
+        private List<GitFileStatusTracker> trackers;
         private uint _vsSolutionEventsCookie, _vsIVsFileChangeEventsCookie, _vsIVsUpdateSolutionEventsCookie;
 
         #region SccProvider Service initialization/unitialization
-        public SccProviderService(BasicSccProvider sccProvider, GitFileStatusTracker statusTracker)
+        public SccProviderService(BasicSccProvider sccProvider, List<GitFileStatusTracker> trackers)
         {
             this._sccProvider = sccProvider;
-            this._statusTracker = statusTracker;
+            this.trackers = trackers;
 
             // Subscribe to solution events
-            IVsSolution sol = (IVsSolution)_sccProvider.GetService(typeof(SVsSolution));
+            IVsSolution sol = (IVsSolution)sccProvider.GetService(typeof(SVsSolution));
             sol.AdviseSolutionEvents(this, out _vsSolutionEventsCookie);
 
-            var sbm = _sccProvider.GetService(typeof(SVsSolutionBuildManager)) as IVsSolutionBuildManager2;
+            var sbm = sccProvider.GetService(typeof(SVsSolutionBuildManager)) as IVsSolutionBuildManager2;
             if (sbm != null)
             {
                 sbm.AdviseUpdateSolutionEvents(this, out _vsIVsUpdateSolutionEventsCookie);
@@ -49,7 +50,7 @@ namespace GitScc
         }
 
         public void Dispose()
-        {    
+        {
             // Unregister from receiving solution events
             if (VSConstants.VSCOOKIE_NIL != _vsSolutionEventsCookie)
             {
@@ -81,10 +82,7 @@ namespace GitScc
         {
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Git Source Control Provider set active"));
             _active = true;
-            _sccProvider.OnActiveStateChange();
-
-            OpenTracker();
-            RefreshSolutionNode();
+            Refresh();
             return VSConstants.S_OK;
         }
 
@@ -93,12 +91,9 @@ namespace GitScc
         public int SetInactive()
         {
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Git Source Control Provider set inactive"));
-
             _active = false;
-            _sccProvider.OnActiveStateChange();
-
+            Refresh();
             CloseTracker();
-            RefreshSolutionNode();
             return VSConstants.S_OK;
         }
 
@@ -144,51 +139,74 @@ namespace GitScc
             Debug.Assert(cFiles == 1, "Only getting one file icon at a time is supported");
             // Return the icons and the status. While the status is a combination a flags, we'll return just values 
             // with one bit set, to make life easier for GetSccGlyphsFromStatus
-            GitFileStatus status = _statusTracker.GetFileStatus(rgpszFullPaths[0]);
+
+            if (rgpszFullPaths[0] == null) return 0;
+
+            GitFileStatus status = _active ? GetFileStatus(rgpszFullPaths[0]) : GitFileStatus.NotControlled;
+
+            Debug.WriteLine("==== GetSccGlyph {0} : {1}", rgpszFullPaths[0], status);
+
+            if (rgdwSccStatus != null) rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_CONTROLLED;
 
             switch (status)
             {
                 case GitFileStatus.Trackered:
                     rgsiGlyphs[0] = VsStateIcon.STATEICON_CHECKEDIN;
-                    if (rgdwSccStatus != null)
-                    {
-                        rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_CONTROLLED;
-                    }
+                    //if (rgdwSccStatus != null)
+                    //{
+                    //    rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_CONTROLLED;
+                    //}
                     break;
 
                 case GitFileStatus.Modified:
                     rgsiGlyphs[0] = VsStateIcon.STATEICON_CHECKEDOUT;
-                    if (rgdwSccStatus != null)
-                    {
-                        rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_CHECKEDOUT;
-                    }
+                    //if (rgdwSccStatus != null)
+                    //{
+                    //    rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_CHECKEDOUT;
+                    //}
                     break;
 
-                case GitFileStatus.UnTrackered:
+                case GitFileStatus.New:
                     //rgsiGlyphs[0] = VsStateIcon.STATEICON_CHECKEDOUT;
                     rgsiGlyphs[0] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Untracked);
-                    if (rgdwSccStatus != null)
-                    {
-                        rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_CHECKEDOUT;
-                    }
+                    //if (rgdwSccStatus != null)
+                    //{
+                    //    rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_CHECKEDOUT;
+                    //}
                     break;
 
                 case GitFileStatus.Added:
                 case GitFileStatus.Staged:
                     //rgsiGlyphs[0] = VsStateIcon.STATEICON_CHECKEDOUT;
                     rgsiGlyphs[0] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Staged);
-                    if (rgdwSccStatus != null)
-                    {
-                        rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_CHECKEDOUT;
-                    }
+                    //if (rgdwSccStatus != null)
+                    //{
+                    //    rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_CHECKEDOUT;
+                    //}
                     break;
 
                 case GitFileStatus.NotControlled:
                     rgsiGlyphs[0] = VsStateIcon.STATEICON_BLANK;
-                    if (rgdwSccStatus != null)
-                    {
-                        rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_NOTCONTROLLED;
-                    }
+                    //if (rgdwSccStatus != null)
+                    //{
+                    //    rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_NOTCONTROLLED;
+                    //}
+                    break;
+
+                case GitFileStatus.Ignored:
+                    rgsiGlyphs[0] = VsStateIcon.STATEICON_EXCLUDEDFROMSCC;
+                    //if (rgdwSccStatus != null)
+                    //{
+                    //    rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_NOTCONTROLLED;
+                    //}
+                    break;
+
+                case GitFileStatus.MergeConflict:
+                    rgsiGlyphs[0] = VsStateIcon.STATEICON_DISABLED;
+                    //if (rgdwSccStatus != null)
+                    //{
+                    //    rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_NOTCONTROLLED;
+                    //}
                     break;
             }
 
@@ -200,18 +218,18 @@ namespace GitScc
         /// </summary>
         public int GetSccGlyphFromStatus([InAttribute] uint dwSccStatus, [OutAttribute] VsStateIcon[] psiGlyph)
         {
-            switch (dwSccStatus)
-            {
-                case (uint)__SccStatus.SCC_STATUS_CHECKEDOUT:
-                    psiGlyph[0] = VsStateIcon.STATEICON_CHECKEDOUT;
-                    break;
-                case (uint)__SccStatus.SCC_STATUS_CONTROLLED:
-                    psiGlyph[0] = VsStateIcon.STATEICON_CHECKEDIN;
-                    break;
-                default:
-                    psiGlyph[0] = VsStateIcon.STATEICON_BLANK;
-                    break;
-            }
+            //switch (dwSccStatus)
+            //{
+            //    case (uint)__SccStatus.SCC_STATUS_CHECKEDOUT:
+            //        psiGlyph[0] = VsStateIcon.STATEICON_CHECKEDOUT;
+            //        break;
+            //    case (uint)__SccStatus.SCC_STATUS_CONTROLLED:
+            //        psiGlyph[0] = VsStateIcon.STATEICON_CHECKEDIN;
+            //        break;
+            //    default:
+            //        psiGlyph[0] = VsStateIcon.STATEICON_BLANK;
+            //        break;
+            //}
             return VSConstants.S_OK;
         }
 
@@ -241,33 +259,33 @@ namespace GitScc
         public int GetGlyphTipText([InAttribute] IVsHierarchy phierHierarchy, [InAttribute] uint itemidNode, out string pbstrTooltipText)
         {
             pbstrTooltipText = "";
-/*
-            IList<string> files = GetNodeFiles(phierHierarchy as IVsSccProject2, itemidNode);
-            if (files.Count == 0)
-            {
-                return VSConstants.S_OK;
-            }
-            GitFileStatus status = _statusTracker.GetFileStatus(files[0]);
-*/
-            GitFileStatus status = _statusTracker.GetFileStatus(GetFileName(phierHierarchy, itemidNode));
+            GitFileStatus status = GetFileStatus(phierHierarchy, itemidNode);
             pbstrTooltipText = status.ToString(); //TODO: use resources
-
             return VSConstants.S_OK;
         }
-
         #endregion
 
         #region IVsSolutionEvents interface functions
 
         public int OnAfterOpenSolution([InAttribute] Object pUnkReserved, [InAttribute] int fNewSolution)
         {
-            OpenTracker();
-            ReDrawStateGlyphs();
+            //automatic switch the scc provider
+            if (!Active)
+            {
+                OpenTracker();
+                if (trackers.Count > 0)
+                {
+                    IVsRegisterScciProvider rscp = (IVsRegisterScciProvider) _sccProvider.GetService(typeof(IVsRegisterScciProvider));
+                    rscp.RegisterSourceControlProvider(GuidList.guidSccProvider);
+                }
+            }
+            Refresh(); 
             return VSConstants.S_OK;
         }
 
         public int OnAfterCloseSolution([InAttribute] Object pUnkReserved)
         {
+            CloseTracker();
             return VSConstants.S_OK;
         }
 
@@ -303,7 +321,6 @@ namespace GitScc
 
         public int OnQueryCloseSolution([InAttribute] Object pUnkReserved, [InAttribute] ref int pfCancel)
         {
-            CloseTracker();
             return VSConstants.S_OK;
         }
 
@@ -367,62 +384,25 @@ namespace GitScc
 
         #endregion
 
-        #region open and close tracker
-
-        internal void OpenTracker()
+        #region EnumHierarchyItems
+/*
+        private void EnumHierarchyItems(IVsHierarchy hierarchy, uint itemid, int recursionLevel, Action<IVsHierarchy, uint> action)
         {
-            string solutionFileName = GetSolutionFileName();
+            //if (recursionLevel > 1) return;
 
-            if (!string.IsNullOrEmpty(solutionFileName))
-            {
-
-                string solutionPath = Path.GetDirectoryName(solutionFileName);
-                _statusTracker.Open(solutionPath);
-
-                _vsIVsFileChangeEventsCookie = VSConstants.VSCOOKIE_NIL;
-                solutionPath = _statusTracker.GitWorkingDirectory ?? solutionPath;
+//#if(DEBUG)
+//            object pval = null;
+//            hierarchy.GetProperty(itemid, (int)__VSHPROPID.VSHPROPID_Name, out pval);
+//            if (pval != null)
+//            {
+//                Debug.WriteLine("==== Enum Hierarchy Item:" + pval.ToString() + (_active ? "- active" : "- inactive"));
+//            }
+//#endif
 
                 if (!string.IsNullOrEmpty(solutionPath))
                 {
-                    IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
-                    fileChangeService.AdviseDirChange(solutionPath, 1, this, out _vsIVsFileChangeEventsCookie);
                 }
-            }
-        }
-
-
-        private void CloseTracker()
-        {
-            _statusTracker.Close();
-            if (VSConstants.VSCOOKIE_NIL != _vsIVsFileChangeEventsCookie)
-            {
-                IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
-                fileChangeService.UnadviseDirChange(_vsIVsFileChangeEventsCookie);
-            }
-        } 
-
-        #endregion
-
-        #region refresh
-
-        internal void Refresh()
-        {
             isBuilding = false;
-            _statusTracker.Update();
-            ReDrawStateGlyphs();
-        }
-
-        internal void ReDrawStateGlyphs()
-        {
-            IVsHierarchy sol = (IVsHierarchy)_sccProvider.GetService(typeof(SVsSolution));
-            EnumHierarchyItems(sol as IVsHierarchy, VSConstants.VSITEMID_ROOT, 0);
-        }
-
-
-        private void EnumHierarchyItems(IVsHierarchy hierarchy, uint itemid, int recursionLevel)
-        {
-
-            if (recursionLevel > 1) return;
 
             int hr;
             IntPtr nestedHierarchyObj;
@@ -436,15 +416,13 @@ namespace GitScc
                 Marshal.Release(nestedHierarchyObj);
                 if (nestedHierarchy != null)
                 {
-                    EnumHierarchyItems(nestedHierarchy, nestedItemId, recursionLevel);
+                    EnumHierarchyItems(nestedHierarchy, nestedItemId, recursionLevel, action);
                 }
             }
             else
             {
                 object pVar;
-
-                processNodeFunc(hierarchy, itemid);
-
+                action(hierarchy, itemid);
                 recursionLevel++;
 
                 hr = hierarchy.GetProperty(itemid, (int)__VSHPROPID.VSHPROPID_FirstVisibleChild, out pVar);
@@ -453,7 +431,7 @@ namespace GitScc
                     uint childId = GetItemId(pVar);
                     while (childId != VSConstants.VSITEMID_NIL)
                     {
-                        EnumHierarchyItems(hierarchy, childId, recursionLevel);
+                        EnumHierarchyItems(hierarchy, childId, recursionLevel, action);
                         hr = hierarchy.GetProperty(childId, (int)__VSHPROPID.VSHPROPID_NextVisibleSibling, out pVar);
                         if (VSConstants.S_OK == hr)
                         {
@@ -479,9 +457,11 @@ namespace GitScc
             if (pvar is long) return (uint)(long)pvar;
             return VSConstants.VSITEMID_NIL;
         }
-        
+
         private void RefreshSolutionNode()
         {
+            Debug.WriteLine("==== Refresh Solution Node");
+
             string fileName = GetSolutionFileName();
             if (string.IsNullOrEmpty(fileName)) return;
 
@@ -494,16 +474,21 @@ namespace GitScc
             solHier.SetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_StateIconIndex, rgsiGlyphs[0]);
 
             var caption = "Solution Explorer";
-            string branch = _statusTracker.CurrentBranch;
+            string branch = CurrentBranchName;
             if (!string.IsNullOrEmpty(branch))
             {
                 caption += " (" + branch + ")";
             }
 
             SetSolutionExplorerTitle(caption);
-
         }
-
+*/
+        private void SetSolutionExplorerTitle(string message)
+        {
+            var dte = (DTE)_sccProvider.GetService(typeof(DTE));
+            dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Caption = message;
+        }
+/*
         private void processNodeFunc(IVsHierarchy hierarchy, uint itemid)
         {
 
@@ -511,6 +496,16 @@ namespace GitScc
 
             if (itemid == VSConstants.VSITEMID_ROOT)
             {
+
+#if(DEBUG)
+                object pval = null;
+                hierarchy.GetProperty(itemid, (int)__VSHPROPID.VSHPROPID_Name, out pval);
+                if (pval != null)
+                {
+                    Debug.WriteLine("==== Refresh:" + pval.ToString());
+                }
+#endif
+
                 if (sccProject2 == null)
                 {
                     RefreshSolutionNode();
@@ -523,13 +518,13 @@ namespace GitScc
                 }
             }
         }
-
+*/
         /// <summary>
         /// Returns the filename of the solution
         /// </summary>
         public string GetSolutionFileName()
         {
-            IVsSolution sol = (IVsSolution) _sccProvider.GetService(typeof(SVsSolution));
+            IVsSolution sol = (IVsSolution)_sccProvider.GetService(typeof(SVsSolution));
             string solutionDirectory, solutionFile, solutionUserOptions;
             if (sol.GetSolutionInfo(out solutionDirectory, out solutionFile, out solutionUserOptions) == VSConstants.S_OK)
             {
@@ -540,11 +535,21 @@ namespace GitScc
                 return null;
             }
         }
-        
+
         private string GetProjectFileName(IVsHierarchy hierHierarchy)
         {
+            if (!(hierHierarchy is IVsSccProject2)) return GetSolutionFileName();
+
             var files = GetNodeFiles(hierHierarchy as IVsSccProject2, VSConstants.VSITEMID_ROOT);
-            return files.Count <= 0 ? null : files[0];
+            string fileName = files.Count <= 0 ? null : files[0];
+
+            //try hierHierarchy.GetCanonicalName to get project name for web site
+            if (fileName == null)
+            {
+                if (hierHierarchy.GetCanonicalName(VSConstants.VSITEMID_ROOT, out fileName) != VSConstants.S_OK) return null;
+                return GetCaseSensitiveFileName(fileName);
+            }
+            return fileName;
         }
 
         private string GetFileName(IVsHierarchy hierHierarchy, uint itemidNode)
@@ -566,16 +571,20 @@ namespace GitScc
 
         private static string GetCaseSensitiveFileName(string fileName)
         {
-            if (fileName == null || !File.Exists(fileName)) return null;
+            if (fileName == null) return fileName;
 
-            try
+            if (Directory.Exists(fileName) || File.Exists(fileName))
             {
-                StringBuilder sb = new StringBuilder(1024);
-                GetShortPathName(fileName, sb, 1024);
-                GetLongPathName(sb.ToString(), sb, 1024);
-                return sb.ToString();
+
+                try
+                {
+                    StringBuilder sb = new StringBuilder(1024);
+                    GetShortPathName(fileName, sb, 1024);
+                    GetLongPathName(sb.ToString(), sb, 1024);
+                    return sb.ToString();
+                }
+                catch { }
             }
-            catch { }
 
             return fileName;
         }
@@ -753,33 +762,109 @@ namespace GitScc
 
         #endregion
 
+        #region open and close tracker
+        string lastMinotorFolder = "";
+        string monitorFolder;
+
+        internal void OpenTracker()
+        {
+            Debug.WriteLine("==== Open Tracker");
+            trackers.Clear();
+
+            var solutionFileName = GetSolutionFileName();
+
+            if (!string.IsNullOrEmpty(solutionFileName))
+            {
+                monitorFolder = Path.GetDirectoryName(solutionFileName);
+
+                //IVsHierarchy sol = (IVsHierarchy)_sccProvider.GetService(typeof(SVsSolution));
+                //EnumHierarchyItems(sol, VSConstants.VSITEMID_ROOT, 0,
+                //    (h, id) => {if(id==VSConstants.VSITEMID_ROOT) AddProject(h);} //only add project nodes
+                //);
+
+                GetLoadedControllableProjects().ForEach(h => AddProject(h as IVsHierarchy));
+
+                if (monitorFolder != lastMinotorFolder)
+                {
+                    RemoveFolderMonitor();
+
+                    IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
+                    if (VSConstants.VSCOOKIE_NIL != _vsIVsFileChangeEventsCookie)
+                    {
+                        fileChangeService.UnadviseDirChange(_vsIVsFileChangeEventsCookie);
+                    }
+                    fileChangeService.AdviseDirChange(monitorFolder, 1, this, out _vsIVsFileChangeEventsCookie);
+                    lastMinotorFolder = monitorFolder;
+
+                    Debug.WriteLine("==== Monitoring: " + monitorFolder + " " + _vsIVsFileChangeEventsCookie);
+                }
+            }
+        }
+
+        private void CloseTracker()
+        {
+            Debug.WriteLine("==== Close Tracker");
+            trackers.Clear();
+            RemoveFolderMonitor();
+        }
+
+        private void RemoveFolderMonitor()
+        {
+
+            if (VSConstants.VSCOOKIE_NIL != _vsIVsFileChangeEventsCookie)
+            {
+                IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
+                fileChangeService.UnadviseDirChange(_vsIVsFileChangeEventsCookie);
+                Debug.WriteLine("==== Stop Monitoring: " + _vsIVsFileChangeEventsCookie.ToString());
+                _vsIVsFileChangeEventsCookie = VSConstants.VSCOOKIE_NIL;
+                lastMinotorFolder = "";
+            }
+        }
+
+        #endregion
+
         #region IVsFileChangeEvents
+
+        internal void Refresh()
+        {
+            Debug.WriteLine("==== Refresh Nodes");
+            
+            noRefresh = true;
+            OpenTracker();
+
+            //IVsHierarchy sol = (IVsHierarchy)_sccProvider.GetService(typeof(SVsSolution));
+            //EnumHierarchyItems(sol as IVsHierarchy, VSConstants.VSITEMID_ROOT, 0,
+            //    (h, id) => processNodeFunc(h, id)
+            //);
+
+            RefreshNodesGlyphs();
+
+            noRefresh = false;
+        }
 
         private DateTime lastTimeDirChangeFired = DateTime.Now;
 
         public int DirectoryChanged(string pszDirectory)
         {
-            if (isBuilding) return VSConstants.S_OK;
+            if (noRefresh) return VSConstants.S_OK;
 
             double delta = DateTime.Now.Subtract(lastTimeDirChangeFired).TotalMilliseconds;
             lastTimeDirChangeFired = DateTime.Now;
-            Debug.WriteLine("Dir changed, delta: " + delta.ToString());
 
+            //Debug.WriteLine("==== dir changed: " + Math.Floor(delta).ToString());
             if (delta > 1000)
             {
                 System.Threading.Thread.Sleep(200);
-                Debug.WriteLine("Dir changed, refresh Git: " + DateTime.Now.ToString());
+                Debug.WriteLine("==== dir changed REFRESH: " + Math.Floor(delta).ToString());
                 Refresh();
-
             }
             return VSConstants.S_OK;
         }
 
-
         public int FilesChanged(uint cChanges, string[] rgpszFile, uint[] rggrfChange)
         {
             return VSConstants.S_OK;
-        } 
+        }
 
         #endregion
 
@@ -790,7 +875,7 @@ namespace GitScc
             get
             {
                 var fileName = GetSelectFileName();
-                GitFileStatus status = _statusTracker.GetFileStatus(fileName);
+                GitFileStatus status = GetFileStatus(fileName);
                 return status == GitFileStatus.Modified || status == GitFileStatus.Staged;
             }
         }
@@ -799,67 +884,43 @@ namespace GitScc
         {
             var selectedNodes = GetSelectedNodes();
             if (selectedNodes.Count <= 0) return null;
-/*
-            var files = GetNodeFiles(selectedNodes[0].pHier as IVsSccProject2, selectedNodes[0].itemid);
-            if (files.Count <= 0) return null;
-
-            return files[0];
-*/
-
             return GetFileName(selectedNodes[0].pHier, selectedNodes[0].itemid);
         }
 
         internal void CompareSelectedFile()
         {
             var fileName = GetSelectFileName();
-
-            GitFileStatus status = _statusTracker.GetFileStatus(fileName);
+            GitFileStatus status = GetFileStatus(fileName);
             if (status == GitFileStatus.Modified || status == GitFileStatus.Staged)
             {
                 string tempFile = Path.GetFileName(fileName);
                 tempFile = Path.Combine(Path.GetTempPath(), tempFile);
-
-                var data = _statusTracker.GetFileContent(fileName);
-                using (var binWriter = new BinaryWriter(File.Open(tempFile, FileMode.Create)))
-                {
-                    binWriter.Write(data ?? new byte[] { });
-                }
-
+                SaveFileFromRepository(fileName, tempFile);
                 _sccProvider.RunDiffCommand(tempFile, fileName);
             }
         }
 
+
         internal void UndoSelectedFile()
         {
             var fileName = GetSelectFileName();
-
-            GitFileStatus status = _statusTracker.GetFileStatus(fileName);
+            GitFileStatus status = GetFileStatus(fileName);
             if (status == GitFileStatus.Modified || status == GitFileStatus.Staged)
             {
                 if (MessageBox.Show("Are you sure you want to undo changes for " + Path.GetFileName(fileName) +
-                    " and store it from last commit? ", 
+                    " and store it from last commit? ",
                     "Undo Changes", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
-                    var data = _statusTracker.GetFileContent(fileName);
-                    using (var binWriter = new BinaryWriter(File.Open(fileName, FileMode.Create)))
-                    {
-                        binWriter.Write(data ?? new byte[] { });
-                    }
+                    SaveFileFromRepository(fileName, fileName);
                 }
             }
         }
 
         #endregion
 
-        private void SetSolutionExplorerTitle(string message)
-        {
-            var dte = (DTE) _sccProvider.GetService(typeof(DTE));
-            dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Caption = message;
-        }
-
-        bool isBuilding = false;
-        
         #region IVsUpdateSolutionEvents2 Members
+
+        bool noRefresh = false;
 
         public int OnActiveProjectCfgChange(IVsHierarchy pIVsHierarchy)
         {
@@ -878,9 +939,8 @@ namespace GitScc
 
         public int UpdateSolution_Begin(ref int pfCancelUpdate)
         {
-            Debug.WriteLine("Build begin ...");
-
-            isBuilding = true;
+            Debug.WriteLine("Git Source Control Provider: suppress refresh before build...");
+            noRefresh = true;
             return VSConstants.S_OK;
         }
 
@@ -891,9 +951,8 @@ namespace GitScc
 
         public int UpdateSolution_Done(int fSucceeded, int fModified, int fCancelCommand)
         {
-            Debug.WriteLine("Build done ...");
-
-            isBuilding = false;
+            Debug.WriteLine("Git Source Control Provider: resume refresh after build...");
+            noRefresh = false;
             return VSConstants.S_OK;
         }
 
@@ -904,22 +963,238 @@ namespace GitScc
 
         #endregion
 
-        public bool IsSolutionGitControlled
+        #region project trackers
+        private void AddProject(IVsHierarchy pHierarchy)
+        {
+            string projectName = GetProjectFileName(pHierarchy);
+            if (string.IsNullOrEmpty(projectName)) return;
+            string projectDirecotry = Path.GetDirectoryName(projectName);
+
+            Debug.WriteLine("==== Adding project: " + projectDirecotry);
+
+            string gitfolder = GitFileStatusTracker.GetRepositoryDirectory(projectDirecotry);
+
+            if (string.IsNullOrEmpty(gitfolder) ||
+                trackers.Any(t => t.HasGitRepository && 
+                             string.Compare(t.GitWorkingDirectory, gitfolder, true)==0)) return;
+            
+            if (gitfolder.Length < monitorFolder.Length) monitorFolder = gitfolder;
+            trackers.Add(new GitFileStatusTracker(gitfolder));
+            
+            Debug.WriteLine("==== Added git tracker: " + gitfolder);
+           
+        }
+
+        internal string CurrentBranchName
         {
             get
             {
-                return _statusTracker.HasGitRepository;
+                return CurrentTracker == null ? null : CurrentTracker.CurrentBranch;
             }
         }
 
-        internal void InitRepo()
+        internal string CurrentGitWorkingDirectory;
+
+        internal GitFileStatusTracker CurrentTracker
         {
-            if (MessageBox.Show("Are you sure you want to create a local repository for this solution?",
-                    "Init Repository", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            get
             {
-                _statusTracker.Init();
+                string fileName = GetSelectFileName();
+                if (string.IsNullOrEmpty(fileName))
+                {
+                    if (trackers.Count == 1) return trackers[0];
+                }
+                return GetTracker(fileName);
             }
         }
- 
+
+        internal GitFileStatusTracker GetSolutionTracker()
+        {
+            return GetTracker(GetSolutionFileName());
+        }
+
+        internal GitFileStatusTracker GetTracker(string fileName)
+        {
+            if (string.IsNullOrEmpty(fileName)) return null;
+            
+            return trackers.Where(t => t.HasGitRepository && 
+                                  IsParentFolder(t.GitWorkingDirectory, fileName))           
+                           .OrderByDescending(t => t.GitWorkingDirectory.Length)
+                           .FirstOrDefault();
+        }
+
+        private bool IsParentFolder(string folder, string fileName)
+        {
+            if (string.IsNullOrEmpty(folder) || string.IsNullOrEmpty(fileName) ||
+               !Directory.Exists(folder) || !File.Exists(fileName)) return false;
+
+            bool b = false;
+            var dir = new DirectoryInfo(Path.GetDirectoryName(fileName));
+            while (!b && dir != null)
+            {
+                b = string.Compare(dir.FullName, folder, true) == 0;
+                dir = dir.Parent;
+            }
+            return b;
+        }
+
+        private GitFileStatus GetFileStatus(string fileName)
+        {
+            var tracker = GetTracker(fileName);
+            return tracker == null ? GitFileStatus.NotControlled :
+                tracker.GetFileStatus(fileName);
+        }
+
+        private GitFileStatus GetFileStatus(IVsHierarchy phierHierarchy, uint itemidNode)
+        {
+            var fileName = GetFileName(phierHierarchy, itemidNode);
+            return GetFileStatus(fileName);
+        }
+
+        private void SaveFileFromRepository(string fileName, string tempFile)
+        {
+            var tracker = CurrentTracker;
+            if (tracker == null) return;
+            var data = tracker.GetFileContent(fileName);
+            using (var binWriter = new BinaryWriter(File.Open(tempFile, FileMode.Create)))
+            {
+                binWriter.Write(data ?? new byte[] { });
+            }
+        }
+        #endregion
+
+        #region new Refresh methods
+        public void RefreshNodesGlyphs()
+        {
+            var solHier = (IVsHierarchy)_sccProvider.GetService(typeof(SVsSolution));
+            var projectList = GetLoadedControllableProjects();
+
+            // We'll also need to refresh the solution folders glyphs
+            // to reflect the controlled state
+            IList<VSITEMSELECTION> nodes = new List<VSITEMSELECTION>();
+
+            {
+                // add solution root item
+                VSITEMSELECTION vsItem;
+                vsItem.itemid = VSConstants.VSITEMID_ROOT;
+                vsItem.pHier = solHier;// pHierarchy;
+                nodes.Add(vsItem);
+            }
+
+            // add project node items
+            foreach (IVsHierarchy hr in projectList)
+            {
+                VSITEMSELECTION vsItem;
+                vsItem.itemid = VSConstants.VSITEMID_ROOT;
+                vsItem.pHier = hr;
+                nodes.Add(vsItem);
+            }
+
+            RefreshNodesGlyphs(nodes);
+
+            var caption = "Solution Explorer";
+            string branch = CurrentBranchName;
+            if (!string.IsNullOrEmpty(branch))
+            {
+                caption += " (" + branch + ")";
+                SetSolutionExplorerTitle(caption);
+            }
+        }
+
+        /// <summary>
+        /// Returns a list of controllable projects in the solution
+        /// </summary>
+        public List<IVsSccProject2> GetLoadedControllableProjects()
+        {
+            var list = new List<IVsSccProject2>();
+            // Hashtable mapHierarchies = new Hashtable();
+
+            IVsSolution sol = (IVsSolution) _sccProvider.GetService(typeof(SVsSolution));
+            Guid rguidEnumOnlyThisType = new Guid();
+            IEnumHierarchies ppenum = null;
+            ErrorHandler.ThrowOnFailure(sol.GetProjectEnum((uint)__VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION, ref rguidEnumOnlyThisType, out ppenum));
+
+            IVsHierarchy[] rgelt = new IVsHierarchy[1];
+            uint pceltFetched = 0;
+            while (ppenum.Next(1, rgelt, out pceltFetched) == VSConstants.S_OK &&
+                   pceltFetched == 1)
+            {
+                IVsSccProject2 sccProject2 = rgelt[0] as IVsSccProject2;
+                if (sccProject2 != null)
+                {
+                    list.Add(sccProject2);
+                }
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Refreshes the glyphs of the specified hierarchy nodes
+        /// </summary>
+        public void RefreshNodesGlyphs(IList<VSITEMSELECTION> selectedNodes)
+        {
+            foreach (VSITEMSELECTION vsItemSel in selectedNodes)
+            {
+                IVsSccProject2 sccProject2 = vsItemSel.pHier as IVsSccProject2;
+                if (vsItemSel.itemid == VSConstants.VSITEMID_ROOT)
+                {
+                    if (sccProject2 == null)
+                    {
+                        // Note: The solution's hierarchy does not implement IVsSccProject2, IVsSccProject interfaces
+                        // It may be a pain to treat the solution as special case everywhere; a possible workaround is 
+                        // to implement a solution-wrapper class, that will implement IVsSccProject2, IVsSccProject and
+                        // IVsHierarhcy interfaces, and that could be used in provider's code wherever a solution is needed.
+                        // This approach could unify the treatment of solution and projects in the provider's code.
+
+                        // Until then, solution is treated as special case
+                        string[] rgpszFullPaths = new string[1];
+                        rgpszFullPaths[0] = GetSolutionFileName();
+                        VsStateIcon[] rgsiGlyphs = new VsStateIcon[1];
+                        uint[] rgdwSccStatus = new uint[1];
+                        GetSccGlyph(1, rgpszFullPaths, rgsiGlyphs, rgdwSccStatus);
+
+                        // Set the solution's glyph directly in the hierarchy
+                        IVsHierarchy solHier = (IVsHierarchy) _sccProvider.GetService(typeof(SVsSolution));
+                        solHier.SetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_StateIconIndex, rgsiGlyphs[0]);
+                    }
+                    else
+                    {
+                        // Refresh all the glyphs in the project; the project will call back GetSccGlyphs() 
+                        // with the files for each node that will need new glyph
+                        sccProject2.SccGlyphChanged(0, null, null, null);
+                    }
+                }
+                else
+                {
+                    // It may be easier/faster to simply refresh all the nodes in the project, 
+                    // and let the project call back on GetSccGlyphs, but just for the sake of the demo, 
+                    // let's refresh ourselves only one node at a time
+                    IList<string> sccFiles = GetNodeFiles(sccProject2, vsItemSel.itemid);
+
+                    // We'll use for the node glyph just the Master file's status (ignoring special files of the node)
+                    if (sccFiles.Count > 0)
+                    {
+                        string[] rgpszFullPaths = new string[1];
+                        rgpszFullPaths[0] = sccFiles[0];
+                        VsStateIcon[] rgsiGlyphs = new VsStateIcon[1];
+                        uint[] rgdwSccStatus = new uint[1];
+                        GetSccGlyph(1, rgpszFullPaths, rgsiGlyphs, rgdwSccStatus);
+
+                        uint[] rguiAffectedNodes = new uint[1];
+                        rguiAffectedNodes[0] = vsItemSel.itemid;
+                        sccProject2.SccGlyphChanged(1, rguiAffectedNodes, rgsiGlyphs, rgdwSccStatus);
+                    }
+                }
+            }
+        }
+        #endregion
+
+        public bool IsSolutionGitControlled { get; set; }
+
+        internal void InitRepo()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

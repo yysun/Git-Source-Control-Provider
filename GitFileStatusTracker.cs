@@ -193,24 +193,30 @@ namespace GitScc
 
         public System.Collections.IEnumerable ChangedFiles { get; set; }
 
-        internal void UnStageFile(string fileName)
+        public void UnStageFile(string fileName)
         {
             throw new NotImplementedException();
         }
 
-        internal void StageFile(string fileName)
+        public void StageFile(string fileName)
         {
             throw new NotImplementedException();
         }
 
-        internal string DiffFile(string fileName)
+        public string DiffFile(string fileName)
         {
             throw new NotImplementedException();
         }
 
-        internal void Commit(string comments)
+        public void Commit(string comments)
         {
             throw new NotImplementedException();
+        }
+
+        public static void Init(string folderName)
+        {
+            var repo = new Repository(new DirectoryInfo(folderName));
+            repo.Create();
         }
     }
 }

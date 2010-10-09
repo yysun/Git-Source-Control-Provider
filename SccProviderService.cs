@@ -46,7 +46,6 @@ namespace GitScc
             {
                 sbm.AdviseUpdateSolutionEvents(this, out _vsIVsUpdateSolutionEventsCookie);
             }
-            
         }
 
         public void Dispose()
@@ -152,61 +151,31 @@ namespace GitScc
             {
                 case GitFileStatus.Trackered:
                     rgsiGlyphs[0] = VsStateIcon.STATEICON_CHECKEDIN;
-                    //if (rgdwSccStatus != null)
-                    //{
-                    //    rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_CONTROLLED;
-                    //}
                     break;
 
                 case GitFileStatus.Modified:
                     rgsiGlyphs[0] = VsStateIcon.STATEICON_CHECKEDOUT;
-                    //if (rgdwSccStatus != null)
-                    //{
-                    //    rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_CHECKEDOUT;
-                    //}
                     break;
 
                 case GitFileStatus.New:
-                    //rgsiGlyphs[0] = VsStateIcon.STATEICON_CHECKEDOUT;
                     rgsiGlyphs[0] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Untracked);
-                    //if (rgdwSccStatus != null)
-                    //{
-                    //    rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_CHECKEDOUT;
-                    //}
                     break;
 
                 case GitFileStatus.Added:
                 case GitFileStatus.Staged:
-                    //rgsiGlyphs[0] = VsStateIcon.STATEICON_CHECKEDOUT;
                     rgsiGlyphs[0] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Staged);
-                    //if (rgdwSccStatus != null)
-                    //{
-                    //    rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_CHECKEDOUT;
-                    //}
                     break;
 
                 case GitFileStatus.NotControlled:
                     rgsiGlyphs[0] = VsStateIcon.STATEICON_BLANK;
-                    //if (rgdwSccStatus != null)
-                    //{
-                    //    rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_NOTCONTROLLED;
-                    //}
                     break;
 
                 case GitFileStatus.Ignored:
                     rgsiGlyphs[0] = VsStateIcon.STATEICON_EXCLUDEDFROMSCC;
-                    //if (rgdwSccStatus != null)
-                    //{
-                    //    rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_NOTCONTROLLED;
-                    //}
                     break;
 
                 case GitFileStatus.MergeConflict:
                     rgsiGlyphs[0] = VsStateIcon.STATEICON_DISABLED;
-                    //if (rgdwSccStatus != null)
-                    //{
-                    //    rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_NOTCONTROLLED;
-                    //}
                     break;
             }
 
@@ -384,141 +353,14 @@ namespace GitScc
 
         #endregion
 
-        #region EnumHierarchyItems
-/*
-        private void EnumHierarchyItems(IVsHierarchy hierarchy, uint itemid, int recursionLevel, Action<IVsHierarchy, uint> action)
-        {
-            //if (recursionLevel > 1) return;
+        #region File Names
 
-//#if(DEBUG)
-//            object pval = null;
-//            hierarchy.GetProperty(itemid, (int)__VSHPROPID.VSHPROPID_Name, out pval);
-//            if (pval != null)
-//            {
-//                Debug.WriteLine("==== Enum Hierarchy Item:" + pval.ToString() + (_active ? "- active" : "- inactive"));
-//            }
-//#endif
-
-                if (!string.IsNullOrEmpty(solutionPath))
-                {
-                }
-            isBuilding = false;
-
-            int hr;
-            IntPtr nestedHierarchyObj;
-            uint nestedItemId;
-            Guid hierGuid = typeof(IVsHierarchy).GUID;
-
-            hr = hierarchy.GetNestedHierarchy(itemid, ref hierGuid, out nestedHierarchyObj, out nestedItemId);
-            if (VSConstants.S_OK == hr && IntPtr.Zero != nestedHierarchyObj)
-            {
-                IVsHierarchy nestedHierarchy = Marshal.GetObjectForIUnknown(nestedHierarchyObj) as IVsHierarchy;
-                Marshal.Release(nestedHierarchyObj);
-                if (nestedHierarchy != null)
-                {
-                    EnumHierarchyItems(nestedHierarchy, nestedItemId, recursionLevel, action);
-                }
-            }
-            else
-            {
-                object pVar;
-                action(hierarchy, itemid);
-                recursionLevel++;
-
-                hr = hierarchy.GetProperty(itemid, (int)__VSHPROPID.VSHPROPID_FirstVisibleChild, out pVar);
-                if (VSConstants.S_OK == hr)
-                {
-                    uint childId = GetItemId(pVar);
-                    while (childId != VSConstants.VSITEMID_NIL)
-                    {
-                        EnumHierarchyItems(hierarchy, childId, recursionLevel, action);
-                        hr = hierarchy.GetProperty(childId, (int)__VSHPROPID.VSHPROPID_NextVisibleSibling, out pVar);
-                        if (VSConstants.S_OK == hr)
-                        {
-                            childId = GetItemId(pVar);
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the item id.
-        /// </summary>
-        /// <param name="pvar">VARIANT holding an itemid.</param>
-        /// <returns>Item Id of the concerned node</returns>
-        private uint GetItemId(object pvar)
-        {
-            if (pvar == null) return VSConstants.VSITEMID_NIL;
-            if (pvar is int) return (uint)(int)pvar;
-            if (pvar is uint) return (uint)pvar;
-            if (pvar is short) return (uint)(short)pvar;
-            if (pvar is ushort) return (uint)(ushort)pvar;
-            if (pvar is long) return (uint)(long)pvar;
-            return VSConstants.VSITEMID_NIL;
-        }
-
-        private void RefreshSolutionNode()
-        {
-            Debug.WriteLine("==== Refresh Solution Node");
-
-            string fileName = GetSolutionFileName();
-            if (string.IsNullOrEmpty(fileName)) return;
-
-            VsStateIcon[] rgsiGlyphs = new VsStateIcon[1];
-            uint[] rgdwSccStatus = new uint[1];
-            GetSccGlyph(1, new string[] { fileName }, rgsiGlyphs, rgdwSccStatus);
-
-            // Set the solution's glyph directly in the hierarchy
-            IVsHierarchy solHier = (IVsHierarchy)_sccProvider.GetService(typeof(SVsSolution));
-            solHier.SetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_StateIconIndex, rgsiGlyphs[0]);
-
-            var caption = "Solution Explorer";
-            string branch = CurrentBranchName;
-            if (!string.IsNullOrEmpty(branch))
-            {
-                caption += " (" + branch + ")";
-            }
-
-            SetSolutionExplorerTitle(caption);
-        }
-*/
         private void SetSolutionExplorerTitle(string message)
         {
             var dte = (DTE)_sccProvider.GetService(typeof(DTE));
             dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Caption = message;
         }
-/*
-        private void processNodeFunc(IVsHierarchy hierarchy, uint itemid)
-        {
 
-            var sccProject2 = hierarchy as IVsSccProject2;
-
-            if (itemid == VSConstants.VSITEMID_ROOT)
-            {
-
-#if(DEBUG)
-                object pval = null;
-                hierarchy.GetProperty(itemid, (int)__VSHPROPID.VSHPROPID_Name, out pval);
-                if (pval != null)
-                {
-                    Debug.WriteLine("==== Refresh:" + pval.ToString());
-                }
-#endif
-
-                if (sccProject2 == null)
-                {
-                    RefreshSolutionNode();
-                }
-                else
-                {
-                    // Refresh all the glyphs in the project; the project will call back GetSccGlyphs() 
-                    // with the files for each node that will need new glyph
-                    sccProject2.SccGlyphChanged(0, null, null, null);
-                }
-            }
-        }
-*/
         /// <summary>
         /// Returns the filename of the solution
         /// </summary>
@@ -967,6 +809,7 @@ namespace GitScc
         private void AddProject(IVsHierarchy pHierarchy)
         {
             string projectName = GetProjectFileName(pHierarchy);
+
             if (string.IsNullOrEmpty(projectName)) return;
             string projectDirecotry = Path.GetDirectoryName(projectName);
 
@@ -993,7 +836,13 @@ namespace GitScc
             }
         }
 
-        internal string CurrentGitWorkingDirectory;
+        internal string CurrentGitWorkingDirectory
+        {
+            get
+            {
+                return CurrentTracker == null ? null : CurrentTracker.GitWorkingDirectory;
+            }
+        }
 
         internal GitFileStatusTracker CurrentTracker
         {
@@ -1190,11 +1039,15 @@ namespace GitScc
         }
         #endregion
 
-        public bool IsSolutionGitControlled { get; set; }
+        public bool IsSolutionGitControlled
+        { 
+            get { return trackers.Count > 0; } 
+        }
 
         internal void InitRepo()
         {
-            throw new NotImplementedException();
+            var solutionPath = Path.GetFullPath(GetSolutionFileName());
+            GitFileStatusTracker.Init(solutionPath);
         }
     }
 }

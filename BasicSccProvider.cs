@@ -175,8 +175,11 @@ namespace GitScc
                     if (sccService.CanCompareSelectedFile) cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
 
-                //case CommandId.icmdSccCommandHistory:
-                //case CommandId.icmdSccCommandPendingChanges:
+                case CommandId.icmdSccCommandHistory:
+                case CommandId.icmdSccCommandPendingChanges:
+                    cmdf |= OLECMDF.OLECMDF_INVISIBLE;
+                    break;
+
                 //    if (sccService.IsSolutionGitControlled) 
                 //        cmdf |= OLECMDF.OLECMDF_ENABLED;
                 //    else

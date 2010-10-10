@@ -1046,7 +1046,7 @@ namespace GitScc
 
         internal void InitRepo()
         {
-            var solutionPath = Path.GetFullPath(GetSolutionFileName());
+            var solutionPath = Path.GetDirectoryName(GetSolutionFileName());
             GitFileStatusTracker.Init(solutionPath);
         }
     }

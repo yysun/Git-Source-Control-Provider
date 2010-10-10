@@ -73,14 +73,12 @@ namespace BasicSccProvider.Tests
         public void HasGitRepositoryTest()
         {
             var tempFolder = Environment.CurrentDirectory + "\\_gitscc_test_1";
-
-            GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
-            Assert.IsFalse(tracker.HasGitRepository);
-
             GitFileStatusTracker.Init(tempFolder);
+            GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
 
-            tracker.Refresh();
             Assert.IsTrue(tracker.HasGitRepository);
+            Assert.AreEqual(tempFolder, tracker.GitWorkingDirectory);
+            Assert.IsTrue(Directory.Exists(tempFolder + "\\.git"));
 
         }
 

@@ -215,8 +215,9 @@ namespace GitScc
 
         public static void Init(string folderName)
         {
-            var repo = new Repository(new DirectoryInfo(folderName));
-            repo.Create();
+            var gitFolder = Path.Combine(folderName, Constants.DOT_GIT);
+            var repo = new Repository(new DirectoryInfo(gitFolder));
+            repo.Create(false);
         }
     }
 }

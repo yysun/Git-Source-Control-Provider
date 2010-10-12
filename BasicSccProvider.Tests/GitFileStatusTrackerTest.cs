@@ -1,9 +1,10 @@
 ﻿using System;
 using System.IO;
-using GitScc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading;
 using System.Diagnostics;
+using GitSharp.Core;
+using GitScc;
 
 namespace BasicSccProvider.Tests
 {
@@ -81,82 +82,6 @@ namespace BasicSccProvider.Tests
 
         }
 
-        //[TestMethod]
-        //public void GetFileStatusTest()
-        //{
-        //    var tempFolder = Environment.CurrentDirectory + "\\_gitscc_test_2";
-        //    var tempFile = Path.Combine(tempFolder, "test");
-
-        //    GitFileStatusTracker.Init(tempFolder);
-        //    GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
-
-        //    string[] lines = { "First line", "Second line", "Third line" };
-
-        //    File.WriteAllLines(tempFile, lines);
-        //    tracker.Refresh();
-        //    Assert.AreEqual(GitFileStatus.New, tracker.GetFileStatus(tempFile));
-
-        //    using (var repo = new Repository(tempFolder))
-        //    {
-        //        repo.Index.Add(tempFile);
-        //        tracker.Refresh();
-        //        Assert.AreEqual(GitFileStatus.Added, tracker.GetFileStatus(tempFile));
-
-        //        repo.Index.CommitChanges("test", new Author("test", "test@test.test"));
-        //        tracker.Refresh();
-        //        Assert.AreEqual(GitFileStatus.Trackered, tracker.GetFileStatus(tempFile));
-
-        //        File.WriteAllText(tempFile, "changed text");
-        //        tracker.Refresh();
-        //        Assert.AreEqual(GitFileStatus.Modified, tracker.GetFileStatus(tempFile));
-
-        //        File.Delete(tempFile);
-        //        tracker.Refresh();
-        //        Assert.AreEqual(GitFileStatus.Missing, tracker.GetFileStatus(tempFile));
-
-        //        repo.Index.Remove(tempFile);
-        //        tracker.Refresh();
-        //        Assert.AreEqual(GitFileStatus.Removed, tracker.GetFileStatus(tempFile));
-
-        //        repo.Close();
-        //    }
-        //}
-
-        //[TestMethod]
-        //public void GetFileContentTest()
-        //{
-        //    var tempFolder = Environment.CurrentDirectory + "\\_gitscc_test_3";
-        //    var tempFile = Path.Combine(tempFolder, "test");
-
-        //    GitFileStatusTracker.Init(tempFolder);
-
-        //    string[] lines = { "First line", "Second line", "Third line" };
-        //    File.WriteAllLines(tempFile, lines);
-
-
-        //    using (var repo = new Repository(tempFolder))
-        //    {
-        //        repo.Index.Add(tempFile);
-        //        repo.Index.CommitChanges("test", new Author("test", "test@test.test"));
-        //        repo.Close();
-        //    }
-
-        //    GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
-
-        //    var fileContent = tracker.GetFileContent(tempFile);
-
-        //    using (var binWriter = new BinaryWriter(File.Open(tempFile + ".bk", FileMode.Create)))
-        //    {
-        //        binWriter.Write(fileContent);
-        //    }
-
-        //    var newlines = File.ReadAllLines(tempFile + ".bk");
-        //    Assert.AreEqual(lines[0], newlines[0]);
-        //    Assert.AreEqual(lines[1], newlines[1]);
-        //    Assert.AreEqual(lines[2], newlines[2]);
-        //}
-
-
         [TestMethod]
         public void GetFileStatusTest()
         {
@@ -210,7 +135,7 @@ namespace BasicSccProvider.Tests
 
             var fileContent = tracker.GetFileContent(tempFile);
 
-            using (var binWriter = new BinaryWriter(File.Open(tempFile + ".bk", FileMode.Create)))
+            using (var binWriter = new BinaryWriter(File.Open(tempFile + ".bk", System.IO.FileMode.Create)))
             {
                 binWriter.Write(fileContent);
             }
@@ -219,6 +144,66 @@ namespace BasicSccProvider.Tests
             Assert.AreEqual(lines[0], newlines[0]);
             Assert.AreEqual(lines[1], newlines[1]);
             Assert.AreEqual(lines[2], newlines[2]);
+        }
+
+        [TestMethod]
+        public void GetChangedFilesTest()
+        {
+            var initFolder = @"E:\Users\Public\My Projects\GitScc\Publish\TestProjects\Folder Test";
+            Repository repository = Repository.Open(initFolder);
+
+            var commit = repository.MapCommit("HEAD");
+            var tree = (commit != null ? commit.TreeEntry : new Tree(repository));
+            var index = repository.Index;
+            index.RereadIfNecessary();
+
+            DirectoryInfo root = new DirectoryInfo(initFolder);
+            var visitor = new AbstractIndexTreeVisitor { VisitEntryAux = OnVisitEntry };
+
+            IgnoreHandler = new IgnoreHandler(repository);
+            var mainTree = new Tree(repository);
+
+            // Create the subdir branch
+            foreach (string sdir in initFolder.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries))
+                mainTree = mainTree.AddTree(sdir);
+
+            if (root.Exists)
+                FillTree(root, mainTree);
+
+            //new IndexTreeWalker(index, tree, mainTree, root, visitor).Walk();
+
+        }
+
+        IgnoreHandler IgnoreHandler;
+
+        private void FillTree(DirectoryInfo dir, Tree tree)
+        {
+            foreach (var subdir in dir.GetDirectories())
+            {
+                if (subdir.Name == Constants.DOT_GIT || IgnoreHandler.IsIgnored(tree.FullName + "/" + subdir.Name))
+                    continue;
+                var t = tree.AddTree(subdir.Name);
+                FillTree(subdir, t);
+            }
+            foreach (var file in dir.GetFiles())
+            {
+                if (IgnoreHandler.IsIgnored(tree.FullName + "/" + file.Name))
+                    continue;
+                tree.AddFile(file.Name);
+
+                Console.WriteLine("{0}", file.Name);
+            }
+        }        
+
+        private void OnVisitEntry(TreeEntry treeEntry, TreeEntry wdirEntry, GitIndex.Entry indexEntry, FileInfo file)
+        {
+            Console.WriteLine("{0} - {1} - {2} - {3}", file.Name, treeEntry, wdirEntry, indexEntry);
+        }
+
+        [TestMethod]
+        public void GetChangedFilesTest_Core()
+        {
+
         }
     }
 }

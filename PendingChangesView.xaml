@@ -5,76 +5,86 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="800">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="500" />
-            <ColumnDefinition Width="auto" />            
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <Grid.Background>
-            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                <GradientStop Color="#FFC5E8F8" Offset="1" />
-                <GradientStop Color="White" Offset="0" />
-            </LinearGradientBrush>
-        </Grid.Background>
-        <GridSplitter Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
+    <TabControl x:Name="Main">
+        <TabItem Visibility="Collapsed">
+            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="0" />
+                    <ColumnDefinition Width="0" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.Background>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="#FFC5E8F8" Offset="1" />
+                        <GradientStop Color="White" Offset="0" />
+                    </LinearGradientBrush>
+                </Grid.Background>
+                <GridSplitter Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
                       VerticalAlignment="Stretch" HorizontalAlignment="Left" Name="gridSplitter1" Width="4" />
-        
-        <Label Content="Comments:" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Center" 
+
+                <Label Content="Comments:" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Center" 
                Margin="12,0,0,0" Foreground="#FF333333" />
-        
-        <Label Content="Diff:" Height="28" HorizontalAlignment="Left" Name="label2" VerticalAlignment="Center" 
+
+                <Label Content="Diff:" Height="28" HorizontalAlignment="Left" Name="label2" VerticalAlignment="Center" 
                Margin="12,0,0,0" Foreground="#FF333333"
                Grid.Column="2" Grid.Row="0"/>
-        
-        <Grid Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="grid1">
 
-            <Grid.RowDefinitions>
-                <RowDefinition Height="50" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />                
-            </Grid.RowDefinitions>
+                <Grid Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="grid1">
 
-            <GridSplitter Grid.Row="1" Grid.ColumnSpan="2"
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <GridSplitter Grid.Row="1" Grid.ColumnSpan="2"
                       VerticalAlignment="Top" HorizontalAlignment="Stretch" Name="gridSplitter2" Height="4" />
 
-            <Label Content="Changed Files (select to add file to stage/index):" Height="28" HorizontalAlignment="Left" Name="label3" VerticalAlignment="Center" 
+                    <Label Content="Changed Files (select to add file to stage/index):" Height="28" HorizontalAlignment="Left" Name="label3" VerticalAlignment="Center" 
                Margin="12,0,0,0" Foreground="#FF333333" Grid.Row="2"/>
 
-            <RichTextBox HorizontalAlignment="Stretch" Name="textBoxComments" VerticalAlignment="Stretch" Margin="10,0,10,10" 
+                    <RichTextBox HorizontalAlignment="Stretch" Name="textBoxComments" VerticalAlignment="Stretch" Margin="10,0,10,10" 
                      AcceptsReturn="True" VerticalScrollBarVisibility="Visible" SpellCheck.IsEnabled="True"/>
-            
-            <DataGrid AutoGenerateColumns="False" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="dataGrid1" VerticalAlignment="Stretch"
+
+                    <DataGrid AutoGenerateColumns="False" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="dataGrid1" VerticalAlignment="Stretch"
                       GridLinesVisibility="None"  Foreground="#FF333333" Sorting="dataGrid1_Sorting"
                       SelectionMode="Single" SelectionChanged="dataGrid1_SelectionChanged">
-                
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Staged">
-                        <DataGridTemplateColumn.HeaderTemplate>
-                            <DataTemplate>
-                                <CheckBox Name="checkBoxAllStaged" Click="checkBoxAllStaged_Click"  
-                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.HeaderTemplate>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <CheckBox Name="checkBoxStaged" Click="checkBoxStaged_Click" IsChecked="{Binding IsStaged}"
-                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Status" Binding="{Binding Status}"  />
-                    <DataGridTextColumn Header="File" Binding="{Binding FileName}" />                    
-                </DataGrid.Columns>
-            </DataGrid>
-        </Grid>
 
-        <RichTextBox Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="textBoxDiff" VerticalAlignment="Stretch"
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Staged">
+                                <DataGridTemplateColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Name="checkBoxAllStaged" Click="checkBoxAllStaged_Click"  
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.HeaderTemplate>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Name="checkBoxStaged" Click="checkBoxStaged_Click" IsChecked="{Binding IsStaged}"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Status" Binding="{Binding Status}"  />
+                            <DataGridTextColumn Header="File" Binding="{Binding FileName}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+
+                <RichTextBox Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="textBoxDiff" VerticalAlignment="Stretch"
                  AcceptsReturn="True" VerticalScrollBarVisibility="Visible" FontSize="12" FontFamily="Consolas" />
-    </Grid>
+            </Grid>
+        </TabItem>
+        <TabItem Visibility="Collapsed">
+            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Button HorizontalAlignment="Center" VerticalAlignment="Center" Padding="30 5"
+                        Content="Find changes in repository" x:Name="btnFindChanges" Click="btnFindChanges_Click" />
+            </Grid>
+        </TabItem>
+    </TabControl>
 </UserControl>

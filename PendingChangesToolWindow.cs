@@ -12,6 +12,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using IServiceProvider = System.IServiceProvider;
 using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 using Microsoft.VisualStudio;
+using System.Collections.Generic;
 
 namespace GitScc
 {
@@ -70,8 +71,11 @@ namespace GitScc
 
             control.Refresh(tracker);
 
-            this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption") +
-                (tracker.HasGitRepository ? " (" + tracker.CurrentBranch + ")" : "");
+            if (tracker != null)
+            {
+                this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption") +
+                    (tracker.HasGitRepository ? " (" + tracker.CurrentBranch + ")" : "");
+            }
         }
     }
 }

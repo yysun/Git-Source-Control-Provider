@@ -17,7 +17,7 @@ namespace GitScc
         private Repository repository;
         private Tree commitTree;
         private GitIndex index;
-        //private IgnoreHandler ignoreHandler;
+        private IgnoreHandler ignoreHandler;
 
         private Dictionary<string, GitFileStatus> cache;
 
@@ -44,7 +44,7 @@ namespace GitScc
                         this.commitTree = (commit != null ? commit.TreeEntry : new Tree(repository));
                         this.index = repository.Index;
                         this.index.RereadIfNecessary();
-                        //this.ignoreHandler = new IgnoreHandler(repository);
+                        this.ignoreHandler = new IgnoreHandler(repository);
                         //this.watcher = new FileSystemWatcher(this.repository.WorkingDirectory.FullName);
                     }
                 }
@@ -150,10 +150,12 @@ namespace GitScc
 
         private string GetRelativeFileName(string fileName)
         {
-            Uri workingFolderUri = new Uri(repository.WorkingDirectory.FullName + "\\");
-            fileName = workingFolderUri.MakeRelativeUri(new Uri(fileName)).ToString();
-            fileName = fileName.Replace("%20", " ");
-            return fileName;
+            //Uri workingFolderUri = new Uri(repository.WorkingDirectory.FullName + "\\");
+            //fileName = workingFolderUri.MakeRelativeUri(new Uri(fileName)).ToString();
+            //fileName = fileName.Replace("%20", " ");
+            //return fileName;
+
+            return PathUtil.RelativePath(repository.WorkingDirectory.FullName, fileName);
         }
 
         public byte[] GetFileContent(string fileName)
@@ -194,10 +196,57 @@ namespace GitScc
             return repository == null ? "[no repo]" : repository.WorkingDirectory.FullName;
         }
 
-        public System.Collections.IEnumerable ChangedFiles { get; set; }
+        public IEnumerable<GitFile> ChangedFiles
+        {
+            get
+            {
+                DirectoryInfo root = new DirectoryInfo(initFolder);
+                var mainTree = new Tree(repository);
+                FillTree(root, mainTree);
+
+                return from f in cache
+                       where f.Value != GitFileStatus.Tracked &&
+                             f.Value != GitFileStatus.NotControlled
+                       select new GitFile
+                       {
+                           FileName = GetRelativeFileName(f.Key),
+                           Status = f.Value,
+                           IsStaged = f.Value == GitFileStatus.Added || 
+                                      f.Value == GitFileStatus.Staged ||
+                                      f.Value == GitFileStatus.Removed
+                       };
+            }
+        }
+        
+        private void FillTree(DirectoryInfo dir, Tree tree)
+        {
+            foreach (var subdir in dir.GetDirectories())
+            {
+                if (subdir.Name == Constants.DOT_GIT || this.ignoreHandler.IsIgnored(tree.FullName + "/" + subdir.Name))
+                    continue;
+                var t = tree.AddTree(subdir.Name);
+                FillTree(subdir, t);
+            }
+
+            foreach (var file in dir.GetFiles())
+            {
+                if (this.ignoreHandler.IsIgnored(tree.FullName + "/" + file.Name))
+                    continue;
+                tree.AddFile(file.Name);
+
+                var fileName = string.IsNullOrEmpty(tree.FullName) ?
+                               Path.Combine(initFolder, file.Name)
+                               :
+                               Path.Combine(initFolder, tree.FullName + "\\" + file.Name);
+
+                var status = GetFileStatus(fileName.Replace("/", "\\"));
+            }
+        }        
 
         public void UnStageFile(string fileName)
         {
+            fileName = Path.Combine(initFolder, fileName);
+
             if (!this.HasGitRepository) return;
             this.index.RereadIfNecessary();
 
@@ -205,12 +254,11 @@ namespace GitScc
             fileName = GetRelativeFileName(fileName);
             if (content == null)
             {
-                this.index.remove(
-                    new DirectoryInfo(this.repository.WorkingDirectory.FullName),
-                    new FileInfo(fileName));
+                this.index.Remove(fileName);
             }
             else
             {
+                
                 this.index.add(
                     new DirectoryInfo(this.repository.WorkingDirectory.FullName),
                     new FileInfo(fileName),
@@ -222,6 +270,8 @@ namespace GitScc
 
         public void StageFile(string fileName)
         {
+            fileName = Path.Combine(initFolder, fileName);
+
             if (!this.HasGitRepository) return;
             this.index.RereadIfNecessary();
 

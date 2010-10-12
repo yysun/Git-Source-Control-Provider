@@ -38,17 +38,6 @@ namespace GitScc
             
         }
 
-        internal void Refresh(GitFileStatusTracker tracker)
-        {
-            this.tracker = tracker;
-
-            this.dataGrid1.ItemsSource = tracker.ChangedFiles;
-            ICollectionView view = CollectionViewSource.GetDefaultView(this.dataGrid1.ItemsSource);
-            view.SortDescriptions.Clear();
-            view.SortDescriptions.Add(new SortDescription(sortMemberPath, sortDirection));
-            view.Refresh();
-        }
-
         private void checkBoxStaged_Click(object sender, RoutedEventArgs e)
         {
             if (this.dataGrid1.SelectedCells.Count == 0) return;
@@ -75,35 +64,35 @@ namespace GitScc
 
         private void dataGrid1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (this.dataGrid1.SelectedCells.Count == 0) return;
-            var selectedItem = this.dataGrid1.SelectedCells[0].Item as GitFile;
-            if (selectedItem == null) return;
-            var fileName = selectedItem.FileName;
+            //if (this.dataGrid1.SelectedCells.Count == 0) return;
+            //var selectedItem = this.dataGrid1.SelectedCells[0].Item as GitFile;
+            //if (selectedItem == null) return;
+            //var fileName = selectedItem.FileName;
 
-            this.textBoxDiff.Document.Blocks.Clear();
+            //this.textBoxDiff.Document.Blocks.Clear();
 
-            var content = tracker.DiffFile(fileName);
-            foreach (var line in content.Split('\n'))
-            {
+            //var content = tracker.DiffFile(fileName);
+            //foreach (var line in content.Split('\n'))
+            //{
 
-                TextRange range = new TextRange(this.textBoxDiff.Document.ContentEnd, this.textBoxDiff.Document.ContentEnd); 
-                range.Text = line.Replace("\r", "") + "\r";
+            //    TextRange range = new TextRange(this.textBoxDiff.Document.ContentEnd, this.textBoxDiff.Document.ContentEnd); 
+            //    range.Text = line.Replace("\r", "") + "\r";
 
-                if (line.StartsWith("+"))
-                {
-                    range.ApplyPropertyValue(TextElement.BackgroundProperty, new SolidColorBrush(Color.FromArgb(128, 166, 255, 166)));
-                }
-                else if (line.StartsWith("-"))
-                {
-                    range.ApplyPropertyValue(TextElement.BackgroundProperty, new SolidColorBrush(Color.FromArgb(128, 255, 166, 166)));
-                }
-                else
-                {
-                    range.ApplyPropertyValue(TextElement.BackgroundProperty, null);
-                }
+            //    if (line.StartsWith("+"))
+            //    {
+            //        range.ApplyPropertyValue(TextElement.BackgroundProperty, new SolidColorBrush(Color.FromArgb(128, 166, 255, 166)));
+            //    }
+            //    else if (line.StartsWith("-"))
+            //    {
+            //        range.ApplyPropertyValue(TextElement.BackgroundProperty, new SolidColorBrush(Color.FromArgb(128, 255, 166, 166)));
+            //    }
+            //    else
+            //    {
+            //        range.ApplyPropertyValue(TextElement.BackgroundProperty, null);
+            //    }
 
-                //this.textBoxDiff.AppendText(line);
-            }
+            //    //this.textBoxDiff.AppendText(line);
+            //}
  
         }
 
@@ -125,5 +114,25 @@ namespace GitScc
             tracker.Commit(comments);
             this.textBoxComments.Document.Blocks.Clear();
         }
+
+        internal void Refresh(GitFileStatusTracker tracker)
+        {
+            this.tracker = tracker;
+            this.dataGrid1.ItemsSource = tracker == null ? null : tracker.ChangedFiles;
+            ICollectionView view = CollectionViewSource.GetDefaultView(this.dataGrid1.ItemsSource);
+            if (view != null)
+            {
+                view.SortDescriptions.Clear();
+                view.SortDescriptions.Add(new SortDescription(sortMemberPath, sortDirection));
+                view.Refresh();
+            }
+
+        }
+
+        private void btnFindChanges_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
     }
 }

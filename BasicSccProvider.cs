@@ -32,8 +32,8 @@ namespace GitScc
     [MsVsShell.ProvideOptionPageAttribute(typeof(SccProviderOptions), "Source Control", "Git Source Control Provider Options", 106, 107, false)]
     [ProvideToolsOptionsPageVisibility("Source Control", "Git Source Control Provider Options", "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
     // Register a sample tool window visible only when the provider is active
-    //[MsVsShell.ProvideToolWindow(typeof(PendingChangesToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
-    //[MsVsShell.ProvideToolWindowVisibility(typeof(PendingChangesToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
+    [MsVsShell.ProvideToolWindow(typeof(PendingChangesToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
+    [MsVsShell.ProvideToolWindowVisibility(typeof(PendingChangesToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
     //[MsVsShell.ProvideToolWindow(typeof(HistoryToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
     //[MsVsShell.ProvideToolWindowVisibility(typeof(HistoryToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]  
     //Register the source control provider's service (implementing IVsScciProvider interface)
@@ -119,6 +119,10 @@ namespace GitScc
                     var mc = new MenuCommand(new EventHandler(OnGitTorCommandExec), cmd);
                     mcs.AddCommand(mc);
                 }
+
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandPendingChanges);
+                menu = new MenuCommand(new EventHandler(ShowPendingChangesWindow), cmd);
+                mcs.AddCommand(menu);
             }
 
 
@@ -220,11 +224,15 @@ namespace GitScc
                     if (sccService.CanCompareSelectedFile) cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
                 
+                case CommandId.icmdSccCommandHistory:
+                        cmdf |= OLECMDF.OLECMDF_INVISIBLE;
+                    break;
+
                 case CommandId.icmdSccCommandRefresh:
                     //if (sccService.IsSolutionGitControlled)
                         cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
-                
+
                 case CommandId.icmdSccCommandInit:
                     if (!sccService.IsSolutionGitControlled)
                         cmdf |= OLECMDF.OLECMDF_ENABLED;
@@ -364,6 +372,35 @@ namespace GitScc
             }
         }
 
+        private void ShowPendingChangesWindow(object sender, EventArgs e)
+        {
+            ShowToolWindow(typeof(PendingChangesToolWindow));
+        }
+
+        private void ShowHistoryWindow(object sender, EventArgs e)
+        {
+            ShowToolWindow(typeof(HistoryToolWindow));
+        }
+
+        private void ShowToolWindow(Type type)
+        {
+            ToolWindowPane window = this.FindToolWindow(type, 0, true);
+            IVsWindowFrame windowFrame = null;
+            if (window != null && window.Frame != null)
+            {
+                windowFrame = (IVsWindowFrame)window.Frame;
+            }
+            if (windowFrame != null)
+            {
+                ErrorHandler.ThrowOnFailure(windowFrame.Show());
+
+                //if (window is PendingChangesToolWindow)
+                //{
+                //    ((PendingChangesToolWindow)window).Refresh();
+                //}
+            }
+        }
+
         #endregion
 
         // This function is called by the IVsSccProvider service implementation when the active state of the provider changes
@@ -428,5 +465,18 @@ namespace GitScc
         } 
         #endregion
 
+        //internal void OnSccStatusChanged()
+        //{
+        //    var pendingChangesToolWindow = GetToolWindowPane<PendingChangesToolWindow>();
+        //    if (pendingChangesToolWindow != null)
+        //    {
+        //        pendingChangesToolWindow.Refresh(sccService.CurrentTracker);
+        //    }
+        //}
+
+        //private T GetToolWindowPane<T>() where T : ToolWindowPane
+        //{
+        //    return (T)this.FindToolWindow(typeof(T), 0, true);
+        //}
     }
 }

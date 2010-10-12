@@ -12,6 +12,7 @@ using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Shell;
 
 namespace GitScc
 {
@@ -925,6 +926,7 @@ namespace GitScc
                     noRefresh = true;
                     OpenTracker();
                     RefreshNodesGlyphs();
+                RefreshToolWindows();
                     noRefresh = false;
 
                     NodesGlyphsDirty = false;
@@ -1093,6 +1095,13 @@ _ReSharper*/
             );
         } 
         #endregion
+
+        private void RefreshToolWindows()
+        {
+            var window = this._sccProvider.FindToolWindow(typeof(PendingChangesToolWindow), 0, false) 
+                as PendingChangesToolWindow;
+            if (window != null) window.Refresh(this.CurrentTracker);
+        }
 
     }
 }

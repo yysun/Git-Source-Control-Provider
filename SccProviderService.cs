@@ -849,11 +849,10 @@ namespace GitScc
             get
             {
                 string fileName = GetSelectFileName();
-                if (string.IsNullOrEmpty(fileName))
-                {
-                    if (trackers.Count == 1) return trackers[0];
-                }
-                return GetTracker(fileName);
+                if (trackers.Count == 1) 
+                    return trackers[0];
+                else
+                    return GetTracker(fileName);
             }
         }
 
@@ -1048,6 +1047,35 @@ namespace GitScc
         {
             var solutionPath = Path.GetDirectoryName(GetSolutionFileName());
             GitFileStatusTracker.Init(solutionPath);
+            File.WriteAllText(Path.Combine(solutionPath, ".gitignore"),
+@"
+Thumbs.db
+*.obj
+*.exe
+*.pdb
+*.user
+*.aps
+*.pch
+*.vspscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+*.log
+[Bb]in
+[Dd]ebug*/
+*.lib
+*.sbr
+obj/
+[Rr]elease*/
+_ReSharper*/
+[Tt]est[Rr]esult*"
+            );
         }
     }
 }

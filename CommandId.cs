@@ -18,7 +18,7 @@ namespace GitScc
         public const int icmdSccCommandInit = 0x106;
         public const int icmdSccCommandPendingChanges = 0x107;
         public const int icmdSccCommandHistory = 0x108;
-
+        public const int icmdSccCommandGitTortoise = 0x109;
 
         public const int icmdPendingChangesCommit = 0x111;
         public const int icmdPendingChangesAmend = 0x112;

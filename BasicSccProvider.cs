@@ -32,11 +32,11 @@ namespace GitScc
     [MsVsShell.ProvideOptionPageAttribute(typeof(SccProviderOptions), "Source Control", "Git Source Control Provider Options", 106, 107, false)]
     [ProvideToolsOptionsPageVisibility("Source Control", "Git Source Control Provider Options", "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
     // Register a sample tool window visible only when the provider is active
-    [MsVsShell.ProvideToolWindow(typeof(PendingChangesToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
-    [MsVsShell.ProvideToolWindowVisibility(typeof(PendingChangesToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
-    [MsVsShell.ProvideToolWindow(typeof(HistoryToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
-    [MsVsShell.ProvideToolWindowVisibility(typeof(HistoryToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]  
-    // Register the source control provider's service (implementing IVsScciProvider interface)
+    //[MsVsShell.ProvideToolWindow(typeof(PendingChangesToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
+    //[MsVsShell.ProvideToolWindowVisibility(typeof(PendingChangesToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
+    //[MsVsShell.ProvideToolWindow(typeof(HistoryToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
+    //[MsVsShell.ProvideToolWindowVisibility(typeof(HistoryToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]  
+    //Register the source control provider's service (implementing IVsScciProvider interface)
     [MsVsShell.ProvideService(typeof(SccProviderService), ServiceName = "Git Source Control Service")]
     // Register the source control provider to be visible in Tools/Options/SourceControl/Plugin dropdown selector
     [ProvideSourceControlProvider("Git Source Control Provider", "#100")]
@@ -96,17 +96,14 @@ namespace GitScc
                 menu = new MenuCommand(new EventHandler(OnUndoCommand), cmd);
                 mcs.AddCommand(menu);
 
-                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandPendingChanges);
-                menu = new MenuCommand(new EventHandler(ShowPendingChangesWindow), cmd);
-                mcs.AddCommand(menu);
-
-                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandHistory);
-                menu = new MenuCommand(new EventHandler(ShowHistoryWindow), cmd);
-                mcs.AddCommand(menu);
-
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandInit);
                 menu = new MenuCommand(new EventHandler(OnInitCommand), cmd);
                 mcs.AddCommand(menu);
+
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandGitTortoise);
+                menu = new MenuCommand(new EventHandler(OnTortoiseGitCommand), cmd);
+                mcs.AddCommand(menu);
+
             }
 
             // Register the provider with the source control manager
@@ -169,22 +166,19 @@ namespace GitScc
                         cmdf |= OLECMDF.OLECMDF_ENABLED;
                     }
                     break;
+
+                case CommandId.icmdSccCommandGitTortoise:
+                    var tortoiseGitPath = GitSccOptions.Current.TortoiseGitPath;
+                    if (!string.IsNullOrEmpty(tortoiseGitPath) && File.Exists(tortoiseGitPath))
+                    {
+                        cmdf |= OLECMDF.OLECMDF_ENABLED;
+                    }
+                    break;
                 
                 case CommandId.icmdSccCommandUndo:
                 case CommandId.icmdSccCommandCompare:
                     if (sccService.CanCompareSelectedFile) cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
-
-                case CommandId.icmdSccCommandHistory:
-                case CommandId.icmdSccCommandPendingChanges:
-                    cmdf |= OLECMDF.OLECMDF_INVISIBLE;
-                    break;
-
-                //    if (sccService.IsSolutionGitControlled) 
-                //        cmdf |= OLECMDF.OLECMDF_ENABLED;
-                //    else
-                //        cmdf |= OLECMDF.OLECMDF_INVISIBLE;
-                //    break;
 
                 case CommandId.icmdSccCommandInit:
                     if (!sccService.IsSolutionGitControlled)
@@ -222,7 +216,6 @@ namespace GitScc
         private void OnRefreshCommand(object sender, EventArgs e)
         {
             sccService.Refresh();
-            OnSccStatusChanged();
         }
 
         private void OnCompareCommand(object sender, EventArgs e)
@@ -252,38 +245,16 @@ namespace GitScc
             var difftoolPath = GitSccOptions.Current.DifftoolPath;
             RunCommand(difftoolPath, "\"" + file1 + "\" \"" + file2 + "\"");
         }
-        private void ShowPendingChangesWindow(object sender, EventArgs e)
-        {
-            ShowToolWindow(typeof(PendingChangesToolWindow));
-        }
-
-        private void ShowHistoryWindow(object sender, EventArgs e)
-        {
-            ShowToolWindow(typeof(HistoryToolWindow));
-        }
-
-        private void ShowToolWindow(Type type)
-        {
-            ToolWindowPane window = this.FindToolWindow(type, 0, true);
-            IVsWindowFrame windowFrame = null;
-            if (window != null && window.Frame != null)
-            {
-                windowFrame = (IVsWindowFrame)window.Frame;
-            }
-            if (windowFrame != null)
-            {
-                ErrorHandler.ThrowOnFailure(windowFrame.Show());
-
-                if (window is PendingChangesToolWindow)
-                {
-                    //((PendingChangesToolWindow)window).Refresh(statusTracker);
-                }
-            }
-        }
 
         private void OnInitCommand(object sender, EventArgs e)
         {
             sccService.InitRepo();
+        }
+
+        private void OnTortoiseGitCommand(object sender, EventArgs e)
+        {
+            var tortoiseGitPath = GitSccOptions.Current.TortoiseGitPath;
+            RunDetatched(tortoiseGitPath, "/command:commit");
         }
         #endregion
 
@@ -347,18 +318,5 @@ namespace GitScc
         } 
         #endregion
 
-        internal void OnSccStatusChanged()
-        {
-            var pendingChangesToolWindow = GetToolWindowPane<PendingChangesToolWindow>();
-            if (pendingChangesToolWindow != null)
-            {
-                //pendingChangesToolWindow.Refresh(statusTracker);
-            }
-        }
-
-        private T GetToolWindowPane<T>() where T : ToolWindowPane
-        {
-            return (T)this.FindToolWindow(typeof(T), 0, true);
-        }
     }
 }

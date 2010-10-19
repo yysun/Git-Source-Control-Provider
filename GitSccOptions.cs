@@ -17,6 +17,7 @@ namespace GitScc
         public string GitBashPath       { get; set; }
         public string GitExtensionPath  { get; set; }
         public string DifftoolPath      { get; set; }
+        public string TortoiseGitPath   { get; set; }
 
         private static GitSccOptions gitSccOptions;
 
@@ -76,8 +77,15 @@ namespace GitScc
             if (string.IsNullOrEmpty(GitExtensionPath))
             {
                 GitExtensionPath = TryFindFile(new string[]{
-                    @"C:\Program Files\Henk\GitExtensions\GitExtensions.exe",
+                    @"C:\Program Files\GitExtensions\GitExtensions.exe",
                     @"C:\Program Files (x86)\GitExtensions\GitExtensions.exe",
+                });
+            }
+            if (string.IsNullOrEmpty(TortoiseGitPath))
+            {
+                TortoiseGitPath = TryFindFile(new string[]{
+                    @"C:\Program Files\TortoiseGit\bin\TortoiseProc.exe",
+                    @"C:\Program Files (x86)\TortoiseGit\bin\TortoiseProc.exe",
                 });
             }
 

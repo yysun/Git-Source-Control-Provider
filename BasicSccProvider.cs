@@ -91,6 +91,14 @@ namespace GitScc
                 menu = new MenuCommand(new EventHandler(OnUndoCommand), cmd);
                 mcs.AddCommand(menu);
 
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandInit);
+                menu = new MenuCommand(new EventHandler(OnInitCommand), cmd);
+                mcs.AddCommand(menu);
+
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandGitTortoise);
+                menu = new MenuCommand(new EventHandler(OnTortoiseGitCommand), cmd);
+                mcs.AddCommand(menu);
+
             }
 
             // Register the provider with the source control manager
@@ -127,7 +135,7 @@ namespace GitScc
             // Process our Commands
             switch (prgCmds[0].cmdID)
             {
-                case CommandId.imnuFileSourceControlMenu:
+                case CommandId.imnuGitSourceControlMenu:
                     OLECMDTEXT cmdtxtStructure = (OLECMDTEXT)Marshal.PtrToStructure(pCmdText, typeof(OLECMDTEXT));
                     if (cmdtxtStructure.cmdtextf == (uint)OLECMDTEXTF.OLECMDTEXTF_NAME)
                     {
@@ -153,10 +161,25 @@ namespace GitScc
                         cmdf |= OLECMDF.OLECMDF_ENABLED;
                     }
                     break;
+
+                case CommandId.icmdSccCommandGitTortoise:
+                    var tortoiseGitPath = GitSccOptions.Current.TortoiseGitPath;
+                    if (!string.IsNullOrEmpty(tortoiseGitPath) && File.Exists(tortoiseGitPath))
+                    {
+                        cmdf |= OLECMDF.OLECMDF_ENABLED;
+                    }
+                    break;
                 
                 case CommandId.icmdSccCommandUndo:
                 case CommandId.icmdSccCommandCompare:
                     if (sccService.CanCompareSelectedFile) cmdf |= OLECMDF.OLECMDF_ENABLED;
+                    break;
+
+                case CommandId.icmdSccCommandInit:
+                    if (!sccService.IsSolutionGitControlled)
+                        cmdf |= OLECMDF.OLECMDF_ENABLED;
+                    else
+                        cmdf |= OLECMDF.OLECMDF_INVISIBLE;
                     break;
 
                 default:
@@ -216,6 +239,17 @@ namespace GitScc
         {
             var difftoolPath = GitSccOptions.Current.DifftoolPath;
             RunCommand(difftoolPath, "\"" + file1 + "\" \"" + file2 + "\"");
+        }
+
+        private void OnInitCommand(object sender, EventArgs e)
+        {
+            sccService.InitRepo();
+        }
+
+        private void OnTortoiseGitCommand(object sender, EventArgs e)
+        {
+            var tortoiseGitPath = GitSccOptions.Current.TortoiseGitPath;
+            RunDetatched(tortoiseGitPath, "/command:commit");
         }
         #endregion
 
@@ -278,5 +312,6 @@ namespace GitScc
             }
         } 
         #endregion
+
     }
 }

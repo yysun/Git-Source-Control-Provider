@@ -89,11 +89,6 @@
       <Name>GitSharp.Core</Name>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\GitSharp\GitSharp.csproj">
-      <Project>{7311850F-619A-4241-B09F-157792C75FBA}</Project>
-      <Name>GitSharp</Name>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

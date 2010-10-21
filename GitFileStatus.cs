@@ -15,6 +15,13 @@ namespace GitScc
         Added,
         Missing,
         MergeConflict,
-        Ignored
+        Ignored,
+    }
+
+    public class GitFile
+    {
+        public GitFileStatus Status { get; set; }
+        public string FileName { get; set; }
+        public bool IsStaged { get; set; }
     }
 }

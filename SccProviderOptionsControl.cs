@@ -44,6 +44,9 @@ namespace GitScc
         private TextBox textBox1;
         private Label label1;
         private OpenFileDialog openFileDialog1;
+        private Button button4;
+        private TextBox textBox4;
+        private Label label4;
         // The parent page, use to persist data
         private SccProviderOptions _customPage;
 
@@ -90,11 +93,17 @@ namespace GitScc
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.button4 = new System.Windows.Forms.Button();
+            this.textBox4 = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.button4);
+            this.groupBox1.Controls.Add(this.textBox4);
+            this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.button3);
             this.groupBox1.Controls.Add(this.button2);
             this.groupBox1.Controls.Add(this.button1);
@@ -114,7 +123,7 @@ namespace GitScc
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(364, 158);
+            this.button3.Location = new System.Drawing.Point(364, 209);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(75, 23);
             this.button3.TabIndex = 19;
@@ -144,7 +153,7 @@ namespace GitScc
             // 
             // textBox3
             // 
-            this.textBox3.Location = new System.Drawing.Point(6, 160);
+            this.textBox3.Location = new System.Drawing.Point(6, 211);
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(348, 20);
             this.textBox3.TabIndex = 16;
@@ -152,7 +161,7 @@ namespace GitScc
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(3, 143);
+            this.label3.Location = new System.Drawing.Point(3, 194);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(286, 13);
             this.label3.TabIndex = 15;
@@ -194,6 +203,32 @@ namespace GitScc
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(364, 147);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(75, 23);
+            this.button4.TabIndex = 22;
+            this.button4.Text = "Browse ...";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // textBox4
+            // 
+            this.textBox4.Location = new System.Drawing.Point(6, 149);
+            this.textBox4.Name = "textBox4";
+            this.textBox4.Size = new System.Drawing.Size(348, 20);
+            this.textBox4.TabIndex = 21;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(3, 132);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(95, 13);
+            this.label4.TabIndex = 20;
+            this.label4.Text = "Path to TortoiseGit";
+            // 
             // SccProviderOptionsControl
             // 
             this.AllowDrop = true;
@@ -221,6 +256,7 @@ namespace GitScc
             this.textBox1.Text = GitSccOptions.Current.GitBashPath;
             this.textBox2.Text = GitSccOptions.Current.GitExtensionPath;
             this.textBox3.Text = GitSccOptions.Current.DifftoolPath;
+            this.textBox4.Text = GitSccOptions.Current.TortoiseGitPath;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -237,6 +273,12 @@ namespace GitScc
         {
             OpenFile("*.exe", textBox3);
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            OpenFile("*.exe", textBox4);
+        }
+
         private void OpenFile(string shexe, TextBox textBox)
         {
             this.openFileDialog1.FileName = shexe;
@@ -248,11 +290,14 @@ namespace GitScc
 
         internal void Save()
         {
-            GitSccOptions.Current.GitBashPath      = this.textBox1.Text; 
+            GitSccOptions.Current.GitBashPath = this.textBox1.Text;
             GitSccOptions.Current.GitExtensionPath = this.textBox2.Text;
-            GitSccOptions.Current.DifftoolPath     = this.textBox3.Text;
+            GitSccOptions.Current.DifftoolPath = this.textBox3.Text;
+            GitSccOptions.Current.TortoiseGitPath = this.textBox4.Text;
             GitSccOptions.Current.SaveConfig();
         }
+
+
     }
 
 }

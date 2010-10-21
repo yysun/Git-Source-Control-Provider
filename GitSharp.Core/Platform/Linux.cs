@@ -1,5 +1,7 @@
-﻿/*
+/*
  * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
+ * Copyrigth (C) 2010, Henon <meinrad.recheis@gmail.com>
+ * Copyrigth (C) 2010, Andrew Cooper <andymancooper@gmail.com>
  *
  * All rights reserved.
  *
@@ -39,27 +41,26 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
-using GitSharp.Core;
+using System.Linq;
 
 
-namespace GitSharp.Platform.OSS
+namespace GitSharp.Core
 {
 
-	public static class Linux
+	public class Linux : Platform
 	{
 		
-		public static bool IsSymlinkSupported()
+		public override bool IsSymlinkSupported
 		{
-			return true;
+			get { return true; }
 		}
-		
-		public static bool IsHardlinkSupported()
+
+		public override bool IsHardlinkSupported
 		{
-			return true;
+			get { return true; }
 		}
-		
-		public static bool CreateSymlink(string symlinkFilename, string existingFilename, bool isSymlinkDirectory)
+
+		public override bool CreateSymlink(string symlinkFilename, string existingFilename, bool isSymlinkDirectory)
 		{
 			//Execute command
 			ProcessStartInfo info = new ProcessStartInfo();
@@ -78,8 +79,8 @@ namespace GitSharp.Platform.OSS
 
 			return true;
 		}
-		
-		public static bool CreateHardlink(string hardlinkFilename, string existingFilename)
+
+		public override bool CreateHardlink(string hardlinkFilename, string existingFilename)
 		{
 			ProcessStartInfo info = new ProcessStartInfo();
 			info.FileName = "ln";
@@ -97,81 +98,100 @@ namespace GitSharp.Platform.OSS
 
 			return true;
 		}
-		
-		public static PlatformObject Load()
+
+        public override Process GetTextPager(string corePagerConfig)
+        {
+            var pager = new Process ();
+            var pagerVar = System.Environment.GetEnvironmentVariable ("GIT_PAGER");
+            if (pagerVar == null)
+                pagerVar = corePagerConfig;
+            if ((pagerVar == null) || (pagerVar.Length == 0))
+                pagerVar = "less";
+            var tokens = pagerVar.Split();
+            pager.StartInfo.FileName = tokens[0];
+            pager.StartInfo.UseShellExecute = false;
+            pager.StartInfo.RedirectStandardInput = true;
+            if (tokens.Length > 1)
+                pager.StartInfo.Arguments = pagerVar.Substring(tokens[0].Length);
+
+            // Apply LESS environment behavior
+            var lessVar = System.Environment.GetEnvironmentVariable ("LESS");
+            if (lessVar == null)
+                lessVar = "FRSX";
+            pager.StartInfo.EnvironmentVariables["LESS"] = lessVar;
+
+            return pager;
+        }
+
+		public Linux()
 		{
 			System.IO.DirectoryInfo di = new System.IO.DirectoryInfo("/etc");
 			System.IO.FileInfo[] release = di.GetFiles("*-release");
 			System.IO.FileInfo[] debian = di.GetFiles("debian_version");
 			System.IO.FileInfo[] slackware = di.GetFiles("slackware-version");
 			
-			PlatformObject obj = new PlatformObject();
-			obj.ClassName = null;
-			obj.PlatformType = "Linux";
-			obj.PlatformSubType = "";
-			obj.Edition = "";
-			obj.Version = "";
-			obj.VersionFile  = "";
+			ClassName = null;
+			PlatformType = "Linux";
+			PlatformSubType = "";
+			Edition = "";
+			Version = "";
+			VersionFile  = "";
 			
 			if (release.Length > 0)
 			{
 				string str = release[0].ToString();
 				string platformType = str.Substring(5,str.Length-13);
-				obj.VersionFile = "/etc/" + str;
+				VersionFile = str;
 				
 				switch (platformType)
 				{
 					case "arch":
-						GetArchPlatform(ref obj, null);
+						GetArchPlatform( this, null);
 						break;
 					case "fedora":
-						GetFedoraPlatform(ref obj, null);
+						GetFedoraPlatform( this, null);
 						break;
 					case "gentoo":
-						GetGentooPlatform(ref obj, null);
+						GetGentooPlatform( this, null);
 						break;
 					case "mandriva":
-						GetMandrivaPlatform(ref obj, null);
+						GetMandrivaPlatform( this, null);
 						break;
 					case "redhat": 	//RedHat variants
-						GetRedHatPlatform(ref obj, null);
+						GetRedHatPlatform( this, null);
 						break;
 					case "suse":
-						GetSusePlatform(ref obj, null);
+						GetSusePlatform( this, null);
 						break;
 					case "lsb": 	//Ubuntu variants
-						GetUbuntuPlatform(ref obj, null);
+						GetUbuntuPlatform( this, null);
 						break;
 					default:
-						GetDefaultLinuxPlatform(ref obj, null);
+						GetDefaultLinuxPlatform( this, null);
 						break;
 				}
 			}
 			else if (slackware.Length > 0)
 			{
-				obj.VersionFile = "/etc/" + slackware[0].ToString();
-				GetSlackwarePlatform(ref obj, null);
+				VersionFile = "/etc/" + slackware[0].ToString();
+				GetSlackwarePlatform( this, null);
 			}
 			else if (debian.Length > 0)
 			{
-				obj.VersionFile = "/etc/" + debian[0].ToString();
-				GetDebianPlatform(ref obj, null);
+				VersionFile = "/etc/" + debian[0].ToString();
+				GetDebianPlatform( this, null);
 			}
 			else
 			{
-				GetDefaultLinuxPlatform(ref obj, null);
+				GetDefaultLinuxPlatform( this, null);
 			}
 			
-			if (obj.ClassName == null)
+			if (ClassName == null)
 				throw new ArgumentNullException("ClassName was not defined. Please report this bug.");
 			
-			//Add project namespace
-			obj.ClassName = "GitSharp.Platform."+obj.ClassName;
-			
-			return obj;
 		}
 		
-		public static void GetArchPlatform(ref PlatformObject obj, string unitTestContent)
+		public static void GetArchPlatform(Linux obj, string unitTestContent)
 		{
 			// Arch is not versioned. It is a single rolling version.
 			// The existance of the arch-release file determines arch
@@ -182,7 +202,7 @@ namespace GitSharp.Platform.OSS
 			obj.Version = "Current";
 		}
 		
-		public static void GetDefaultLinuxPlatform(ref PlatformObject obj, string unitTestContent)
+		public static void GetDefaultLinuxPlatform(Linux obj, string unitTestContent)
 		{
 			obj.ClassName = "Linux.Default";
 			obj.PlatformSubType = "Generic";
@@ -190,7 +210,7 @@ namespace GitSharp.Platform.OSS
 			obj.Version = "";
 		}
 		
-		public static void GetDebianPlatform(ref PlatformObject obj, string unitTestContent)
+		public static void GetDebianPlatform(Linux obj, string unitTestContent)
 		{
 			//Version list available at: http://www.debian.org/releases/
 			//There is no accurate way to determine the version information
@@ -208,7 +228,7 @@ namespace GitSharp.Platform.OSS
 			obj.Version = "";
 		}
 		
-		public static void GetFedoraPlatform(ref PlatformObject obj, string unitTestContent)
+		public static void GetFedoraPlatform(Linux obj, string unitTestContent)
 		{
 			//Version list available at http://fedoraproject.org/wiki/Releases
 			//Unique version variations for parsing include:
@@ -232,7 +252,7 @@ namespace GitSharp.Platform.OSS
 			
 		}
 		
-		public static void GetGentooPlatform(ref PlatformObject obj, string unitTestContent)
+		public static void GetGentooPlatform(Linux obj, string unitTestContent)
 		{
 			//Version list available at http://gentest.neysx.org/proj/en/releng/#doc_chap6
 			//Versioning is primarily based on date.
@@ -243,16 +263,15 @@ namespace GitSharp.Platform.OSS
 			if (unitTestContent != null)
 				lines = ParseString(unitTestContent);
 			else
-				lines = ParseFile("/etc/" + obj.VersionFile);
+				lines = ParseFile(obj.VersionFile);
 			
 			obj.ClassName = "Linux.Gentoo";
 			obj.PlatformSubType = "Gentoo";
 			obj.Edition = "";
-			int pt = lines[0].LastIndexOf(" ");
-			obj.Version = lines[0].Substring(pt+1,lines[0].Length - pt +1);
+			obj.Version = lines[0].Split().Last();
 		}
 		
-		public static void GetMandrivaPlatform(ref PlatformObject obj, string unitTestContent)
+		public static void GetMandrivaPlatform(Linux obj, string unitTestContent)
 		{
 			//Formerly known as Mandrake Linux
 			//Version list is available at http://en.wikipedia.org/wiki/Mandriva_Linux
@@ -355,7 +374,7 @@ namespace GitSharp.Platform.OSS
 			}
 		}
 		
-		public static void GetRedHatPlatform(ref PlatformObject obj, string unitTestContent)
+		public static void GetRedHatPlatform(Linux obj, string unitTestContent)
 		{
 			//Version list is available at ...
 			//Unique version variations for parsing include:
@@ -382,7 +401,7 @@ namespace GitSharp.Platform.OSS
 			
 		}
 		
-		public static void GetSlackwarePlatform(ref PlatformObject obj, string unitTestContent)
+		public static void GetSlackwarePlatform(Linux obj, string unitTestContent)
 		{
 			//Version list is available at ...
 			//Unique version variations for parsing include:
@@ -401,12 +420,12 @@ namespace GitSharp.Platform.OSS
 			obj.Version = lines[0].Substring(pt+1, lines[0].Length - 1);
 		}
 
-		public static void GetSusePlatform(ref PlatformObject obj)
+		public static void GetSusePlatform(Linux obj)
 		{
-			GetSusePlatform(ref obj, null);
+			GetSusePlatform( obj, null);
 		}
 		
-		public static void GetSusePlatform(ref PlatformObject obj, string unitTestContent)
+		public static void GetSusePlatform(Linux obj, string unitTestContent)
 		{
 			//Version list is available at http://en.wikipedia.org/wiki/SUSE_Linux
 			//Unique version variations for parsing include (multi-line):
@@ -427,12 +446,12 @@ namespace GitSharp.Platform.OSS
 			obj.Version = lines[1].Substring(11, lines[1].Length - 11);
 		}
 		
-		public static void GetUbuntuPlatform(ref PlatformObject obj)
+		public static void GetUbuntuPlatform(Linux obj)
 		{
-			GetUbuntuPlatform(ref obj, null);
+			GetUbuntuPlatform( obj, null);
 		}
 		
-		public static void GetUbuntuPlatform(ref PlatformObject obj, string unitTestContent)
+		public static void GetUbuntuPlatform(Linux obj, string unitTestContent)
 		{
 			//Version list is available at http://en.wikipedia.org/wiki/Ubuntu_(Linux_distribution)
 			//Unique version variations for parsing include (multi-line):

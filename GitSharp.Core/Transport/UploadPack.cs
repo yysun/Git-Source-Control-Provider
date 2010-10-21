@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Google Inc.
+ * Copyright (C) 2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -268,8 +269,10 @@ namespace GitSharp.Core.Transport
 
             if (_timeout > 0)
             {
-                var i = new TimeoutStream(_rawIn, _timeout * 1000);
-                var o = new TimeoutStream(_rawOut, _timeout * 1000);
+                var i = new TimeoutStream(_rawIn);
+					i.setTimeout(_timeout * 1000);
+                var o = new TimeoutStream(_rawOut );
+					 o.setTimeout(_timeout * 1000);
                 _rawIn = i;
                 _rawOut = o;
             }
@@ -292,7 +295,7 @@ namespace GitSharp.Core.Transport
                     {
                         _walk.parseAny(r.ObjectId).add(ADVERTISED);
                     }
-                    catch (IOException e)
+                    catch (IOException)
                     {
                         // Skip missing/corrupt objects
                     }
@@ -567,7 +570,7 @@ namespace GitSharp.Core.Transport
             bool sideband = _options.Contains(OptionSideBand) || _options.Contains(OptionSideBand64K);
 
             ProgressMonitor pm = NullProgressMonitor.Instance;
-            Stream packOut = _rawOut;
+            Stream _packOut = _rawOut;
 
             if (sideband)
             {
@@ -576,12 +579,11 @@ namespace GitSharp.Core.Transport
                 {
                     bufsz = SideBandOutputStream.MAX_BUF;
                 }
-                bufsz -= SideBandOutputStream.HDR_SIZE;
 
-                packOut = new BufferedStream(new SideBandOutputStream(SideBandOutputStream.CH_DATA, _pckOut), bufsz);
+                _packOut = new SideBandOutputStream(SideBandOutputStream.CH_DATA, bufsz, _rawOut);
 
                 if (progress)
-                    pm = new SideBandProgressMonitor(_pckOut);
+                    pm = new SideBandProgressMonitor(new SideBandOutputStream(SideBandOutputStream.CH_PROGRESS, bufsz, _rawOut));
             }
 
             var pw = new PackWriter(_db, pm, NullProgressMonitor.Instance)
@@ -612,11 +614,11 @@ namespace GitSharp.Core.Transport
                 }
             }
 
-            pw.writePack(packOut);
+            pw.writePack(_packOut);
 
             if (sideband)
             {
-                packOut.Flush();
+                _packOut.Flush();
                 _pckOut.End();
             }
             else

@@ -1,5 +1,7 @@
-﻿/*
+/*
  * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
+ * Copyrigth (C) 2010, Henon <meinrad.recheis@gmail.com>
+ * Copyrigth (C) 2010, Andrew Cooper <andymancooper@gmail.com>
  *
  * All rights reserved.
  *
@@ -36,157 +38,112 @@
  */
 
 using System;
-using GitSharp.Platform;
+using System.Diagnostics;
 
-namespace GitSharp.Core.Platform
+namespace GitSharp.Core
 {
-    public static class Platform1
-    {
-        enum GitPlatformID
-        {
-          Win32S = PlatformID.Win32S,
-          Win32Windows = PlatformID.Win32Windows,
-          Win32NT = PlatformID.Win32NT,
-          WinCE = PlatformID.WinCE,
-          Unix = PlatformID.Unix,
-          Xbox,
-          MacOSX,
-        }
-        
-	
-        public static PlatformObject Load()
-        {
-           System.OperatingSystem os = Environment.OSVersion;
-           GitPlatformID pid = (GitPlatformID)os.Platform;
-            PlatformObject obj;
-			
-            switch (pid)
-            {
-               case GitPlatformID.Unix:
-                    obj = GitSharp.Platform.OSS.Linux.Load();
-                    break;
-               case GitPlatformID.MacOSX:
-                    obj = GitSharp.Platform.Macintosh.Mac.Load();
-                    break;
-               case GitPlatformID.Win32NT:
-               case GitPlatformID.Win32S:
-               case GitPlatformID.Win32Windows:
-               case GitPlatformID.WinCE:
-                    obj = GitSharp.Platform.Windows.Win32.Load();
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
+	/// <summary>
+	/// Base class for a singleton object that provides capabilities that
+	/// require a different implementation per platform. 
+	/// </summary>
+	public abstract class Platform
+	{
+		/// <summary>
+		/// Extension of System.PlatformID to add plaforms. 
+		/// </summary>
+		enum GitPlatformID
+		{
+			Win32S = PlatformID.Win32S,
+			Win32Windows = PlatformID.Win32Windows,
+			Win32NT = PlatformID.Win32NT,
+			WinCE = PlatformID.WinCE,
+			Unix = PlatformID.Unix,
+			Xbox,
+			MacOSX,
+		}
+
+		/// <summary>
+		/// Enumeration of the known concrete implementation families. 
+		/// </summary>
+		public enum PlatformId
+		{
+			Windows = 1,
+			Linux = 2,
+			Mac = 3
+		}
+
+		/// <summary>
+		/// Access to the singleton object.  Will create the object on first get. 
+		/// </summary>
+		public static Platform Instance
+		{
+			get
+			{
+				if (_instance == null)
+				{
+					System.OperatingSystem os = Environment.OSVersion;
+					GitPlatformID pid = (GitPlatformID)os.Platform;
 		
-            return obj;
-        }
-		
-        public static bool IsHardlinkSupported()
-        {
-            System.OperatingSystem os = Environment.OSVersion;
-            GitPlatformID pid = (GitPlatformID)os.Platform;
-            bool isSupported = false;
-			
-            switch (pid)
-            {
-               case GitPlatformID.Unix:
-                    isSupported = GitSharp.Platform.OSS.Linux.IsHardlinkSupported();
-                    break;
-               case GitPlatformID.MacOSX:
-                    isSupported = GitSharp.Platform.Macintosh.Mac.IsHardlinkSupported();
-                    break;
-                case GitPlatformID.Win32NT:
-                case GitPlatformID.Win32S:
-                case GitPlatformID.Win32Windows:
-                case GitPlatformID.WinCE:
-                    isSupported = GitSharp.Platform.Windows.Win32.IsHardlinkSupported();
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-		
-            return isSupported;
-        }
-	
-        public static bool IsSymlinkSupported()
-        {
-            System.OperatingSystem os = Environment.OSVersion;
-            GitPlatformID pid = (GitPlatformID)os.Platform;
-            bool isSupported = false;
-		
-            switch (pid)
-            {
-               case GitPlatformID.Unix:
-                    isSupported = GitSharp.Platform.OSS.Linux.IsSymlinkSupported();
-                    break;
-               case GitPlatformID.MacOSX:
-                    isSupported = GitSharp.Platform.Macintosh.Mac.IsSymlinkSupported();
-                    break;
-               case GitPlatformID.Win32NT:
-               case GitPlatformID.Win32S:
-               case GitPlatformID.Win32Windows:
-               case GitPlatformID.WinCE:
-                    isSupported = GitSharp.Platform.Windows.Win32.IsSymlinkSupported();
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-		
-            return isSupported;
-        }
-	
-        public static bool CreateSymlink(string symlinkFilename, string existingFilename, bool isSymlinkDirectory)
-        {
-            System.OperatingSystem os = Environment.OSVersion;
-            GitPlatformID pid = (GitPlatformID)os.Platform;
-            bool success = false;
-			
-            switch (pid)
-            {
-               case GitPlatformID.Unix:
-                    success = GitSharp.Platform.OSS.Linux.CreateSymlink(symlinkFilename, existingFilename, isSymlinkDirectory);
-                    break;
-               case GitPlatformID.MacOSX:
-                    success = GitSharp.Platform.Macintosh.Mac.CreateSymlink(symlinkFilename, existingFilename, isSymlinkDirectory);
-                    break;
-               case GitPlatformID.Win32NT:
-               case GitPlatformID.Win32S:
-               case GitPlatformID.Win32Windows:
-               case GitPlatformID.WinCE:
-                    success = GitSharp.Platform.Windows.Win32.CreateSymlink(symlinkFilename, existingFilename, isSymlinkDirectory);
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-		
-            return success;
-        }
-	
-        public static bool CreateHardlink(string hardlinkFilename, string exisitingFilename)
-        {
-            System.OperatingSystem os = Environment.OSVersion;
-            GitPlatformID pid = (GitPlatformID)os.Platform;
-            bool success = false;
-		
-            switch (pid)
-            {
-               case GitPlatformID.Unix:
-                    success = GitSharp.Platform.OSS.Linux.CreateHardlink(hardlinkFilename, exisitingFilename);
-                    break;
-               case GitPlatformID.MacOSX:
-                    success = GitSharp.Platform.Macintosh.Mac.CreateHardlink(hardlinkFilename, exisitingFilename);
-                    break;
-               case GitPlatformID.Win32NT:
-               case GitPlatformID.Win32S:
-               case GitPlatformID.Win32Windows:
-               case GitPlatformID.WinCE:
-                    success = GitSharp.Platform.Windows.Win32.CreateHardlink(hardlinkFilename, exisitingFilename);
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-		
-            return success;
-        }
-    }
+					switch (pid)
+					{
+						case GitPlatformID.Unix:
+							_instance = new Linux();
+							break;
+						case GitPlatformID.MacOSX:
+							_instance = new Mac();
+							break;
+						case GitPlatformID.Win32NT:
+						case GitPlatformID.Win32S:
+						case GitPlatformID.Win32Windows:
+						case GitPlatformID.WinCE:
+							_instance = new Win32();
+							break;
+						default:
+							throw new NotSupportedException("Platform could not be detected!");
+					}
+				}
+
+				return _instance;
+			}
+		}
+
+		public abstract bool IsHardlinkSupported { get; }
+
+		public abstract bool IsSymlinkSupported { get; }
+
+		public abstract bool CreateSymlink(string symlinkFilename, string existingFilename, bool isSymlinkDirectory);
+
+		public abstract bool CreateHardlink(string hardlinkFilename, string exisitingFilename);
+
+
+		public abstract Process GetTextPager(string corePagerConfig);
+
+		protected Platform()
+		{
+		}
+
+		public string ClassName { get; protected set; }
+
+		public PlatformId Id { get; protected set; }
+
+		public string PlatformType { get; protected set; }
+
+		public string PlatformSubType { get; protected set; }
+
+		public string Edition { get; protected set; }
+
+		public string Version { get; protected set; }
+
+		public string VersionFile { get; protected set; }
+
+		public string ProductName
+		{
+			get
+			{
+				return PlatformType + " " + PlatformSubType + " " + Edition + "(" + Version + ")";
+			}
+		}
+
+		private static Platform _instance;
+	}
 }

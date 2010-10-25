@@ -106,6 +106,14 @@ namespace GitScc
                 menu = new MenuCommand(new EventHandler(OnTortoiseGitCommand), cmd);
                 mcs.AddCommand(menu);
 
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdGitExtCommand1);
+                menu = new MenuCommand(new EventHandler(OnTortoiseGitCommand), cmd);
+                mcs.AddCommand(menu);
+
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdGitTorCommand1);
+                menu = new MenuCommand(new EventHandler(OnTortoiseGitCommand), cmd);
+                mcs.AddCommand(menu);
+
             }
 
             // Register the provider with the source control manager

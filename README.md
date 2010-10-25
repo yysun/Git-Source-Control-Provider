@@ -10,6 +10,7 @@ Visual Studio users are used to see file status of source control right inside t
 Features
 --------
 * Display file status in solution explorer
+* Display file status in solution navigator
 * Enable/disable plug-in through visual studio's source control plug-in selection
 * No source code control information stored in solution or project file
 * Initialize new git repository and generate .gitignore 

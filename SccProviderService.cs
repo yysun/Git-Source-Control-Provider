@@ -149,7 +149,7 @@ namespace GitScc
 
             switch (status)
             {
-                case GitFileStatus.Trackered:
+                case GitFileStatus.Tracked:
                     rgsiGlyphs[0] = VsStateIcon.STATEICON_CHECKEDIN;
                     break;
 
@@ -619,11 +619,6 @@ namespace GitScc
             {
                 monitorFolder = Path.GetDirectoryName(solutionFileName);
 
-                //IVsHierarchy sol = (IVsHierarchy)_sccProvider.GetService(typeof(SVsSolution));
-                //EnumHierarchyItems(sol, VSConstants.VSITEMID_ROOT, 0,
-                //    (h, id) => {if(id==VSConstants.VSITEMID_ROOT) AddProject(h);} //only add project nodes
-                //);
-
                 GetLoadedControllableProjects().ForEach(h => AddProject(h as IVsHierarchy));
 
                 if (monitorFolder != lastMinotorFolder)
@@ -667,39 +662,24 @@ namespace GitScc
 
         #region IVsFileChangeEvents
 
-        internal void Refresh()
-        {
-            Debug.WriteLine("==== Refresh Nodes");
-            
-            noRefresh = true;
-            OpenTracker();
-
-            //IVsHierarchy sol = (IVsHierarchy)_sccProvider.GetService(typeof(SVsSolution));
-            //EnumHierarchyItems(sol as IVsHierarchy, VSConstants.VSITEMID_ROOT, 0,
-            //    (h, id) => processNodeFunc(h, id)
-            //);
-
-            RefreshNodesGlyphs();
-
-            noRefresh = false;
-        }
-
-        private DateTime lastTimeDirChangeFired = DateTime.Now;
+        //private DateTime lastTimeDirChangeFired = DateTime.Now;
 
         public int DirectoryChanged(string pszDirectory)
         {
             if (noRefresh) return VSConstants.S_OK;
 
-            double delta = DateTime.Now.Subtract(lastTimeDirChangeFired).TotalMilliseconds;
-            lastTimeDirChangeFired = DateTime.Now;
+            //double delta = DateTime.Now.Subtract(lastTimeDirChangeFired).TotalMilliseconds;
+            //lastTimeDirChangeFired = DateTime.Now;
 
             //Debug.WriteLine("==== dir changed: " + Math.Floor(delta).ToString());
-            if (delta > 1000)
-            {
-                System.Threading.Thread.Sleep(200);
-                Debug.WriteLine("==== dir changed REFRESH: " + Math.Floor(delta).ToString());
-                Refresh();
-            }
+            //if (delta > 1000)
+            //{
+            //    System.Threading.Thread.Sleep(200);
+            //    Debug.WriteLine("==== dir changed REFRESH: " + Math.Floor(delta).ToString());
+            //    Refresh();
+            //}
+
+            NodesGlyphsDirty = true;
             return VSConstants.S_OK;
         }
 
@@ -761,8 +741,6 @@ namespace GitScc
         #endregion
 
         #region IVsUpdateSolutionEvents2 Members
-
-        bool noRefresh = false;
 
         public int OnActiveProjectCfgChange(IVsHierarchy pIVsHierarchy)
         {
@@ -912,6 +890,28 @@ namespace GitScc
         #endregion
 
         #region new Refresh methods
+
+        bool noRefresh = false;
+        bool NodesGlyphsDirty = false;
+
+        internal void Refresh()
+        {
+            Debug.WriteLine("==== Refresh Nodes");
+            NodesGlyphsDirty = true;
+        }
+
+        public void UpdateNodesGlyphs()
+        {
+            if (NodesGlyphsDirty)
+            {
+                noRefresh = true;
+                OpenTracker();
+                RefreshNodesGlyphs();
+                noRefresh = false;
+            }
+            NodesGlyphsDirty = false;
+        }
+
         public void RefreshNodesGlyphs()
         {
             var solHier = (IVsHierarchy)_sccProvider.GetService(typeof(SVsSolution));
@@ -920,14 +920,6 @@ namespace GitScc
             // We'll also need to refresh the solution folders glyphs
             // to reflect the controlled state
             IList<VSITEMSELECTION> nodes = new List<VSITEMSELECTION>();
-
-            {
-                // add solution root item
-                VSITEMSELECTION vsItem;
-                vsItem.itemid = VSConstants.VSITEMID_ROOT;
-                vsItem.pHier = solHier;// pHierarchy;
-                nodes.Add(vsItem);
-            }
 
             // add project node items
             foreach (IVsHierarchy hr in projectList)
@@ -955,9 +947,10 @@ namespace GitScc
         public List<IVsSccProject2> GetLoadedControllableProjects()
         {
             var list = new List<IVsSccProject2>();
-            // Hashtable mapHierarchies = new Hashtable();
 
             IVsSolution sol = (IVsSolution) _sccProvider.GetService(typeof(SVsSolution));
+            list.Add(sol as IVsSccProject2);
+
             Guid rguidEnumOnlyThisType = new Guid();
             IEnumHierarchies ppenum = null;
             ErrorHandler.ThrowOnFailure(sol.GetProjectEnum((uint)__VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION, ref rguidEnumOnlyThisType, out ppenum));
@@ -1077,5 +1070,6 @@ _ReSharper*/
 [Tt]est[Rr]esult*"
             );
         }
+
     }
 }

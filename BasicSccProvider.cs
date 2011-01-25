@@ -50,6 +50,8 @@ namespace GitScc
     [Guid("C4128D99-2000-41D1-A6C3-704E6C1A3DE2")]
     public class BasicSccProvider : MsVsShell.Package, IOleCommandTarget
     {
+        private SccOnIdleEvent _OnIdleEvent = new SccOnIdleEvent();
+
         private List<GitFileStatusTracker> projects;
         private SccProviderService sccService = null;
 
@@ -110,11 +112,20 @@ namespace GitScc
             // If the package is to become active, this will also callback on OnActiveStateChange and the menu commands will be enabled
             IVsRegisterScciProvider rscp = (IVsRegisterScciProvider)GetService(typeof(IVsRegisterScciProvider));
             rscp.RegisterSourceControlProvider(GuidList.guidSccProvider);
+
+            _OnIdleEvent.RegisterForIdleTimeCallbacks(GetGlobalService(typeof(SOleComponentManager)) as IOleComponentManager);
+            _OnIdleEvent.OnIdleEvent += new OnIdleEvent(sccService.UpdateNodesGlyphs);
+
         }
 
         protected override void Dispose(bool disposing)
         {
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Entering Dispose() of: {0}", this.ToString()));
+
+            _OnIdleEvent.OnIdleEvent -= new OnIdleEvent(sccService.UpdateNodesGlyphs);
+            _OnIdleEvent.UnRegisterForIdleTimeCallbacks();
+              
+            sccService.Dispose();
 
             base.Dispose(disposing);
         }

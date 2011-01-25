@@ -178,7 +178,7 @@ namespace BasicSccProvider.Tests
 
             tracker.Commit("test");
             tracker.Refresh();
-            Assert.AreEqual(GitFileStatus.Trackered, tracker.GetFileStatus(tempFile));
+            Assert.AreEqual(GitFileStatus.Tracked, tracker.GetFileStatus(tempFile));
 
             File.WriteAllText(tempFile, "changed text");
             tracker.Refresh();

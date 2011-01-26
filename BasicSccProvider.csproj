@@ -69,6 +69,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GitToolCommands.cs" />
     <Compile Include="HistoryToolWindow.cs" />
     <Compile Include="GitFileStatusTracker.cs" />
     <Compile Include="GitSccOptions.cs" />

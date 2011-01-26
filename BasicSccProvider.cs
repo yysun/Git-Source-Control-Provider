@@ -106,15 +106,21 @@ namespace GitScc
                 menu = new MenuCommand(new EventHandler(OnTortoiseGitCommand), cmd);
                 mcs.AddCommand(menu);
 
-                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdGitExtCommand1);
-                menu = new MenuCommand(new EventHandler(OnTortoiseGitCommand), cmd);
-                mcs.AddCommand(menu);
+                for (int i = 0; i < GitToolCommands.GitExtCommands.Count; i++)
+                {
+                    cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdGitExtCommand1 + i);
+                    var mc = new MenuCommand(new EventHandler(OnGitExtCommandExec), cmd);
+                    mcs.AddCommand(mc);
+                }
 
-                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdGitTorCommand1);
-                menu = new MenuCommand(new EventHandler(OnTortoiseGitCommand), cmd);
-                mcs.AddCommand(menu);
-
+                for (int i = 0; i < GitToolCommands.GitTorCommands.Count; i++)
+                {
+                    cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdGitTorCommand1 + i);
+                    var mc = new MenuCommand(new EventHandler(OnGitTorCommandExec), cmd);
+                    mcs.AddCommand(mc);
+                }
             }
+
 
             // Register the provider with the source control manager
             // If the package is to become active, this will also callback on OnActiveStateChange and the menu commands will be enabled
@@ -141,8 +147,19 @@ namespace GitScc
         #endregion
 
         #region menu commands
-        int IOleCommandTarget.QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
+        int IOleCommandTarget.QueryStatus(ref Guid guidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
         {
+            Debug.Assert(cCmds == 1, "Multiple commands");
+            Debug.Assert(prgCmds != null, "NULL argument");
+
+            if ((prgCmds == null))  return VSConstants.E_INVALIDARG;
+
+            // Filter out commands that are not defined by this package
+            if (guidCmdGroup != GuidList.guidSccProviderCmdSet)
+            {
+                return (int)(Microsoft.VisualStudio.OLE.Interop.Constants.OLECMDERR_E_NOTSUPPORTED); 
+            }
+
             OLECMDF cmdf = OLECMDF.OLECMDF_SUPPORTED;
 
             // All source control commands needs to be hidden and disabled when the provider is not active
@@ -180,25 +197,36 @@ namespace GitScc
 
                 case CommandId.icmdSccCommandGitExtension:
                     var gitExtensionPath = GitSccOptions.Current.GitExtensionPath;
-                    if (!string.IsNullOrEmpty(gitExtensionPath) && File.Exists(gitExtensionPath))
+                    if (!string.IsNullOrEmpty(gitExtensionPath) && File.Exists(gitExtensionPath) && GitSccOptions.Current.NotExpandGitExtensions)
                     {
                         cmdf |= OLECMDF.OLECMDF_ENABLED;
                     }
+                    else
+                        cmdf |= OLECMDF.OLECMDF_INVISIBLE;
                     break;
 
                 case CommandId.icmdSccCommandGitTortoise:
                     var tortoiseGitPath = GitSccOptions.Current.TortoiseGitPath;
-                    if (!string.IsNullOrEmpty(tortoiseGitPath) && File.Exists(tortoiseGitPath))
+                    if (!string.IsNullOrEmpty(tortoiseGitPath) && File.Exists(tortoiseGitPath) && GitSccOptions.Current.NotExpandTortoiseGit)
                     {
                         cmdf |= OLECMDF.OLECMDF_ENABLED;
                     }
+                    else
+                        cmdf |= OLECMDF.OLECMDF_INVISIBLE;
                     break;
                 
                 case CommandId.icmdSccCommandUndo:
                 case CommandId.icmdSccCommandCompare:
                     if (sccService.CanCompareSelectedFile) cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
-
+                
+                case CommandId.icmdSccCommandRefresh:
+                    if (sccService.IsSolutionGitControlled)
+                        cmdf |= OLECMDF.OLECMDF_ENABLED;
+                    else
+                        cmdf |= OLECMDF.OLECMDF_INVISIBLE;
+                    break;
+                
                 case CommandId.icmdSccCommandInit:
                     if (!sccService.IsSolutionGitControlled)
                         cmdf |= OLECMDF.OLECMDF_ENABLED;
@@ -207,8 +235,27 @@ namespace GitScc
                     break;
 
                 default:
-                    cmdf |= OLECMDF.OLECMDF_ENABLED;
-                    break;
+                    if (prgCmds[0].cmdID >= CommandId.icmdGitExtCommand1 &&
+                        prgCmds[0].cmdID < CommandId.icmdGitExtCommand1 + GitToolCommands.GitExtCommands.Count && 
+                        !GitSccOptions.Current.NotExpandGitExtensions)
+                    {
+                        int idx = (int)prgCmds[0].cmdID - CommandId.icmdGitExtCommand1;
+                        SetOleCmdText(pCmdText, GitToolCommands.GitExtCommands[idx].Name);
+                        cmdf |= OLECMDF.OLECMDF_ENABLED;
+                        break;
+                    }
+                    else if (prgCmds[0].cmdID >= CommandId.icmdGitTorCommand1 &&
+                        prgCmds[0].cmdID < CommandId.icmdGitTorCommand1 + GitToolCommands.GitTorCommands.Count && 
+                        !GitSccOptions.Current.NotExpandTortoiseGit)
+                    {
+                        int idx = (int)prgCmds[0].cmdID - CommandId.icmdGitTorCommand1;
+                        SetOleCmdText(pCmdText, GitToolCommands.GitTorCommands[idx].Name);
+                        cmdf |= OLECMDF.OLECMDF_ENABLED;
+                        break;
+                    }
+
+                    else
+                        return (int)(Microsoft.VisualStudio.OLE.Interop.Constants.OLECMDERR_E_NOTSUPPORTED);
             }
 
 
@@ -275,6 +322,36 @@ namespace GitScc
             var tortoiseGitPath = GitSccOptions.Current.TortoiseGitPath;
             RunDetatched(tortoiseGitPath, "/command:commit");
         }
+
+        private void OnGitTorCommandExec(object sender, EventArgs e)
+        {
+            var menuCommand = sender as MenuCommand;
+            if (null != menuCommand)
+            {
+                int idx = menuCommand.CommandID.ID - CommandId.icmdGitTorCommand1;
+
+                Debug.WriteLine(string.Format(CultureInfo.CurrentCulture,
+                                  "Run GitTor Command {0}", GitToolCommands.GitTorCommands[idx].Command));
+
+                var tortoiseGitPath = GitSccOptions.Current.TortoiseGitPath;
+                RunDetatched(tortoiseGitPath, GitToolCommands.GitTorCommands[idx].Command);
+            }
+        }
+
+        private void OnGitExtCommandExec(object sender, EventArgs e)
+        {
+            var menuCommand = sender as MenuCommand;
+            if (null != menuCommand)
+            {
+                int idx = menuCommand.CommandID.ID - CommandId.icmdGitExtCommand1;
+                Debug.WriteLine(string.Format(CultureInfo.CurrentCulture,
+                                  "Run GitExt Command {0}", GitToolCommands.GitExtCommands[idx].Command));
+
+                var gitExtensionPath = GitSccOptions.Current.GitExtensionPath;
+                RunDetatched(gitExtensionPath, GitToolCommands.GitExtCommands[idx].Command);
+            }
+        }
+
         #endregion
 
         // This function is called by the IVsSccProvider service implementation when the active state of the provider changes

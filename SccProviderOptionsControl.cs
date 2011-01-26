@@ -47,6 +47,8 @@ namespace GitScc
         private Button button4;
         private TextBox textBox4;
         private Label label4;
+        private CheckBox checkBox1;
+        private CheckBox checkBox2;
         // The parent page, use to persist data
         private SccProviderOptions _customPage;
 
@@ -83,6 +85,10 @@ namespace GitScc
         private void InitializeComponent()
         {
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.button4 = new System.Windows.Forms.Button();
+            this.textBox4 = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
@@ -93,14 +99,14 @@ namespace GitScc
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.button4 = new System.Windows.Forms.Button();
-            this.textBox4 = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
+            this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.checkBox2);
+            this.groupBox1.Controls.Add(this.checkBox1);
             this.groupBox1.Controls.Add(this.button4);
             this.groupBox1.Controls.Add(this.textBox4);
             this.groupBox1.Controls.Add(this.label4);
@@ -121,9 +127,45 @@ namespace GitScc
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Git Source Control Provider Options";
             // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(135, 124);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(219, 17);
+            this.checkBox1.TabIndex = 23;
+            this.checkBox1.Text = "Not to Expand Git Extensions Commands";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(364, 162);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(75, 23);
+            this.button4.TabIndex = 22;
+            this.button4.Text = "Browse ...";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // textBox4
+            // 
+            this.textBox4.Location = new System.Drawing.Point(6, 164);
+            this.textBox4.Name = "textBox4";
+            this.textBox4.Size = new System.Drawing.Size(348, 20);
+            this.textBox4.TabIndex = 21;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(3, 147);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(95, 13);
+            this.label4.TabIndex = 20;
+            this.label4.Text = "Path to TortoiseGit";
+            // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(364, 209);
+            this.button3.Location = new System.Drawing.Point(364, 242);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(75, 23);
             this.button3.TabIndex = 19;
@@ -153,7 +195,7 @@ namespace GitScc
             // 
             // textBox3
             // 
-            this.textBox3.Location = new System.Drawing.Point(6, 211);
+            this.textBox3.Location = new System.Drawing.Point(6, 244);
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(348, 20);
             this.textBox3.TabIndex = 16;
@@ -161,7 +203,7 @@ namespace GitScc
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(3, 194);
+            this.label3.Location = new System.Drawing.Point(3, 227);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(286, 13);
             this.label3.TabIndex = 15;
@@ -203,31 +245,15 @@ namespace GitScc
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
-            // button4
+            // checkBox2
             // 
-            this.button4.Location = new System.Drawing.Point(364, 147);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
-            this.button4.TabIndex = 22;
-            this.button4.Text = "Browse ...";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
-            // 
-            // textBox4
-            // 
-            this.textBox4.Location = new System.Drawing.Point(6, 149);
-            this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(348, 20);
-            this.textBox4.TabIndex = 21;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(3, 132);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(95, 13);
-            this.label4.TabIndex = 20;
-            this.label4.Text = "Path to TortoiseGit";
+            this.checkBox2.AutoSize = true;
+            this.checkBox2.Location = new System.Drawing.Point(135, 190);
+            this.checkBox2.Name = "checkBox2";
+            this.checkBox2.Size = new System.Drawing.Size(203, 17);
+            this.checkBox2.TabIndex = 24;
+            this.checkBox2.Text = "Not to Expand TortoiseGit Commands";
+            this.checkBox2.UseVisualStyleBackColor = true;
             // 
             // SccProviderOptionsControl
             // 
@@ -257,6 +283,8 @@ namespace GitScc
             this.textBox2.Text = GitSccOptions.Current.GitExtensionPath;
             this.textBox3.Text = GitSccOptions.Current.DifftoolPath;
             this.textBox4.Text = GitSccOptions.Current.TortoiseGitPath;
+            this.checkBox1.Checked = GitSccOptions.Current.NotExpandGitExtensions;
+            this.checkBox2.Checked = GitSccOptions.Current.NotExpandTortoiseGit;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -266,7 +294,7 @@ namespace GitScc
 
         private void button2_Click(object sender, EventArgs e)
         {
-            OpenFile("sh.exe", textBox2);
+            OpenFile("*.exe", textBox2);
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -294,10 +322,10 @@ namespace GitScc
             GitSccOptions.Current.GitExtensionPath = this.textBox2.Text;
             GitSccOptions.Current.DifftoolPath     = this.textBox3.Text;
             GitSccOptions.Current.TortoiseGitPath  = this.textBox4.Text;
+            GitSccOptions.Current.NotExpandGitExtensions = this.checkBox1.Checked;
+            GitSccOptions.Current.NotExpandTortoiseGit = this.checkBox2.Checked;
             GitSccOptions.Current.SaveConfig();
         }
-
-
     }
 
 }

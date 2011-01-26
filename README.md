@@ -17,20 +17,20 @@ Features
 * Compare file with last commit 
 * Undo file changes (restore file from last commit) 
 * Launch Git Bash 
-* Launch Git Extensions 
-* Launch TortoiseGit (commit)
+* Launch Git Extensions Commands
+* Launch TortoiseGit Commands
 * Options page
 
 
 How to use
 ----------
 * Run Visual Studio. 
-* Go to Tools | Extension Manager, search online gallary for Git Source Control Provider and install. 
+* Go to Tools | Extension Manager, search online gallery for Git Source Control Provider and install. 
 * Go to Tools | Options. 
 * Select Source Control in the tree view.
 * Select Git Source Control Provider from the drop down list, and click OK.
 * Open your solution controlled by Git to see the file's status.
-* Right click within solution explorer and select "Git" to use git releated fuctions.
+* Right click within solution explorer and select "Git" to use git related functions.
 
 ![context menu](http://gitscc.codeplex.com/Project/Download/FileDownload.aspx?DownloadId=159024)
 

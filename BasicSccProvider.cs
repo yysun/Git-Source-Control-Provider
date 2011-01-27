@@ -221,10 +221,8 @@ namespace GitScc
                     break;
                 
                 case CommandId.icmdSccCommandRefresh:
-                    if (sccService.IsSolutionGitControlled)
+                    //if (sccService.IsSolutionGitControlled)
                         cmdf |= OLECMDF.OLECMDF_ENABLED;
-                    else
-                        cmdf |= OLECMDF.OLECMDF_INVISIBLE;
                     break;
                 
                 case CommandId.icmdSccCommandInit:

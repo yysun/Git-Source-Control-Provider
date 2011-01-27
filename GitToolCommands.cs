@@ -20,6 +20,7 @@ namespace GitScc
     static class GitToolCommands
     {
         internal static List<GitToolCommand> GitTorCommands = new List<GitToolCommand> { 
+            new GitToolCommand("TortoiseGit", "/command:log"), // workaround to missing of the first command in menu
             new GitToolCommand("Branch", "/command:branch"), 
             new GitToolCommand("Commit", "/command:commit"), 
             new GitToolCommand("Export", "/command:export"), 
@@ -34,6 +35,7 @@ namespace GitScc
         };
 
         internal static List<GitToolCommand> GitExtCommands = new List<GitToolCommand> { 
+            new GitToolCommand("Git Extensions", "browse"), // workaround to missing of the first command in menu
             new GitToolCommand("Add Files", "add"), 
             new GitToolCommand("Apply Patch", "applypatch"), 
             new GitToolCommand("Browse", "browse"), 

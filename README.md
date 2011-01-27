@@ -16,24 +16,25 @@ Features
 * Initialize new git repository and generate .gitignore 
 * Compare file with last commit 
 * Undo file changes (restore file from last commit) 
-* Launch Git Bash 
-* Launch Git Extensions Commands
-* Launch TortoiseGit Commands
+* Integrates with [msysgit](http://code.google.com/p/msysgit)
+* Integrates with [Git Extensions](http://code.google.com/p/gitextensions)
+* Integrates with [TortoiseGit](http://code.google.com/p/tortoisegit)
 * Options page
-
 
 How to use
 ----------
+* Install [msysgit](http://code.google.com/p/msysgit), or [Git Extensions](http://code.google.com/p/gitextensions), or [TortoiseGit](http://code.google.com/p/tortoisegit).
 * Run Visual Studio. 
 * Go to Tools | Extension Manager, search online gallery for Git Source Control Provider and install. 
 * Go to Tools | Options. 
 * Select Source Control in the tree view.
 * Select Git Source Control Provider from the drop down list, and click OK.
 * Open your solution controlled by Git to see the file's status.
-* Right click within solution explorer and select "Git" to use git related functions.
+* Right click within solution explorer and select "Git". If msysgit, Git Extensions or TortoiseGit are installed, their commands are listed in the menu.
+* Using the option page to disable the commands if you like.
 
-![context menu](http://gitscc.codeplex.com/Project/Download/FileDownload.aspx?DownloadId=159024)
+![context menu](http://gitscc.codeplex.com/Project/Download/FileDownload.aspx?DownloadId=203542)
 
-What's coming
+Change Logs
 -----------------
 [Project Roadmap](http://gitscc.codeplex.com/wikipage?title=Project%20Roadmap)

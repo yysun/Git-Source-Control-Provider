@@ -91,8 +91,8 @@ namespace GitScc
         {
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Git Source Control Provider set inactive"));
             _active = false;
-            Refresh();
             CloseTracker();
+            NodesGlyphsDirty = true;
             return VSConstants.S_OK;
         }
 
@@ -906,22 +906,22 @@ namespace GitScc
 
         public void UpdateNodesGlyphs()
         {
+            double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
+            lastTimeRefresh = DateTime.Now;
+
             if (NodesGlyphsDirty && !noRefresh)
-            {
-                double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalSeconds;
-                lastTimeRefresh = DateTime.Now;
-                
-                if (delta > 3)
+            {               
+                if (delta > 300)
                 {
                     Debug.WriteLine("==== UpdateNodesGlyphs: " + Math.Floor(delta).ToString());
                     noRefresh = true;
                     OpenTracker();
                     RefreshNodesGlyphs();
                     noRefresh = false;
+
+                    NodesGlyphsDirty = false;
                 }
             }
-
-            NodesGlyphsDirty = false;
         }
 
         public void RefreshNodesGlyphs()
@@ -1043,9 +1043,10 @@ namespace GitScc
         }
         #endregion
 
+        #region git
         public bool IsSolutionGitControlled
-        { 
-            get { return trackers.Count > 0; } 
+        {
+            get { return trackers.Count > 0; }
         }
 
         internal void InitRepo()
@@ -1081,7 +1082,8 @@ obj/
 _ReSharper*/
 [Tt]est[Rr]esult*"
             );
-        }
+        } 
+        #endregion
 
     }
 }

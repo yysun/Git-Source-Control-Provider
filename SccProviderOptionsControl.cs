@@ -85,6 +85,7 @@ namespace GitScc
         private void InitializeComponent()
         {
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.button4 = new System.Windows.Forms.Button();
             this.textBox4 = new System.Windows.Forms.TextBox();
@@ -99,7 +100,6 @@ namespace GitScc
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -127,14 +127,24 @@ namespace GitScc
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Git Source Control Provider Options";
             // 
+            // checkBox2
+            // 
+            this.checkBox2.AutoSize = true;
+            this.checkBox2.Location = new System.Drawing.Point(135, 190);
+            this.checkBox2.Name = "checkBox2";
+            this.checkBox2.Size = new System.Drawing.Size(204, 17);
+            this.checkBox2.TabIndex = 24;
+            this.checkBox2.Text = "Do not expand TortoiseGit commands";
+            this.checkBox2.UseVisualStyleBackColor = true;
+            // 
             // checkBox1
             // 
             this.checkBox1.AutoSize = true;
             this.checkBox1.Location = new System.Drawing.Point(135, 124);
             this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(219, 17);
+            this.checkBox1.Size = new System.Drawing.Size(220, 17);
             this.checkBox1.TabIndex = 23;
-            this.checkBox1.Text = "Not to Expand Git Extensions Commands";
+            this.checkBox1.Text = "Do not expand Git Extensions commands";
             this.checkBox1.UseVisualStyleBackColor = true;
             // 
             // button4
@@ -244,16 +254,6 @@ namespace GitScc
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
-            // 
-            // checkBox2
-            // 
-            this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(135, 190);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(203, 17);
-            this.checkBox2.TabIndex = 24;
-            this.checkBox2.Text = "Not to Expand TortoiseGit Commands";
-            this.checkBox2.UseVisualStyleBackColor = true;
             // 
             // SccProviderOptionsControl
             // 

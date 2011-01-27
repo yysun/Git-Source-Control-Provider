@@ -130,6 +130,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <None Include="README.md" />
     <None Include="source.extension.vsixmanifest" />
     <None Include="Resources\Product.ico" />
   </ItemGroup>

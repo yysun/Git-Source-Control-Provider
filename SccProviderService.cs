@@ -915,7 +915,7 @@ namespace GitScc
         }
 
         public void UpdateNodesGlyphs()
-        {
+        {           
             if (NodesGlyphsDirty && !noRefresh)
             {
                 double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;

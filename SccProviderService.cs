@@ -662,11 +662,9 @@ namespace GitScc
 
         #region IVsFileChangeEvents
 
-        //private DateTime lastTimeDirChangeFired = DateTime.Now;
-
         public int DirectoryChanged(string pszDirectory)
         {
-            if (noRefresh) return VSConstants.S_OK;
+            //if (noRefresh) return VSConstants.S_OK;
 
             //double delta = DateTime.Now.Subtract(lastTimeDirChangeFired).TotalMilliseconds;
             //lastTimeDirChangeFired = DateTime.Now;
@@ -679,7 +677,11 @@ namespace GitScc
             //    Refresh();
             //}
 
-            NodesGlyphsDirty = true;
+            if (!noRefresh)
+            {
+                Debug.WriteLine("==== dir changed REFRESH: ");
+                Refresh();
+            }
             return VSConstants.S_OK;
         }
 
@@ -893,22 +895,32 @@ namespace GitScc
 
         bool noRefresh = false;
         bool NodesGlyphsDirty = false;
+        
+        private DateTime lastTimeRefresh = DateTime.Now;
 
         internal void Refresh()
         {
-            Debug.WriteLine("==== Refresh Nodes");
-            NodesGlyphsDirty = true;
+            //Debug.WriteLine("==== Refresh");
+            if(!noRefresh) NodesGlyphsDirty = true;
         }
 
         public void UpdateNodesGlyphs()
         {
-            if (NodesGlyphsDirty)
+            if (NodesGlyphsDirty && !noRefresh)
             {
-                noRefresh = true;
-                OpenTracker();
-                RefreshNodesGlyphs();
-                noRefresh = false;
+                double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalSeconds;
+                lastTimeRefresh = DateTime.Now;
+                
+                if (delta > 3)
+                {
+                    Debug.WriteLine("==== UpdateNodesGlyphs: " + Math.Floor(delta).ToString());
+                    noRefresh = true;
+                    OpenTracker();
+                    RefreshNodesGlyphs();
+                    noRefresh = false;
+                }
             }
+
             NodesGlyphsDirty = false;
         }
 

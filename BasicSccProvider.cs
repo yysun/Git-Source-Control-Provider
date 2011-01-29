@@ -233,9 +233,11 @@ namespace GitScc
                     break;
 
                 default:
+                    var gitExtPath = GitSccOptions.Current.GitExtensionPath;
+                    var torGitPath = GitSccOptions.Current.TortoiseGitPath;
                     if (prgCmds[0].cmdID >= CommandId.icmdGitExtCommand1 &&
-                        prgCmds[0].cmdID < CommandId.icmdGitExtCommand1 + GitToolCommands.GitExtCommands.Count && 
-                        !GitSccOptions.Current.NotExpandGitExtensions)
+                        prgCmds[0].cmdID < CommandId.icmdGitExtCommand1 + GitToolCommands.GitExtCommands.Count &&
+                        !string.IsNullOrEmpty(gitExtPath) && File.Exists(gitExtPath) && !GitSccOptions.Current.NotExpandGitExtensions)
                     {
                         int idx = (int)prgCmds[0].cmdID - CommandId.icmdGitExtCommand1;
                         SetOleCmdText(pCmdText, GitToolCommands.GitExtCommands[idx].Name);
@@ -243,8 +245,8 @@ namespace GitScc
                         break;
                     }
                     else if (prgCmds[0].cmdID >= CommandId.icmdGitTorCommand1 &&
-                        prgCmds[0].cmdID < CommandId.icmdGitTorCommand1 + GitToolCommands.GitTorCommands.Count && 
-                        !GitSccOptions.Current.NotExpandTortoiseGit)
+                        prgCmds[0].cmdID < CommandId.icmdGitTorCommand1 + GitToolCommands.GitTorCommands.Count &&
+                        !string.IsNullOrEmpty(torGitPath) && File.Exists(torGitPath) && !GitSccOptions.Current.NotExpandTortoiseGit)
                     {
                         int idx = (int)prgCmds[0].cmdID - CommandId.icmdGitTorCommand1;
                         SetOleCmdText(pCmdText, GitToolCommands.GitTorCommands[idx].Name);

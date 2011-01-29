@@ -8,7 +8,7 @@ namespace GitScc
     {
         NotControlled,
         New,
-        Trackered,
+        Tracked,
         Modified,
         Staged,
         Removed,

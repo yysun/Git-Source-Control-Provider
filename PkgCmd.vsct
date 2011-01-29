@@ -31,8 +31,8 @@
           <CommandName>Git</CommandName>
         </Strings>
       </Menu>
-      
     </Menus>
+    
     <Groups>    
       <Group guid="guidSccProviderCmdSet" id="igrpSourceControlCommands" priority="0x0000">
         <Parent guid="guidSccProviderCmdSet" id="imnuGitSourceControlMenu"/>
@@ -46,7 +46,16 @@
         <Parent guid="guidSccProviderCmdSet" id="imnuPendingChangesToolWindowToolbarMenu"/>
       </Group>
 
+      <Group guid="guidSccProviderCmdSet" id="igrpGitExtCommands" priority="0x0100">
+        <Parent guid="guidSccProviderCmdSet" id="imnuGitSourceControlMenu"/>
+      </Group>
+
+      <Group guid="guidSccProviderCmdSet" id="igrpGitTorCommands" priority="0x0200">
+        <Parent guid="guidSccProviderCmdSet" id="imnuGitSourceControlMenu"/>
+      </Group>
+      
     </Groups>
+    
     <Buttons>
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandGitBash" priority="0x0106" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
@@ -164,6 +173,29 @@
         </Strings>
       </Button>-->
 
+
+      <Button guid="guidSccProviderCmdSet" id="icmdGitExtCommand1" type="Button" priority="0x0101">
+        <Parent guid="guidSccProviderCmdSet" id="igrpGitExtCommands" />
+        <Icon guid="guidSccProviderImages" id="iconGitExt" />
+        <CommandFlag>DynamicItemStart</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <Strings>
+          <CommandName>icmdGitExtCommand1</CommandName>
+          <ButtonText>Git Extensions Commands</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidSccProviderCmdSet" id="icmdGitTorCommand1" type="Button" priority="0x0101">
+        <Parent guid="guidSccProviderCmdSet" id="igrpGitTorCommands" />
+        <Icon guid="guidSccProviderImages" id="iconGitTor" />
+        <CommandFlag>DynamicItemStart</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <Strings>
+          <CommandName>icmdGitTorCommand1</CommandName>
+          <ButtonText>TortoiseGit Commands</ButtonText>
+        </Strings>
+      </Button>
+
     </Buttons>
     <Bitmaps>
       <Bitmap guid="guidSccProviderImages" href="Resources\Images_32bit.bmp" 
@@ -228,6 +260,14 @@
       <IDSymbol name="icmdPendingChangesCommit" value="0x111"/>
       <IDSymbol name="icmdPendingChangesAmend" value="0x112"/>
 
+      <IDSymbol name="igrpGitExtCommands" value="0x800"/>
+      <IDSymbol name="imnuGitExtMenu" value="0x801"/>
+      <IDSymbol name="igrpGitTorCommands" value="0x900"/>
+      <IDSymbol name="imnuGitTorMenu" value="0x901"/>
+      
+      <IDSymbol name="icmdGitExtCommand1" value="0x811"/>
+      <IDSymbol name="icmdGitTorCommand1" value="0x911"/>
+      
     </GuidSymbol>
     <GuidSymbol name="guidSccProviderImages" value="{495089FD-A8CA-4260-8EB1-794E2956B625}" >
       <IDSymbol name="iconGitBash" value="1"/>

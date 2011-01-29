@@ -124,7 +124,7 @@ namespace GitScc
                 }
                 if (treeEntry != null && treeEntry.Id.Equals(indexEntry.ObjectId))
                 {
-                    return GitFileStatus.Trackered;
+                    return GitFileStatus.Tracked;
                 }
             }
             else // <-- index entry == null

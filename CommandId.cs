@@ -38,5 +38,10 @@ namespace GitScc
 
         // Glyph indexes in the bitmap used for toolwindows (ibmpToolWindowsImages)
         public const int iconSccProviderToolWindow = 0;
+
+
+        public const int icmdGitExtCommand1 = 0x811;
+        public const int icmdGitTorCommand1 = 0x911;
+
     }
 }

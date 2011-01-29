@@ -18,6 +18,8 @@ namespace GitScc
         public string GitExtensionPath  { get; set; }
         public string DifftoolPath      { get; set; }
         public string TortoiseGitPath   { get; set; }
+        public bool NotExpandGitExtensions { get; set; }
+        public bool NotExpandTortoiseGit { get; set; }
 
         private static GitSccOptions gitSccOptions;
 

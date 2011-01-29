@@ -8,7 +8,7 @@ namespace GitScc
 {
     public class GitProject
     {
-        public string ProjectDirectory { get; set; }
+        //public string ProjectDirectory { get; set; }
         public GitFileStatusTracker Tracker { get; set; }
         //public uint IVsHierarchyEventsCookie { get; set; }
         //public IVsHierarchy Hierarchy { get; set; }

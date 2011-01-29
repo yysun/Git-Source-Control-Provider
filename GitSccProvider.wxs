@@ -13,22 +13,22 @@ Studio 2008 SDK\VisualStudioIntegration\Tools\wix\light" GitSccProvider.wixobj
 -->
 
 <Wix xmlns='http://schemas.microsoft.com/wix/2003/01/wi'>
-  <Product Name='Git Source Control Provider' Id='FE1E44C3-DD34-41b9-9D4D-515F3DD190F9' 
-    Language='1033' Codepage='1252' Version='0.6.0' Manufacturer='Yiyi Sun'
+  <Product Name='Git Source Control Provider' Id='2851CEC2-5AD2-4f8a-9F78-67272344F68E'
+    Language='1033' Codepage='1252' Version='0.6.2' Manufacturer='Yiyi Sun'
     UpgradeCode='675B7214-244E-4a51-96C4-26DBB2C779A5'>
-    
-    <Package Id='B5F3C98B-7AC7-49f9-B79B-DB3DCE00DCEE' Keywords='Installer'
+
+    <Package Id='3DD6DA64-250E-4379-90B4-CB72EAA68749' Keywords='Installer'
       Description="Git Source Control Provider Installer"
       Comments='Git Source Control Provider Installer' Manufacturer='Yiyi Sun'
       InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
-   
+
     <Media Id='1' Cabinet='GitScc.cab' EmbedCab='yes' />
 
     <!-- Properties -->
     <Property Id="DEVENV_EXE_PATH">
       <RegistrySearch Id="RegSearch_DevenvExe_Path" Root="HKLM" Key="$(var.VisualStudioRegistryRoot)\Setup\VS" Name="EnvironmentPath" Type="raw" />
     </Property>
-    
+
     <!-- Launch conditions -->
     <Condition Message="An administrator must approve or install [ProductName]."> Privileged </Condition>
     <Condition Message="Git Source Control Provider requires Visual Studio 2008."> DEVENV_EXE_PATH </Condition>
@@ -40,14 +40,14 @@ Studio 2008 SDK\VisualStudioIntegration\Tools\wix\light" GitSccProvider.wixobj
           <Component Guid="85F702E4-299C-4686-AC1D-D7C0BC811F5B" Id="MainExecutable">
             <File Id="GitSccProvider.dll" Name="GitScc~1.dll" LongName="GitSccProvider.dll" Source="GitSccProvider.dll" Vital="yes" DiskId="1" />
             <!--<File Id="GitSccProvider.pkgdef" Name="GitScc~1.pkg" LongName="GitSccProvider.pkgdef" Source="GitSccProvider.pkgdef" Vital="yes" DiskId="1" />-->
-            <File Id="DiffieHellman.dll" Name="Diffie~1.dll" LongName="DiffieHellman.dll" Source="DiffieHellman.dll" Vital="yes" DiskId="1" /> 
+            <File Id="DiffieHellman.dll" Name="Diffie~1.dll" LongName="DiffieHellman.dll" Source="DiffieHellman.dll" Vital="yes" DiskId="1" />
             <File Id="GitSharp.Core.dll" Name="GitSha~1.dll" LongName="GitSharp.Core.dll" Source="GitSharp.Core.dll" Vital="yes" DiskId="1" />
             <!--<File Id="GitSharp.dll" Name="GitSharp.dll" LongName="GitSharp.dll" Source="GitSharp.dll" Vital="yes" DiskId="1" />-->
             <File Id="ICSharpCode.SharpZipLib.dll" Name="ICShar~1.dll" LongName="ICSharpCode.SharpZipLib.dll" Source="ICSharpCode.SharpZipLib.dll" Vital="yes" DiskId="1" />
             <File Id="Org.Mentalis.Security.dll" Name="OrgMen~1.dll" LongName="Org.Mentalis.Security.dll" Source="Org.Mentalis.Security.dll" Vital="yes" DiskId="1" />
             <File Id="Tamir.SharpSSH.dll" Name="TamirS~1.dll" LongName="Tamir.SharpSSH.dll" Source="Tamir.SharpSSH.dll" Vital="yes" DiskId="1" />
-            <File Id="Winterdom.IO.FileMap.dll" Name="Winter~1.dll" LongName="Winterdom.IO.FileMap.dll" Source="Winterdom.IO.FileMap.dll" Vital="yes" DiskId="1" />
-                 
+            <!--<File Id="Winterdom.IO.FileMap.dll" Name="Winter~1.dll" LongName="Winterdom.IO.FileMap.dll" Source="Winterdom.IO.FileMap.dll" Vital="yes" DiskId="1" />-->
+
             <?include DeployFragment.wxs ?>
           </Component>
         </Directory>
@@ -62,13 +62,37 @@ Studio 2008 SDK\VisualStudioIntegration\Tools\wix\light" GitSccProvider.wixobj
     <Upgrade Id="675B7214-244E-4a51-96C4-26DBB2C779A5">
       <UpgradeVersion  Minimum="0.0.0.0" Maximum="99.0.0.0" Property="PREVIOUSVERSIONSINSTALLED"  IncludeMinimum="yes" IncludeMaximum="no"/>
     </Upgrade>
-	
+
     <InstallExecuteSequence>
       <RemoveExistingProducts Before="InstallInitialize" />
       <Custom Action="CA_DeployPackage" Before="InstallFinalize" />
     </InstallExecuteSequence>
 
     <CustomAction Id="CA_DeployPackage" Property="DEVENV_EXE_PATH" ExeCommand="/setup /nosetupvstemplates" Impersonate="no" Execute="deferred" />
+
+    <UI>
+      <Dialog Id="ExitDialog" Width="260" Height="80" Title="Git Source Control Provider Setup" NoMinimize="yes">
+        <Control Id="Description" Type="Text" X="10" Y="10" Width="220" Height="60"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="Git Source Control Provider has been installed successfully. To use it, launch Visual Studio and go to Tools | Options ... | Source Control." />
+        <Control Id="Exit" Type="PushButton"
+                 X="100" Y="50" Width="60" Height="17" Default="yes" Cancel="yes" Text="Close">
+                 <Publish Event="EndDialog" Value="Return">1</Publish>
+        </Control>
+      </Dialog>
+
+      <TextStyle Id="DefaultFont" FaceName="Tahoma" Size="8" />
+      <Property Id="DefaultUIFont" Value="DefaultFont" />
+
+      <InstallUISequence>
+        <Show Dialog="ExitDialog" OnExit="success" />
+      </InstallUISequence>
+
+      <AdminUISequence>
+        <Show Dialog="ExitDialog" OnExit="success" />
+      </AdminUISequence>
+
+    </UI>
 
   </Product>
 </Wix>

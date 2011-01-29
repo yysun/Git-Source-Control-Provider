@@ -901,17 +901,19 @@ namespace GitScc
         internal void Refresh()
         {
             //Debug.WriteLine("==== Refresh");
-            if(!noRefresh) NodesGlyphsDirty = true;
+            if (!noRefresh)
+            {
+                NodesGlyphsDirty = true;
+                lastTimeRefresh = DateTime.Now;
+            }
         }
 
         public void UpdateNodesGlyphs()
         {
-            double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
-            lastTimeRefresh = DateTime.Now;
-
             if (NodesGlyphsDirty && !noRefresh)
-            {               
-                if (delta > 300)
+            {
+                double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
+                if (delta > 500)
                 {
                     Debug.WriteLine("==== UpdateNodesGlyphs: " + Math.Floor(delta).ToString());
                     noRefresh = true;

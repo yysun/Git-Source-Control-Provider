@@ -334,7 +334,7 @@ namespace GitScc
                                   "Run GitTor Command {0}", GitToolCommands.GitTorCommands[idx].Command));
 
                 var tortoiseGitPath = GitSccOptions.Current.TortoiseGitPath;
-                RunDetatched(tortoiseGitPath, GitToolCommands.GitTorCommands[idx].Command);
+                RunDetatched(tortoiseGitPath, GitToolCommands.GitTorCommands[idx].Command + " /path:\"" + sccService.CurrentGitWorkingDirectory + "\"");
             }
         }
 

@@ -1069,6 +1069,7 @@ Thumbs.db
 *_p.c
 *.ncb
 *.suo
+*.sln.docstates
 *.tlb
 *.tlh
 *.bak

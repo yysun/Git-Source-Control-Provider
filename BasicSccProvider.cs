@@ -366,7 +366,7 @@ namespace GitScc
         }
 
         #region Run Command
-        internal string RunCommand(string cmd, string args)
+        internal void RunCommand(string cmd, string args)
         {
             var pinfo = new ProcessStartInfo(cmd)
             {
@@ -379,17 +379,19 @@ namespace GitScc
                     Path.GetDirectoryName(sccService.GetSolutionFileName())
             };
 
-            using (var process = Process.Start(pinfo))
-            {
-                string output = process.StandardOutput.ReadToEnd();
-                string error = process.StandardError.ReadToEnd();
-                process.WaitForExit();
+            Process.Start(pinfo);
 
-                if (!string.IsNullOrEmpty(error))
-                    throw new Exception(error);
+            //using (var process = Process.Start(pinfo))
+            //{
+            //    string output = process.StandardOutput.ReadToEnd();
+            //    string error = process.StandardError.ReadToEnd();
+            //    process.WaitForExit();
 
-                return output;
-            }
+            //    if (!string.IsNullOrEmpty(error))
+            //        throw new Exception(error);
+
+            //    return output;
+            //}
         }
 
         internal void RunDetatched(string cmd, string arguments)

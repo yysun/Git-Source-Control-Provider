@@ -49,6 +49,7 @@ namespace GitScc
         private Label label4;
         private CheckBox checkBox1;
         private CheckBox checkBox2;
+        private CheckBox checkBox3;
         // The parent page, use to persist data
         private SccProviderOptions _customPage;
 
@@ -85,6 +86,7 @@ namespace GitScc
         private void InitializeComponent()
         {
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.button4 = new System.Windows.Forms.Button();
@@ -105,6 +107,7 @@ namespace GitScc
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.checkBox3);
             this.groupBox1.Controls.Add(this.checkBox2);
             this.groupBox1.Controls.Add(this.checkBox1);
             this.groupBox1.Controls.Add(this.button4);
@@ -122,10 +125,21 @@ namespace GitScc
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Location = new System.Drawing.Point(0, 0);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(463, 274);
+            this.groupBox1.Size = new System.Drawing.Size(463, 323);
             this.groupBox1.TabIndex = 11;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Git Source Control Provider Options";
+            // 
+            // checkBox3
+            // 
+            this.checkBox3.AutoSize = true;
+            this.checkBox3.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.checkBox3.Location = new System.Drawing.Point(6, 282);
+            this.checkBox3.Name = "checkBox3";
+            this.checkBox3.Size = new System.Drawing.Size(168, 17);
+            this.checkBox3.TabIndex = 25;
+            this.checkBox3.Text = "Use TortoiseGit Style Icon Set";
+            this.checkBox3.UseVisualStyleBackColor = true;
             // 
             // checkBox2
             // 
@@ -260,7 +274,7 @@ namespace GitScc
             this.AllowDrop = true;
             this.Controls.Add(this.groupBox1);
             this.Name = "SccProviderOptionsControl";
-            this.Size = new System.Drawing.Size(463, 274);
+            this.Size = new System.Drawing.Size(463, 323);
             this.Load += new System.EventHandler(this.SccProviderOptionsControl_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -285,6 +299,7 @@ namespace GitScc
             this.textBox4.Text = GitSccOptions.Current.TortoiseGitPath;
             this.checkBox1.Checked = GitSccOptions.Current.NotExpandGitExtensions;
             this.checkBox2.Checked = GitSccOptions.Current.NotExpandTortoiseGit;
+            this.checkBox3.Checked = GitSccOptions.Current.UseTGitIconSet;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -324,7 +339,11 @@ namespace GitScc
             GitSccOptions.Current.TortoiseGitPath  = this.textBox4.Text;
             GitSccOptions.Current.NotExpandGitExtensions = this.checkBox1.Checked;
             GitSccOptions.Current.NotExpandTortoiseGit = this.checkBox2.Checked;
+            GitSccOptions.Current.UseTGitIconSet = this.checkBox3.Checked;
             GitSccOptions.Current.SaveConfig();
+
+            SccProviderService sccProviderService = (SccProviderService)GetService(typeof(SccProviderService));
+            sccProviderService.Refresh();
         }
     }
 

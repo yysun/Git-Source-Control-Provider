@@ -20,6 +20,7 @@ namespace GitScc
         public string TortoiseGitPath   { get; set; }
         public bool NotExpandTortoiseGit { get; set; }
         public bool NotExpandGitExtensions { get; set; }
+        public bool UseTGitIconSet { get; set; }
 
         private static GitSccOptions gitSccOptions;
 

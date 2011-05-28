@@ -150,11 +150,15 @@ namespace GitScc
             switch (status)
             {
                 case GitFileStatus.Tracked:
-                    rgsiGlyphs[0] = VsStateIcon.STATEICON_CHECKEDIN;
+                    rgsiGlyphs[0] = GitSccOptions.Current.UseTGitIconSet ?
+                                    (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Tracked) :
+                                    VsStateIcon.STATEICON_CHECKEDIN;
                     break;
 
                 case GitFileStatus.Modified:
-                    rgsiGlyphs[0] = VsStateIcon.STATEICON_CHECKEDOUT;
+                    rgsiGlyphs[0] = GitSccOptions.Current.UseTGitIconSet ?
+                                    (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Modified):
+                                    VsStateIcon.STATEICON_CHECKEDOUT;
                     break;
 
                 case GitFileStatus.New:
@@ -316,6 +320,8 @@ namespace GitScc
         {
             Untracked = 0,
             Staged = 1,
+            Modified = 2,
+            Tracked = 3,
         };
 
         public int GetCustomGlyphList(uint BaseIndex, out uint pdwImageListHandle)

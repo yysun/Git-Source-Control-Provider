@@ -74,7 +74,7 @@ namespace GitScc
             if (tracker != null)
             {
                 this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption") +
-                    (tracker.HasGitRepository ? " (" + tracker.CurrentBranch + ")" : "");
+                    (tracker.HasGitRepository ? string.Format(" {1} - ({0})", tracker.CurrentBranch, tracker.GitWorkingDirectory) : "");
             }
         }
     }

@@ -926,7 +926,7 @@ namespace GitScc
                     noRefresh = true;
                     OpenTracker();
                     RefreshNodesGlyphs();
-                RefreshToolWindows();
+                    RefreshToolWindows();
                     noRefresh = false;
 
                     NodesGlyphsDirty = false;

@@ -241,7 +241,7 @@ namespace GitScc
 
                 var status = GetFileStatus(fileName.Replace("/", "\\"));
             }
-        }        
+        }
 
         public void UnStageFile(string fileName)
         {
@@ -251,18 +251,17 @@ namespace GitScc
             this.index.RereadIfNecessary();
 
             var content = GetFileContent(fileName);
-            fileName = GetRelativeFileName(fileName);
-            if (content == null)
+
+            this.index.remove(
+                new DirectoryInfo(this.repository.WorkingDirectory.FullName),
+                new FileInfo(fileName));
+
+            if (content != null)
             {
-                this.index.Remove(fileName);
-            }
-            else
-            {
-                
                 this.index.add(
-                    new DirectoryInfo(this.repository.WorkingDirectory.FullName),
-                    new FileInfo(fileName),
-                    content);
+                new DirectoryInfo(this.repository.WorkingDirectory.FullName),
+                new FileInfo(fileName),
+                content);
             }
 
             this.index.write();
@@ -329,7 +328,7 @@ namespace GitScc
 
 			var updateRef = this.repository.UpdateRef("HEAD");
 			updateRef.NewObjectId = corecommit.CommitId;
-			updateRef.IsForceUpdate = true;
+            updateRef.IsForceUpdate = true;
 			updateRef.update();
 
             Refresh();

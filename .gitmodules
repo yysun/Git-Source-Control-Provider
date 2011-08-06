@@ -1,0 +1,3 @@
+[submodule "ngit"]
+	path = ngit
+	url = https://github.com/slluis/ngit.git

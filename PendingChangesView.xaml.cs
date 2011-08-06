@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace GitScc
 {
@@ -117,6 +118,8 @@ namespace GitScc
 
         internal void Refresh(GitFileStatusTracker tracker)
         {
+            Debug.WriteLine("==== Pending Changes Refresh {0}", tracker == null ? "" : tracker.GitWorkingDirectory);
+
             this.tracker = tracker;
             this.dataGrid1.ItemsSource = tracker == null ? null : tracker.ChangedFiles;
             ICollectionView view = CollectionViewSource.GetDefaultView(this.dataGrid1.ItemsSource);
@@ -126,7 +129,6 @@ namespace GitScc
                 view.SortDescriptions.Add(new SortDescription(sortMemberPath, sortDirection));
                 view.Refresh();
             }
-
         }
 
         private void btnFindChanges_Click(object sender, RoutedEventArgs e)

@@ -12,8 +12,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{A0417584-B3B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicSccProvider", "BasicSccProvider.csproj", "{ADECE07A-5D80-4950-9DA5-A681CE2F5106}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp.Core", "GitSharp.Core\GitSharp.Core.csproj", "{C46EDD61-C202-465A-93F1-ADE20A83BB59}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicSccProvider.Tests", "BasicSccProvider.Tests\BasicSccProvider.Tests.csproj", "{AE3D1ACA-680D-4CDE-B71E-B7B135F32899}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9B2F3727-28C1-4D1B-951E-BA1AB452DA67}"
@@ -22,6 +20,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Local.testsettings = Local.testsettings
 		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGit", "ngit\NGit\NGit.csproj", "{E3BFF8B4-189C-496A-A817-7E8B31E22B91}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sharpen", "ngit\Sharpen\Sharpen.csproj", "{72944A6C-45FF-4EF8-B349-8C9CABF519D4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NSch", "ngit\NSch\NSch.csproj", "{A19E6F3F-A25B-4B01-8922-CF0CC35C781D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGit.Test", "ngit\NGit.Test\NGit.Test.csproj", "{E1FA8F29-5BAB-4FB7-8362-B8CE67ECF7C2}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
@@ -36,14 +42,26 @@ Global
 		{ADECE07A-5D80-4950-9DA5-A681CE2F5106}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ADECE07A-5D80-4950-9DA5-A681CE2F5106}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ADECE07A-5D80-4950-9DA5-A681CE2F5106}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C46EDD61-C202-465A-93F1-ADE20A83BB59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C46EDD61-C202-465A-93F1-ADE20A83BB59}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C46EDD61-C202-465A-93F1-ADE20A83BB59}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C46EDD61-C202-465A-93F1-ADE20A83BB59}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AE3D1ACA-680D-4CDE-B71E-B7B135F32899}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AE3D1ACA-680D-4CDE-B71E-B7B135F32899}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE3D1ACA-680D-4CDE-B71E-B7B135F32899}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE3D1ACA-680D-4CDE-B71E-B7B135F32899}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3BFF8B4-189C-496A-A817-7E8B31E22B91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3BFF8B4-189C-496A-A817-7E8B31E22B91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3BFF8B4-189C-496A-A817-7E8B31E22B91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3BFF8B4-189C-496A-A817-7E8B31E22B91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72944A6C-45FF-4EF8-B349-8C9CABF519D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72944A6C-45FF-4EF8-B349-8C9CABF519D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72944A6C-45FF-4EF8-B349-8C9CABF519D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72944A6C-45FF-4EF8-B349-8C9CABF519D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A19E6F3F-A25B-4B01-8922-CF0CC35C781D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A19E6F3F-A25B-4B01-8922-CF0CC35C781D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A19E6F3F-A25B-4B01-8922-CF0CC35C781D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A19E6F3F-A25B-4B01-8922-CF0CC35C781D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1FA8F29-5BAB-4FB7-8362-B8CE67ECF7C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1FA8F29-5BAB-4FB7-8362-B8CE67ECF7C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1FA8F29-5BAB-4FB7-8362-B8CE67ECF7C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1FA8F29-5BAB-4FB7-8362-B8CE67ECF7C2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

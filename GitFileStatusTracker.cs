@@ -4,9 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Timers;
-using GitSharp.Core;
-using GitSharp.Core.Util;
-using GitSharp.Core.Util.JavaHelper;
+using Sharpen;
+using NGit;
+using NGit.Api;
 
 namespace GitScc
 {
@@ -35,14 +35,15 @@ namespace GitScc
             {
                 try
                 {
-                    this.repository = Repository.Open(initFolder);
+                    this.repository = Git.Open(initFolder).GetRepository();
 
                     if (this.repository != null)
                     {
                         var id = repository.Resolve("HEAD");
-                        var commit = repository.MapCommit(id);
-                        this.commitTree = (commit != null ? commit.TreeEntry : new Tree(repository));
-                        this.index = repository.Index;
+                        //var commit = repository.MapCommit(id);
+                        //this.commitTree = (commit != null ? commit.TreeEntry : new Tree(repository));
+                        this.commitTree = repository.
+                        this.index = repository.GetIndex();
                         this.index.RereadIfNecessary();
                         this.ignoreHandler = new IgnoreHandler(repository);
                         //this.watcher = new FileSystemWatcher(this.repository.WorkingDirectory.FullName);

@@ -82,10 +82,6 @@
       <Project>{ADECE07A-5D80-4950-9DA5-A681CE2F5106}</Project>
       <Name>BasicSccProvider</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GitSharp.Core\GitSharp.Core.csproj">
-      <Project>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</Project>
-      <Name>GitSharp.Core</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

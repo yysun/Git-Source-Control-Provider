@@ -9,9 +9,9 @@
         <TabItem Visibility="Collapsed">
             <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="0" />
-                    <ColumnDefinition Width="0" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="2" />
+                    <ColumnDefinition Width="1*" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -71,7 +71,7 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTextColumn Header="Status" Binding="{Binding Status}"  />
-                            <DataGridTextColumn Header="File" Binding="{Binding FileName}" />
+                            <DataGridTextColumn Header="File" Binding="{Binding FileName}" Width="500" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>

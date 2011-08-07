@@ -11,6 +11,8 @@ using NGit.Revwalk;
 using NGit.Storage.File;
 using NGit.Treewalk;
 using NGit.Treewalk.Filter;
+using NGit.Diff;
+using System.Text;
 
 namespace GitScc
 {
@@ -316,10 +318,34 @@ namespace GitScc
             cache.Clear();
         }
 
+        /// <summary>
+        /// Diff working file with last commit
+        /// </summary>
+        /// <param name="fileName">Expect relative path</param>
+        /// <returns></returns>
         public string DiffFile(string fileName)
         {
             if (!this.HasGitRepository) return null;
-            throw new NotImplementedException();
+            
+            HistogramDiff hd = new HistogramDiff();
+            hd.SetFallbackAlgorithm(null);
+
+            RawText b = new RawText(File.ReadAllBytes(GetFullPath(fileName)));
+            RawText a = new RawText(GetFileContent(fileName));
+            
+            var list = hd.Diff(RawTextComparator.DEFAULT, a, b);
+
+            using (Stream mstream = new MemoryStream(),
+                          stream = new BufferedStream(mstream))
+            {
+                DiffFormatter df = new DiffFormatter(stream);
+                df.Format(list, a, b);
+                df.Flush();
+                stream.Seek(0, SeekOrigin.Begin);
+                var ret = new StreamReader(stream).ReadToEnd();
+
+                return ret;
+            }
         }
 
         public void Commit(string message)
@@ -360,7 +386,8 @@ namespace GitScc
                 FillCache();
                 return from f in cache
                        where f.Value != GitFileStatus.Tracked &&
-                             f.Value != GitFileStatus.NotControlled
+                             f.Value != GitFileStatus.NotControlled &&
+                             f.Value != GitFileStatus.Missing
                        select new GitFile
                        {
                            FileName = GetRelativeFileName(f.Key),

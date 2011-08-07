@@ -214,5 +214,27 @@ namespace BasicSccProvider.Tests
             tracker.AmendCommit("new message");
             Assert.AreEqual("new message", tracker.LastCommitMessage);
         }
+
+        [TestMethod]
+        public void DiffFileTest()
+        {
+            var tempFolder = Environment.CurrentDirectory + "\\_gitscc_test_7";
+            var tempFile = Path.Combine(tempFolder, "test");
+
+            GitFileStatusTracker.Init(tempFolder);
+            string[] lines = { "First line", "Second line", "Third line" };
+            File.WriteAllLines(tempFile, lines);
+
+            GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
+            tracker.StageFile(tempFile);
+
+            tracker.Commit("test message");
+            Assert.AreEqual("test message", tracker.LastCommitMessage);
+
+            File.WriteAllText(tempFile, "changed text");
+            var diff = tracker.DiffFile(tempFile);
+            Console.WriteLine(diff);
+            Assert.IsTrue(diff.StartsWith("@@ -1,3 +1 @@"));
+        }
     }
 }

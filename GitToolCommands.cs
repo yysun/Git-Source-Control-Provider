@@ -38,7 +38,7 @@ namespace GitScc
             new GitToolCommand("Show Log", "/command:log", CommandScope.File), 
             new GitToolCommand("Switch", "/command:switch"), 
             new GitToolCommand("Sync", "/command:sync"), 
-            new GitToolCommand("Tag", "/command:Tag"), 
+            new GitToolCommand("Tag", "/command:tag"), 
         };
 
         internal static List<GitToolCommand> GitExtCommands = new List<GitToolCommand> { 

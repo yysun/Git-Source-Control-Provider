@@ -60,7 +60,21 @@ namespace GitScc
 
         private void checkBoxAllStaged_Click(object sender, RoutedEventArgs e)
         {
-
+            var checkBox = sender as CheckBox;
+            if (checkBox.IsChecked == false)
+            {
+                foreach (var item in this.dataGrid1.ItemsSource)
+                {
+                    tracker.StageFile(((GitFile)item).FileName);
+                }
+            }
+            else
+            {
+                foreach (var item in this.dataGrid1.ItemsSource)
+                {
+                    tracker.UnStageFile(((GitFile)item).FileName);
+                }
+            }
         }
 
         private void dataGrid1_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -71,6 +85,7 @@ namespace GitScc
             var fileName = selectedItem.FileName;
 
             this.textBoxDiff.Document.Blocks.Clear();
+            this.textBoxDiff.Document.PageWidth = 1000;
 
             var content = tracker.DiffFile(fileName);
             foreach (var line in content.Split('\n'))
@@ -91,10 +106,7 @@ namespace GitScc
                 {
                     range.ApplyPropertyValue(TextElement.BackgroundProperty, null);
                 }
-
-                //this.textBoxDiff.AppendText(line);
             }
- 
         }
 
         internal void Commit()

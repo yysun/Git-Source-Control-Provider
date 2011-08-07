@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
-using System.Timers;
-using Sharpen;
+using System.Text.RegularExpressions;
 using NGit;
 using NGit.Api;
+using NGit.Dircache;
+using NGit.Revwalk;
+using NGit.Storage.File;
+using NGit.Treewalk;
+using NGit.Treewalk.Filter;
 
 namespace GitScc
 {
@@ -17,7 +21,8 @@ namespace GitScc
         private Repository repository;
         private Tree commitTree;
         private GitIndex index;
-        private IgnoreHandler ignoreHandler;
+
+        //private IgnoreHandler ignoreHandler;
 
         private Dictionary<string, GitFileStatus> cache;
 
@@ -39,14 +44,21 @@ namespace GitScc
 
                     if (this.repository != null)
                     {
-                        var id = repository.Resolve("HEAD");
+                        var id = repository.Resolve(Constants.HEAD);
                         //var commit = repository.MapCommit(id);
                         //this.commitTree = (commit != null ? commit.TreeEntry : new Tree(repository));
-                        this.commitTree = repository.
+                        if (id == null)
+                        {
+                            this.commitTree = new Tree(repository);
+                        }
+                        else
+                        {
+                            var treeId = ObjectId.FromString(repository.Open(id).GetBytes(), 5);
+                            this.commitTree = new Tree(repository, treeId, repository.Open(treeId).GetBytes());
+                        }
                         this.index = repository.GetIndex();
-                        this.index.RereadIfNecessary();
-                        this.ignoreHandler = new IgnoreHandler(repository);
-                        //this.watcher = new FileSystemWatcher(this.repository.WorkingDirectory.FullName);
+                        //this.index.RereadIfNecessary();
+                        //this.ignoreHandler = new IgnoreHandler(repository);
                     }
                 }
                 catch (Exception ex)
@@ -65,7 +77,7 @@ namespace GitScc
             get
             {
                 return this.repository == null ? null :
-                    this.repository.WorkingDirectory.FullName;
+                    this.repository.WorkTree;
             }
         }
 
@@ -107,7 +119,7 @@ namespace GitScc
                 {
                     return GitFileStatus.Added;
                 }
-                if (treeEntry != null && !treeEntry.Id.Equals(indexEntry.ObjectId))
+                if (treeEntry != null && !treeEntry.GetId().Equals(indexEntry.GetObjectId()))
                 {
                     return GitFileStatus.Staged;
                 }
@@ -115,15 +127,15 @@ namespace GitScc
                 {
                     return GitFileStatus.Missing;
                 }
-                if (File.Exists(fileName) && indexEntry.IsModified(repository.WorkingDirectory, true))
+                if (File.Exists(fileName) && indexEntry.IsModified(repository.WorkTree, true))
                 {
                     return GitFileStatus.Modified;
                 }
-                if (indexEntry.Stage != 0)
+                if (indexEntry.GetStage() != 0)
                 {
                     return GitFileStatus.MergeConflict;
                 }
-                if (treeEntry != null && treeEntry.Id.Equals(indexEntry.ObjectId))
+                if (treeEntry != null && treeEntry.GetId().Equals(indexEntry.GetObjectId()))
                 {
                     return GitFileStatus.Tracked;
                 }
@@ -156,7 +168,57 @@ namespace GitScc
             //fileName = fileName.Replace("%20", " ");
             //return fileName;
 
-            return PathUtil.RelativePath(repository.WorkingDirectory.FullName, fileName);
+            return GetRelativePath(repository.WorkTree, fileName);
+        }
+
+        /// <summary>
+        /// Computes relative path, where path is relative to reference_path
+        /// </summary>
+        /// <param name="reference_path"></param>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static string GetRelativePath(string reference_path, string path)
+        {
+            if (reference_path == null)
+                throw new ArgumentNullException("reference_path");
+            if (path == null)
+                throw new ArgumentNullException("path");
+            //reference_path = reference_path.Replace('/', '\\');
+            //path = path.Replace('/', '\\');
+            bool isRooted = Path.IsPathRooted(reference_path) && Path.IsPathRooted(path);
+            if (isRooted)
+            {
+                bool isDifferentRoot = string.Compare(Path.GetPathRoot(reference_path), Path.GetPathRoot(path), true) != 0;
+                if (isDifferentRoot)
+                    return path;
+            }
+            var relativePath = new StringCollection();
+            string[] fromDirectories = Regex.Split(reference_path, @"[/\\]+");
+            string[] toDirectories = Regex.Split(path, @"[/\\]+");
+            int length = Math.Min(fromDirectories.Length, toDirectories.Length);
+            int lastCommonRoot = -1;
+            // find common root
+            for (int x = 0; x < length; x++)
+            {
+                if (string.Compare(fromDirectories[x],
+                      toDirectories[x], true) != 0)
+                    break;
+                lastCommonRoot = x;
+            }
+            if (lastCommonRoot == -1)
+                return string.Join(Path.DirectorySeparatorChar.ToString(), toDirectories);
+            // add relative folders in from path
+            for (int x = lastCommonRoot + 1; x < fromDirectories.Length; x++)
+                if (fromDirectories[x].Length > 0)
+                    relativePath.Add("..");
+            // add to folders to path
+            for (int x = lastCommonRoot + 1; x < toDirectories.Length; x++)
+                relativePath.Add(toDirectories[x]);
+            // create relative path
+            string[] relativeParts = new string[relativePath.Count];
+            relativePath.CopyTo(relativeParts, 0);
+            string newPath = string.Join(Path.DirectorySeparatorChar.ToString(), relativeParts);
+            return newPath;
         }
 
         public byte[] GetFileContent(string fileName)
@@ -169,9 +231,10 @@ namespace GitScc
             var entry = commitTree.FindBlobMember(fileName);
             if (entry != null)
             {
-                var blob = repository.OpenBlob(entry.Id);
-                if (blob != null) return blob.CachedBytes;
+                var blob = repository.Open(entry.GetId());
+                if (blob != null) return blob.GetCachedBytes();
             }
+
             return null;
         }
 
@@ -179,69 +242,33 @@ namespace GitScc
         {
             get
             {
-                return this.HasGitRepository ? this.repository.getBranch() : "";
+                return this.HasGitRepository ? this.repository.GetBranch() : "";
             }
         }
 
-        internal static string GetRepositoryDirectory(string folder)
+        /// <summary>
+        /// Search Git Repository in folder and its parent folders 
+        /// </summary>
+        /// <param name="folder">starting folder</param>
+        /// <returns>folder that has .git subfolder</returns>
+        public static string GetRepositoryDirectory(string folder)
         {
-            var repository = (!string.IsNullOrEmpty(folder) && Directory.Exists(folder)) ?
-                Repository.Open(folder) : null;
+            if(string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder)) return null;
 
-            return repository == null ? null : repository.WorkingDirectory.FullName;
+            var directory = new DirectoryInfo(folder);
 
+            if (directory.GetDirectories(Constants.DOT_GIT).Length > 0)
+            {
+                return folder;
+            }
+
+            return directory.Parent == null ? null :
+                   GetRepositoryDirectory(directory.Parent.FullName);
         }
 
         public override string ToString()
         {
-            return repository == null ? "[no repo]" : repository.WorkingDirectory.FullName;
-        }
-
-        public IEnumerable<GitFile> ChangedFiles
-        {
-            get
-            {
-                DirectoryInfo root = new DirectoryInfo(initFolder);
-                var mainTree = new Tree(repository);
-                FillTree(root, mainTree);
-
-                return from f in cache
-                       where f.Value != GitFileStatus.Tracked &&
-                             f.Value != GitFileStatus.NotControlled
-                       select new GitFile
-                       {
-                           FileName = GetRelativeFileName(f.Key),
-                           Status = f.Value,
-                           IsStaged = f.Value == GitFileStatus.Added || 
-                                      f.Value == GitFileStatus.Staged ||
-                                      f.Value == GitFileStatus.Removed
-                       };
-            }
-        }
-        
-        private void FillTree(DirectoryInfo dir, Tree tree)
-        {
-            foreach (var subdir in dir.GetDirectories())
-            {
-                if (subdir.Name == Constants.DOT_GIT || this.ignoreHandler.IsIgnored(tree.FullName + "/" + subdir.Name))
-                    continue;
-                var t = tree.AddTree(subdir.Name);
-                FillTree(subdir, t);
-            }
-
-            foreach (var file in dir.GetFiles())
-            {
-                if (this.ignoreHandler.IsIgnored(tree.FullName + "/" + file.Name))
-                    continue;
-                tree.AddFile(file.Name);
-
-                var fileName = string.IsNullOrEmpty(tree.FullName) ?
-                               Path.Combine(initFolder, file.Name)
-                               :
-                               Path.Combine(initFolder, tree.FullName + "\\" + file.Name);
-
-                var status = GetFileStatus(fileName.Replace("/", "\\"));
-            }
+            return repository == null ? "[no repo]" : this.GitWorkingDirectory;
         }
 
         public void UnStageFile(string fileName)
@@ -253,19 +280,15 @@ namespace GitScc
 
             var content = GetFileContent(fileName);
 
-            this.index.remove(
-                new DirectoryInfo(this.repository.WorkingDirectory.FullName),
-                new FileInfo(fileName));
+            this.index.Remove(repository.WorkTree, fileName);
 
             if (content != null)
             {
-                this.index.add(
-                new DirectoryInfo(this.repository.WorkingDirectory.FullName),
-                new FileInfo(fileName),
-                content);
+                this.index.Add(repository.WorkTree, fileName, content);
             }
 
-            this.index.write();
+            this.index.Write();
+            cache.Clear();
         }
 
         public void StageFile(string fileName)
@@ -277,12 +300,10 @@ namespace GitScc
 
             var content = File.ReadAllBytes(fileName);
 
-            this.index.add(
-                new DirectoryInfo(this.repository.WorkingDirectory.FullName),
-                new FileInfo(fileName),
-                content);
+            this.index.Add(repository.WorkTree, fileName, content);
 
-            this.index.write();
+            this.index.Write();
+            cache.Clear();
         }
 
         public void RemoveFile(string fileName)
@@ -290,11 +311,9 @@ namespace GitScc
             if (!this.HasGitRepository) return;
 
             this.index.RereadIfNecessary();
-            this.index.remove(
-                    new DirectoryInfo(this.repository.WorkingDirectory.FullName),
-                    new FileInfo(fileName));
-
-            this.index.write();
+            this.index.Remove(repository.WorkTree, fileName);
+            this.index.Write();
+            cache.Clear();
         }
 
         public string DiffFile(string fileName)
@@ -306,75 +325,128 @@ namespace GitScc
         public void Commit(string message)
         {
             if (!this.HasGitRepository) return;
+
             if (string.IsNullOrEmpty(message))
                 throw new ArgumentException("Commit message must not be null or empty!", "message");
 
-            this.index.RereadIfNecessary();
-            var tree_id = this.index.writeTree();
-
-            var parent = repository.MapCommit(repository.Resolve("HEAD"));
-
-            if ((parent == null && this.index.Members.Count == 0) || (parent != null && parent.TreeId == tree_id))
-                throw new InvalidOperationException("There are no changes to commit");
-
-            var corecommit = new Commit(this.repository);
-            corecommit.ParentIds = parent == null ? new ObjectId[0] : new ObjectId[] { parent.TreeId };
-            var time = DateTimeOffset.Now;
-            corecommit.Author =
-            corecommit.Committer = new PersonIdent(this["user.name"], this["user.email"], time.ToMillisecondsSinceEpoch(), (int)time.Offset.TotalMinutes);
-            corecommit.Message = message;
-            corecommit.TreeEntry = this.repository.MapTree(tree_id);
-            corecommit.Encoding = Charset.forName(this["i18n.commitencoding"] ?? "utf-8");
-            corecommit.Save();
-
-			var updateRef = this.repository.UpdateRef("HEAD");
-			updateRef.NewObjectId = corecommit.CommitId;
-            updateRef.IsForceUpdate = true;
-			updateRef.update();
-
+            var git = new Git(this.repository);
+            git.Commit().SetMessage(message).Call();
             Refresh();
+        }
 
+        public void AmendCommit(string message)
+        {
+            if (!HasGitRepository) return;
+
+            if (string.IsNullOrEmpty(message))
+                throw new ArgumentException("Commit message must not be null or empty!", "message");
+
+            var git = new Git(this.repository);
+            git.Commit().SetAmend(true).SetMessage(message).Call();
+            Refresh();
         }
 
         public static void Init(string folderName)
         {
             var gitFolder = Path.Combine(folderName, Constants.DOT_GIT);
-            var repo = new Repository(new DirectoryInfo(gitFolder));
-            repo.Create(false);
+            var repo = new FileRepository(gitFolder);
+            repo.Create();
         }
 
-
-        public string this[string key]
+        public IEnumerable<GitFile> ChangedFiles
         {
             get
             {
-                if (!this.HasGitRepository) return null;
-
-                var config = this.repository.Config;
-                var token = key.Split('.');
-
-                if (token.Count() == 2)
-                {
-                    return config.getString(token[0], null, token[1]);
-                }
-
-                if (token.Count() == 3)
-                {
-                    return config.getString(token[0], token[1], token[2]);
-                }
-
-                return null;
+                FillCache();
+                return from f in cache
+                       where f.Value != GitFileStatus.Tracked &&
+                             f.Value != GitFileStatus.NotControlled
+                       select new GitFile
+                       {
+                           FileName = GetRelativeFileName(f.Key),
+                           Status = f.Value,
+                           IsStaged = f.Value == GitFileStatus.Added ||
+                                      f.Value == GitFileStatus.Staged ||
+                                      f.Value == GitFileStatus.Removed
+                       };
             }
-            set
-            {
-                if (!this.HasGitRepository) return;
+        }
 
-                var config = this.repository.Config;
-                var token = key.Split('.');
-                if (token.Count() == 2)
-                    config.setString(token[0], null, token[1], value);
-                else if (token.Count() == 3)
-                    config.setString(token[0], token[1], token[2], value);
+        private const int INDEX = 1;
+        private const int WORKDIR = 2;
+
+        public void FillCache()
+        {
+            //Stopwatch sw = new Stopwatch();
+            //sw.Start();
+
+            var treeWalk = new TreeWalk(this.repository);
+            treeWalk.Recursive = true;
+            treeWalk.Filter = TreeFilter.ANY_DIFF;
+
+            var id = repository.Resolve(Constants.HEAD);
+            if (id != null)
+            {
+                treeWalk.AddTree(ObjectId.FromString(repository.Open(id).GetBytes(), 5)); //any better way?
+            }
+            else
+            {
+                treeWalk.AddTree(new EmptyTreeIterator());
+            }
+
+            treeWalk.AddTree(new DirCacheIterator(this.repository.ReadDirCache()));
+            treeWalk.AddTree(new FileTreeIterator(this.repository));
+            var filters = new TreeFilter[] { new SkipWorkTreeFilter(INDEX), new IndexDiffFilter(INDEX, WORKDIR) };
+            treeWalk.Filter = AndTreeFilter.Create(filters);
+
+            while (treeWalk.Next())
+            {
+                var fileName = GetFullPath(treeWalk.PathString);
+                //    Debug.WriteLine(string.Format("==== Fill cache for {0}", fileName));
+                var status = GetFileStatusNoCache(fileName);
+                cache[fileName] = status;
+            }
+
+            //sw.Stop();
+            //Debug.WriteLine("+++++++++++" + sw.ElapsedMilliseconds);
+
+            //sw.Start();
+
+            //var workingTreeIt = new FileTreeIterator(this.repository);
+            //IndexDiff diff = new IndexDiff(this.repository, Constants.HEAD, workingTreeIt);
+            //diff.Diff();
+            //diff.GetChanged().ToList().ForEach(f => cache[GetFullPath(f)] = GitFileStatus.Staged);
+            //diff.GetModified().ToList().ForEach(f => cache[GetFullPath(f)] = GitFileStatus.Modified);
+            //diff.GetAdded().ToList().ForEach(f => cache[GetFullPath(f)] = GitFileStatus.Added);
+            //diff.GetUntracked().ToList().ForEach(f => cache[GetFullPath(f)] = GitFileStatus.New);
+            
+            //sw.Stop();
+            //Debug.WriteLine("+++++++++++" + sw.ElapsedMilliseconds);
+        }
+
+        private string GetFullPath(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName)) return this.GitWorkingDirectory;
+
+            return Path.Combine(this.GitWorkingDirectory, fileName.Replace("/", "\\"));
+        }
+
+
+        public string LastCommitMessage
+        {
+            get
+            {
+                if (!HasGitRepository) return null;
+
+                ObjectId headId = this.repository.Resolve(Constants.HEAD);
+                var revWalk = new RevWalk(this.repository);
+                revWalk.MarkStart(revWalk.LookupCommit(headId));
+                foreach (RevCommit c in revWalk)
+                {
+                    return c.GetFullMessage();
+                }
+                return "";
+
             }
         }
     }

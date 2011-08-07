@@ -62,7 +62,7 @@ namespace GitScc
 
         private void OnAmendCommitCommand(object sender, EventArgs e)
         {
-            MessageBox.Show("Amend Commit");
+            control.AmendCommit();
         }
 
         internal void Refresh(GitFileStatusTracker tracker)

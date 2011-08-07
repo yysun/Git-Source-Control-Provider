@@ -1,15 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{A0417584-B3B4-4991-8435-4B86D643322B}"
-	ProjectSection(SolutionItems) = preProject
-		lib\DiffieHellman.dll = lib\DiffieHellman.dll
-		lib\ICSharpCode.SharpZipLib.dll = lib\ICSharpCode.SharpZipLib.dll
-		lib\Org.Mentalis.Security.dll = lib\Org.Mentalis.Security.dll
-		lib\Tamir.SharpSSH.dll = lib\Tamir.SharpSSH.dll
-		lib\Winterdom.IO.FileMap.dll = lib\Winterdom.IO.FileMap.dll
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicSccProvider", "BasicSccProvider.csproj", "{ADECE07A-5D80-4950-9DA5-A681CE2F5106}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicSccProvider.Tests", "BasicSccProvider.Tests\BasicSccProvider.Tests.csproj", "{AE3D1ACA-680D-4CDE-B71E-B7B135F32899}"

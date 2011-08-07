@@ -7,14 +7,21 @@ namespace GitScc
 {
     class GitToolCommand
     {
+        public CommandScope Scope { get; set; }
         public string Name { get; set; }
         public string Command { get; set; }
         
-        public GitToolCommand(string name, string Command)
+        public GitToolCommand(string name, string Command, CommandScope scope = CommandScope.Project)
         {
             this.Name = name;
             this.Command = Command;
+            Scope = scope;
         }
+    }
+
+    public enum CommandScope
+    {
+        File, Project
     }
 
     static class GitToolCommands
@@ -28,7 +35,7 @@ namespace GitScc
             new GitToolCommand("Rebase", "/command:rebase"), 
             new GitToolCommand("Resolve", "/command:resolve"), 
             new GitToolCommand("Revert", "/command:revert"), 
-            new GitToolCommand("Show Log", "/command:log"), 
+            new GitToolCommand("Show Log", "/command:log", CommandScope.File), 
             new GitToolCommand("Switch", "/command:switch"), 
             new GitToolCommand("Sync", "/command:sync"), 
             new GitToolCommand("Tag", "/command:Tag"), 

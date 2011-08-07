@@ -323,6 +323,15 @@ namespace GitScc
             RunDetatched(tortoiseGitPath, "/command:commit");
         }
 
+        private string GetTargetPath(GitToolCommand command)
+        {
+            var workingDirectory = sccService.CurrentGitWorkingDirectory;
+            if (command.Scope == CommandScope.Project) return workingDirectory;
+            var fileName = sccService.GetSelectFileName();
+            if (fileName == sccService.GetSolutionFileName()) return workingDirectory;
+            return fileName;
+        }
+
         private void OnGitTorCommandExec(object sender, EventArgs e)
         {
             var menuCommand = sender as MenuCommand;
@@ -333,8 +342,11 @@ namespace GitScc
                 Debug.WriteLine(string.Format(CultureInfo.CurrentCulture,
                                   "Run GitTor Command {0}", GitToolCommands.GitTorCommands[idx].Command));
 
+                var cmd = GitToolCommands.GitTorCommands[idx];
+                var targetPath = GetTargetPath(cmd);
+
                 var tortoiseGitPath = GitSccOptions.Current.TortoiseGitPath;
-                RunDetatched(tortoiseGitPath, GitToolCommands.GitTorCommands[idx].Command + " /path:\"" + sccService.CurrentGitWorkingDirectory + "\"");
+                RunDetatched(tortoiseGitPath, cmd.Command + " /path:\"" + targetPath + "\"");
             }
         }
 

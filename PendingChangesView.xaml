@@ -83,7 +83,7 @@
         <TabItem Visibility="Collapsed">
             <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <Button HorizontalAlignment="Center" VerticalAlignment="Center" Padding="30 5"
-                        Content="Find changes in repository" x:Name="btnFindChanges" Click="btnFindChanges_Click" />
+                        Content="Find changes in repository" x:Name="btnFindChanges" />
             </Grid>
         </TabItem>
     </TabControl>

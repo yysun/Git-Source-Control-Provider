@@ -1,10 +1,8 @@
 ﻿using System;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading;
-using System.Diagnostics;
-using GitSharp.Core;
+using System.Linq;
 using GitScc;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BasicSccProvider.Tests
 {
@@ -66,9 +64,17 @@ namespace BasicSccProvider.Tests
         //
         #endregion
 
-        /// <summary>
-        ///A test for HasGitRepository
-        ///</summary>
+        [TestMethod()]
+        public void GetRepositoryDirectoryTest()
+        {
+            var tempFolder = Environment.CurrentDirectory + "\\_gitscc_test_0";
+            var newFolder = tempFolder + "\\t t";
+            Directory.CreateDirectory(newFolder);
+            GitFileStatusTracker.Init(tempFolder);
+            var folder = GitFileStatusTracker.GetRepositoryDirectory(newFolder);
+            Assert.AreEqual(tempFolder, folder);
+        }
+
         [TestMethod()]
         public void HasGitRepositoryTest()
         {
@@ -79,7 +85,6 @@ namespace BasicSccProvider.Tests
             Assert.IsTrue(tracker.HasGitRepository);
             Assert.AreEqual(tempFolder, tracker.GitWorkingDirectory);
             Assert.IsTrue(Directory.Exists(tempFolder + "\\.git"));
-
         }
 
         [TestMethod]
@@ -94,15 +99,12 @@ namespace BasicSccProvider.Tests
             string[] lines = { "First line", "Second line", "Third line" };
 
             File.WriteAllLines(tempFile, lines);
-            tracker.Refresh();
             Assert.AreEqual(GitFileStatus.New, tracker.GetFileStatus(tempFile));
 
             tracker.StageFile(tempFile);
-            tracker.Refresh();
             Assert.AreEqual(GitFileStatus.Added, tracker.GetFileStatus(tempFile));
 
-            tracker.Commit("test");
-            tracker.Refresh();
+            tracker.Commit("test commit");
             Assert.AreEqual(GitFileStatus.Tracked, tracker.GetFileStatus(tempFile));
 
             File.WriteAllText(tempFile, "changed text");
@@ -114,7 +116,6 @@ namespace BasicSccProvider.Tests
             Assert.AreEqual(GitFileStatus.Missing, tracker.GetFileStatus(tempFile));
 
             tracker.RemoveFile(tempFile);
-            tracker.Refresh();
             Assert.AreEqual(GitFileStatus.Removed, tracker.GetFileStatus(tempFile));
         }
 
@@ -149,61 +150,69 @@ namespace BasicSccProvider.Tests
         [TestMethod]
         public void GetChangedFilesTest()
         {
-            var initFolder = @"E:\Users\Public\My Projects\GitScc\Publish\TestProjects\Folder Test";
-            Repository repository = Repository.Open(initFolder);
 
-            var commit = repository.MapCommit("HEAD");
-            var tree = (commit != null ? commit.TreeEntry : new Tree(repository));
-            var index = repository.Index;
-            index.RereadIfNecessary();
+            var tempFolder = Environment.CurrentDirectory + "\\_gitscc_test_5";
+            var tempFile = Path.Combine(tempFolder, "test");
 
-            DirectoryInfo root = new DirectoryInfo(initFolder);
-            var visitor = new AbstractIndexTreeVisitor { VisitEntryAux = OnVisitEntry };
+            GitFileStatusTracker.Init(tempFolder);
 
-            IgnoreHandler = new IgnoreHandler(repository);
-            var mainTree = new Tree(repository);
+            string[] lines = { "First line", "Second line", "Third line" };
+            File.WriteAllLines(tempFile, lines);
 
-            // Create the subdir branch
-            foreach (string sdir in initFolder.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries))
-                mainTree = mainTree.AddTree(sdir);
+            GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
+            Assert.AreEqual(GitFileStatus.New, tracker.ChangedFiles.ToList()[0].Status);
 
-            if (root.Exists)
-                FillTree(root, mainTree);
+            tracker.StageFile(tempFile);
+            Assert.AreEqual(GitFileStatus.Added, tracker.ChangedFiles.ToList()[0].Status);
 
-            //new IndexTreeWalker(index, tree, mainTree, root, visitor).Walk();
+            tracker.Commit("test");
+            
+            Assert.AreEqual(0, tracker.ChangedFiles.Count());
 
-        }
+            File.WriteAllText(tempFile, "a");
+            Assert.AreEqual(GitFileStatus.Modified, tracker.ChangedFiles.ToList()[0].Status);
 
-        IgnoreHandler IgnoreHandler;
-
-        private void FillTree(DirectoryInfo dir, Tree tree)
-        {
-            foreach (var subdir in dir.GetDirectories())
-            {
-                if (subdir.Name == Constants.DOT_GIT || IgnoreHandler.IsIgnored(tree.FullName + "/" + subdir.Name))
-                    continue;
-                var t = tree.AddTree(subdir.Name);
-                FillTree(subdir, t);
-            }
-            foreach (var file in dir.GetFiles())
-            {
-                if (IgnoreHandler.IsIgnored(tree.FullName + "/" + file.Name))
-                    continue;
-                tree.AddFile(file.Name);
-
-                Console.WriteLine("{0}", file.Name);
-            }
-        }        
-
-        private void OnVisitEntry(TreeEntry treeEntry, TreeEntry wdirEntry, GitIndex.Entry indexEntry, FileInfo file)
-        {
-            Console.WriteLine("{0} - {1} - {2} - {3}", file.Name, treeEntry, wdirEntry, indexEntry);
+            tracker.StageFile(tempFile);
+            Assert.AreEqual(GitFileStatus.Staged, tracker.ChangedFiles.ToList()[0].Status);
         }
 
         [TestMethod]
-        public void GetChangedFilesTest_Core()
+        public void LastCommitMessageTest()
         {
+            var tempFolder = Environment.CurrentDirectory + "\\_gitscc_test_6";
+            var tempFile = Path.Combine(tempFolder, "test");
 
+            GitFileStatusTracker.Init(tempFolder);
+            string[] lines = { "First line", "Second line", "Third line" };
+            File.WriteAllLines(tempFile, lines);
+
+            GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
+            tracker.StageFile(tempFile);
+            
+            tracker.Commit("test message");
+            Assert.AreEqual("test message", tracker.LastCommitMessage);
+        }
+
+        [TestMethod]
+        public void AmendCommitTest()
+        {
+            var tempFolder = Environment.CurrentDirectory + "\\_gitscc_test_7";
+            var tempFile = Path.Combine(tempFolder, "test");
+
+            GitFileStatusTracker.Init(tempFolder);
+            string[] lines = { "First line", "Second line", "Third line" };
+            File.WriteAllLines(tempFile, lines);
+
+            GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
+            tracker.StageFile(tempFile);
+
+            tracker.Commit("test message");
+            Assert.AreEqual("test message", tracker.LastCommitMessage);
+
+            File.WriteAllText(tempFile, "changed text");
+            tracker.StageFile(tempFile);
+            tracker.AmendCommit("new message");
+            Assert.AreEqual("new message", tracker.LastCommitMessage);
         }
     }
 }

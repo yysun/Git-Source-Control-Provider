@@ -224,6 +224,10 @@ namespace GitScc
                     if (sccService.CanCompareSelectedFile) cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
                 
+                case CommandId.icmdSccCommandPendingChanges:
+                    if (sccService.IsSolutionGitControlled) cmdf |= OLECMDF.OLECMDF_ENABLED;
+                    break;
+
                 case CommandId.icmdSccCommandHistory:
                         cmdf |= OLECMDF.OLECMDF_INVISIBLE;
                     break;
@@ -239,7 +243,7 @@ namespace GitScc
                     else
                         cmdf |= OLECMDF.OLECMDF_INVISIBLE;
                     break;
-
+            
                 default:
                     var gitExtPath = GitSccOptions.Current.GitExtensionPath;
                     var torGitPath = GitSccOptions.Current.TortoiseGitPath;

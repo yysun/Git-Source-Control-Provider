@@ -131,10 +131,24 @@ namespace GitScc
             }
         }
 
-        private void btnFindChanges_Click(object sender, RoutedEventArgs e)
+        internal void AmendCommit()
         {
+            TextRange textRange = new TextRange(
+                this.textBoxComments.Document.ContentStart,
+                this.textBoxComments.Document.ContentEnd);
 
+            var comments = textRange.Text;
+
+            if (string.IsNullOrWhiteSpace(comments))
+            {
+                textRange.Text = tracker.LastCommitMessage;
+                return;
+            }
+            else
+            {
+                tracker.AmendCommit(comments);
+                this.textBoxComments.Document.Blocks.Clear();
+            }
         }
-
     }
 }

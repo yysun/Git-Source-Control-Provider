@@ -925,10 +925,9 @@ namespace GitScc
                     Debug.WriteLine("==== UpdateNodesGlyphs: " + Math.Floor(delta).ToString());
                     noRefresh = true;
                     OpenTracker();
-                    RefreshNodesGlyphs();
                     RefreshToolWindows();
+                    RefreshNodesGlyphs();
                     noRefresh = false;
-
                     NodesGlyphsDirty = false;
                 }
             }

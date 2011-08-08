@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using NGit;
 using NGit.Api;
+using NGit.Diff;
 using NGit.Dircache;
 using NGit.Revwalk;
 using NGit.Storage.File;
 using NGit.Treewalk;
 using NGit.Treewalk.Filter;
-using NGit.Diff;
-using System.Text;
 
 namespace GitScc
 {
@@ -30,14 +30,15 @@ namespace GitScc
 
         public GitFileStatusTracker(string workingFolder)
         {
-            cache = new Dictionary<string, GitFileStatus>();
+            this.cache = new Dictionary<string, GitFileStatus>();
             this.initFolder = workingFolder;
             Refresh();
         }
 
         public void Refresh()
         {
-            cache.Clear();
+            this.cache.Clear();
+
             if (!string.IsNullOrEmpty(initFolder))
             {
                 try
@@ -94,21 +95,23 @@ namespace GitScc
             if (!HasGitRepository || string.IsNullOrEmpty(fileName))
                 return GitFileStatus.NotControlled;
 
-            if (!cache.ContainsKey(fileName))
+            if (!this.cache.ContainsKey(fileName))
             {
                 var status = GetFileStatusNoCache(fileName);
-                cache.Add(fileName, status);
+                this.cache.Add(fileName, status);
                 //Debug.WriteLine(string.Format("GetFileStatus {0} - {1}", fileName, status));
                 return status;
             }
             else
             {
-                return cache[fileName];
+                return this.cache[fileName];
             }
         }
 
         private GitFileStatus GetFileStatusNoCache(string fileName)
         {
+            Debug.WriteLine(string.Format("===+ GetFileStatusNoCache {0}", fileName));
+
             var fileNameRel = GetRelativeFileName(fileName);
 
             TreeEntry treeEntry = this.commitTree.FindBlobMember(fileNameRel);
@@ -165,11 +168,6 @@ namespace GitScc
 
         private string GetRelativeFileName(string fileName)
         {
-            //Uri workingFolderUri = new Uri(repository.WorkingDirectory.FullName + "\\");
-            //fileName = workingFolderUri.MakeRelativeUri(new Uri(fileName)).ToString();
-            //fileName = fileName.Replace("%20", " ");
-            //return fileName;
-
             return GetRelativePath(repository.WorkTree, fileName);
         }
 
@@ -290,7 +288,7 @@ namespace GitScc
             }
 
             this.index.Write();
-            cache.Clear();
+            this.cache.Remove(fileName);
         }
 
         public void StageFile(string fileName)
@@ -305,7 +303,7 @@ namespace GitScc
             this.index.Add(repository.WorkTree, fileName, content);
 
             this.index.Write();
-            cache.Clear();
+            this.cache.Remove(fileName);
         }
 
         public void RemoveFile(string fileName)
@@ -315,7 +313,7 @@ namespace GitScc
             this.index.RereadIfNecessary();
             this.index.Remove(repository.WorkTree, fileName);
             this.index.Write();
-            cache.Clear();
+            this.cache.Remove(fileName);
         }
 
         /// <summary>
@@ -331,7 +329,7 @@ namespace GitScc
             hd.SetFallbackAlgorithm(null);
 
             RawText b = new RawText(File.ReadAllBytes(GetFullPath(fileName)));
-            RawText a = new RawText(GetFileContent(fileName));
+            RawText a = new RawText(GetFileContent(fileName) ?? new byte[0]);
             
             var list = hd.Diff(RawTextComparator.DEFAULT, a, b);
 
@@ -378,24 +376,29 @@ namespace GitScc
             var repo = new FileRepository(gitFolder);
             repo.Create();
         }
+        
+
 
         public IEnumerable<GitFile> ChangedFiles
         {
             get
             {
                 FillCache();
-                return from f in cache
-                       where f.Value != GitFileStatus.Tracked &&
-                             f.Value != GitFileStatus.NotControlled &&
-                             f.Value != GitFileStatus.Missing
-                       select new GitFile
-                       {
-                           FileName = GetRelativeFileName(f.Key),
-                           Status = f.Value,
-                           IsStaged = f.Value == GitFileStatus.Added ||
-                                      f.Value == GitFileStatus.Staged ||
-                                      f.Value == GitFileStatus.Removed
-                       };
+
+                var changedFiles = from f in this.cache
+                                   where f.Value != GitFileStatus.Tracked &&
+                                         f.Value != GitFileStatus.NotControlled &&
+                                         f.Value != GitFileStatus.Missing
+                                   select new GitFile
+                                   {
+                                       FileName = GetRelativeFileName(f.Key),
+                                       Status = f.Value,
+                                       IsStaged = f.Value == GitFileStatus.Added ||
+                                                  f.Value == GitFileStatus.Staged ||
+                                                  f.Value == GitFileStatus.Removed
+                                   };
+
+                return changedFiles;
             }
         }
 
@@ -404,9 +407,6 @@ namespace GitScc
 
         public void FillCache()
         {
-            //Stopwatch sw = new Stopwatch();
-            //sw.Start();
-
             var treeWalk = new TreeWalk(this.repository);
             treeWalk.Recursive = true;
             treeWalk.Filter = TreeFilter.ANY_DIFF;
@@ -429,26 +429,10 @@ namespace GitScc
             while (treeWalk.Next())
             {
                 var fileName = GetFullPath(treeWalk.PathString);
-                //    Debug.WriteLine(string.Format("==== Fill cache for {0}", fileName));
                 var status = GetFileStatusNoCache(fileName);
-                cache[fileName] = status;
+                this.cache[fileName] = status;
+                Debug.WriteLine(string.Format("==== Fill cache for {0} <- {1}", fileName, status));
             }
-
-            //sw.Stop();
-            //Debug.WriteLine("+++++++++++" + sw.ElapsedMilliseconds);
-
-            //sw.Start();
-
-            //var workingTreeIt = new FileTreeIterator(this.repository);
-            //IndexDiff diff = new IndexDiff(this.repository, Constants.HEAD, workingTreeIt);
-            //diff.Diff();
-            //diff.GetChanged().ToList().ForEach(f => cache[GetFullPath(f)] = GitFileStatus.Staged);
-            //diff.GetModified().ToList().ForEach(f => cache[GetFullPath(f)] = GitFileStatus.Modified);
-            //diff.GetAdded().ToList().ForEach(f => cache[GetFullPath(f)] = GitFileStatus.Added);
-            //diff.GetUntracked().ToList().ForEach(f => cache[GetFullPath(f)] = GitFileStatus.New);
-            
-            //sw.Stop();
-            //Debug.WriteLine("+++++++++++" + sw.ElapsedMilliseconds);
         }
 
         private string GetFullPath(string fileName)
@@ -457,7 +441,6 @@ namespace GitScc
 
             return Path.Combine(this.GitWorkingDirectory, fileName.Replace("/", "\\"));
         }
-
 
         public string LastCommitMessage
         {
@@ -473,7 +456,6 @@ namespace GitScc
                     return c.GetFullMessage();
                 }
                 return "";
-
             }
         }
     }

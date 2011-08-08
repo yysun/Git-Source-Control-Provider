@@ -9,7 +9,7 @@
         <TabItem Visibility="Collapsed">
             <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="500" />
+                    <ColumnDefinition Width="520" />
                     <ColumnDefinition Width="2" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
@@ -45,14 +45,14 @@
                     <GridSplitter Grid.Row="1" Grid.ColumnSpan="2"
                       VerticalAlignment="Top" HorizontalAlignment="Stretch" Name="gridSplitter2" Height="4" />
 
-                    <Label Content="Changed Files (select to add file to stage/index):" Height="28" HorizontalAlignment="Left" Name="label3" VerticalAlignment="Center" 
+                    <Label Content="Changed Files (click checkbox to add file to stage/index):" Height="28" HorizontalAlignment="Left" Name="label3" VerticalAlignment="Center" 
                Margin="12,0,0,0" Foreground="#FF333333" Grid.Row="2"/>
 
                     <RichTextBox HorizontalAlignment="Stretch" Name="textBoxComments" VerticalAlignment="Stretch" Margin="10,0,10,10" 
                      AcceptsReturn="True" VerticalScrollBarVisibility="Visible" SpellCheck.IsEnabled="True"/>
 
                     <DataGrid AutoGenerateColumns="False" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="dataGrid1" VerticalAlignment="Stretch"
-                      GridLinesVisibility="None"  Foreground="#FF333333" Sorting="dataGrid1_Sorting"
+                      GridLinesVisibility="None"  Foreground="#FF333333" Sorting="dataGrid1_Sorting" IsReadOnly="True" 
                       SelectionMode="Single" SelectionChanged="dataGrid1_SelectionChanged">
 
                         <DataGrid.Columns>

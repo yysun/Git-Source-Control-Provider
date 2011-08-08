@@ -88,7 +88,9 @@ namespace GitScc
             this.textBoxDiff.Document.PageWidth = 1000;
 
             var content = tracker.DiffFile(fileName);
-            foreach (var line in content.Split('\n'))
+
+            // TODO: paging all text into the richtextbox
+            foreach (var line in content.Split('\n').Take(256)) // take max 256 lines for now
             {
 
                 TextRange range = new TextRange(this.textBoxDiff.Document.ContentEnd, this.textBoxDiff.Document.ContentEnd);
@@ -126,6 +128,7 @@ namespace GitScc
 
             tracker.Commit(comments);
             this.textBoxComments.Document.Blocks.Clear();
+            this.textBoxDiff.Document.Blocks.Clear();
         }
 
         internal void Refresh(GitFileStatusTracker tracker)
@@ -160,6 +163,7 @@ namespace GitScc
             {
                 tracker.AmendCommit(comments);
                 this.textBoxComments.Document.Blocks.Clear();
+                this.textBoxDiff.Document.Blocks.Clear();
             }
         }
     }

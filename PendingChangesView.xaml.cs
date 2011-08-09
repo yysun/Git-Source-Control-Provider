@@ -143,9 +143,12 @@ namespace GitScc
                 return;
             }
 
-            tracker.Commit(comments);
-            this.textBoxComments.Document.Blocks.Clear();
-            this.textBoxDiff.Document.Blocks.Clear();
+            if (HastagedFiles())
+            {
+                tracker.Commit(comments);
+                this.textBoxComments.Document.Blocks.Clear();
+                this.textBoxDiff.Document.Blocks.Clear();
+            }
         }
 
         DateTime lastTimeRefresh = DateTime.Now;
@@ -203,10 +206,26 @@ namespace GitScc
             }
             else
             {
-                tracker.AmendCommit(comments);
-                this.textBoxComments.Document.Blocks.Clear();
-                this.textBoxDiff.Document.Blocks.Clear();
+                if (HastagedFiles())
+                {
+                    tracker.AmendCommit(comments);
+                    this.textBoxComments.Document.Blocks.Clear();
+                    this.textBoxDiff.Document.Blocks.Clear();
+                }
             }
+        }
+
+        private bool HastagedFiles()
+        {
+            bool hasStaged = tracker == null ? false :
+                             tracker.ChangedFiles.Any(f => f.IsStaged);
+
+            if (!hasStaged)
+            {
+                MessageBox.Show("No file has been staged for commit.", "Commit",
+                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
+            return hasStaged;
         }
 
     }

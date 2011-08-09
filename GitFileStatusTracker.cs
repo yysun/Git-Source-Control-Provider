@@ -38,6 +38,7 @@ namespace GitScc
         public void Refresh()
         {
             this.cache.Clear();
+            this.changedFiles = null;
 
             if (!string.IsNullOrEmpty(initFolder))
             {
@@ -288,7 +289,7 @@ namespace GitScc
             }
 
             this.index.Write();
-            this.cache.Remove(fileName);
+            this.cache[fileName] = GetFileStatusNoCache(fileName);
         }
 
         public void StageFile(string fileName)
@@ -303,7 +304,7 @@ namespace GitScc
             this.index.Add(repository.WorkTree, fileName, content);
 
             this.index.Write();
-            this.cache.Remove(fileName);
+            this.cache[fileName] = GetFileStatusNoCache(fileName);
         }
 
         public void RemoveFile(string fileName)
@@ -313,7 +314,7 @@ namespace GitScc
             this.index.RereadIfNecessary();
             this.index.Remove(repository.WorkTree, fileName);
             this.index.Write();
-            this.cache.Remove(fileName);
+            this.cache[fileName] = GetFileStatusNoCache(fileName);
         }
 
         /// <summary>
@@ -376,16 +377,17 @@ namespace GitScc
             var repo = new FileRepository(gitFolder);
             repo.Create();
         }
-        
 
-
+        private IEnumerable<GitFile> changedFiles;
         public IEnumerable<GitFile> ChangedFiles
         {
             get
             {
-                FillCache();
+                if (changedFiles == null)
+                {
+                    FillCache();
 
-                var changedFiles = from f in this.cache
+                    changedFiles = from f in this.cache
                                    where f.Value != GitFileStatus.Tracked &&
                                          f.Value != GitFileStatus.NotControlled &&
                                          f.Value != GitFileStatus.Missing
@@ -397,7 +399,7 @@ namespace GitScc
                                                   f.Value == GitFileStatus.Staged ||
                                                   f.Value == GitFileStatus.Removed
                                    };
-
+                }
                 return changedFiles;
             }
         }

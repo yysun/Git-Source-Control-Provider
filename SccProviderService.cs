@@ -651,6 +651,7 @@ namespace GitScc
             Debug.WriteLine("==== Close Tracker");
             trackers.Clear();
             RemoveFolderMonitor();
+            RefreshToolWindows();
         }
 
         private void RemoveFolderMonitor()
@@ -920,21 +921,16 @@ namespace GitScc
             if (NodesGlyphsDirty && !noRefresh)
             {
                 double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
-                if (delta < 500) return;
-                Debug.WriteLine("==== Refresh: " + Math.Floor(delta).ToString());
-
-                var dispatcher = Dispatcher.CurrentDispatcher;
-                Action act = () =>
+                if (delta > 500)
                 {
-                    
+                    Debug.WriteLine("==== Refresh: " + Math.Floor(delta).ToString());
                     noRefresh = true;
                     OpenTracker();
                     RefreshNodesGlyphs();
                     RefreshToolWindows();
                     noRefresh = false;
                     NodesGlyphsDirty = false;
-                };
-                dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+                }
             }
         }
 

@@ -43,11 +43,8 @@ namespace GitScc
 
         private void checkBoxStaged_Click(object sender, RoutedEventArgs e)
         {
-            if (this.dataGrid1.SelectedCells.Count == 0) return;
-            var selectedItem = this.dataGrid1.SelectedCells[0].Item as GitFile;
-            if (selectedItem == null) return;
-
-            var fileName = selectedItem.FileName;
+            var fileName = GetSelectedFileName();
+            if (fileName == null) return;
 
             var checkBox = sender as CheckBox;
             if (checkBox.IsChecked == false)
@@ -58,37 +55,37 @@ namespace GitScc
             {
                 tracker.StageFile(fileName);
             }
+
+            Refresh(this.tracker);
         }
 
         private void checkBoxAllStaged_Click(object sender, RoutedEventArgs e)
         {
             var checkBox = sender as CheckBox;
-            if (checkBox.IsChecked == false)
+            var files = this.dataGrid1.ItemsSource.Cast<GitFile>().Select(i => i.FileName).ToList();
+            if (checkBox.IsChecked == true)
             {
-                foreach (var item in this.dataGrid1.ItemsSource)
-                {
-                    tracker.StageFile(((GitFile)item).FileName);
-                }
+                files.ForEach(file => tracker.StageFile(file));
             }
             else
             {
-                foreach (var item in this.dataGrid1.ItemsSource)
-                {
-                    tracker.UnStageFile(((GitFile)item).FileName);
-                }
+                files.ForEach(file => tracker.UnStageFile(file));
             }
         }
 
+
         private void dataGrid1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (this.dataGrid1.SelectedCells.Count == 0) return;
-            var selectedItem = this.dataGrid1.SelectedCells[0].Item as GitFile;
-            if (selectedItem == null) return;
+            var fileName = GetSelectedFileName();
+            if (fileName == null)
+            {
+                this.textBoxDiff.Document.Blocks.Clear();
+                return;
+            }
 
             var dispatcher = Dispatcher.CurrentDispatcher;
             Action act = () =>
             {
-                var fileName = selectedItem.FileName;
                 this.textBoxDiff.Document.Blocks.Clear();
                 this.textBoxDiff.Document.PageWidth = 1000;
 
@@ -116,11 +113,19 @@ namespace GitScc
                     }
 
                 }
-                
+
                 this.textBoxDiff.EndInit();
             };
 
             dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+        }
+
+        private string GetSelectedFileName()
+        {
+            if (this.dataGrid1.SelectedCells.Count == 0) return null;
+            var selectedItem = this.dataGrid1.SelectedCells[0].Item as GitFile;
+            if (selectedItem == null) return null;
+            return selectedItem.FileName;
         }
 
         internal void Commit()
@@ -147,9 +152,13 @@ namespace GitScc
         internal void Refresh(GitFileStatusTracker tracker)
         {
             this.tracker = tracker;
-            if (tracker == null) return;
+            if (tracker == null)
+            {
+                this.dataGrid1.ItemsSource = null;
+                return;
+            }
 
-            double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;          
+            double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
             if (delta < 1000) return; //no refresh within 1 second
 
             Debug.WriteLine("==== Pending Changes Refresh {0}", delta);
@@ -157,6 +166,7 @@ namespace GitScc
             var dispatcher = Dispatcher.CurrentDispatcher;
             Action act = () =>
             {
+                var selectedFile = GetSelectedFileName();
                 this.dataGrid1.BeginInit();
 
                 this.dataGrid1.ItemsSource = tracker.ChangedFiles;
@@ -170,9 +180,11 @@ namespace GitScc
 
                 this.dataGrid1.EndInit();
 
+                this.dataGrid1.SelectedValue = selectedFile;
             };
 
             dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+
             lastTimeRefresh = DateTime.Now;
         }
 

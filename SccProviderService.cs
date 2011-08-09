@@ -13,6 +13,7 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell;
+using System.Windows.Threading;
 
 namespace GitScc
 {
@@ -907,7 +908,6 @@ namespace GitScc
 
         internal void Refresh()
         {
-            //Debug.WriteLine("==== Refresh");
             if (!noRefresh)
             {
                 NodesGlyphsDirty = true;
@@ -916,20 +916,25 @@ namespace GitScc
         }
 
         public void UpdateNodesGlyphs()
-        {           
+        {
             if (NodesGlyphsDirty && !noRefresh)
             {
                 double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
-                if (delta > 500)
+                if (delta < 500) return;
+                Debug.WriteLine("==== Refresh: " + Math.Floor(delta).ToString());
+
+                var dispatcher = Dispatcher.CurrentDispatcher;
+                Action act = () =>
                 {
-                    Debug.WriteLine("==== UpdateNodesGlyphs: " + Math.Floor(delta).ToString());
+                    
                     noRefresh = true;
                     OpenTracker();
-                    RefreshToolWindows();
                     RefreshNodesGlyphs();
+                    RefreshToolWindows();
                     noRefresh = false;
                     NodesGlyphsDirty = false;
-                }
+                };
+                dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
             }
         }
 

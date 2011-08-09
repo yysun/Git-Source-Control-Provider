@@ -13,6 +13,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Windows.Threading;
+using System.Collections.ObjectModel;
 
 namespace GitScc
 {
@@ -36,7 +38,7 @@ namespace GitScc
             sortMemberPath = e.Column.SortMemberPath;
             sortDirection = e.Column.SortDirection != ListSortDirection.Ascending ?
                 ListSortDirection.Ascending : ListSortDirection.Descending;
-            
+
         }
 
         private void checkBoxStaged_Click(object sender, RoutedEventArgs e)
@@ -82,33 +84,43 @@ namespace GitScc
             if (this.dataGrid1.SelectedCells.Count == 0) return;
             var selectedItem = this.dataGrid1.SelectedCells[0].Item as GitFile;
             if (selectedItem == null) return;
-            var fileName = selectedItem.FileName;
 
-            this.textBoxDiff.Document.Blocks.Clear();
-            this.textBoxDiff.Document.PageWidth = 1000;
-
-            var content = tracker.DiffFile(fileName);
-
-            // TODO: paging all text into the richtextbox
-            foreach (var line in content.Split('\n').Take(256)) // take max 256 lines for now
+            var dispatcher = Dispatcher.CurrentDispatcher;
+            Action act = () =>
             {
+                var fileName = selectedItem.FileName;
+                this.textBoxDiff.Document.Blocks.Clear();
+                this.textBoxDiff.Document.PageWidth = 1000;
 
-                TextRange range = new TextRange(this.textBoxDiff.Document.ContentEnd, this.textBoxDiff.Document.ContentEnd);
-                range.Text = line.Replace("\r", "") + "\r";
+                var content = tracker.DiffFile(fileName);
+                this.textBoxDiff.BeginInit();
 
-                if (line.StartsWith("+"))
+                // TODO: paging all text into the richtextbox
+                foreach (var line in content.Split('\n').Take(256)) // take max 256 lines for now
                 {
-                    range.ApplyPropertyValue(TextElement.BackgroundProperty, new SolidColorBrush(Color.FromArgb(128, 166, 255, 166)));
+
+                    TextRange range = new TextRange(this.textBoxDiff.Document.ContentEnd, this.textBoxDiff.Document.ContentEnd);
+                    range.Text = line.Replace("\r", "") + "\r";
+
+                    if (line.StartsWith("+"))
+                    {
+                        range.ApplyPropertyValue(TextElement.BackgroundProperty, new SolidColorBrush(Color.FromArgb(128, 166, 255, 166)));
+                    }
+                    else if (line.StartsWith("-"))
+                    {
+                        range.ApplyPropertyValue(TextElement.BackgroundProperty, new SolidColorBrush(Color.FromArgb(128, 255, 166, 166)));
+                    }
+                    else
+                    {
+                        range.ApplyPropertyValue(TextElement.BackgroundProperty, null);
+                    }
+
                 }
-                else if (line.StartsWith("-"))
-                {
-                    range.ApplyPropertyValue(TextElement.BackgroundProperty, new SolidColorBrush(Color.FromArgb(128, 255, 166, 166)));
-                }
-                else
-                {
-                    range.ApplyPropertyValue(TextElement.BackgroundProperty, null);
-                }
-            }
+                
+                this.textBoxDiff.EndInit();
+            };
+
+            dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
         }
 
         internal void Commit()
@@ -121,7 +133,7 @@ namespace GitScc
 
             if (string.IsNullOrWhiteSpace(comments))
             {
-                MessageBox.Show("Please enter comments for the commit.", "Commit", 
+                MessageBox.Show("Please enter comments for the commit.", "Commit",
                     MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
@@ -131,19 +143,37 @@ namespace GitScc
             this.textBoxDiff.Document.Blocks.Clear();
         }
 
+        DateTime lastTimeRefresh = DateTime.Now;
         internal void Refresh(GitFileStatusTracker tracker)
         {
-            Debug.WriteLine("==== Pending Changes Refresh {0}", tracker == null ? "" : tracker.GitWorkingDirectory);
-
             this.tracker = tracker;
-            this.dataGrid1.ItemsSource = tracker == null ? null : tracker.ChangedFiles;
-            ICollectionView view = CollectionViewSource.GetDefaultView(this.dataGrid1.ItemsSource);
-            if (view != null)
+            if (tracker == null) return;
+
+            double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;          
+            if (delta < 1000) return; //no refresh within 1 second
+
+            Debug.WriteLine("==== Pending Changes Refresh {0}", delta);
+
+            var dispatcher = Dispatcher.CurrentDispatcher;
+            Action act = () =>
             {
-                view.SortDescriptions.Clear();
-                view.SortDescriptions.Add(new SortDescription(sortMemberPath, sortDirection));
-                view.Refresh();
-            }
+                this.dataGrid1.BeginInit();
+
+                this.dataGrid1.ItemsSource = tracker.ChangedFiles;
+                ICollectionView view = CollectionViewSource.GetDefaultView(this.dataGrid1.ItemsSource);
+                if (view != null)
+                {
+                    view.SortDescriptions.Clear();
+                    view.SortDescriptions.Add(new SortDescription(sortMemberPath, sortDirection));
+                    view.Refresh();
+                }
+
+                this.dataGrid1.EndInit();
+
+            };
+
+            dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+            lastTimeRefresh = DateTime.Now;
         }
 
         internal void AmendCommit()
@@ -166,5 +196,6 @@ namespace GitScc
                 this.textBoxDiff.Document.Blocks.Clear();
             }
         }
+
     }
 }

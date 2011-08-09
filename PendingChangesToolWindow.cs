@@ -32,7 +32,7 @@ namespace GitScc
 
             //// set the CommandID for the window ToolBar
             this.ToolBar = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.imnuPendingChangesToolWindowToolbarMenu);
-                                                                                    
+
             // set the icon for the frame
             this.BitmapResourceID = CommandId.ibmpToolWindowsImages;  // bitmap strip resource ID
             this.BitmapIndex = CommandId.iconSccProviderToolWindow;   // index in the bitmap strip
@@ -45,7 +45,7 @@ namespace GitScc
             base.Content = control;
 
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            
+
             var cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesCommit);
             var menu = new MenuCommand(new EventHandler(OnCommitCommand), cmd);
             mcs.AddCommand(menu);
@@ -53,6 +53,13 @@ namespace GitScc
             cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesAmend);
             menu = new MenuCommand(new EventHandler(OnAmendCommitCommand), cmd);
             mcs.AddCommand(menu);
+
+
+            var sccProviderService = BasicSccProvider.GetServiceEx<SccProviderService>();
+            if (sccProviderService != null)
+            {
+                Refresh(sccProviderService.CurrentTracker);
+            }
         }
 
         private void OnCommitCommand(object sender, EventArgs e)
@@ -67,15 +74,15 @@ namespace GitScc
 
         internal void Refresh(GitFileStatusTracker tracker)
         {
-            if (((IVsWindowFrame)this.Frame).IsVisible() == VSConstants.S_FALSE) return;
+            //if (((IVsWindowFrame)this.Frame).IsVisible() == VSConstants.S_FALSE) return;
 
             control.Refresh(tracker);
 
-            if (tracker != null)
-            {
-                this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption") +
-                    (tracker.HasGitRepository ? string.Format(" {1} - ({0})", tracker.CurrentBranch, tracker.GitWorkingDirectory) : "");
-            }
+            var repository = (tracker == null || !tracker.HasGitRepository) ? " (no repository)" :
+                string.Format(" {1} - ({0})", tracker.CurrentBranch, tracker.GitWorkingDirectory);
+
+            this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption") + repository;
+                
         }
     }
 }

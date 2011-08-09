@@ -57,6 +57,7 @@ namespace GitScc
 
         public BasicSccProvider()
         {
+            _SccProvider = this;
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Entering constructor for: {0}", this.ToString()));
         }
 
@@ -416,6 +417,14 @@ namespace GitScc
         public new Object GetService(Type serviceType)
         {
             return base.GetService(serviceType);
+        }
+
+        static BasicSccProvider _SccProvider = null;
+
+        public static T GetServiceEx<T>()
+        {
+            if(_SccProvider == null) return default(T);
+            return (T)_SccProvider.GetService(typeof(T));
         }
 
         #region Run Command

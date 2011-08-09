@@ -151,7 +151,7 @@ namespace GitScc
             }
         }
 
-        DateTime lastTimeRefresh = DateTime.Now;
+        DateTime lastTimeRefresh = DateTime.Now.AddDays(-1);
         internal void Refresh(GitFileStatusTracker tracker)
         {
             this.tracker = tracker;

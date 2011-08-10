@@ -245,5 +245,22 @@ namespace GitScc
             dte.StatusBar.Text = msg;
         }
 
+        private void dataGrid1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            var fileName = GetSelectedFileName();
+            if (fileName != null && this.tracker != null)
+            {
+                try
+                {
+                    fileName = System.IO.Path.Combine(this.tracker.GitWorkingDirectory, fileName);
+                    var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
+                    dte.ItemOperations.OpenFile(fileName);
+                }
+                catch { }
+            }
+        }
+
+
+
     }
 }

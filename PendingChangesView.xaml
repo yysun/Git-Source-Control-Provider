@@ -49,11 +49,11 @@
                Margin="12,0,0,0" Foreground="#FF333333" Grid.Row="2"/>
 
                     <RichTextBox HorizontalAlignment="Stretch" Name="textBoxComments" VerticalAlignment="Stretch" Margin="10,0,10,10" 
-                     AcceptsReturn="True" VerticalScrollBarVisibility="Visible" SpellCheck.IsEnabled="True"/>
+                     AcceptsReturn="True" VerticalScrollBarVisibility="Visible" SpellCheck.IsEnabled="True" />
 
                     <DataGrid AutoGenerateColumns="False" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="dataGrid1" VerticalAlignment="Stretch"
                       GridLinesVisibility="None"  Foreground="#FF333333" Sorting="dataGrid1_Sorting" IsReadOnly="True" SelectedValuePath="FileName"
-                      SelectionMode="Single" SelectionChanged="dataGrid1_SelectionChanged">
+                      SelectionMode="Single" SelectionChanged="dataGrid1_SelectionChanged" MouseDoubleClick="dataGrid1_MouseDoubleClick">
 
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="Staged">

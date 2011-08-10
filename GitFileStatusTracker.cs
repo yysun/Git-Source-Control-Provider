@@ -131,7 +131,7 @@ namespace GitScc
                 }
                 if (!File.Exists(fileName))
                 {
-                    return GitFileStatus.Missing;
+                    return GitFileStatus.Deleted;
                 }
                 if (File.Exists(fileName) && indexEntry.IsModified(repository.WorkTree, true))
                 {
@@ -299,10 +299,17 @@ namespace GitScc
             if (!this.HasGitRepository) return;
             this.index.RereadIfNecessary();
 
-            var content = File.ReadAllBytes(fileName);
+            if (File.Exists(fileName))
+            {
 
-            this.index.Add(repository.WorkTree, fileName, content);
-
+                var content = File.ReadAllBytes(fileName);
+                this.index.Add(repository.WorkTree, fileName, content);
+            }
+            else
+            {
+                //stage deleted
+                this.index.Remove(repository.WorkTree, fileName);
+            }
             this.index.Write();
             this.cache[fileName] = GetFileStatusNoCache(fileName);
         }
@@ -329,7 +336,10 @@ namespace GitScc
             HistogramDiff hd = new HistogramDiff();
             hd.SetFallbackAlgorithm(null);
 
-            RawText b = new RawText(File.ReadAllBytes(GetFullPath(fileName)));
+            var fullName = GetFullPath(fileName);
+            
+            RawText b = new RawText(File.Exists(GetFullPath(fileName)) ? 
+                                    File.ReadAllBytes(fullName) : new byte[0]);
             RawText a = new RawText(GetFileContent(fileName) ?? new byte[0]);
             
             var list = hd.Diff(RawTextComparator.DEFAULT, a, b);
@@ -395,8 +405,8 @@ namespace GitScc
 
                     changedFiles = from f in this.cache
                                    where f.Value != GitFileStatus.Tracked &&
-                                         f.Value != GitFileStatus.NotControlled &&
-                                         f.Value != GitFileStatus.Missing
+                                         f.Value != GitFileStatus.NotControlled //&&
+                                         //f.Value != GitFileStatus.Deleted
                                    select new GitFile
                                    {
                                        FileName = GetRelativeFileName(f.Key),
@@ -437,6 +447,9 @@ namespace GitScc
             while (treeWalk.Next())
             {
                 var fileName = GetFullPath(treeWalk.PathString);
+
+                if (Directory.Exists(fileName)) continue; // this excludes sub modules
+
                 var status = GetFileStatusNoCache(fileName);
                 this.cache[fileName] = status;
                 Debug.WriteLine(string.Format("==== Fill cache for {0} <- {1}", fileName, status));

@@ -113,7 +113,7 @@ namespace BasicSccProvider.Tests
 
             File.Delete(tempFile);
             tracker.Refresh();
-            Assert.AreEqual(GitFileStatus.Missing, tracker.GetFileStatus(tempFile));
+            Assert.AreEqual(GitFileStatus.Deleted, tracker.GetFileStatus(tempFile));
 
             tracker.RemoveFile(tempFile);
             Assert.AreEqual(GitFileStatus.Removed, tracker.GetFileStatus(tempFile));

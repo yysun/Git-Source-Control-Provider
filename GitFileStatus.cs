@@ -13,7 +13,7 @@ namespace GitScc
         Staged,
         Removed,
         Added,
-        Missing,
+        Deleted,
         MergeConflict,
         Ignored,
     }

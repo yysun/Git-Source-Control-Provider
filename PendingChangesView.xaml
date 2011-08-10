@@ -77,7 +77,7 @@
                 </Grid>
 
                 <RichTextBox Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="textBoxDiff" VerticalAlignment="Stretch"
-                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto" FontSize="12" FontFamily="Consolas" HorizontalScrollBarVisibility="Auto" />
+                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto" FontSize="12" FontFamily="Consolas" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" />
             </Grid>
         </TabItem>
         <TabItem Visibility="Collapsed">

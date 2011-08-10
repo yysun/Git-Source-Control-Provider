@@ -50,10 +50,12 @@ namespace GitScc
             if (checkBox.IsChecked == false)
             {
                 tracker.UnStageFile(fileName);
+                ShowStatusMessage("Un-staged file: " + fileName);
             }
             else
             {
                 tracker.StageFile(fileName);
+                ShowStatusMessage("Staged file: " + fileName);
             }
 
             Refresh(this.tracker);
@@ -66,10 +68,12 @@ namespace GitScc
             if (checkBox.IsChecked == true)
             {
                 files.ForEach(file => tracker.StageFile(file));
+                ShowStatusMessage("Staged all files.");
             }
             else
             {
                 files.ForEach(file => tracker.UnStageFile(file));
+                ShowStatusMessage("Un-staged all files.");
             }
         }
 
@@ -145,9 +149,13 @@ namespace GitScc
 
             if (HastagedFiles())
             {
-                tracker.Commit(comments);
+                var id = tracker.Commit(comments);
                 this.textBoxComments.Document.Blocks.Clear();
                 this.textBoxDiff.Document.Blocks.Clear();
+                //MessageBox.Show("Done.\r\nCommit Hash: " + id, "Commit",
+                //    MessageBoxButton.OK, MessageBoxImage.None);
+
+                ShowStatusMessage("Commit successfully. Commit Hash: " + id);
             }
         }
 
@@ -208,9 +216,12 @@ namespace GitScc
             {
                 if (HastagedFiles())
                 {
-                    tracker.AmendCommit(comments);
+                    var id = tracker.AmendCommit(comments);
                     this.textBoxComments.Document.Blocks.Clear();
                     this.textBoxDiff.Document.Blocks.Clear();
+                    //MessageBox.Show("Done.\r\nCommit Hash: " + id, "Commit",
+                    //    MessageBoxButton.OK, MessageBoxImage.None);
+                    ShowStatusMessage("Amend last commit successfully. Commit Hash: " + id);
                 }
             }
         }
@@ -226,6 +237,12 @@ namespace GitScc
                     MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
             return hasStaged;
+        }
+
+        private void ShowStatusMessage(string msg)
+        {
+            var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
+            dte.StatusBar.Text = msg;
         }
 
     }

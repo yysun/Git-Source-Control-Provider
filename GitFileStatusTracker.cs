@@ -347,28 +347,34 @@ namespace GitScc
             }
         }
 
-        public void Commit(string message)
+        public string Commit(string message)
         {
-            if (!this.HasGitRepository) return;
+            if (!this.HasGitRepository) return null;
 
             if (string.IsNullOrEmpty(message))
                 throw new ArgumentException("Commit message must not be null or empty!", "message");
 
             var git = new Git(this.repository);
-            git.Commit().SetMessage(message).Call();
+            var rev = git.Commit().SetMessage(message).Call();
+
             Refresh();
+
+            return rev.Name;
         }
 
-        public void AmendCommit(string message)
+        public string AmendCommit(string message)
         {
-            if (!HasGitRepository) return;
+            if (!HasGitRepository) return null;
 
             if (string.IsNullOrEmpty(message))
                 throw new ArgumentException("Commit message must not be null or empty!", "message");
 
             var git = new Git(this.repository);
-            git.Commit().SetAmend(true).SetMessage(message).Call();
+            var rev = git.Commit().SetAmend(true).SetMessage(message).Call();
+
             Refresh();
+
+            return rev.Name;
         }
 
         public static void Init(string folderName)

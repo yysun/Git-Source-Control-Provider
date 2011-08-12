@@ -10,8 +10,8 @@
         <Parent guid="guidSccProviderCmdSet" id="imnuHistoryToolWindowToolbarMenu"/>
         <CommandFlag>TextChanges</CommandFlag>
         <Strings>
-          <ButtonText>Git Commands</ButtonText>
-          <CommandName>GitCommands</CommandName>
+          <ButtonText>Git History</ButtonText>
+          <CommandName>GitHistory</CommandName>
         </Strings>
       </Menu>
 
@@ -19,8 +19,8 @@
         <Parent guid="guidSccProviderCmdSet" id="imnuPendingChangesToolWindowToolbarMenu"/>
         <CommandFlag>TextChanges</CommandFlag>
         <Strings>
-          <ButtonText>Git Commands</ButtonText>
-          <CommandName>GitCommands</CommandName>
+          <ButtonText>Git Pending Changes</ButtonText>
+          <CommandName>GitPendingChanges</CommandName>
         </Strings>
       </Menu>
       
@@ -151,6 +151,29 @@
         </Strings>
       </Button>
 
+      <Button guid="guidSccProviderCmdSet" id="icmdGitExtCommand1" type="Button" priority="0x0101">
+        <Parent guid="guidSccProviderCmdSet" id="igrpGitExtCommands" />
+        <Icon guid="guidSccProviderImages" id="iconGitExt" />
+        <CommandFlag>DynamicItemStart</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <Strings>
+          <CommandName>icmdGitExtCommand1</CommandName>
+          <ButtonText>Git Extensions Commands</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidSccProviderCmdSet" id="icmdGitTorCommand1" type="Button" priority="0x0101">
+        <Parent guid="guidSccProviderCmdSet" id="igrpGitTorCommands" />
+        <Icon guid="guidSccProviderImages" id="iconGitTor" />
+        <CommandFlag>DynamicItemStart</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <Strings>
+          <CommandName>icmdGitTorCommand1</CommandName>
+          <ButtonText>TortoiseGit Commands</ButtonText>
+        </Strings>
+      </Button>
+      
+      <!-- buttons on pending changes tool window's tool bar -->
       <Button guid="guidSccProviderCmdSet" id="icmdPendingChangesCommit" priority="0x0000" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
         <!--<Icon guid="guidSccProviderImages" id="iconRefresh" />-->
@@ -173,29 +196,7 @@
         </Strings>
       </Button>
 
-
-      <Button guid="guidSccProviderCmdSet" id="icmdGitExtCommand1" type="Button" priority="0x0101">
-        <Parent guid="guidSccProviderCmdSet" id="igrpGitExtCommands" />
-        <Icon guid="guidSccProviderImages" id="iconGitExt" />
-        <CommandFlag>DynamicItemStart</CommandFlag>
-        <CommandFlag>DefaultInvisible</CommandFlag>
-        <Strings>
-          <CommandName>icmdGitExtCommand1</CommandName>
-          <ButtonText>Git Extensions Commands</ButtonText>
-        </Strings>
-      </Button>
-
-      <Button guid="guidSccProviderCmdSet" id="icmdGitTorCommand1" type="Button" priority="0x0101">
-        <Parent guid="guidSccProviderCmdSet" id="igrpGitTorCommands" />
-        <Icon guid="guidSccProviderImages" id="iconGitTor" />
-        <CommandFlag>DynamicItemStart</CommandFlag>
-        <CommandFlag>DefaultInvisible</CommandFlag>
-        <Strings>
-          <CommandName>icmdGitTorCommand1</CommandName>
-          <ButtonText>TortoiseGit Commands</ButtonText>
-        </Strings>
-      </Button>
-
+      
     </Buttons>
     <Bitmaps>
       <Bitmap guid="guidSccProviderImages" href="Resources\Images_32bit.bmp" 

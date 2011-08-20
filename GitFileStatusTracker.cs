@@ -274,18 +274,18 @@ namespace GitScc
 
         public void UnStageFile(string fileName)
         {
+            TreeEntry treeEntry = this.commitTree.FindBlobMember(fileName);
+
             fileName = Path.Combine(initFolder, fileName);
 
             if (!this.HasGitRepository) return;
             this.index.RereadIfNecessary();
 
-            var content = GetFileContent(fileName);
-
             this.index.Remove(repository.WorkTree, fileName);
 
-            if (content != null)
+            if (treeEntry != null)
             {
-                this.index.Add(repository.WorkTree, fileName, content);
+                this.index.AddEntry(treeEntry);
             }
 
             this.index.Write();
@@ -301,7 +301,6 @@ namespace GitScc
 
             if (File.Exists(fileName))
             {
-
                 var content = File.ReadAllBytes(fileName);
                 this.index.Add(repository.WorkTree, fileName, content);
             }

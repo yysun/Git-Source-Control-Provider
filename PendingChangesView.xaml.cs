@@ -1,20 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Windows.Threading;
-using System.Collections.ObjectModel;
 
 namespace GitScc
 {
@@ -132,6 +127,20 @@ namespace GitScc
             return selectedItem.FileName;
         }
 
+        private void GetSelectedFileFullName(Action<string> action)
+        {
+            var fileName = GetSelectedFileName();
+            if (fileName == null) return;
+            fileName = System.IO.Path.Combine(this.tracker.GitWorkingDirectory, fileName);
+            if (!File.Exists(fileName)) return;
+
+            try
+            {
+                action(fileName);
+            }
+            catch { }
+        }
+
         internal void Commit()
         {
             TextRange textRange = new TextRange(
@@ -247,20 +256,59 @@ namespace GitScc
 
         private void dataGrid1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            var fileName = GetSelectedFileName();
-            if (fileName != null && this.tracker != null)
+            GetSelectedFileFullName((fileName) =>
             {
-                try
-                {
-                    fileName = System.IO.Path.Combine(this.tracker.GitWorkingDirectory, fileName);
-                    var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
-                    dte.ItemOperations.OpenFile(fileName);
-                }
-                catch { }
-            }
+                fileName = System.IO.Path.Combine(this.tracker.GitWorkingDirectory, fileName);
+                if (!File.Exists(fileName)) return;
+
+                var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
+                dte.ItemOperations.OpenFile(fileName);
+            });
+
         }
 
+        private void textBoxDiff_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            GetSelectedFileFullName((fileName) =>
+            {
+                var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
+                dte.ItemOperations.OpenFile(fileName);
 
+                var pointer = textBoxDiff.GetPositionFromPoint(e.GetPosition(textBoxDiff), true);
+                var text = pointer.GetTextInRun(LogicalDirection.Backward);
+                if (text.IndexOf('\r') > 0) text = text.Substring(text.LastIndexOf('\r'));
+                int currentColumnNumber = text.Length;
+
+                var start = 0;
+                text = "";
+                while (true)
+                {
+                    if (pointer.GetPointerContext(LogicalDirection.Backward) == TextPointerContext.Text)
+                    {
+                        text = pointer.GetTextInRun(LogicalDirection.Backward) + text;
+                        if (text.StartsWith("@@"))
+                        {
+                            var s = text.Substring(text.IndexOf('+') + 1);
+                            s = s.Substring(0, s.IndexOf(','));
+                            start = Convert.ToInt32(s);
+                            break;
+                        }
+                    }
+                    pointer = pointer.GetNextContextPosition(LogicalDirection.Backward);
+                }
+
+                start += text.Split('\r').Where(s => !s.StartsWith("-")).Count() - 2;
+
+                var selection = dte.ActiveDocument.Selection as EnvDTE.TextSelection;
+                selection.MoveToLineAndOffset(start, currentColumnNumber);
+
+            });
+        }
+
+        private void dataGrid1_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+
+        }
 
     }
 }

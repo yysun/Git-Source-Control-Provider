@@ -29,7 +29,7 @@
                 <Label Content="Comments:" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Center" 
                Margin="12,0,0,0" Foreground="#FF333333" />
 
-                <Label Content="Diff:" Height="28" HorizontalAlignment="Left" Name="label2" VerticalAlignment="Center" 
+                <Label Content="Diff (double click to open file):" Height="28" HorizontalAlignment="Left" Name="label2" VerticalAlignment="Center" 
                Margin="12,0,0,0" Foreground="#FF333333"
                Grid.Column="2" Grid.Row="0"/>
 
@@ -53,7 +53,7 @@
 
                     <DataGrid AutoGenerateColumns="False" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="dataGrid1" VerticalAlignment="Stretch"
                       GridLinesVisibility="None"  Foreground="#FF333333" Sorting="dataGrid1_Sorting" IsReadOnly="True" SelectedValuePath="FileName"
-                      SelectionMode="Single" SelectionChanged="dataGrid1_SelectionChanged" MouseDoubleClick="dataGrid1_MouseDoubleClick">
+                      SelectionMode="Single" SelectionChanged="dataGrid1_SelectionChanged" MouseDoubleClick="dataGrid1_MouseDoubleClick" ContextMenuOpening="dataGrid1_ContextMenuOpening">
 
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="Staged">
@@ -73,11 +73,24 @@
                             <DataGridTextColumn Header="Status" Binding="{Binding Status}"  />
                             <DataGridTextColumn Header="File" Binding="{Binding FileName}" Width="400" />
                         </DataGrid.Columns>
+                        
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Compare ..."/>
+                                <MenuItem Header="Undo File Changes"/>
+                                <MenuItem Header="Delete File"/>
+                                <MenuItem Header="Add to .gitignore">
+                                    <MenuItem Header="Add File to .gitignore"/>
+                                    <MenuItem Header="Add File Path to .gitignore"/>
+                                    <MenuItem Header="Add File Extensions to .gitignore"/>
+                                </MenuItem>
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
                     </DataGrid>
                 </Grid>
 
                 <RichTextBox Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="textBoxDiff" VerticalAlignment="Stretch"
-                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto" FontSize="12" FontFamily="Consolas" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" />
+                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto" FontSize="12" FontFamily="Consolas" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" MouseDoubleClick="textBoxDiff_MouseDoubleClick" />
             </Grid>
         </TabItem>
         <TabItem Visibility="Collapsed">

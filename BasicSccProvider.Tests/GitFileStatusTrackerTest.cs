@@ -170,6 +170,7 @@ namespace BasicSccProvider.Tests
             Assert.AreEqual(0, tracker.ChangedFiles.Count());
 
             File.WriteAllText(tempFile, "a");
+            tracker.Refresh();
             Assert.AreEqual(GitFileStatus.Modified, tracker.ChangedFiles.ToList()[0].Status);
 
             tracker.StageFile(tempFile);
@@ -218,7 +219,7 @@ namespace BasicSccProvider.Tests
         [TestMethod]
         public void DiffFileTest()
         {
-            var tempFolder = Environment.CurrentDirectory + "\\_gitscc_test_7";
+            var tempFolder = Environment.CurrentDirectory + "\\_gitscc_test_8";
             var tempFile = Path.Combine(tempFolder, "test");
 
             GitFileStatusTracker.Init(tempFolder);

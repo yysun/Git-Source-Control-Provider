@@ -133,7 +133,7 @@ namespace GitScc
                 {
                     return GitFileStatus.Deleted;
                 }
-                if (File.Exists(fileName) && indexEntry.IsModified(repository.WorkTree, true))
+                if (File.Exists(fileName) && indexEntry.IsModified(repository.WorkTree, false))
                 {
                     return GitFileStatus.Modified;
                 }

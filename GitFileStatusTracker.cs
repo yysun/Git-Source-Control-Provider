@@ -61,8 +61,7 @@ namespace GitScc
                             this.commitTree = new Tree(repository, treeId, repository.Open(treeId).GetBytes());
                         }
                         this.index = repository.GetIndex();
-                        //this.index.RereadIfNecessary();
-                        //this.ignoreHandler = new IgnoreHandler(repository);
+                        this.index.RereadIfNecessary();
                     }
                 }
                 catch (Exception ex)
@@ -133,7 +132,7 @@ namespace GitScc
                 {
                     return GitFileStatus.Deleted;
                 }
-                if (File.Exists(fileName) && indexEntry.IsModified(repository.WorkTree, false))
+                if (File.Exists(fileName) && indexEntry.IsModified(repository.WorkTree, true))
                 {
                     return GitFileStatus.Modified;
                 }

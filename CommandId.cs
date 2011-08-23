@@ -19,6 +19,7 @@ namespace GitScc
         public const int icmdSccCommandPendingChanges = 0x107;
         public const int icmdSccCommandHistory = 0x108;
         public const int icmdSccCommandGitTortoise = 0x109;
+        public const int icmdSccCommandEditIgnore = 0x110;
 
         public const int icmdPendingChangesCommit = 0x111;
         public const int icmdPendingChangesAmend = 0x112;
@@ -38,7 +39,6 @@ namespace GitScc
 
         // Glyph indexes in the bitmap used for toolwindows (ibmpToolWindowsImages)
         public const int iconSccProviderToolWindow = 0;
-
 
         public const int icmdGitExtCommand1 = 0x811;
         public const int icmdGitTorCommand1 = 0x911;

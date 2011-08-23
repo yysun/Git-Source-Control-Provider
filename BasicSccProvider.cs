@@ -103,6 +103,10 @@ namespace GitScc
                 menu = new MenuCommand(new EventHandler(OnInitCommand), cmd);
                 mcs.AddCommand(menu);
 
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandEditIgnore);
+                menu = new MenuCommand(new EventHandler(OnEditIgnore), cmd);
+                mcs.AddCommand(menu);
+
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandGitTortoise);
                 menu = new MenuCommand(new EventHandler(OnTortoiseGitCommand), cmd);
                 mcs.AddCommand(menu);
@@ -225,6 +229,7 @@ namespace GitScc
                     if (sccService.CanCompareSelectedFile) cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
                 
+                case CommandId.icmdSccCommandEditIgnore:
                 case CommandId.icmdSccCommandPendingChanges:
                     if (sccService.IsSolutionGitControlled) cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
@@ -311,6 +316,11 @@ namespace GitScc
         {
             var gitBashPath = GitSccOptions.Current.GitBashPath;
             RunDetatched("cmd.exe", string.Format("/c \"{0}\" --login -i", gitBashPath));
+        }
+
+        private void OnEditIgnore(object sender, EventArgs e)
+        {
+            sccService.EditIgnore();
         }
 
         private void OnGitExtensionCommand(object sender, EventArgs e)

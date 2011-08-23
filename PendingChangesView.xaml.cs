@@ -329,8 +329,6 @@ namespace GitScc
 
         private void dataGrid1_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            menuOpenIgnoreFile.IsEnabled = (tracker != null && tracker.HasGitRepository);
-
             if (this.dataGrid1.SelectedCells.Count == 0) return;
             var selectedItem = this.dataGrid1.SelectedCells[0].Item as GitFile;
             if (selectedItem == null) return;
@@ -373,14 +371,6 @@ namespace GitScc
             });
         }
 
-        private void menuOpenIgnoreFile_Click(object sender, RoutedEventArgs e)
-        {
-            if(tracker!=null && tracker.HasGitRepository)
-            {
-                var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
-                dte.ItemOperations.OpenFile(Path.Combine(tracker.GitWorkingDirectory, ".gitignore"));
-            }
-        }
         #endregion
     }
 }

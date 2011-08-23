@@ -762,6 +762,15 @@ namespace GitScc
             }
         }
 
+        internal void EditIgnore()
+        {
+            if (this.CurrentTracker != null && this.CurrentTracker.HasGitRepository)
+            {
+                var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
+                dte.ItemOperations.OpenFile(Path.Combine(this.CurrentTracker.GitWorkingDirectory, ".gitignore"));
+            }
+        }
+
         #endregion
 
         #region IVsUpdateSolutionEvents2 Members
@@ -1115,6 +1124,5 @@ _ReSharper*/
                 as PendingChangesToolWindow;
             if (window != null) window.Refresh(this.CurrentTracker);
         }
-
     }
 }

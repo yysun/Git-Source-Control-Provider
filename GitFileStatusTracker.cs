@@ -390,6 +390,8 @@ namespace GitScc
             var gitFolder = Path.Combine(folderName, Constants.DOT_GIT);
             var repo = new FileRepository(gitFolder);
             repo.Create();
+            var dir = Directory.CreateDirectory(gitFolder);
+            dir.Attributes = FileAttributes.Directory | FileAttributes.Hidden;  
         }
 
         private IEnumerable<GitFile> changedFiles;

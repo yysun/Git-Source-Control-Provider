@@ -25,6 +25,7 @@ namespace GitScc
             InitializeComponent();
         }
 
+        #region Events
         private string sortMemberPath = "FileName";
         private ListSortDirection sortDirection = ListSortDirection.Ascending;
 
@@ -38,22 +39,25 @@ namespace GitScc
 
         private void checkBoxStaged_Click(object sender, RoutedEventArgs e)
         {
-            var fileName = GetSelectedFileName();
-            if (fileName == null) return;
-
             var checkBox = sender as CheckBox;
             if (checkBox.IsChecked == false)
             {
-                tracker.UnStageFile(fileName);
-                ShowStatusMessage("Un-staged file: " + fileName);
+                GetSelectedFileName(fileName =>
+                {
+                    tracker.UnStageFile(fileName);
+                    ShowStatusMessage("Un-staged file: " + fileName);
+                });
             }
             else
             {
-                tracker.StageFile(fileName);
-                ShowStatusMessage("Staged file: " + fileName);
+                GetSelectedFileName(fileName =>
+                {
+                    tracker.StageFile(fileName);
+                    ShowStatusMessage("Staged file: " + fileName);
+                });
             }
 
-            Refresh(this.tracker);
+            //Refresh(this.tracker);
         }
 
         private void checkBoxAllStaged_Click(object sender, RoutedEventArgs e)
@@ -119,12 +123,39 @@ namespace GitScc
             dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
         }
 
+        private void dataGrid1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            GetSelectedFileFullName((fileName) =>
+            {
+                fileName = System.IO.Path.Combine(this.tracker.GitWorkingDirectory, fileName);
+                if (!File.Exists(fileName)) return;
+
+                var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
+                dte.ItemOperations.OpenFile(fileName);
+            });
+
+        }
+
+        #endregion
+
+        #region Select File
         private string GetSelectedFileName()
         {
             if (this.dataGrid1.SelectedCells.Count == 0) return null;
             var selectedItem = this.dataGrid1.SelectedCells[0].Item as GitFile;
             if (selectedItem == null) return null;
             return selectedItem.FileName;
+        }
+
+        private void GetSelectedFileName(Action<string> action)
+        {
+            var fileName = GetSelectedFileName();
+            if (fileName == null) return;
+            try
+            {
+                action(fileName);
+            }
+            catch { }
         }
 
         private void GetSelectedFileFullName(Action<string> action)
@@ -140,7 +171,9 @@ namespace GitScc
             }
             catch { }
         }
+        #endregion
 
+        #region Git functions
         internal void Commit()
         {
             TextRange textRange = new TextRange(
@@ -161,9 +194,6 @@ namespace GitScc
                 var id = tracker.Commit(comments);
                 this.textBoxComments.Document.Blocks.Clear();
                 this.textBoxDiff.Document.Blocks.Clear();
-                //MessageBox.Show("Done.\r\nCommit Hash: " + id, "Commit",
-                //    MessageBoxButton.OK, MessageBoxImage.None);
-
                 ShowStatusMessage("Commit successfully. Commit Hash: " + id);
             }
         }
@@ -179,7 +209,7 @@ namespace GitScc
             }
 
             double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
-            if (delta < 1000) return; //no refresh within 1 second
+            //if (delta < 1000) return; //no refresh within 1 second
 
             Debug.WriteLine("==== Pending Changes Refresh {0}", delta);
 
@@ -253,20 +283,9 @@ namespace GitScc
             var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
             dte.StatusBar.Text = msg;
         }
+        #endregion
 
-        private void dataGrid1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            GetSelectedFileFullName((fileName) =>
-            {
-                fileName = System.IO.Path.Combine(this.tracker.GitWorkingDirectory, fileName);
-                if (!File.Exists(fileName)) return;
-
-                var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
-                dte.ItemOperations.OpenFile(fileName);
-            });
-
-        }
-
+        #region Diff view events
         private void textBoxDiff_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             GetSelectedFileFullName((fileName) =>
@@ -304,11 +323,64 @@ namespace GitScc
 
             });
         }
+        #endregion
+
+        #region Menu Events
 
         private void dataGrid1_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
+            menuOpenIgnoreFile.IsEnabled = (tracker != null && tracker.HasGitRepository);
 
+            if (this.dataGrid1.SelectedCells.Count == 0) return;
+            var selectedItem = this.dataGrid1.SelectedCells[0].Item as GitFile;
+            if (selectedItem == null) return;
+
+            switch (selectedItem.Status)
+            {
+                case GitFileStatus.Added:
+                case GitFileStatus.New:
+                    menuCompare.IsEnabled = menuUndo.IsEnabled = false;
+                    break;
+
+                case GitFileStatus.Modified:
+                case GitFileStatus.Staged:
+                    menuCompare.IsEnabled = menuUndo.IsEnabled = true;
+                    break;
+
+                case GitFileStatus.Removed:
+                case GitFileStatus.Deleted:
+                    menuCompare.IsEnabled = false;
+                    menuUndo.IsEnabled = true;
+                    break;
+            }
         }
 
+        private void menuCompare_Click(object sender, RoutedEventArgs e)
+        {
+            GetSelectedFileFullName(fileName =>
+            {
+                var service = BasicSccProvider.GetServiceEx<SccProviderService>();
+                service.CompareFile(fileName);
+            });
+        }
+
+        private void menuUndo_Click(object sender, RoutedEventArgs e)
+        {
+            GetSelectedFileFullName(fileName =>
+            {
+                var service = BasicSccProvider.GetServiceEx<SccProviderService>();
+                service.UndoFileChanges(fileName);
+            });
+        }
+
+        private void menuOpenIgnoreFile_Click(object sender, RoutedEventArgs e)
+        {
+            if(tracker!=null && tracker.HasGitRepository)
+            {
+                var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
+                dte.ItemOperations.OpenFile(Path.Combine(tracker.GitWorkingDirectory, ".gitignore"));
+            }
+        }
+        #endregion
     }
 }

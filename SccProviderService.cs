@@ -723,6 +723,11 @@ namespace GitScc
         internal void CompareSelectedFile()
         {
             var fileName = GetSelectFileName();
+            CompareFile(fileName);
+        }
+
+        internal void CompareFile(string fileName)
+        {
             GitFileStatus status = GetFileStatus(fileName);
             if (status == GitFileStatus.Modified || status == GitFileStatus.Staged)
             {
@@ -733,10 +738,14 @@ namespace GitScc
             }
         }
 
-
         internal void UndoSelectedFile()
         {
             var fileName = GetSelectFileName();
+            UndoFileChanges(fileName);
+        }
+
+        internal void UndoFileChanges(string fileName)
+        {
             GitFileStatus status = GetFileStatus(fileName);
             if (status == GitFileStatus.Modified || status == GitFileStatus.Staged)
             {
@@ -745,6 +754,10 @@ namespace GitScc
                     "Undo Changes", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     SaveFileFromRepository(fileName, fileName);
+                    if (status == GitFileStatus.Staged)
+                    {
+                        CurrentTracker.UnStageFile(fileName);
+                    }
                 }
             }
         }

@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="800">
-    <TabControl x:Name="Main">
+        <TabControl x:Name="Main">
         <TabItem Visibility="Collapsed">
             <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
@@ -45,7 +45,7 @@
                     <GridSplitter Grid.Row="1" Grid.ColumnSpan="2"
                       VerticalAlignment="Top" HorizontalAlignment="Stretch" Name="gridSplitter2" Height="4" />
 
-                    <Label Content="Changed Files (click checkbox to add file to stage/index):" Height="28" HorizontalAlignment="Left" Name="label3" VerticalAlignment="Center" 
+                    <Label Content="Changed Files (click checkbox to stage/unstage file):" Height="28" HorizontalAlignment="Left" Name="label3" VerticalAlignment="Center" 
                Margin="12,0,0,0" Foreground="#FF333333" Grid.Row="2"/>
 
                     <RichTextBox HorizontalAlignment="Stretch" Name="textBoxComments" VerticalAlignment="Stretch" Margin="10,0,10,10" 
@@ -60,7 +60,7 @@
                                 <DataGridTemplateColumn.HeaderTemplate>
                                     <DataTemplate>
                                         <CheckBox Name="checkBoxAllStaged" Click="checkBoxAllStaged_Click"  
-                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                          HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.HeaderTemplate>
                                 <DataGridTemplateColumn.CellTemplate>
@@ -76,13 +76,13 @@
                         
                         <DataGrid.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="Compare ..."/>
-                                <MenuItem Header="Undo File Changes"/>
-                                <MenuItem Header="Delete File"/>
-                                <MenuItem Header="Add to .gitignore">
-                                    <MenuItem Header="Add File to .gitignore"/>
-                                    <MenuItem Header="Add File Path to .gitignore"/>
-                                    <MenuItem Header="Add File Extensions to .gitignore"/>
+                                <MenuItem Header="Compare ..." Name="menuCompare" Click="menuCompare_Click" />
+                                <MenuItem Header="Undo File Changes" Name="menuUndo" Click="menuUndo_Click"/>
+                                <!--<MenuItem Header="Delete File" Name="menuDeleteFile" Click="menuDeleteFile_Click"/>-->
+                                <MenuItem Header="Open .gitignore file" Name="menuOpenIgnoreFile" Click="menuOpenIgnoreFile_Click" >
+                                    <!--<MenuItem Header="Add File to .gitignore" Name="menuIgnoreFile" Click="menuIgnoreFile_Click"/>
+                                    <MenuItem Header="Add File Path to .gitignore" Name="menuIgnoreFilePath" Click="menuIgnoreFilePath_Click"/>
+                                    <MenuItem Header="Add File Extensions to .gitignore" Name="menuIgnoreFileExt" Click="menuIgnoreFileExt_Click"/>-->
                                 </MenuItem>
                             </ContextMenu>
                         </DataGrid.ContextMenu>

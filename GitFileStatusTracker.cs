@@ -271,11 +271,16 @@ namespace GitScc
             return repository == null ? "[no repo]" : this.GitWorkingDirectory;
         }
 
+        /// <summary>
+        /// Requires absolute path
+        /// </summary>
+        /// <param name="fileName"></param>
         public void UnStageFile(string fileName)
         {
-            TreeEntry treeEntry = this.commitTree.FindBlobMember(fileName);
+            var fileNameRel = GetRelativeFileName(fileName);
+            TreeEntry treeEntry = this.commitTree.FindBlobMember(fileNameRel);
 
-            fileName = Path.Combine(initFolder, fileName);
+            //fileName = Path.Combine(initFolder, fileName);
 
             if (!this.HasGitRepository) return;
             this.index.RereadIfNecessary();
@@ -291,9 +296,13 @@ namespace GitScc
             this.cache[fileName] = GetFileStatusNoCache(fileName);
         }
 
+        /// <summary>
+        /// Requires absolute path
+        /// </summary>
+        /// <param name="fileName"></param>
         public void StageFile(string fileName)
         {
-            fileName = Path.Combine(initFolder, fileName);
+            //fileName = Path.Combine(initFolder, fileName);
 
             if (!this.HasGitRepository) return;
             this.index.RereadIfNecessary();

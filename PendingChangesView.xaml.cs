@@ -42,19 +42,19 @@ namespace GitScc
             var checkBox = sender as CheckBox;
             if (checkBox.IsChecked == false)
             {
-                GetSelectedFileName(fileName =>
+                GetSelectedFileFullName(fileName =>
                 {
                     tracker.UnStageFile(fileName);
                     ShowStatusMessage("Un-staged file: " + fileName);
-                });
+                }, false);
             }
             else
             {
-                GetSelectedFileName(fileName =>
+                GetSelectedFileFullName(fileName =>
                 {
                     tracker.StageFile(fileName);
                     ShowStatusMessage("Staged file: " + fileName);
-                });
+                }, false);
             }
 
             //Refresh(this.tracker);
@@ -158,13 +158,13 @@ namespace GitScc
             catch { }
         }
 
-        private void GetSelectedFileFullName(Action<string> action)
+        private void GetSelectedFileFullName(Action<string> action, bool fileMustExists = true)
         {
             var fileName = GetSelectedFileName();
             if (fileName == null) return;
             fileName = System.IO.Path.Combine(this.tracker.GitWorkingDirectory, fileName);
-            if (!File.Exists(fileName)) return;
-
+            
+            if (fileMustExists && !File.Exists(fileName)) return;
             try
             {
                 action(fileName);
@@ -368,7 +368,7 @@ namespace GitScc
             {
                 var service = BasicSccProvider.GetServiceEx<SccProviderService>();
                 service.UndoFileChanges(fileName);
-            });
+            }, false); // file must exists check flag is false
         }
 
         #endregion

@@ -747,14 +747,15 @@ namespace GitScc
         internal void UndoFileChanges(string fileName)
         {
             GitFileStatus status = GetFileStatus(fileName);
-            if (status == GitFileStatus.Modified || status == GitFileStatus.Staged)
+            if (status == GitFileStatus.Modified || status == GitFileStatus.Staged ||
+                status == GitFileStatus.Deleted || status == GitFileStatus.Removed)
             {
                 if (MessageBox.Show("Are you sure you want to undo changes for " + Path.GetFileName(fileName) +
                     " and store it from last commit? ",
                     "Undo Changes", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     SaveFileFromRepository(fileName, fileName);
-                    if (status == GitFileStatus.Staged)
+                    if (status == GitFileStatus.Staged || status == GitFileStatus.Removed)
                     {
                         CurrentTracker.UnStageFile(fileName);
                     }
@@ -885,7 +886,7 @@ namespace GitScc
         private bool IsParentFolder(string folder, string fileName)
         {
             if (string.IsNullOrEmpty(folder) || string.IsNullOrEmpty(fileName) ||
-               !Directory.Exists(folder) || !File.Exists(fileName)) return false;
+               !Directory.Exists(folder)) return false;
 
             bool b = false;
             var dir = new DirectoryInfo(Path.GetDirectoryName(fileName));

@@ -10,6 +10,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using System.Text.RegularExpressions;
 
 namespace GitScc
 {
@@ -298,22 +299,27 @@ namespace GitScc
                 if (text.IndexOf('\r') > 0) text = text.Substring(text.LastIndexOf('\r'));
                 int currentColumnNumber = text.Length;
 
-                var start = 0;
-                text = "";
+                var start = 1;
                 while (true)
                 {
+                    var match = Regex.Match(text, "@@(.+)@@\r");
+                    if (match.Success)
+                    {
+                        var s = match.Groups[1].Value;
+                        s = s.Substring(s.IndexOf('+') + 1);
+                        s = s.Substring(0, s.IndexOf(','));
+                        start = Convert.ToInt32(s);
+
+                        if (!text.StartsWith("@@")) start -= 3;
+                        break;
+                    }
+
+                    pointer = pointer.GetNextContextPosition(LogicalDirection.Backward);
                     if (pointer.GetPointerContext(LogicalDirection.Backward) == TextPointerContext.Text)
                     {
                         text = pointer.GetTextInRun(LogicalDirection.Backward) + text;
-                        if (text.StartsWith("@@"))
-                        {
-                            var s = text.Substring(text.IndexOf('+') + 1);
-                            s = s.Substring(0, s.IndexOf(','));
-                            start = Convert.ToInt32(s);
-                            break;
-                        }
                     }
-                    pointer = pointer.GetNextContextPosition(LogicalDirection.Backward);
+
                 }
 
                 start += text.Split('\r').Where(s => !s.StartsWith("-")).Count() - 2;

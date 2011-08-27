@@ -38,45 +38,20 @@ namespace GitScc
 
         }
 
-        private void checkBoxStaged_Click(object sender, RoutedEventArgs e)
+        private void checkBoxSelected_Click(object sender, RoutedEventArgs e)
         {
             var checkBox = sender as CheckBox;
-            if (checkBox.IsChecked == false)
-            {
-                GetSelectedFileFullName(fileName =>
-                {
-                    tracker.UnStageFile(fileName);
-                    ShowStatusMessage("Un-staged file: " + fileName);
-                }, false);
-            }
-            else
-            {
-                GetSelectedFileFullName(fileName =>
-                {
-                    tracker.StageFile(fileName);
-                    ShowStatusMessage("Staged file: " + fileName);
-                }, false);
-            }
-
-            //Refresh(this.tracker);
+            ((GitFile)this.dataGrid1.SelectedItem).IsSelected = checkBox.IsChecked == true;
         }
 
         private void checkBoxAllStaged_Click(object sender, RoutedEventArgs e)
         {
             var checkBox = sender as CheckBox;
-            var files = this.dataGrid1.ItemsSource.Cast<GitFile>().Select(i => i.FileName).ToList();
-            if (checkBox.IsChecked == true)
+            foreach (var item in this.dataGrid1.Items.Cast<GitFile>())
             {
-                files.ForEach(file => tracker.StageFile(file));
-                ShowStatusMessage("Staged all files.");
-            }
-            else
-            {
-                files.ForEach(file => tracker.UnStageFile(file));
-                ShowStatusMessage("Un-staged all files.");
+                ((GitFile) item).IsSelected = checkBox.IsChecked == true;
             }
         }
-
 
         private void dataGrid1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -90,11 +65,12 @@ namespace GitScc
             var dispatcher = Dispatcher.CurrentDispatcher;
             Action act = () =>
             {
+                this.textBoxDiff.BeginInit();
+
                 this.textBoxDiff.Document.Blocks.Clear();
                 this.textBoxDiff.Document.PageWidth = 1000;
 
                 var content = tracker.DiffFile(fileName);
-                this.textBoxDiff.BeginInit();
 
                 // TODO: paging all text into the richtextbox
                 foreach (var line in content.Split('\n').Take(256)) // take max 256 lines for now
@@ -164,7 +140,7 @@ namespace GitScc
             var fileName = GetSelectedFileName();
             if (fileName == null) return;
             fileName = System.IO.Path.Combine(this.tracker.GitWorkingDirectory, fileName);
-            
+
             if (fileMustExists && !File.Exists(fileName)) return;
             try
             {
@@ -175,29 +151,6 @@ namespace GitScc
         #endregion
 
         #region Git functions
-        internal void Commit()
-        {
-            TextRange textRange = new TextRange(
-                this.textBoxComments.Document.ContentStart,
-                this.textBoxComments.Document.ContentEnd);
-
-            var comments = textRange.Text;
-
-            if (string.IsNullOrWhiteSpace(comments))
-            {
-                MessageBox.Show("Please enter comments for the commit.", "Commit",
-                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                return;
-            }
-
-            if (HastagedFiles())
-            {
-                var id = tracker.Commit(comments);
-                this.textBoxComments.Document.Blocks.Clear();
-                this.textBoxDiff.Document.Blocks.Clear();
-                ShowStatusMessage("Commit successfully. Commit Hash: " + id);
-            }
-        }
 
         DateTime lastTimeRefresh = DateTime.Now.AddDays(-1);
         internal void Refresh(GitFileStatusTracker tracker)
@@ -212,7 +165,7 @@ namespace GitScc
             double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
             //if (delta < 1000) return; //no refresh within 1 second
 
-            Debug.WriteLine("==== Pending Changes Refresh {0}", delta);
+            //Debug.WriteLine("==== Pending Changes Refresh {0}", delta);
 
             var dispatcher = Dispatcher.CurrentDispatcher;
             Action act = () =>
@@ -239,6 +192,31 @@ namespace GitScc
             lastTimeRefresh = DateTime.Now;
         }
 
+        internal void Commit()
+        {
+            TextRange textRange = new TextRange(
+                this.textBoxComments.Document.ContentStart,
+                this.textBoxComments.Document.ContentEnd);
+
+            var comments = textRange.Text;
+
+            if (string.IsNullOrWhiteSpace(comments))
+            {
+                MessageBox.Show("Please enter comments for the commit.", "Commit",
+                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
+            if (StagedFiles())
+            {
+                var id = tracker.Commit(comments);
+                this.textBoxComments.Document.Blocks.Clear();
+                this.textBoxDiff.Document.Blocks.Clear();
+                ShowStatusMessage("Commit successfully. Commit Hash: " + id);
+                this.dataGrid1.FindVisualChild<CheckBox>("checkBoxAllStaged").IsChecked = false;
+            }
+        }
+
         internal void AmendCommit()
         {
             TextRange textRange = new TextRange(
@@ -254,20 +232,28 @@ namespace GitScc
             }
             else
             {
-                if (HastagedFiles())
+                if (StagedFiles())
                 {
                     var id = tracker.AmendCommit(comments);
                     this.textBoxComments.Document.Blocks.Clear();
                     this.textBoxDiff.Document.Blocks.Clear();
-                    //MessageBox.Show("Done.\r\nCommit Hash: " + id, "Commit",
-                    //    MessageBoxButton.OK, MessageBoxImage.None);
                     ShowStatusMessage("Amend last commit successfully. Commit Hash: " + id);
+                    this.dataGrid1.FindVisualChild<CheckBox>("checkBoxAllStaged").IsChecked = false;
                 }
             }
         }
 
-        private bool HastagedFiles()
+        private bool StagedFiles()
         {
+            foreach (var item in this.dataGrid1.Items.Cast<GitFile>())
+            {
+                //var item = (GitFile) _item;
+                if (item.IsSelected && !item.IsStaged)
+                {
+                    tracker.StageFile(System.IO.Path.Combine(this.tracker.GitWorkingDirectory, item.FileName));
+                }
+            }
+
             bool hasStaged = tracker == null ? false :
                              tracker.ChangedFiles.Any(f => f.IsStaged);
 
@@ -319,7 +305,6 @@ namespace GitScc
                     {
                         text = pointer.GetTextInRun(LogicalDirection.Backward) + text;
                     }
-
                 }
 
                 start += text.Split('\r').Where(s => !s.StartsWith("-")).Count() - 2;
@@ -357,6 +342,10 @@ namespace GitScc
                     menuUndo.IsEnabled = true;
                     break;
             }
+
+            menuStage.Visibility = selectedItem.IsStaged ? Visibility.Collapsed : Visibility.Visible;
+            menuUnstage.Visibility = !selectedItem.IsStaged ? Visibility.Collapsed : Visibility.Visible;
+
         }
 
         private void menuCompare_Click(object sender, RoutedEventArgs e)
@@ -377,6 +366,48 @@ namespace GitScc
             }, false); // file must exists check flag is false
         }
 
+
+        private void menuStage_Click(object sender, RoutedEventArgs e)
+        {
+            GetSelectedFileFullName(fileName =>
+            {
+                tracker.StageFile(fileName);
+                ShowStatusMessage("Staged file: " + fileName);
+            }, false);
+        }
+
+        private void menuUnstage_Click(object sender, RoutedEventArgs e)
+        {
+            GetSelectedFileFullName(fileName =>
+            {
+                tracker.UnStageFile(fileName);
+                ShowStatusMessage("Un-staged file: " + fileName);
+            }, false);
+        }
+
         #endregion
+
+    }
+
+    public static class ExtHelper
+    {
+        public static TChild FindVisualChild<TChild>(this DependencyObject obj, string name = null) where TChild : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(obj, i);
+                if (child != null && child is TChild && (name ==null || ((Control) child).Name == name))
+                {
+                    return (TChild) child;
+                }
+                else
+                {
+                    TChild childOfChild = FindVisualChild<TChild>(child, name);
+                    if (childOfChild != null)
+                        return childOfChild;
+                }
+            }
+            return null;
+        }
     }
 }

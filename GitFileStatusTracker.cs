@@ -110,7 +110,7 @@ namespace GitScc
 
         private GitFileStatus GetFileStatusNoCache(string fileName)
         {
-            Debug.WriteLine(string.Format("===+ GetFileStatusNoCache {0}", fileName));
+            //Debug.WriteLine(string.Format("===+ GetFileStatusNoCache {0}", fileName));
 
             var fileNameRel = GetRelativeFileName(fileName);
 
@@ -461,7 +461,7 @@ namespace GitScc
 
                 var status = GetFileStatusNoCache(fileName);
                 this.cache[fileName] = status;
-                Debug.WriteLine(string.Format("==== Fill cache for {0} <- {1}", fileName, status));
+                //Debug.WriteLine(string.Format("==== Fill cache for {0} <- {1}", fileName, status));
             }
         }
 
@@ -479,11 +479,15 @@ namespace GitScc
                 if (!HasGitRepository) return null;
 
                 ObjectId headId = this.repository.Resolve(Constants.HEAD);
-                var revWalk = new RevWalk(this.repository);
-                revWalk.MarkStart(revWalk.LookupCommit(headId));
-                foreach (RevCommit c in revWalk)
+
+                if (headId != null)
                 {
-                    return c.GetFullMessage();
+                    var revWalk = new RevWalk(this.repository);
+                    revWalk.MarkStart(revWalk.LookupCommit(headId));
+                    foreach (RevCommit c in revWalk)
+                    {
+                        return c.GetFullMessage();
+                    }
                 }
                 return "";
             }

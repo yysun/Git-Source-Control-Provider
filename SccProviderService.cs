@@ -145,7 +145,7 @@ namespace GitScc
 
             GitFileStatus status = _active ? GetFileStatus(rgpszFullPaths[0]) : GitFileStatus.NotControlled;
 
-            Debug.WriteLine("==== GetSccGlyph {0} : {1}", rgpszFullPaths[0], status);
+            //Debug.WriteLine("==== GetSccGlyph {0} : {1}", rgpszFullPaths[0], status);
 
             if (rgdwSccStatus != null) rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_CONTROLLED;
 
@@ -673,24 +673,9 @@ namespace GitScc
 
         public int DirectoryChanged(string pszDirectory)
         {
-            //if (noRefresh) return VSConstants.S_OK;
+            //Debug.WriteLine("==== dir changed REFRESH: " + pszDirectory);
+            Refresh();
 
-            //double delta = DateTime.Now.Subtract(lastTimeDirChangeFired).TotalMilliseconds;
-            //lastTimeDirChangeFired = DateTime.Now;
-
-            //Debug.WriteLine("==== dir changed: " + Math.Floor(delta).ToString());
-            //if (delta > 1000)
-            //{
-            //    System.Threading.Thread.Sleep(200);
-            //    Debug.WriteLine("==== dir changed REFRESH: " + Math.Floor(delta).ToString());
-            //    Refresh();
-            //}
-
-            if (!noRefresh)
-            {
-                Debug.WriteLine("==== dir changed REFRESH: ");
-                Refresh();
-            }
             return VSConstants.S_OK;
         }
 
@@ -750,8 +735,16 @@ namespace GitScc
             if (status == GitFileStatus.Modified || status == GitFileStatus.Staged ||
                 status == GitFileStatus.Deleted || status == GitFileStatus.Removed)
             {
+                var deleteMsg = "";
+                if (status == GitFileStatus.Deleted || status == GitFileStatus.Removed)
+                {
+                    deleteMsg = @"
+
+Note: you will need to click 'Show All Files' in solution explorer to see the file.";
+                }
+                
                 if (MessageBox.Show("Are you sure you want to undo changes for " + Path.GetFileName(fileName) +
-                    " and store it from last commit? ",
+                    " and store it from last commit? " + deleteMsg,
                     "Undo Changes", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     SaveFileFromRepository(fileName, fileName);

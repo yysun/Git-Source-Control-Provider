@@ -1080,8 +1080,7 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
             var solutionPath = Path.GetDirectoryName(GetSolutionFileName());
             GitFileStatusTracker.Init(solutionPath);
             File.WriteAllText(Path.Combine(solutionPath, ".gitignore"),
-@"
-Thumbs.db
+@"Thumbs.db
 *.obj
 *.exe
 *.pdb

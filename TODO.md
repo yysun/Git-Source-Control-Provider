@@ -3,7 +3,7 @@ Git Source Control Provider TODO List
 
 Features
 --------
-* Context Menu on changed files - Stage, Un-stage, Delete, Reset, Ignore
+* Detect binary file, display image files
 * Diff view Performance
 * Diff view syntax highlight
 * Drop down list (of multiple repositories) in the Pending Changes Tool Window

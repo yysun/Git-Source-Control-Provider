@@ -71,11 +71,11 @@ namespace GitScc
                 this.textBoxDiff.Document.PageWidth = 1000;
 
                 var content = tracker.DiffFile(fileName);
+                var lines = content.Split('\n');
 
                 // TODO: paging all text into the richtextbox
-                foreach (var line in content.Split('\n').Take(256)) // take max 256 lines for now
+                foreach (var line in lines.Take(256)) // take max 256 lines for now
                 {
-
                     TextRange range = new TextRange(this.textBoxDiff.Document.ContentEnd, this.textBoxDiff.Document.ContentEnd);
                     range.Text = line.Replace("\r", "") + "\r";
 
@@ -91,9 +91,15 @@ namespace GitScc
                     {
                         range.ApplyPropertyValue(TextElement.BackgroundProperty, null);
                     }
+                }
+                
+                if (lines.Count() > 256)
+                {
+                    TextRange range = new TextRange(this.textBoxDiff.Document.ContentEnd, this.textBoxDiff.Document.ContentEnd);
+                    range.Text = string.Format("\r*** Note:  next {0} lines are not displayed. ***", lines.Count() - 256);
+                    range.ApplyPropertyValue(TextElement.BackgroundProperty, new SolidColorBrush(Color.FromArgb(128, 255, 255, 166)));
 
                 }
-
                 this.textBoxDiff.EndInit();
             };
 
@@ -207,8 +213,10 @@ namespace GitScc
                 return;
             }
 
+            
             if (StagedFiles())
             {
+                ShowStatusMessage("Committing ...");
                 var id = tracker.Commit(comments);
                 this.textBoxComments.Document.Blocks.Clear();
                 this.textBoxDiff.Document.Blocks.Clear();
@@ -234,6 +242,7 @@ namespace GitScc
             {
                 if (StagedFiles())
                 {
+                    ShowStatusMessage("Amending last Commit ...");
                     var id = tracker.AmendCommit(comments);
                     this.textBoxComments.Document.Blocks.Clear();
                     this.textBoxDiff.Document.Blocks.Clear();

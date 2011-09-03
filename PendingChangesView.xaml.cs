@@ -164,7 +164,9 @@ namespace GitScc
             this.tracker = tracker;
             if (tracker == null)
             {
-                this.dataGrid1.ItemsSource = null;
+                this.dataGrid1.ItemsSource = null; 
+                this.textBoxComments.Document.Blocks.Clear();
+                this.textBoxDiff.Document.Blocks.Clear();
                 return;
             }
 

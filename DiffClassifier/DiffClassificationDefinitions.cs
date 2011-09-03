@@ -87,7 +87,8 @@ namespace DiffClassifier
         {
             public DiffAddedFormat()
             {
-                this.ForegroundColor = Colors.Blue;
+                //this.ForegroundColor = Colors.Blue;
+                this.BackgroundBrush = new SolidColorBrush(Color.FromArgb(128, 166, 255, 166));
             }
         }
 
@@ -98,7 +99,8 @@ namespace DiffClassifier
         {
             public DiffRemovedFormat()
             {
-                this.ForegroundColor = Colors.Red;
+                //this.ForegroundColor = Colors.Red;
+                this.BackgroundBrush = new SolidColorBrush(Color.FromArgb(128, 255, 166, 166));
             }
         }
 

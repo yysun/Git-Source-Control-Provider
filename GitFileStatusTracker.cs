@@ -13,6 +13,7 @@ using NGit.Revwalk;
 using NGit.Storage.File;
 using NGit.Treewalk;
 using NGit.Treewalk.Filter;
+using NGit.Ignore;
 
 namespace GitScc
 {
@@ -23,6 +24,7 @@ namespace GitScc
         private Repository repository;
         private Tree commitTree;
         private GitIndex index;
+        private IList<IgnoreRule> ignoreRules;
 
         //private IgnoreHandler ignoreHandler;
 
@@ -62,6 +64,10 @@ namespace GitScc
                         }
                         this.index = repository.GetIndex();
                         this.index.RereadIfNecessary();
+
+                        ignoreRules = File.ReadAllLines(Path.Combine(this.initFolder, Constants.GITIGNORE_FILENAME))
+                                          .Where(line => !line.StartsWith("#") && line.Trim().Length > 0)
+                                          .Select(line => new IgnoreRule(line)).ToList();
                     }
                 }
                 catch (Exception ex)
@@ -88,7 +94,6 @@ namespace GitScc
         {
             get { return this.repository != null; }
         }
-
 
         public GitFileStatus GetFileStatus(string fileName)
         {
@@ -153,11 +158,10 @@ namespace GitScc
                 }
                 if (File.Exists(fileName))
                 {
-                    //remove the ingore check for better performance
-                    //if (this.ignoreHandler.IsIgnored(fileName))
-                    //{
-                    //    return GitFileStatus.Ignored;
-                    //}
+                    if (ignoreRules.Any(rule=>rule.IsMatch(fileName, false)))
+                    {
+                        return GitFileStatus.Ignored;
+                    }
 
                     return GitFileStatus.New;
                 }
@@ -414,8 +418,8 @@ namespace GitScc
 
                     changedFiles = from f in this.cache
                                    where f.Value != GitFileStatus.Tracked &&
-                                         f.Value != GitFileStatus.NotControlled //&&
-                                         //f.Value != GitFileStatus.Deleted
+                                         f.Value != GitFileStatus.NotControlled &&
+                                         f.Value != GitFileStatus.Ignored
                                    select new GitFile
                                    {
                                        FileName = GetRelativeFileName(f.Key),

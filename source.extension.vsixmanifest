@@ -23,5 +23,6 @@
   </References>
   <Content>
     <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
+    <MefComponent>DiffClassifier.dll</MefComponent>
   </Content>
 </Vsix>

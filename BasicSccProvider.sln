@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NSch", "ngit\NSch\NSch.cspr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGit.Test", "ngit\NGit.Test\NGit.Test.csproj", "{E1FA8F29-5BAB-4FB7-8362-B8CE67ECF7C2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiffClassifier", "DiffClassifier\DiffClassifier.csproj", "{57D5E6BB-DC11-49CF-9F49-7C3F3EC11F09}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = BasicSccProvider.vsmdi
@@ -55,6 +57,10 @@ Global
 		{E1FA8F29-5BAB-4FB7-8362-B8CE67ECF7C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1FA8F29-5BAB-4FB7-8362-B8CE67ECF7C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1FA8F29-5BAB-4FB7-8362-B8CE67ECF7C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57D5E6BB-DC11-49CF-9F49-7C3F3EC11F09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57D5E6BB-DC11-49CF-9F49-7C3F3EC11F09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57D5E6BB-DC11-49CF-9F49-7C3F3EC11F09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57D5E6BB-DC11-49CF-9F49-7C3F3EC11F09}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

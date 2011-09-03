@@ -80,7 +80,7 @@
                                 <MenuItem Header="Un-Stage File" Name="menuUnstage" Click="menuUnstage_Click" />
                                 <MenuItem Header="Compare ..." Name="menuCompare" Click="menuCompare_Click" />
                                 <MenuItem Header="Undo File Changes" Name="menuUndo" Click="menuUndo_Click"/>
-                                <!--<MenuItem Header="Delete File" Name="menuDeleteFile" Click="menuDeleteFile_Click"/>-->
+                                <MenuItem Header="Delete File" Name="menuDeleteFile" Click="menuDeleteFile_Click"/>
                                 <!--<MenuItem Header="Open .gitignore file" Name="menuOpenIgnoreFile" Click="menuOpenIgnoreFile_Click" >
                                     <MenuItem Header="Add File to .gitignore" Name="menuIgnoreFile" Click="menuIgnoreFile_Click"/>
                                     <MenuItem Header="Add File Path to .gitignore" Name="menuIgnoreFilePath" Click="menuIgnoreFilePath_Click"/>

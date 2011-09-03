@@ -356,7 +356,8 @@ namespace GitScc
 
             menuStage.Visibility = selectedItem.IsStaged ? Visibility.Collapsed : Visibility.Visible;
             menuUnstage.Visibility = !selectedItem.IsStaged ? Visibility.Collapsed : Visibility.Visible;
-
+            menuDeleteFile.Visibility = (selectedItem.Status == GitFileStatus.New || selectedItem.Status == GitFileStatus.Modified) ?
+                Visibility.Visible : Visibility.Collapsed;
         }
 
         private void menuCompare_Click(object sender, RoutedEventArgs e)
@@ -396,8 +397,25 @@ namespace GitScc
             }, false);
         }
 
-        #endregion
+        private void menuDeleteFile_Click(object sender, RoutedEventArgs e)
+        {
+            const string deleteMsg = @"
 
+Note: if the file is included project, you need to delete the file from project in solution explorer.";
+
+            GetSelectedFileFullName(fileName =>
+            {
+                if (MessageBox.Show("Are you sure you want to delete file: " + Path.GetFileName(fileName) + deleteMsg,
+                                   "Delete File",  
+                                   MessageBoxButton.YesNo, 
+                                   MessageBoxImage.Question) ==  MessageBoxResult.Yes)
+                {
+                    File.Delete(fileName);
+                }
+            });
+        }
+
+        #endregion
     }
 
     public static class ExtHelper

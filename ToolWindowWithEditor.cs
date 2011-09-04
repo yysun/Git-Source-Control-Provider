@@ -132,63 +132,63 @@ namespace GitScc
         /// it allows us to have the editor keybindings active ONLY when the focus is in the editor, that way we won't have editor
         /// keybindings active in our window UNLESS the editor has focus, which is what we want.
         /// </summary>
-        protected override bool PreProcessMessage(ref System.Windows.Forms.Message m)
-        {
-            //Only try and pre-process keyboard input messages, all others are not interesting to us.
-            if (m.Msg >= WM_KEYFIRST && m.Msg <= WM_KEYLAST)
-            {
-                //Only attempt to do the input -> command mapping if focus is inside our hosted editor.
-                if (this.control.IsKeyboardFocusWithin)
-                {
-                    IVsFilterKeys2 filterKeys = (IVsFilterKeys2)GetService(typeof(SVsFilterKeys));
-                    MSG oleMSG = new MSG() { hwnd = m.HWnd, lParam = m.LParam, wParam = m.WParam, message = (uint)m.Msg };
+        //protected override bool PreProcessMessage(ref System.Windows.Forms.Message m)
+        //{
+        //    //Only try and pre-process keyboard input messages, all others are not interesting to us.
+        //    if (m.Msg >= WM_KEYFIRST && m.Msg <= WM_KEYLAST)
+        //    {
+        //        //Only attempt to do the input -> command mapping if focus is inside our hosted editor.
+        //        if (this.control.IsKeyboardFocusWithin)
+        //        {
+        //            IVsFilterKeys2 filterKeys = (IVsFilterKeys2)GetService(typeof(SVsFilterKeys));
+        //            MSG oleMSG = new MSG() { hwnd = m.HWnd, lParam = m.LParam, wParam = m.WParam, message = (uint)m.Msg };
 
-                    //Ask the shell to do the command mapping for us and fire off the command if it succeeds with that mapping. We pass no 'custom' scopes
-                    //(third and fourth argument) because we pass VSTAEXF_UseTextEditorKBScope to indicate we want the shell to apply the text editor
-                    //command scope to this call.
-                    Guid cmdGuid;
-                    uint cmdId;
-                    int fTranslated;
-                    int fStartsMultiKeyChord;
-                    int res = filterKeys.TranslateAcceleratorEx(new MSG[] { oleMSG },
-                                                                (uint)(__VSTRANSACCELEXFLAGS.VSTAEXF_UseTextEditorKBScope),
-                                                                0 /*scope count*/,
-                                                                new Guid[0] /*scopes*/,
-                                                                out cmdGuid,
-                                                                out cmdId,
-                                                                out fTranslated,
-                                                                out fStartsMultiKeyChord);
+        //            //Ask the shell to do the command mapping for us and fire off the command if it succeeds with that mapping. We pass no 'custom' scopes
+        //            //(third and fourth argument) because we pass VSTAEXF_UseTextEditorKBScope to indicate we want the shell to apply the text editor
+        //            //command scope to this call.
+        //            Guid cmdGuid;
+        //            uint cmdId;
+        //            int fTranslated;
+        //            int fStartsMultiKeyChord;
+        //            int res = filterKeys.TranslateAcceleratorEx(new MSG[] { oleMSG },
+        //                                                        (uint)(__VSTRANSACCELEXFLAGS.VSTAEXF_UseTextEditorKBScope),
+        //                                                        0 /*scope count*/,
+        //                                                        new Guid[0] /*scopes*/,
+        //                                                        out cmdGuid,
+        //                                                        out cmdId,
+        //                                                        out fTranslated,
+        //                                                        out fStartsMultiKeyChord);
 
-                    if (fStartsMultiKeyChord == 0)
-                    {
-                        //HACK: Work around a bug in TranslateAcceleratorEx that will report it DIDN'T do the command mapping 
-                        //when in fact it did :( Problem has been fixed (since I found it while writing this code), but in the 
-                        //mean time we need to successfully eat keystrokes that have been mapped to commands and dispatched, 
-                        //we DON'T want them to continue on to Translate/Dispatch. "Luckily" asking TranslateAcceleratorEx to
-                        //do the mapping WITHOUT firing the command will give us the right result code to indicate if the command
-                        //mapped or not, unfortunately we can't always do this as it would break key-chords as it causes the shell 
-                        //to not remember the first input match of a multi-part chord, hence the reason we ONLY hit this block if 
-                        //it didn't tell us the input IS part of key-chord.
-                        res = filterKeys.TranslateAcceleratorEx(new MSG[] { oleMSG },
-                                                                (uint)(__VSTRANSACCELEXFLAGS.VSTAEXF_NoFireCommand | __VSTRANSACCELEXFLAGS.VSTAEXF_UseTextEditorKBScope),
-                                                                0,
-                                                                new Guid[0],
-                                                                out cmdGuid,
-                                                                out cmdId,
-                                                                out fTranslated,
-                                                                out fStartsMultiKeyChord);
+        //            if (fStartsMultiKeyChord == 0)
+        //            {
+        //                //HACK: Work around a bug in TranslateAcceleratorEx that will report it DIDN'T do the command mapping 
+        //                //when in fact it did :( Problem has been fixed (since I found it while writing this code), but in the 
+        //                //mean time we need to successfully eat keystrokes that have been mapped to commands and dispatched, 
+        //                //we DON'T want them to continue on to Translate/Dispatch. "Luckily" asking TranslateAcceleratorEx to
+        //                //do the mapping WITHOUT firing the command will give us the right result code to indicate if the command
+        //                //mapped or not, unfortunately we can't always do this as it would break key-chords as it causes the shell 
+        //                //to not remember the first input match of a multi-part chord, hence the reason we ONLY hit this block if 
+        //                //it didn't tell us the input IS part of key-chord.
+        //                res = filterKeys.TranslateAcceleratorEx(new MSG[] { oleMSG },
+        //                                                        (uint)(__VSTRANSACCELEXFLAGS.VSTAEXF_NoFireCommand | __VSTRANSACCELEXFLAGS.VSTAEXF_UseTextEditorKBScope),
+        //                                                        0,
+        //                                                        new Guid[0],
+        //                                                        out cmdGuid,
+        //                                                        out cmdId,
+        //                                                        out fTranslated,
+        //                                                        out fStartsMultiKeyChord);
 
-                        return (res == VSConstants.S_OK);
-                    }
+        //                return (res == VSConstants.S_OK);
+        //            }
 
-                    //We return true (that we handled the input message) if we managed to map it to a command OR it was the 
-                    //beginning of a multi-key chord, anything else should continue on with normal processing.
-                    return ((res == VSConstants.S_OK) || (fStartsMultiKeyChord != 0));
-                }
-            }
+        //            //We return true (that we handled the input message) if we managed to map it to a command OR it was the 
+        //            //beginning of a multi-key chord, anything else should continue on with normal processing.
+        //            return ((res == VSConstants.S_OK) || (fStartsMultiKeyChord != 0));
+        //        }
+        //    }
 
-            return base.PreProcessMessage(ref m);
-        }
+        //    return base.PreProcessMessage(ref m);
+        //}
 
         #endregion
 

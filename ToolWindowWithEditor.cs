@@ -53,68 +53,72 @@ namespace GitScc
         public Tuple<Control, IVsTextView> SetDisplayedFile(string filePath)
         {
             ClearEditor();
-
-            //Get an invisible editor over the file, this makes it much easier than having to manually figure out the right content type, 
-            //language service, and it will automatically associate the document with its owning project, meaning we will get intellisense
-            //in our editor with no extra work.
-            IVsInvisibleEditorManager invisibleEditorManager = (IVsInvisibleEditorManager)GetService(typeof(SVsInvisibleEditorManager));
-            ErrorHandler.ThrowOnFailure(invisibleEditorManager.RegisterInvisibleEditor(filePath,
-                                                                                       pProject: null,
-                                                                                       dwFlags: (uint)_EDITORREGFLAGS.RIEF_ENABLECACHING,
-                                                                                       pFactory: null,
-                                                                                       ppEditor: out this.invisibleEditor));
-
-            //The doc data is the IVsTextLines that represents the in-memory version of the file we opened in our invisibe editor, we need
-            //to extract that so that we can create our real (visible) editor.
-            IntPtr docDataPointer = IntPtr.Zero;
-            Guid guidIVSTextLines = typeof(IVsTextLines).GUID;
-            ErrorHandler.ThrowOnFailure(this.invisibleEditor.GetDocData(fEnsureWritable: 1, riid: ref guidIVSTextLines, ppDocData: out docDataPointer));
             try
             {
-                IVsTextLines docData = (IVsTextLines)Marshal.GetObjectForIUnknown(docDataPointer);
+                //Get an invisible editor over the file, this makes it much easier than having to manually figure out the right content type, 
+                //language service, and it will automatically associate the document with its owning project, meaning we will get intellisense
+                //in our editor with no extra work.
+                IVsInvisibleEditorManager invisibleEditorManager = (IVsInvisibleEditorManager)GetService(typeof(SVsInvisibleEditorManager));
+                ErrorHandler.ThrowOnFailure(invisibleEditorManager.RegisterInvisibleEditor(filePath,
+                                                                                           pProject: null,
+                                                                                           dwFlags: (uint)_EDITORREGFLAGS.RIEF_ENABLECACHING,
+                                                                                           pFactory: null,
+                                                                                           ppEditor: out this.invisibleEditor));
 
-                //Get the component model so we can request the editor adapter factory which we can use to spin up an editor instance.
-                IComponentModel componentModel = (IComponentModel)GetService(typeof(SComponentModel));
-                IVsEditorAdaptersFactoryService editorAdapterFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
-
-                //Create a code window adapter.
-                this.codeWindow = editorAdapterFactoryService.CreateVsCodeWindowAdapter(OleServiceProvider);
-
-                //Disable the splitter control on the editor as leaving it enabled causes a crash if the user
-                //tries to use it here :(
-                IVsCodeWindowEx codeWindowEx = (IVsCodeWindowEx)this.codeWindow;
-                INITVIEW[] initView = new INITVIEW[1];
-                codeWindowEx.Initialize((uint)_codewindowbehaviorflags.CWB_DISABLESPLITTER,
-                                         VSUSERCONTEXTATTRIBUTEUSAGE.VSUC_Usage_Filter,
-                                         szNameAuxUserContext: "",
-                                         szValueAuxUserContext: "",
-                                         InitViewFlags: 0,
-                                         pInitView: initView);
-
-                docData.SetStateFlags((uint)BUFFERSTATEFLAGS.BSF_USER_READONLY); //set read only
-
-                //Associate our IVsTextLines with our new code window.
-                ErrorHandler.ThrowOnFailure(this.codeWindow.SetBuffer((IVsTextLines)docData));
-
-                //Get our text view for our editor which we will use to get the WPF control that hosts said editor.
-                ErrorHandler.ThrowOnFailure(this.codeWindow.GetPrimaryView(out this.textView));
-
-                //Get our WPF host from our text view (from our code window).
-                IWpfTextViewHost textViewHost = editorAdapterFactoryService.GetWpfTextViewHost(this.textView);
-
-                return Tuple.Create<Control, IVsTextView>(textViewHost.HostControl, this.textView);
-
-                //Debug.Assert(contentControl != null);
-                //contentControl.Content = textViewHost.HostControl;
-            }
-            finally
-            {
-                if (docDataPointer != IntPtr.Zero)
+                //The doc data is the IVsTextLines that represents the in-memory version of the file we opened in our invisibe editor, we need
+                //to extract that so that we can create our real (visible) editor.
+                IntPtr docDataPointer = IntPtr.Zero;
+                Guid guidIVSTextLines = typeof(IVsTextLines).GUID;
+                ErrorHandler.ThrowOnFailure(this.invisibleEditor.GetDocData(fEnsureWritable: 1, riid: ref guidIVSTextLines, ppDocData: out docDataPointer));
+                try
                 {
-                    //Release the doc data from the invisible editor since it gave us a ref-counted copy.
-                    Marshal.Release(docDataPointer);
+                    IVsTextLines docData = (IVsTextLines)Marshal.GetObjectForIUnknown(docDataPointer);
+
+                    //Get the component model so we can request the editor adapter factory which we can use to spin up an editor instance.
+                    IComponentModel componentModel = (IComponentModel)GetService(typeof(SComponentModel));
+                    IVsEditorAdaptersFactoryService editorAdapterFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
+
+                    //Create a code window adapter.
+                    this.codeWindow = editorAdapterFactoryService.CreateVsCodeWindowAdapter(OleServiceProvider);
+
+                    //Disable the splitter control on the editor as leaving it enabled causes a crash if the user
+                    //tries to use it here :(
+                    IVsCodeWindowEx codeWindowEx = (IVsCodeWindowEx)this.codeWindow;
+                    INITVIEW[] initView = new INITVIEW[1];
+                    codeWindowEx.Initialize((uint)_codewindowbehaviorflags.CWB_DISABLESPLITTER,
+                                             VSUSERCONTEXTATTRIBUTEUSAGE.VSUC_Usage_Filter,
+                                             szNameAuxUserContext: "",
+                                             szValueAuxUserContext: "",
+                                             InitViewFlags: 0,
+                                             pInitView: initView);
+
+                    docData.SetStateFlags((uint)BUFFERSTATEFLAGS.BSF_USER_READONLY); //set read only
+
+                    //Associate our IVsTextLines with our new code window.
+                    ErrorHandler.ThrowOnFailure(this.codeWindow.SetBuffer((IVsTextLines)docData));
+
+                    //Get our text view for our editor which we will use to get the WPF control that hosts said editor.
+                    ErrorHandler.ThrowOnFailure(this.codeWindow.GetPrimaryView(out this.textView));
+
+                    //Get our WPF host from our text view (from our code window).
+                    IWpfTextViewHost textViewHost = editorAdapterFactoryService.GetWpfTextViewHost(this.textView);
+
+                    return Tuple.Create<Control, IVsTextView>(textViewHost.HostControl, this.textView);
+
+                    //Debug.Assert(contentControl != null);
+                    //contentControl.Content = textViewHost.HostControl;
+                }
+                finally
+                {
+                    if (docDataPointer != IntPtr.Zero)
+                    {
+                        //Release the doc data from the invisible editor since it gave us a ref-counted copy.
+                        Marshal.Release(docDataPointer);
+                    }
                 }
             }
+            catch { }
+            return null;
         }
 
         #endregion

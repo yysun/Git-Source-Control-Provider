@@ -78,9 +78,12 @@ namespace GitScc
                 File.WriteAllText(tmpFileName, ret);
 
                 var tuple = this.toolWindow.SetDisplayedFile(tmpFileName);
-                this.DiffEditor.Content = tuple.Item1;
-                this.textView = tuple.Item2;
-                diffLines = ret.Split('\n');
+                if (tuple != null)
+                {
+                    this.DiffEditor.Content = tuple.Item1;
+                    this.textView = tuple.Item2;
+                    diffLines = ret.Split('\n');
+                }
 
             };
 

@@ -19,9 +19,21 @@ namespace GitScc
     /// </summary>
     public partial class HistoryView : UserControl
     {
+        private GitFileStatusTracker tracker;
+
         public HistoryView()
         {
             InitializeComponent();
+        }
+
+        internal void Refresh(GitFileStatusTracker tracker)
+        {
+            this.tracker = tracker;
+            if (tracker == null)
+            {
+                //this.dataGrid1.ItemsSource = null;
+                return;
+            }
         }
     }
 }

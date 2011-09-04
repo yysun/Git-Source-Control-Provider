@@ -34,8 +34,8 @@ namespace GitScc
     // Register a sample tool window visible only when the provider is active
     [MsVsShell.ProvideToolWindow(typeof(PendingChangesToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
     [MsVsShell.ProvideToolWindowVisibility(typeof(PendingChangesToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
-    //[MsVsShell.ProvideToolWindow(typeof(HistoryToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
-    //[MsVsShell.ProvideToolWindowVisibility(typeof(HistoryToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]  
+    [MsVsShell.ProvideToolWindow(typeof(HistoryToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
+    [MsVsShell.ProvideToolWindowVisibility(typeof(HistoryToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]  
     //Register the source control provider's service (implementing IVsScciProvider interface)
     [MsVsShell.ProvideService(typeof(SccProviderService), ServiceName = "Git Source Control Service")]
     // Register the source control provider to be visible in Tools/Options/SourceControl/Plugin dropdown selector
@@ -127,6 +127,10 @@ namespace GitScc
 
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandPendingChanges);
                 menu = new MenuCommand(new EventHandler(ShowPendingChangesWindow), cmd);
+                mcs.AddCommand(menu);
+
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandHistory);
+                menu = new MenuCommand(new EventHandler(ShowHistoryWindow), cmd);
                 mcs.AddCommand(menu);
             }
 
@@ -228,14 +232,10 @@ namespace GitScc
                 case CommandId.icmdSccCommandCompare:
                     if (sccService.CanCompareSelectedFile) cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
-                
-                case CommandId.icmdSccCommandEditIgnore:
-                case CommandId.icmdSccCommandPendingChanges:
-                    if (sccService.IsSolutionGitControlled) cmdf |= OLECMDF.OLECMDF_ENABLED;
-                    break;
 
                 case CommandId.icmdSccCommandHistory:
-                        cmdf |= OLECMDF.OLECMDF_INVISIBLE;
+                case CommandId.icmdSccCommandPendingChanges:
+                    if (sccService.IsSolutionGitControlled) cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
 
                 case CommandId.icmdSccCommandRefresh:
@@ -408,11 +408,6 @@ namespace GitScc
             if (windowFrame != null)
             {
                 ErrorHandler.ThrowOnFailure(windowFrame.Show());
-
-                //if (window is PendingChangesToolWindow)
-                //{
-                //    ((PendingChangesToolWindow)window).Refresh();
-                //}
             }
         }
 

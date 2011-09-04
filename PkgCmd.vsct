@@ -136,7 +136,6 @@
       </Button>
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandInit" priority="0x0000" type="Button">
-        <!--<Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>-->
         <Icon guid="guidSccProviderImages" id="iconGitInit" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
@@ -178,15 +177,15 @@
         </Strings>
       </Button>
 
-      <!--<Button guid="guidSccProviderCmdSet" id="icmdSccCommandHistory" priority="0x0105" type="Button">
-        <Icon guid="guidSccProviderImages" id="iconHistory" />
+      <Button guid="guidSccProviderCmdSet" id="icmdSccCommandHistory" priority="0x0105" type="Button">
+        <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>History</ButtonText>
+          <ButtonText>Git - History ...</ButtonText>
         </Strings>
-      </Button>-->
+      </Button>
 
       <!-- buttons on pending changes tool window's tool bar -->
       <Button guid="guidSccProviderCmdSet" id="icmdPendingChangesCommit" priority="0x0000" type="Button">
@@ -259,15 +258,22 @@
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
     </CommandPlacement>
 
-    <!--<CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandRefresh" priority="0x0007">
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandHistory" priority="0x0004">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>
+    </CommandPlacement>
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandHistory" priority="0x0004">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_SCC"/>
+    </CommandPlacement>
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandHistory" priority="0x0004">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
+    </CommandPlacement>
+    
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandRefresh" priority="0x0007">
       <Parent guid="guidSccProviderCmdSet" id="igrpHistoryToolWindowToolbarGroup"/>
     </CommandPlacement>
     <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandGitBash" priority="0x0008">
       <Parent guid="guidSccProviderCmdSet" id="igrpHistoryToolWindowToolbarGroup"/>
     </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandGitExtension" priority="0x0009">
-      <Parent guid="guidSccProviderCmdSet" id="igrpHistoryToolWindowToolbarGroup"/>
-    </CommandPlacement>-->
 
     <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandRefresh" priority="0x0006">
       <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>

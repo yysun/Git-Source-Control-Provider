@@ -1116,6 +1116,10 @@ _ReSharper*/
             var window = this._sccProvider.FindToolWindow(typeof(PendingChangesToolWindow), 0, false) 
                 as PendingChangesToolWindow;
             if (window != null) window.Refresh(this.CurrentTracker);
+
+            var window2 = this._sccProvider.FindToolWindow(typeof(HistoryToolWindow), 0, false)
+                as HistoryToolWindow;
+            if (window2 != null) window2.Refresh(this.CurrentTracker);
         }
     }
 }

@@ -19,11 +19,18 @@ namespace GitScc
     /// </summary>
     public partial class HistoryView : UserControl
     {
+        HistoryToolWindow toolWindow;
         private GitFileStatusTracker tracker;
 
-        public HistoryView()
+        public HistoryView(HistoryToolWindow toolWindow)
         {
             InitializeComponent();
+            this.toolWindow = toolWindow;
+        }
+
+        public void InsertNewEditor(object editor)
+        {
+            diffEditorHost.Content = editor;
         }
 
         internal void Refresh(GitFileStatusTracker tracker)
@@ -35,5 +42,10 @@ namespace GitScc
                 return;
             }
         }
+
+        private void OpenFile(string fileName)
+        {
+            this.toolWindow.SetDisplayedFile(fileName);
+        }        
     }
 }

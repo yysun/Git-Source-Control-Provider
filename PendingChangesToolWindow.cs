@@ -20,24 +20,27 @@ namespace GitScc
     /// Summary description for SccProviderToolWindow.
     /// </summary>
     [Guid("75EDECF4-68D8-4B7B-92A9-5915461DA6D9")]
-    public class PendingChangesToolWindow : ToolWindowPane
+    public class PendingChangesToolWindow : ToolWindowWithEditor
     {
-        private PendingChangesView control;
+        //private PendingChangesView control;
 
         public PendingChangesToolWindow()
-            : base(null)
         {
             // set the window title
             this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption");
 
             //// set the CommandID for the window ToolBar
-            this.ToolBar = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.imnuPendingChangesToolWindowToolbarMenu);
+            base.ToolBar = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.imnuPendingChangesToolWindowToolbarMenu);
 
             // set the icon for the frame
             this.BitmapResourceID = CommandId.ibmpToolWindowsImages;  // bitmap strip resource ID
             this.BitmapIndex = CommandId.iconSccProviderToolWindow;   // index in the bitmap strip
+        }
 
-            control = new PendingChangesView();
+        protected override void Initialize()
+        {
+            base.Initialize();
+            control = new PendingChangesView(this);
 
             // This is the user control hosted by the tool window; Note that, even if this class implements IDisposable,
             // we are not calling Dispose on this object. This is because ToolWindowPane calls Dispose on 
@@ -64,19 +67,19 @@ namespace GitScc
 
         private void OnCommitCommand(object sender, EventArgs e)
         {
-            control.Commit();
+            ((PendingChangesView) control).Commit();
         }
 
         private void OnAmendCommitCommand(object sender, EventArgs e)
         {
-            control.AmendCommit();
+            ((PendingChangesView) control).AmendCommit();
         }
 
         internal void Refresh(GitFileStatusTracker tracker)
         {
             //if (((IVsWindowFrame)this.Frame).IsVisible() == VSConstants.S_FALSE) return;
 
-            control.Refresh(tracker);
+            ((PendingChangesView) control).Refresh(tracker);
 
             var repository = (tracker == null || !tracker.HasGitRepository) ? " (no repository)" :
                 string.Format(" - {1} - ({0})", tracker.CurrentBranch, tracker.GitWorkingDirectory);

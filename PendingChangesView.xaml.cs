@@ -11,6 +11,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Text.RegularExpressions;
+using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.TextManager.Interop;
 
 namespace GitScc
 {
@@ -20,10 +22,14 @@ namespace GitScc
     public partial class PendingChangesView : UserControl
     {
         private GitFileStatusTracker tracker;
+        private ToolWindowWithEditor toolWindow;
+        private IVsTextView textView;
+        private string[] diffLines;
 
-        public PendingChangesView()
+        public PendingChangesView(ToolWindowWithEditor toolWindow)
         {
             InitializeComponent();
+            this.toolWindow = toolWindow;
         }
 
         #region Events
@@ -58,49 +64,24 @@ namespace GitScc
             var fileName = GetSelectedFileName();
             if (fileName == null)
             {
-                this.textBoxDiff.Document.Blocks.Clear();
+                this.toolWindow.ClearEditor();
                 return;
             }
 
             var dispatcher = Dispatcher.CurrentDispatcher;
             Action act = () =>
             {
-                this.textBoxDiff.BeginInit();
+                var ret = tracker.DiffFile(fileName);
+                ret = ret.Replace("\r", "").Replace("\n", "\r\n");
 
-                this.textBoxDiff.Document.Blocks.Clear();
-                this.textBoxDiff.Document.PageWidth = 1000;
+                var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), ".diff");
+                File.WriteAllText(tmpFileName, ret);
 
-                var content = tracker.DiffFile(fileName);
-                var lines = content.Split('\n');
+                var tuple = this.toolWindow.SetDisplayedFile(tmpFileName);
+                this.DiffEditor.Content = tuple.Item1;
+                this.textView = tuple.Item2;
+                diffLines = ret.Split('\n');
 
-                // TODO: paging all text into the richtextbox
-                foreach (var line in lines.Take(256)) // take max 256 lines for now
-                {
-                    TextRange range = new TextRange(this.textBoxDiff.Document.ContentEnd, this.textBoxDiff.Document.ContentEnd);
-                    range.Text = line.Replace("\r", "") + "\r";
-
-                    if (line.StartsWith("+"))
-                    {
-                        range.ApplyPropertyValue(TextElement.BackgroundProperty, new SolidColorBrush(Color.FromArgb(128, 166, 255, 166)));
-                    }
-                    else if (line.StartsWith("-"))
-                    {
-                        range.ApplyPropertyValue(TextElement.BackgroundProperty, new SolidColorBrush(Color.FromArgb(128, 255, 166, 166)));
-                    }
-                    else
-                    {
-                        range.ApplyPropertyValue(TextElement.BackgroundProperty, null);
-                    }
-                }
-                
-                if (lines.Count() > 256)
-                {
-                    TextRange range = new TextRange(this.textBoxDiff.Document.ContentEnd, this.textBoxDiff.Document.ContentEnd);
-                    range.Text = string.Format("\r*** Note:  next {0} lines are not displayed. ***", lines.Count() - 256);
-                    range.ApplyPropertyValue(TextElement.BackgroundProperty, new SolidColorBrush(Color.FromArgb(128, 255, 255, 166)));
-
-                }
-                this.textBoxDiff.EndInit();
             };
 
             dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
@@ -166,7 +147,7 @@ namespace GitScc
             {
                 this.dataGrid1.ItemsSource = null; 
                 this.textBoxComments.Document.Blocks.Clear();
-                this.textBoxDiff.Document.Blocks.Clear();
+                this.toolWindow.ClearEditor();
                 return;
             }
 
@@ -221,7 +202,7 @@ namespace GitScc
                 ShowStatusMessage("Committing ...");
                 var id = tracker.Commit(comments);
                 this.textBoxComments.Document.Blocks.Clear();
-                this.textBoxDiff.Document.Blocks.Clear();
+                this.toolWindow.ClearEditor();
                 ShowStatusMessage("Commit successfully. Commit Hash: " + id);
                 this.dataGrid1.FindVisualChild<CheckBox>("checkBoxAllStaged").IsChecked = false;
             }
@@ -247,7 +228,7 @@ namespace GitScc
                     ShowStatusMessage("Amending last Commit ...");
                     var id = tracker.AmendCommit(comments);
                     this.textBoxComments.Document.Blocks.Clear();
-                    this.textBoxDiff.Document.Blocks.Clear();
+                    this.toolWindow.ClearEditor();
                     ShowStatusMessage("Amend last commit successfully. Commit Hash: " + id);
                     this.dataGrid1.FindVisualChild<CheckBox>("checkBoxAllStaged").IsChecked = false;
                 }
@@ -280,50 +261,6 @@ namespace GitScc
         {
             var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
             dte.StatusBar.Text = msg;
-        }
-        #endregion
-
-        #region Diff view events
-        private void textBoxDiff_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            GetSelectedFileFullName((fileName) =>
-            {
-                var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
-                dte.ItemOperations.OpenFile(fileName);
-
-                var pointer = textBoxDiff.GetPositionFromPoint(e.GetPosition(textBoxDiff), true);
-                var text = pointer.GetTextInRun(LogicalDirection.Backward);
-                if (text.IndexOf('\r') > 0) text = text.Substring(text.LastIndexOf('\r'));
-                int currentColumnNumber = text.Length;
-
-                var start = 1;
-                while (true)
-                {
-                    var match = Regex.Match(text, "@@(.+)@@\r");
-                    if (match.Success)
-                    {
-                        var s = match.Groups[1].Value;
-                        s = s.Substring(s.IndexOf('+') + 1);
-                        s = s.Substring(0, s.IndexOf(','));
-                        start = Convert.ToInt32(s);
-
-                        if (!text.StartsWith("@@")) start -= 3;
-                        break;
-                    }
-
-                    pointer = pointer.GetNextContextPosition(LogicalDirection.Backward);
-                    if (pointer.GetPointerContext(LogicalDirection.Backward) == TextPointerContext.Text)
-                    {
-                        text = pointer.GetTextInRun(LogicalDirection.Backward) + text;
-                    }
-                }
-
-                start += text.Split('\r').Where(s => !s.StartsWith("-")).Count() - 2;
-
-                var selection = dte.ActiveDocument.Selection as EnvDTE.TextSelection;
-                selection.MoveToLineAndOffset(start, currentColumnNumber);
-
-            });
         }
         #endregion
 
@@ -416,6 +353,50 @@ Note: if the file is included project, you need to delete the file from project 
         }
 
         #endregion
+
+        private void DiffEditor_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (this.textView != null &&
+                diffLines != null && diffLines.Length > 0)
+            {
+                int line, column;
+                textView.GetCaretPos(out line, out column);
+                var start = 1;
+                string text = diffLines[line];
+                while (true || line < 0)
+                {
+                    var match = Regex.Match(text, "@@(.+)@@\r");
+                    if (match.Success)
+                    {
+                        var s = match.Groups[1].Value;
+                        s = s.Substring(s.IndexOf('+') + 1);
+                        s = s.Substring(0, s.IndexOf(','));
+                        start += Convert.ToInt32(s) - 2;
+
+                        //if (!text.StartsWith("@@")) start -= 3;
+                        break;
+                    }
+                    else if (text.StartsWith("-"))
+                    {
+                        start--;
+                    }
+
+                    if (text.Contains("\r"))
+                    {
+                        start++;
+                    }
+                    text = diffLines[--line];
+                }
+
+                GetSelectedFileFullName((fileName) =>
+                {
+                    var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
+                    dte.ItemOperations.OpenFile(fileName);
+                    var selection = dte.ActiveDocument.Selection as EnvDTE.TextSelection;
+                    selection.MoveToLineAndOffset(start, column);
+                });
+            }
+        }
     }
 
     public static class ExtHelper

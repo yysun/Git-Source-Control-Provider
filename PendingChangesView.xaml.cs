@@ -13,6 +13,7 @@ using System.Windows.Threading;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
+using NGit.Api;
 
 namespace GitScc
 {
@@ -148,9 +149,8 @@ namespace GitScc
             this.tracker = tracker;
             if (tracker == null)
             {
-                this.dataGrid1.ItemsSource = null; 
-                this.textBoxComments.Document.Blocks.Clear();
-                this.toolWindow.ClearEditor();
+                this.dataGrid1.ItemsSource = null;
+                ClearUI();
                 return;
             }
 
@@ -184,61 +184,121 @@ namespace GitScc
             lastTimeRefresh = DateTime.Now;
         }
 
-        internal void Commit()
+        private void ClearUI()
         {
-            TextRange textRange = new TextRange(
-                this.textBoxComments.Document.ContentStart,
-                this.textBoxComments.Document.ContentEnd);
+            this.textBoxComments.Document.Blocks.Clear();
+            this.toolWindow.ClearEditor();
+            var chk = this.dataGrid1.FindVisualChild<CheckBox>("checkBoxAllStaged");
+            if (chk != null) chk.IsChecked = false;
+        }
 
-            var comments = textRange.Text;
+        private string Comments
+        {
+            get 
+            {
+                TextRange textRange = new TextRange(
+                    this.textBoxComments.Document.ContentStart,
+                    this.textBoxComments.Document.ContentEnd);
+                return textRange.Text;
+            }
+            set
+            {
+                TextRange textRange = new TextRange(
+                    this.textBoxComments.Document.ContentStart,
+                    this.textBoxComments.Document.ContentEnd);
+                textRange.Text = value;
+            }
+        }
 
-            if (string.IsNullOrWhiteSpace(comments))
+        private bool HasComments()
+        {
+            if (string.IsNullOrWhiteSpace(Comments))
             {
                 MessageBox.Show("Please enter comments for the commit.", "Commit",
                     MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                return;
+                return false;
             }
+            else 
+                return true;
+        }
 
-            
-            if (StagedFiles())
+        internal void Commit()
+        {
+            if (HasComments() && StageSelectedFiles())
             {
-                ShowStatusMessage("Committing ...");
-                var id = tracker.Commit(comments);
-                this.textBoxComments.Document.Blocks.Clear();
-                this.toolWindow.ClearEditor();
-                ShowStatusMessage("Commit successfully. Commit Hash: " + id);
-                this.dataGrid1.FindVisualChild<CheckBox>("checkBoxAllStaged").IsChecked = false;
+                try
+                {
+                    ShowStatusMessage("Committing ...");
+                    var id = tracker.Commit(Comments);
+                    ShowStatusMessage("Commit successfully. Commit Hash: " + id);
+                    ClearUI();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    ShowStatusMessage(ex.Message);
+                }
             }
         }
 
         internal void AmendCommit()
         {
-            TextRange textRange = new TextRange(
-                this.textBoxComments.Document.ContentStart,
-                this.textBoxComments.Document.ContentEnd);
-
-            var comments = textRange.Text;
-
-            if (string.IsNullOrWhiteSpace(comments))
+            if (string.IsNullOrWhiteSpace(Comments))
             {
-                textRange.Text = tracker.LastCommitMessage;
+                Comments = tracker.LastCommitMessage;
                 return;
             }
             else
             {
-                if (StagedFiles())
+                if (StageSelectedFiles())
                 {
-                    ShowStatusMessage("Amending last Commit ...");
-                    var id = tracker.AmendCommit(comments);
-                    this.textBoxComments.Document.Blocks.Clear();
-                    this.toolWindow.ClearEditor();
-                    ShowStatusMessage("Amend last commit successfully. Commit Hash: " + id);
-                    this.dataGrid1.FindVisualChild<CheckBox>("checkBoxAllStaged").IsChecked = false;
+                    try
+                    {
+                        ShowStatusMessage("Amending last Commit ...");
+                        var id = tracker.AmendCommit(Comments);
+                        ShowStatusMessage("Amend last commit successfully. Commit Hash: " + id);
+                        ClearUI();
+
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                        ShowStatusMessage(ex.Message);
+                    }
                 }
             }
         }
 
-        private bool StagedFiles()
+        internal void CommitToBranch()
+        {
+            if (HasComments() && StageSelectedFiles())
+            {
+                var branch = Microsoft.VisualBasic.Interaction.InputBox("Enter new branch name:", "New Branch", "");
+                if (!string.IsNullOrWhiteSpace(branch))
+                {
+                    try
+                    {
+                        ShowStatusMessage("Creating new branch ...");
+
+                        Git git = new Git(tracker.Repository);
+                        git.Checkout().SetName(branch).SetCreateBranch(true).Call();
+
+                        var id = tracker.Commit(Comments);
+                        ShowStatusMessage("Commit successfully to branch: " + branch + ". Commit Hash: " + id);
+                        ClearUI();
+                        //MessageBox.Show("Switched to branch: " + branch, "New Branch Created",
+                        //    MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                        ShowStatusMessage(ex.Message);
+                    }
+                }
+            }
+        }
+
+        private bool StageSelectedFiles()
         {
             foreach (var item in this.dataGrid1.Items.Cast<GitFile>())
             {
@@ -400,6 +460,7 @@ Note: if the file is included project, you need to delete the file from project 
                 });
             }
         }
+
     }
 
     public static class ExtHelper

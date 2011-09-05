@@ -496,5 +496,10 @@ namespace GitScc
                 return "";
             }
         }
+
+        public Repository Repository
+        {
+            get { return repository; }
+        }
     }
 }

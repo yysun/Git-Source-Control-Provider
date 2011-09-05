@@ -57,7 +57,10 @@ namespace GitScc
             menu = new MenuCommand(new EventHandler(OnAmendCommitCommand), cmd);
             mcs.AddCommand(menu);
 
-
+            cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesCommitToBranch);
+            menu = new MenuCommand(new EventHandler(OnCommitToBranchCommand), cmd);
+            mcs.AddCommand(menu);
+            
             var sccProviderService = BasicSccProvider.GetServiceEx<SccProviderService>();
             if (sccProviderService != null)
             {
@@ -73,6 +76,11 @@ namespace GitScc
         private void OnAmendCommitCommand(object sender, EventArgs e)
         {
             ((PendingChangesView) control).AmendCommit();
+        }
+
+        private void OnCommitToBranchCommand(object sender, EventArgs e)
+        {
+            ((PendingChangesView)control).CommitToBranch();
         }
 
         internal void Refresh(GitFileStatusTracker tracker)

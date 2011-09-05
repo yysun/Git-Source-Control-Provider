@@ -209,6 +209,16 @@
         </Strings>
       </Button>
 
+      <Button guid="guidSccProviderCmdSet" id="icmdPendingChangesCommitToBranch" priority="0x0002" type="Button">
+        <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <CommandFlag>IconAndText</CommandFlag>
+        <Strings>
+          <ButtonText>Commit to Branch</ButtonText>
+        </Strings>
+      </Button>
+      
     </Buttons>
     
     <Bitmaps>
@@ -293,6 +303,7 @@
 
       <IDSymbol name="icmdPendingChangesCommit" value="0x111"/>
       <IDSymbol name="icmdPendingChangesAmend" value="0x112"/>
+      <IDSymbol name="icmdPendingChangesCommitToBranch" value="0x113"/>
 
       <IDSymbol name="igrpGitExtCommands" value="0x800"/>
       <IDSymbol name="imnuGitExtMenu" value="0x801"/>

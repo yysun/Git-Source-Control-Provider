@@ -1,8 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -10,10 +10,9 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using System.Text.RegularExpressions;
-using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using NGit.Api;
+using GitScc.UI;
 
 namespace GitScc
 {
@@ -271,30 +270,12 @@ namespace GitScc
 
         internal void CommitToBranch()
         {
-            if (HasComments() && StageSelectedFiles())
+            if (this.tracker == null || this.tracker.Repository == null) return;
+
+            var branchPicker = new BranchPicker(this.tracker.Repository);
+            if (HasComments() && StageSelectedFiles() && branchPicker.Show() == true)
             {
-                var branch = Microsoft.VisualBasic.Interaction.InputBox("Enter new branch name:", "New Branch", "");
-                if (!string.IsNullOrWhiteSpace(branch))
-                {
-                    try
-                    {
-                        ShowStatusMessage("Creating new branch ...");
-
-                        Git git = new Git(tracker.Repository);
-                        git.Checkout().SetName(branch).SetCreateBranch(true).Call();
-
-                        var id = tracker.Commit(Comments);
-                        ShowStatusMessage("Commit successfully to branch: " + branch + ". Commit Hash: " + id);
-                        ClearUI();
-                        //MessageBox.Show("Switched to branch: " + branch, "New Branch Created",
-                        //    MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                        ShowStatusMessage(ex.Message);
-                    }
-                }
+                Commit();
             }
         }
 

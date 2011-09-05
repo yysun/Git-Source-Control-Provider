@@ -215,7 +215,7 @@
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>Commit to Branch</ButtonText>
+          <ButtonText>Commit to Branch ...</ButtonText>
         </Strings>
       </Button>
       

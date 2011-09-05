@@ -19,8 +19,16 @@
             </LinearGradientBrush>
         </Grid.Background>
         
-        <ListBox>
-
+        <ListBox x:Name="CommitListBox" Margin="8 4 8 0">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="{Binding Id}" />
+                        <Label Content="{Binding Message}" />
+                        <Label Content="{Binding Author}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
         </ListBox>
         
         <GridSplitter Grid.Row="1" Height="4" ResizeDirection="Rows" 
@@ -35,17 +43,19 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TreeView x:Name="fileTree" Grid.Column="0"/>
+            <TreeView x:Name="fileTree" Grid.Column="0" Margin="8 4 4 4"/>
             
             <GridSplitter Grid.Column="1"
                       VerticalAlignment="Stretch" HorizontalAlignment="Left" Width="4" ResizeDirection="Columns" />
 
-            <ListBox x:Name="patchList" Grid.Column="2"/>
+            <ListBox x:Name="patchList" Grid.Column="2" Margin="4 4 4 4"/>
             
             <GridSplitter Grid.Column="3"
                       VerticalAlignment="Stretch" HorizontalAlignment="Left" Width="4" ResizeDirection="Columns" />
 
-            <ContentControl x:Name="diffEditorHost" Grid.Column="4"  />
+            <Grid  Grid.Column="4" Background="White" Margin="4 4 8 4">
+                <ContentControl x:Name="diffEditorHost" />
+            </Grid>
         </Grid>
 
     </Grid>

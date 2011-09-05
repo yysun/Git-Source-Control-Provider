@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="GitScc.HistoryView"
+﻿<UserControl xmlns:my="clr-namespace:GitScc.UI"  x:Class="GitScc.HistoryView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -8,9 +8,9 @@
 
     <Grid x:Name="Main" Margin="4">
         <Grid.RowDefinitions>
-            <RowDefinition Height="100" />
-            <RowDefinition Height="4" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="4" />
+            <RowDefinition Height="0" />
         </Grid.RowDefinitions>
         <Grid.Background>
             <LinearGradientBrush EndPoint="0.5,0" StartPoint="0.5,0">
@@ -18,21 +18,11 @@
                 <GradientStop Color="#B4FFFFCA" Offset="1" />
             </LinearGradientBrush>
         </Grid.Background>
-        
-        <ListBox x:Name="CommitListBox" Margin="8 4 8 0">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="{Binding Id}" />
-                        <Label Content="{Binding Message}" />
-                        <Label Content="{Binding Author}" />
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-        
+
+        <my:HistoryGraph x:Name="HistoryGraph"/>
+
         <GridSplitter Grid.Row="1" Height="4" ResizeDirection="Rows" 
-                      VerticalAlignment="Top" HorizontalAlignment="Stretch"/>
+                      VerticalAlignment="Bottom" HorizontalAlignment="Stretch"/>
 
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>

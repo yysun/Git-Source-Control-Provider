@@ -65,22 +65,22 @@ namespace GitScc
                 //}).ToArray();
 
 
-                PlotWalk pw = new PlotWalk(tracker.Repository);
-                pw.MarkStart(pw.LookupCommit(tracker.Repository.Resolve("HEAD")));
-                PlotCommitList<PlotLane> pcl = new PlotCommitList<PlotLane>();
-                pcl.Source(pw);
-                pcl.FillTo(int.MaxValue);
+                //PlotWalk pw = new PlotWalk(tracker.Repository);
+                //pw.MarkStart(pw.LookupCommit(tracker.Repository.Resolve("HEAD")));
+                //PlotCommitList<PlotLane> pcl = new PlotCommitList<PlotLane>();
+                //pcl.Source(pw);
+                //pcl.FillTo(int.MaxValue);
 
-                var commits = pcl.ToArray();
+                //var commits = pcl.ToArray();
 
-                CommitListBox.ItemsSource = commits.Select(r => new
-                {
-                    Message = r.GetShortMessage().Replace("\r", ""),
-                    Id = r.GetLane().GetPosition(),
-                    Author = r.GetChildCount(),
-                    //Author = r.GetAuthorIdent().GetName(),
-                    //CommitTime = r.
-                }).ToArray();
+                //CommitListBox.ItemsSource = commits.Select(r => new
+                //{
+                //    Message = r.GetShortMessage().Replace("\r", ""),
+                //    Id = r.GetLane().GetPosition(),
+                //    Author = r.GetChildCount(),
+                //    //Author = r.GetAuthorIdent().GetName(),
+                //    //CommitTime = r.
+                //}).ToArray();
             };
 
             dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
@@ -91,6 +91,7 @@ namespace GitScc
         private void OpenFile(string fileName)
         {
             this.toolWindow.SetDisplayedFile(fileName);
-        }        
+        }
+
     }
 }

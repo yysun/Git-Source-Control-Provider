@@ -117,6 +117,9 @@
     <Compile Include="UI\BranchPicker.xaml.cs">
       <DependentUpon>BranchPicker.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\HistoryGraph.xaml.cs">
+      <DependentUpon>HistoryGraph.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="HistoryToolWindow.resx">
@@ -167,6 +170,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\BranchPicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\HistoryGraph.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

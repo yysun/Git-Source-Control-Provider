@@ -136,18 +136,14 @@ namespace GitScc.UI
             //this.Scaler.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimate);
 
             AdjustCanvasSize();
-        }      
+        }
 
         #endregion
 
         const int MAX_COMMITS = 200;
         const int PADDING = 50;
-        const int BOX_HEIGHT = 150;
-        const int BOX_WIDTH = 200;
-        const int BOX_BORDER_WIDTH = 4;
-        const int BOX_RADIUS = 6;
-        const int BOX_HSPACE = 100;
-        const int BOX_VSPACE = 200;
+        const int BOX_HEIGHT = 120;
+        const int BOX_WIDTH = 300;
 
         private Repository repository;
 
@@ -163,85 +159,172 @@ namespace GitScc.UI
                 var head = repository.Resolve("HEAD");
                 if (head == null) return;
 
-                var  pw = new PlotWalk(repository);
+                var pw = new PlotWalk(repository);
                 var heads = repository.GetAllRefs().Values.Select(r =>
                     pw.LookupCommit(repository.Resolve(r.GetObjectId().Name))).ToList();
                 pw.MarkStart(heads);
                 PlotCommitList<PlotLane> pcl = new PlotCommitList<PlotLane>();
-                pcl.Source(pw);               
+                pcl.Source(pw);
                 pcl.FillTo(MAX_COMMITS);
 
-                var commits = pcl.ToArray();
+                var commits = pcl.ToList();
+                var maxX = commits.Count();
+                var maxY = commits.Max(c => c.GetLane().GetPosition());
 
                 for (int i = commits.Count() - 1; i >= 0; i--)
                 {
                     var commit = commits[i];
 
-                    //var grid = new Grid { ToolTip = commit.GetShortMessage() };
+                    #region Add commit links
 
-                    //var rect = new Rectangle
-                    //{
-                    //    Width = BOX_WIDTH,
-                    //    Height = BOX_HEIGHT,
-                    //    RadiusX = BOX_RADIUS,
-                    //    RadiusY = BOX_RADIUS,
-                    //    Stroke = new SolidColorBrush(Color.FromArgb(200, 0, 128, 0)),
-                    //    StrokeThickness = BOX_BORDER_WIDTH,
-                    //    Fill = new SolidColorBrush(Color.FromArgb(120, 180, 255, 120)),
-                    //};
+                    int idx = 0;
+                    for (int n = 0; n < commit.ParentCount; n++)
+                    {
+                        var pid = commit.GetParent(n).Id;
+                        var parent = commits.Where(c => c.Id == pid)
+                            .OrderBy(c=>c.GetLane().GetPosition())
+                            .FirstOrDefault();
 
-                    //double left = PADDING + (commits.Count() - i - 1) * (BOX_WIDTH + BOX_HSPACE);
-                    //double top = PADDING + commit.GetLane().GetPosition() * BOX_VSPACE;
+                        if (parent != null)
+                        {
+                            // current node
+                            double x1 = i;
+                            double y1 = commit.GetLane().GetPosition();
 
-                    //Canvas.SetLeft(grid, left);
-                    //Canvas.SetTop(grid, top);
+                            // parent node
+                            double x2 = commits.IndexOf(parent);
+                            double y2 = parent.GetLane().GetPosition();
 
-                    //grid.Children.Add(rect);
-                    //grid.Children.Add(new TextBlock 
-                    //{ 
-                    //    Text = commit.GetShortMessage(), //commit.Id.Name.Substring(0, 5),
-                    //    Width = BOX_WIDTH,
-                    //    FontSize = 14,
-                    //    HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch,
-                    //    VerticalAlignment = System.Windows.VerticalAlignment.Top,
-                    //    TextAlignment = TextAlignment.Left,
-                    //    TextWrapping = TextWrapping.Wrap,
-                    //    Padding = new Thickness(10)
+                            x1 = GetScreenX(maxX - x1);
+                            y1 = GetScreenY(y1) + CommitBox.HEIGHT / 2;
+                            x2 = GetScreenX(maxX - x2) + CommitBox.WIDTH;
+                            y2 = GetScreenY(y2) + CommitBox.HEIGHT / 2;
 
-                    //});
+                            if (y1 == y2)
+                            {
+                                var line = new Line
+                                {
+                                    Stroke = new SolidColorBrush(Color.FromArgb(255, 153, 182, 209)),
+                                    StrokeThickness = 4,
+                                };
+                                line.X1 = x1;
+                                line.Y1 = y1;
+                                line.X2 = x2;
+                                line.Y2 = y2;
+                                this.canvasContainer.Children.Add(line);
+                                idx++;
+                            }
+                            else if(idx == 0)
+                            {
+                                var path = new Path
+                                {
+                                    Stroke = new SolidColorBrush(Color.FromArgb(255, 153, 182, 209)),
+                                    StrokeThickness = 4,
+                                };
+                                
+                                var x3 = x2 - CommitBox.WIDTH / 2;
 
-                    //this.canvasContainer.Children.Add(grid);
+                                PathSegmentCollection pscollection = new PathSegmentCollection();
+                                pscollection.Add(new LineSegment(new Point(x2, y1), true));
+                                
+                                BezierSegment curve = new BezierSegment(
+                                    new Point(x2, y1), new Point(x3, y1), new Point(x3, y2), true);
+                                pscollection.Add(curve);
 
+                                PathFigure pf = new PathFigure
+                                {
+                                    StartPoint = new Point(x1, y1),
+                                    Segments = pscollection,
+                                };
+                                PathFigureCollection pfcollection = new PathFigureCollection();
+                                pfcollection.Add(pf);
+                                PathGeometry pathGeometry = new PathGeometry();
+                                pathGeometry.Figures = pfcollection;
+                                path.Data = pathGeometry;
+
+                                this.canvasContainer.Children.Add(path);
+                                idx++;
+                            }
+                            else 
+                            {
+                                var path = new Path
+                                {
+                                    Stroke = new SolidColorBrush(Color.FromArgb(255, 153, 182, 209)),
+                                    StrokeThickness = 4,
+                                };
+
+                                var x3 = x1 + CommitBox.WIDTH / 2;
+
+                                PathSegmentCollection pscollection = new PathSegmentCollection();
+
+                                BezierSegment curve = new BezierSegment(
+                                    new Point(x3, y1), new Point(x3, y2), new Point(x1, y2), true);
+                                pscollection.Add(curve);
+
+                                pscollection.Add(new LineSegment(new Point(x2, y2), true));
+
+                                PathFigure pf = new PathFigure
+                                {
+                                    StartPoint = new Point(x1, y1),
+                                    Segments = pscollection,
+                                };
+                                PathFigureCollection pfcollection = new PathFigureCollection();
+                                pfcollection.Add(pf);
+                                PathGeometry pathGeometry = new PathGeometry();
+                                pathGeometry.Figures = pfcollection;
+                                path.Data = pathGeometry;
+
+                                this.canvasContainer.Children.Add(path);
+                                idx++;
+                            }
+                        }
+                    }
+                    #endregion
+
+                    #region Add commit box
                     var box = new CommitBox();
                     box.DataContext = new
                     {
-                        Id = commit.Id.Name.Substring(0, 5),
-                        Comments = commit.GetShortMessage(),
-                        Author = commit.GetAuthorIdent().GetName(),
-                        Date = "",
+                            Id = commit.Id.Name.Substring(0, 5),
+                            Comments = commit.GetShortMessage(),
+                            Author = commit.GetAuthorIdent().GetName(),
+                            Date = "",
                     };
 
-                    double left = PADDING + (commits.Count() - i - 1) * (BOX_WIDTH + BOX_HSPACE);
-                    double top = PADDING + commit.GetLane().GetPosition() * BOX_VSPACE;
+                    double left = GetScreenX(maxX - i);
+                    double top = GetScreenY(commit.GetLane().GetPosition());
 
                     Canvas.SetLeft(box, left);
                     Canvas.SetTop(box, top);
+                    Canvas.SetZIndex(box, 10);
 
                     this.canvasContainer.Children.Add(box);
+
+                    #endregion
+
                 }
 
-
                 this.canvasRoot.Width =
-                this.canvasContainer.Width = PADDING * 2 + commits.Count() * (BOX_WIDTH + BOX_HSPACE);
+                this.canvasContainer.Width = PADDING * 2 + (maxX + 1) * BOX_WIDTH;
 
-                this.canvasRoot.Height =
+                this.canvasRoot.Height = PADDING * 2 + (maxY + 1) * BOX_HEIGHT;
                 this.canvasContainer.Height = 300;
 
                 AdjustCanvasSize();
-
             };
 
             dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
         }
+
+        private double GetScreenX(double x)
+        {
+            return PADDING + (x-1) * BOX_WIDTH;
+        }
+
+        private double GetScreenY(double y)
+        {
+            return PADDING + y * BOX_HEIGHT;
+        }
+
     }
 }

@@ -8,7 +8,7 @@
     <Grid Height="120" Width="200">
         <Rectangle HorizontalAlignment="Stretch" Margin="0" 
                    Name="rectangle1" Stroke="#FF99B6D1" 
-                   VerticalAlignment="Stretch" StrokeThickness="4" RadiusX="4" RadiusY="4" Fill="#8BD9E4EF" />
+                   VerticalAlignment="Stretch" StrokeThickness="4" RadiusX="4" RadiusY="4" Fill="#FFF2FBFF" />
         <ScrollViewer Margin="6,30,6,24" VerticalScrollBarVisibility="Auto" >
             <TextBlock Name="txtComment" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="6,0,6,0"
                        Text="{Binding Comments}" FontSize="10" TextWrapping="Wrap" TextAlignment="Justify" />

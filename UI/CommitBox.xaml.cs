@@ -19,6 +19,10 @@ namespace GitScc.UI
     /// </summary>
     public partial class CommitBox : UserControl
     {
+        // need to match the size of top grid
+        internal const int HEIGHT = 120;
+        internal const int WIDTH = 200;
+
         public CommitBox()
         {
             InitializeComponent();

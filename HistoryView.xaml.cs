@@ -46,44 +46,47 @@ namespace GitScc
                 //clear all UI
                 return;
             }
+            
             double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
-            //if (delta < 1000) return; //no refresh within 1 second
+            if (delta < 1000) return; //no refresh within 1 second
 
-            var dispatcher = Dispatcher.CurrentDispatcher;
-            Action act = () =>
-            {
-                //var rw = new RevWalk(tracker.Repository);
-                //rw.Sort(RevSort.COMMIT_TIME_DESC);
-                //var head = rw.ParseCommit(tracker.Repository.Resolve("HEAD"));
-                //rw.MarkStart(head);
+            this.HistoryGraph.Show(tracker.Repository);
 
-                //CommitListBox.ItemsSource = rw.Select(r=>new {
-                //    Message = r.GetShortMessage().Replace("\r", ""),
-                //    Id = r.Id.Name.Substring(0, 5),
-                //    Author = r.GetAuthorIdent().GetName(),
-                //    //CommitTime = r.
-                //}).ToArray();
+            //var dispatcher = Dispatcher.CurrentDispatcher;
+            //Action act = () =>
+            //{
+            //    //var rw = new RevWalk(tracker.Repository);
+            //    //rw.Sort(RevSort.COMMIT_TIME_DESC);
+            //    //var head = rw.ParseCommit(tracker.Repository.Resolve("HEAD"));
+            //    //rw.MarkStart(head);
+
+            //    //CommitListBox.ItemsSource = rw.Select(r=>new {
+            //    //    Message = r.GetShortMessage().Replace("\r", ""),
+            //    //    Id = r.Id.Name.Substring(0, 5),
+            //    //    Author = r.GetAuthorIdent().GetName(),
+            //    //    //CommitTime = r.
+            //    //}).ToArray();
 
 
-                //PlotWalk pw = new PlotWalk(tracker.Repository);
-                //pw.MarkStart(pw.LookupCommit(tracker.Repository.Resolve("HEAD")));
-                //PlotCommitList<PlotLane> pcl = new PlotCommitList<PlotLane>();
-                //pcl.Source(pw);
-                //pcl.FillTo(int.MaxValue);
+            //    //PlotWalk pw = new PlotWalk(tracker.Repository);
+            //    //pw.MarkStart(pw.LookupCommit(tracker.Repository.Resolve("HEAD")));
+            //    //PlotCommitList<PlotLane> pcl = new PlotCommitList<PlotLane>();
+            //    //pcl.Source(pw);
+            //    //pcl.FillTo(int.MaxValue);
 
-                //var commits = pcl.ToArray();
+            //    //var commits = pcl.ToArray();
 
-                //CommitListBox.ItemsSource = commits.Select(r => new
-                //{
-                //    Message = r.GetShortMessage().Replace("\r", ""),
-                //    Id = r.GetLane().GetPosition(),
-                //    Author = r.GetChildCount(),
-                //    //Author = r.GetAuthorIdent().GetName(),
-                //    //CommitTime = r.
-                //}).ToArray();
-            };
+            //    //CommitListBox.ItemsSource = commits.Select(r => new
+            //    //{
+            //    //    Message = r.GetShortMessage().Replace("\r", ""),
+            //    //    Id = r.GetLane().GetPosition(),
+            //    //    Author = r.GetChildCount(),
+            //    //    //Author = r.GetAuthorIdent().GetName(),
+            //    //    //CommitTime = r.
+            //    //}).ToArray();
+            //};
 
-            dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+            //dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
 
             lastTimeRefresh = DateTime.Now;
         }

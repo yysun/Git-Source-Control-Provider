@@ -12,6 +12,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
+using NGit;
+using NGit.Revplot;
+using NGit.Revwalk;
 
 namespace GitScc.UI
 {
@@ -20,13 +24,16 @@ namespace GitScc.UI
     /// </summary>
     public partial class HistoryGraph : UserControl
     {
-        private bool isDragging = false;
-        private Point offset;
 
         public HistoryGraph()
         {
             InitializeComponent();
         }
+
+        #region zoom and pan
+
+        private bool isDragging = false;
+        private Point offset;
 
         /// <summary>
         /// Called when user presses mouse down. Start
@@ -40,7 +47,7 @@ namespace GitScc.UI
             this.canvasContainer.CaptureMouse();
             // Calculate the place where they clicked
             offset = e.GetPosition(this.canvasContainer);
-            offset.X *= this.Scaler.ScaleX; 
+            offset.X *= this.Scaler.ScaleX;
             offset.Y *= this.Scaler.ScaleY;
         }
 
@@ -70,8 +77,7 @@ namespace GitScc.UI
             {
                 // Calculate the new drag distance
                 Point newPosition = e.GetPosition(this.canvasRoot);
-                Point newPoint =
-                    new Point(newPosition.X - offset.X, newPosition.Y - offset.Y);
+                Point newPoint = new Point(newPosition.X - offset.X, newPosition.Y - offset.Y);
 
                 // Set the values
                 this.canvasContainer.SetValue(Canvas.LeftProperty, newPoint.X);
@@ -114,22 +120,107 @@ namespace GitScc.UI
             double mouseDelta = Math.Sign(e.Delta);
 
             // calculate the new scale for the canvas
-            double newScale = this.Scaler.ScaleX + (mouseDelta * .8);
+            double newScale = this.Scaler.ScaleX + (mouseDelta * .2);
 
             // Don't allow scrolling too big or small
             if (newScale < 0.1 || newScale > 50) return;
 
             // Set the zoom!
-            //this.Scaler.ScaleX = newScale;
-            //this.Scaler.ScaleY = newScale;
+            this.Scaler.ScaleX = newScale;
+            this.Scaler.ScaleY = newScale;
 
-            var animationDuration = TimeSpan.FromSeconds(.2);
-            var scaleAnimate = new DoubleAnimation(newScale, new Duration(animationDuration));
+            //var animationDuration = TimeSpan.FromSeconds(.2);
+            //var scaleAnimate = new DoubleAnimation(newScale, new Duration(animationDuration));
 
-            this.Scaler.BeginAnimation(ScaleTransform.ScaleXProperty, scaleAnimate);
-            this.Scaler.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimate);
+            //this.Scaler.BeginAnimation(ScaleTransform.ScaleXProperty, scaleAnimate);
+            //this.Scaler.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimate);
 
             AdjustCanvasSize();
-        }     
+        }      
+
+        #endregion
+
+        const int MAX_COMMITS = 200;
+        const int PADDING = 20;
+        const int BOX_HEIGHT = 50;
+        const int BOX_WIDTH = 90;
+        const int BOX_BORDER_WIDTH = 4;
+        const int BOX_RADIUS = 6;
+        const int BOX_HSPACE = 80;
+        const int BOX_VSPACE = 80;
+
+        private Repository repository;
+
+        internal void Show(Repository repository)
+        {
+            this.repository = repository;
+
+            var dispatcher = Dispatcher.CurrentDispatcher;
+            Action act = () =>
+            {
+                canvasContainer.Children.Clear();
+
+                var head = repository.Resolve("HEAD");
+                if (head == null) return;
+
+                var  pw = new PlotWalk(repository);
+                var heads = repository.GetAllRefs().Values.Select(r =>
+                    pw.LookupCommit(repository.Resolve(r.GetObjectId().Name))).ToList();
+                pw.MarkStart(heads);
+                PlotCommitList<PlotLane> pcl = new PlotCommitList<PlotLane>();
+                pcl.Source(pw);               
+                pcl.FillTo(MAX_COMMITS);
+
+                var commits = pcl.ToArray();
+
+                for (int i = commits.Count() - 1; i >= 0; i--)
+                {
+                    var commit = commits[i];
+
+                    var grid = new Grid { ToolTip = commit.GetShortMessage() };
+
+                    var rect = new Rectangle
+                    {
+                        Width = BOX_WIDTH,
+                        Height = BOX_HEIGHT,
+                        RadiusX = BOX_RADIUS,
+                        RadiusY = BOX_RADIUS,
+                        Stroke = new SolidColorBrush(Color.FromArgb(200, 0, 128, 0)),
+                        StrokeThickness = BOX_BORDER_WIDTH,
+                        Fill = new SolidColorBrush(Color.FromArgb(120, 180, 255, 120)),
+                    };
+
+                    double left = PADDING + (commits.Count() - i - 1) * (BOX_WIDTH + BOX_HSPACE);
+                    double top = PADDING + commit.GetLane().GetPosition() * BOX_VSPACE;
+
+                    Canvas.SetLeft(grid, left);
+                    Canvas.SetTop(grid, top);
+
+                    grid.Children.Add(rect);
+                    grid.Children.Add(new TextBlock 
+                    { 
+                        Text = commit.Id.Name.Substring(0, 5),
+                        Width = BOX_WIDTH,
+                        FontSize = 20,
+                        HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                        VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                        TextAlignment = TextAlignment.Center,
+                    });
+
+                    this.canvasContainer.Children.Add(grid);
+                }
+
+                this.canvasRoot.Width =
+                this.canvasContainer.Width = PADDING * 2 + commits.Count() * (BOX_WIDTH + BOX_HSPACE);
+
+                this.canvasRoot.Height =
+                this.canvasContainer.Height = 300;
+
+                AdjustCanvasSize();
+
+            };
+
+            dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+        }
     }
 }

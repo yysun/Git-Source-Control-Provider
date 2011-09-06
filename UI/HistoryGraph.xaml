@@ -8,22 +8,15 @@
 
     <ScrollViewer x:Name="scrollRoot" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" 
                   PreviewMouseWheel="scrollRoot_PreviewMouseWheel">
-        <Canvas x:Name="canvasRoot" Background="DarkGray">
-            <Canvas Background="White" x:Name="canvasContainer"
-                    Width="300" Height="300" 
+        <Canvas x:Name="canvasRoot" Background="White">
+            <Canvas x:Name="canvasContainer" Background="White"
                     MouseLeftButtonDown="canvasContainer_MouseLeftButtonDown" 
                     MouseLeftButtonUp="canvasContainer_MouseLeftButtonUp" 
                     MouseMove="canvasContainer_MouseMove">
 
-                <!-- This is dummy stuff for zooming/panning -->
-                <Rectangle Width="90" Height="90" Fill="#FFCA1F1F"
-                           Canvas.Left="0" Canvas.Top="0" 
-                           RadiusX="2" RadiusY="2" />
                 <Canvas.RenderTransform>
                     <TransformGroup>
-                        <ScaleTransform x:Name="Scaler"
-                                    CenterX="0" CenterY="0" 
-                                    ScaleX="1" ScaleY="1" />
+                        <ScaleTransform x:Name="Scaler" CenterX="0" CenterY="0" ScaleX="1" ScaleY="1" />
                         <TranslateTransform x:Name="Translator" />
                     </TransformGroup>
                 </Canvas.RenderTransform>

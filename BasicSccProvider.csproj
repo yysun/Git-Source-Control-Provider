@@ -117,6 +117,12 @@
     <Compile Include="UI\BranchPicker.xaml.cs">
       <DependentUpon>BranchPicker.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\CommitBox.xaml.cs">
+      <DependentUpon>CommitBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\CommitLink.xaml.cs">
+      <DependentUpon>CommitLink.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\HistoryGraph.xaml.cs">
       <DependentUpon>HistoryGraph.xaml</DependentUpon>
     </Compile>
@@ -170,6 +176,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\BranchPicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\CommitBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\CommitLink.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

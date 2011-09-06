@@ -141,13 +141,13 @@ namespace GitScc.UI
         #endregion
 
         const int MAX_COMMITS = 200;
-        const int PADDING = 20;
-        const int BOX_HEIGHT = 50;
-        const int BOX_WIDTH = 90;
+        const int PADDING = 50;
+        const int BOX_HEIGHT = 150;
+        const int BOX_WIDTH = 200;
         const int BOX_BORDER_WIDTH = 4;
         const int BOX_RADIUS = 6;
-        const int BOX_HSPACE = 80;
-        const int BOX_VSPACE = 80;
+        const int BOX_HSPACE = 100;
+        const int BOX_VSPACE = 200;
 
         private Repository repository;
 
@@ -177,38 +177,59 @@ namespace GitScc.UI
                 {
                     var commit = commits[i];
 
-                    var grid = new Grid { ToolTip = commit.GetShortMessage() };
+                    //var grid = new Grid { ToolTip = commit.GetShortMessage() };
 
-                    var rect = new Rectangle
+                    //var rect = new Rectangle
+                    //{
+                    //    Width = BOX_WIDTH,
+                    //    Height = BOX_HEIGHT,
+                    //    RadiusX = BOX_RADIUS,
+                    //    RadiusY = BOX_RADIUS,
+                    //    Stroke = new SolidColorBrush(Color.FromArgb(200, 0, 128, 0)),
+                    //    StrokeThickness = BOX_BORDER_WIDTH,
+                    //    Fill = new SolidColorBrush(Color.FromArgb(120, 180, 255, 120)),
+                    //};
+
+                    //double left = PADDING + (commits.Count() - i - 1) * (BOX_WIDTH + BOX_HSPACE);
+                    //double top = PADDING + commit.GetLane().GetPosition() * BOX_VSPACE;
+
+                    //Canvas.SetLeft(grid, left);
+                    //Canvas.SetTop(grid, top);
+
+                    //grid.Children.Add(rect);
+                    //grid.Children.Add(new TextBlock 
+                    //{ 
+                    //    Text = commit.GetShortMessage(), //commit.Id.Name.Substring(0, 5),
+                    //    Width = BOX_WIDTH,
+                    //    FontSize = 14,
+                    //    HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch,
+                    //    VerticalAlignment = System.Windows.VerticalAlignment.Top,
+                    //    TextAlignment = TextAlignment.Left,
+                    //    TextWrapping = TextWrapping.Wrap,
+                    //    Padding = new Thickness(10)
+
+                    //});
+
+                    //this.canvasContainer.Children.Add(grid);
+
+                    var box = new CommitBox();
+                    box.DataContext = new
                     {
-                        Width = BOX_WIDTH,
-                        Height = BOX_HEIGHT,
-                        RadiusX = BOX_RADIUS,
-                        RadiusY = BOX_RADIUS,
-                        Stroke = new SolidColorBrush(Color.FromArgb(200, 0, 128, 0)),
-                        StrokeThickness = BOX_BORDER_WIDTH,
-                        Fill = new SolidColorBrush(Color.FromArgb(120, 180, 255, 120)),
+                        Id = commit.Id.Name.Substring(0, 5),
+                        Comments = commit.GetShortMessage(),
+                        Author = commit.GetAuthorIdent().GetName(),
+                        Date = "",
                     };
 
                     double left = PADDING + (commits.Count() - i - 1) * (BOX_WIDTH + BOX_HSPACE);
                     double top = PADDING + commit.GetLane().GetPosition() * BOX_VSPACE;
 
-                    Canvas.SetLeft(grid, left);
-                    Canvas.SetTop(grid, top);
+                    Canvas.SetLeft(box, left);
+                    Canvas.SetTop(box, top);
 
-                    grid.Children.Add(rect);
-                    grid.Children.Add(new TextBlock 
-                    { 
-                        Text = commit.Id.Name.Substring(0, 5),
-                        Width = BOX_WIDTH,
-                        FontSize = 20,
-                        HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
-                        VerticalAlignment = System.Windows.VerticalAlignment.Center,
-                        TextAlignment = TextAlignment.Center,
-                    });
-
-                    this.canvasContainer.Children.Add(grid);
+                    this.canvasContainer.Children.Add(box);
                 }
+
 
                 this.canvasRoot.Width =
                 this.canvasContainer.Width = PADDING * 2 + commits.Count() * (BOX_WIDTH + BOX_HSPACE);

@@ -1,0 +1,23 @@
+﻿<UserControl x:Class="GitScc.UI.CommitBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="120" d:DesignWidth="200">
+    <Grid Height="120" Width="200">
+        <Rectangle HorizontalAlignment="Stretch" Margin="0" 
+                   Name="rectangle1" Stroke="#FF99B6D1" 
+                   VerticalAlignment="Stretch" StrokeThickness="4" RadiusX="4" RadiusY="4" Fill="#8BD9E4EF" />
+        <ScrollViewer Margin="6,30,6,24" VerticalScrollBarVisibility="Auto" >
+            <TextBlock Name="txtComment" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="6,0,6,0"
+                       Text="{Binding Comments}" FontSize="10" TextWrapping="Wrap" TextAlignment="Justify" />
+        </ScrollViewer>
+        <TextBlock Name="txtId" FontSize="10"  HorizontalAlignment="Right" Margin="0,12,18,0" VerticalAlignment="Top" TextAlignment="Right" FontWeight="Bold" 
+                   Text="{Binding Id}" />
+        <TextBlock Name="txtDate" FontSize="10"  HorizontalAlignment="Left" Margin="14,12,0,0" VerticalAlignment="Top" TextAlignment="Left" 
+                   Text="{Binding Date}" />
+        <TextBlock Name="txtAuthor" FontSize="10"  HorizontalAlignment="Right" Margin="0,0,12,6" VerticalAlignment="Bottom" TextAlignment="Right" 
+                   Text="{Binding Author}" />
+    </Grid>
+</UserControl>

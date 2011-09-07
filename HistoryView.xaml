@@ -8,45 +8,22 @@
 
     <Grid x:Name="Main" Margin="4">
         <Grid.RowDefinitions>
+            <RowDefinition Height="60" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="4" />
-            <RowDefinition Height="0" />
         </Grid.RowDefinitions>
-        <Grid.Background>
-            <LinearGradientBrush EndPoint="0.5,0" StartPoint="0.5,0">
-                <GradientStop Color="White" Offset="0" />
-                <GradientStop Color="#B4FFFFCA" Offset="1" />
-            </LinearGradientBrush>
-        </Grid.Background>
 
-        <my:HistoryGraph x:Name="HistoryGraph"/>
-
-        <GridSplitter Grid.Row="1" Height="4" ResizeDirection="Rows" 
-                      VerticalAlignment="Bottom" HorizontalAlignment="Stretch"/>
-
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250"/>
-                <ColumnDefinition Width="4"/>
-                <ColumnDefinition Width="250"/>
-                <ColumnDefinition Width="4"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <TreeView x:Name="fileTree" Grid.Column="0" Margin="8 4 4 4"/>
-            
-            <GridSplitter Grid.Column="1"
-                      VerticalAlignment="Stretch" HorizontalAlignment="Left" Width="4" ResizeDirection="Columns" />
-
-            <ListBox x:Name="patchList" Grid.Column="2" Margin="4 4 4 4"/>
-            
-            <GridSplitter Grid.Column="3"
-                      VerticalAlignment="Stretch" HorizontalAlignment="Left" Width="4" ResizeDirection="Columns" />
-
-            <Grid  Grid.Column="4" Background="White" Margin="4 4 8 4">
-                <ContentControl x:Name="diffEditorHost" />
-            </Grid>
+        <my:HistoryGraph Grid.Row="1" x:Name="HistoryGraph" />
+        <Grid>
+            <Label Content="Branches:" Height="28" HorizontalAlignment="Left" Margin="12,2,0,0" Name="label1" VerticalAlignment="Top" />
+            <Label Content="Tags:" Height="28" HorizontalAlignment="Left" Margin="12,26,0,0" Name="label2" VerticalAlignment="Top" />
+            <TextBlock Height="23" HorizontalAlignment="Left" Margin="78,6,0,0" Name="textBlock1" Text="master" VerticalAlignment="Top" Padding="10,2" Background="#FFFCFC8E" />
+            <Grid.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FFF2F2F2" Offset="0" />
+                    <GradientStop Color="#FFDBDBDB" Offset="1" />
+                    <GradientStop Color="#FFD8D5D5" Offset="0.331" />
+                </LinearGradientBrush>
+            </Grid.Background>
         </Grid>
-
     </Grid>
 </UserControl>

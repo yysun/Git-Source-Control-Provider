@@ -16,8 +16,8 @@
         <TextBlock Name="txtId" FontSize="10"  HorizontalAlignment="Right" Margin="0,12,18,0" VerticalAlignment="Top" TextAlignment="Right" FontWeight="Bold" 
                    Text="{Binding Id}" />
         <TextBlock Name="txtDate" FontSize="10"  HorizontalAlignment="Left" Margin="14,12,0,0" VerticalAlignment="Top" TextAlignment="Left" 
-                   Text="{Binding Date}" />
-        <TextBlock Name="txtAuthor" FontSize="10"  HorizontalAlignment="Right" Margin="0,0,12,6" VerticalAlignment="Bottom" TextAlignment="Right" 
                    Text="{Binding Author}" />
+        <TextBlock Name="txtAuthor" FontSize="10"  HorizontalAlignment="Right" Margin="0,0,12,12" VerticalAlignment="Bottom" TextAlignment="Right" 
+                   Text="{Binding Date}" />
     </Grid>
 </UserControl>

@@ -33,7 +33,7 @@ namespace GitScc
 
         public void InsertNewEditor(object editor)
         {
-            diffEditorHost.Content = editor;
+            //diffEditorHost.Content = editor;
         }
 
         DateTime lastTimeRefresh = DateTime.Now.AddDays(-1);

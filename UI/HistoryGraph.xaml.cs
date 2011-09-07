@@ -16,6 +16,7 @@ using System.Windows.Threading;
 using NGit;
 using NGit.Revplot;
 using NGit.Revwalk;
+using NGit.Util;
 
 namespace GitScc.UI
 {
@@ -98,20 +99,13 @@ namespace GitScc.UI
 
         private void AdjustCanvasSize()
         {
-            var x = Convert.ToDouble(this.canvasContainer.GetValue(Canvas.LeftProperty));
-            var y = Convert.ToDouble(this.canvasContainer.GetValue(Canvas.TopProperty));
+            
+            this.canvasContainer.Width = (PADDING * 2 + maxX * GRID_WIDTH);
+            this.canvasRoot.Width = this.canvasContainer.Width * this.Scaler.ScaleX;
 
-            if (Double.IsNaN(x)) x = 0.0;
-            if (Double.IsNaN(y)) y = 0.0;
-
-            var ww = x + this.canvasContainer.Width * this.Scaler.ScaleX;
-            if (ww < this.scrollRoot.RenderSize.Width) ww = this.scrollRoot.RenderSize.Width;
-
-            var hh = y + this.canvasContainer.Height * this.Scaler.ScaleY;
-            if (hh < this.scrollRoot.RenderSize.Height) hh = this.scrollRoot.RenderSize.Height;
-
-            this.canvasRoot.Width = ww;
-            this.canvasRoot.Height = hh;
+            
+            this.canvasContainer.Height = (PADDING * 2 + (maxY+1) * GRID_HEIGHT);
+            this.canvasRoot.Height = this.canvasContainer.Height * this.Scaler.ScaleY;
         }
 
         private void scrollRoot_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -142,8 +136,9 @@ namespace GitScc.UI
 
         const int MAX_COMMITS = 200;
         const int PADDING = 50;
-        const int BOX_HEIGHT = 120;
-        const int BOX_WIDTH = 300;
+        const int GRID_HEIGHT = 180;
+        const int GRID_WIDTH = 300;
+        int maxX, maxY;
 
         private Repository repository;
 
@@ -168,8 +163,8 @@ namespace GitScc.UI
                 pcl.FillTo(MAX_COMMITS);
 
                 var commits = pcl.ToList();
-                var maxX = commits.Count();
-                var maxY = commits.Max(c => c.GetLane().GetPosition());
+                maxX = commits.Count();
+                maxY = commits.Max(c => c.GetLane().GetPosition());
 
                 for (int i = commits.Count() - 1; i >= 0; i--)
                 {
@@ -288,7 +283,7 @@ namespace GitScc.UI
                             Id = commit.Id.Name.Substring(0, 5),
                             Comments = commit.GetShortMessage(),
                             Author = commit.GetAuthorIdent().GetName(),
-                            Date = "",
+                            Date = RelativeDateFormatter.Format(commit.GetAuthorIdent().GetWhen()),
                     };
 
                     double left = GetScreenX(maxX - i);
@@ -302,13 +297,29 @@ namespace GitScc.UI
 
                     #endregion
 
+                    #region Add Branches
+
+                    for (int n = 0; n < commit.GetRefCount(); n++ )
+                    {
+                        var @ref = commit.GetRef(n);
+                        var name = @ref.GetName();
+                        if (name.StartsWith("ref")) name = name.Substring(11);
+
+                        var textBlock = new CommitHead
+                        {
+                            DataContext = new { Text = name },
+                        };
+
+                        Canvas.SetLeft(textBlock, left + CommitBox.WIDTH + 4);
+                        Canvas.SetTop(textBlock, top + n * 30);
+
+                        this.canvasContainer.Children.Add(textBlock);
+                    }
+                    #endregion
+
+                    #region Add Tags
+                    #endregion
                 }
-
-                this.canvasRoot.Width =
-                this.canvasContainer.Width = PADDING * 2 + (maxX + 1) * BOX_WIDTH;
-
-                this.canvasRoot.Height = PADDING * 2 + (maxY + 1) * BOX_HEIGHT;
-                this.canvasContainer.Height = 300;
 
                 AdjustCanvasSize();
             };
@@ -318,12 +329,12 @@ namespace GitScc.UI
 
         private double GetScreenX(double x)
         {
-            return PADDING + (x-1) * BOX_WIDTH;
+            return PADDING + (x-1) * GRID_WIDTH;
         }
 
         private double GetScreenY(double y)
         {
-            return PADDING + y * BOX_HEIGHT;
+            return PADDING + y * GRID_HEIGHT;
         }
 
     }

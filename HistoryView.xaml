@@ -5,6 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="800">
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="ResourceDictionary.xaml"/>
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
 
     <Grid x:Name="Main" Margin="4">
         <Grid.RowDefinitions>
@@ -16,7 +23,8 @@
         <Grid>
             <Label Content="Branches:" Height="28" HorizontalAlignment="Left" Margin="12,2,0,0" Name="label1" VerticalAlignment="Top" />
             <Label Content="Tags:" Height="28" HorizontalAlignment="Left" Margin="12,26,0,0" Name="label2" VerticalAlignment="Top" />
-            <TextBlock Height="23" HorizontalAlignment="Left" Margin="78,6,0,0" Name="textBlock1" Text="master" VerticalAlignment="Top" Padding="10,2" Background="#FFFCFC8E" />
+            <ListBox x:Name="branchList" Margin="78,4,160,36" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" ItemTemplate="{DynamicResource DataTemplate1}" 
+                     Background="#00000000" BorderBrush="{x:Null}" Height="20" ItemContainerStyle="{DynamicResource ListBoxItemStyle1}"/>
             <Grid.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="#FFF2F2F2" Offset="0" />

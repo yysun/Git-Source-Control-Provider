@@ -4,11 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="24" d:DesignWidth="100">
-    <StackPanel Height="20" Orientation="Horizontal">
-        <Polygon Points="0,0.5 1,0 1,1" Fill="Yellow" Width="16" Height="12" Stretch="Fill" />
-        <Border BorderThickness="1" CornerRadius="4" Background="Yellow">
-            <TextBlock Padding="10, 0" Text="{Binding Text}"></TextBlock>
+             d:DesignHeight="18" d:DesignWidth="100">
+    <StackPanel Height="18" Orientation="Horizontal">
+        <Polygon Points="0,0.5 1,0 1,1" Fill="#B4FFFF3D" Width="12" Height="6" Stretch="Fill" Stroke="#B4FFFF3D" />
+        <Border BorderThickness="1" CornerRadius="4" BorderBrush="#B4FFFF3D" Background="#FFFFFF76">
+            <TextBlock Padding="10,0" Text="{Binding Text}" FontSize="10"
+                       VerticalAlignment="Center" HorizontalAlignment="Center" ></TextBlock>
         </Border>
     </StackPanel>
 </UserControl>

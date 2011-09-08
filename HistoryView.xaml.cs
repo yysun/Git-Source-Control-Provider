@@ -29,6 +29,7 @@ namespace GitScc
         {
             InitializeComponent();
             this.toolWindow = toolWindow;
+            this.branchList.ItemsSource = new string[] { "master", "develop", "test"};
         }
 
         public void InsertNewEditor(object editor)

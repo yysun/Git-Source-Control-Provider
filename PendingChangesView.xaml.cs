@@ -273,10 +273,12 @@ namespace GitScc
             if (this.tracker == null || this.tracker.Repository == null) return;
 
             var branchPicker = new BranchPicker(this.tracker.Repository);
-            if (HasComments() && StageSelectedFiles() && branchPicker.Show() == true)
-            {
-                Commit();
-            }
+            branchPicker.Show();
+
+            //if (HasComments() && StageSelectedFiles() && branchPicker.Show() == true)
+            //{
+            //    Commit();
+            //}
         }
 
         private bool StageSelectedFiles()

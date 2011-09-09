@@ -37,7 +37,7 @@ namespace GitScc.UI
         {
             window = new Window
             {
-                Title = "Select a branch",
+                Title = "Switch (checkout) branch",
                 Content = this,
                 WindowStartupLocation = WindowStartupLocation.CenterScreen,
                 ResizeMode = System.Windows.ResizeMode.NoResize,

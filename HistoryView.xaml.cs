@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using NGit.Revwalk;
 using NGit.Revplot;
+using GitScc.DataServices;
 
 namespace GitScc
 {
@@ -29,7 +30,6 @@ namespace GitScc
         {
             InitializeComponent();
             this.toolWindow = toolWindow;
-            this.branchList.ItemsSource = new string[] { "master", "develop", "test"};
         }
 
         public void InsertNewEditor(object editor)
@@ -51,7 +51,15 @@ namespace GitScc
             double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
             if (delta < 1000) return; //no refresh within 1 second
 
-            this.HistoryGraph.Show(tracker.Repository);
+            this.branchList.ItemsSource = tracker.RepositoryGraph.Refs
+                .Where(r => r.Type == RefTypes.Branch)
+                .Select(r => r.Name);
+
+            //this.tagList.ItemsSource = tracker.RepositoryGraph.Refs
+            //    .Where(r => r.Type == "tag")
+            //    .Select(r => r.Name);                
+            
+            this.HistoryGraph.Show(tracker);
 
             lastTimeRefresh = DateTime.Now;
         }
@@ -59,6 +67,11 @@ namespace GitScc
         private void OpenFile(string fileName)
         {
             this.toolWindow.SetDisplayedFile(fileName);
+        }
+
+        private void button1_Click(object sender, RoutedEventArgs e)
+        {
+            this.HistoryGraph.SaveToFile();
         }
 
     }

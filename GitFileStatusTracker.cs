@@ -14,6 +14,7 @@ using NGit.Storage.File;
 using NGit.Treewalk;
 using NGit.Treewalk.Filter;
 using NGit.Ignore;
+using GitScc.DataServices;
 
 namespace GitScc
 {
@@ -41,6 +42,7 @@ namespace GitScc
         {
             this.cache.Clear();
             this.changedFiles = null;
+            this.repositoryGraph = null;
 
             if (!string.IsNullOrEmpty(initFolder))
             {
@@ -500,6 +502,19 @@ namespace GitScc
         public Repository Repository
         {
             get { return repository; }
+        }
+
+        RepositoryGraph repositoryGraph;
+        public RepositoryGraph RepositoryGraph
+        {
+            get
+            {
+                if (repositoryGraph == null)
+                {
+                    repositoryGraph = HasGitRepository ? new RepositoryGraph(this.GitWorkingDirectory) : null;
+                }
+                return repositoryGraph;
+            }
         }
     }
 }

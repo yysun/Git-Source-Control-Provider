@@ -25,6 +25,10 @@
             <Label Content="Tags:" Height="28" HorizontalAlignment="Left" Margin="12,26,0,0" Name="label2" VerticalAlignment="Top" />
             <ListBox x:Name="branchList" Margin="78,4,160,36" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" ItemTemplate="{DynamicResource DataTemplate1}" 
                      Background="#00000000" BorderBrush="{x:Null}" Height="20" ItemContainerStyle="{DynamicResource ListBoxItemStyle1}"/>
+
+            <ListBox x:Name="tagList" Margin="78,26,160,14" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" ItemTemplate="{DynamicResource DataTemplate1}" 
+                     Background="#00000000" BorderBrush="{x:Null}" Height="20" ItemContainerStyle="{DynamicResource ListBoxItemStyle1}"/>
+            <Button Content="Button" Height="23" HorizontalAlignment="Left" Margin="671,27,0,0" Name="button1" VerticalAlignment="Top" Width="75" Click="button1_Click" />
             <Grid.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="#FFF2F2F2" Offset="0" />

@@ -15,9 +15,9 @@
         </ScrollViewer>
         <TextBlock Name="txtId" FontSize="10"  HorizontalAlignment="Right" Margin="0,12,18,0" VerticalAlignment="Top" TextAlignment="Right" FontWeight="Bold" 
                    Text="{Binding Id}" />
-        <TextBlock Name="txtDate" FontSize="10"  HorizontalAlignment="Left" Margin="14,12,0,0" VerticalAlignment="Top" TextAlignment="Left" 
-                   Text="{Binding Author}" />
-        <TextBlock Name="txtAuthor" FontSize="10"  HorizontalAlignment="Right" Margin="0,0,12,12" VerticalAlignment="Bottom" TextAlignment="Right" 
-                   Text="{Binding Date}" />
+        <TextBlock Name="txtAuthor" FontSize="10"  HorizontalAlignment="Left" Margin="12,12,0,0" VerticalAlignment="Top" TextAlignment="Left" 
+                   Text="{Binding Author}" Foreground="#D1000000" />
+        <TextBlock Name="txtDate" FontSize="10"  HorizontalAlignment="Right" Margin="0,0,12,12" VerticalAlignment="Bottom" TextAlignment="Right" 
+                   Text="{Binding Date}" Foreground="#D1000000" />
     </Grid>
 </UserControl>

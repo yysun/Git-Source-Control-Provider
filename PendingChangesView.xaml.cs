@@ -268,19 +268,8 @@ namespace GitScc
             }
         }
 
-        internal void CommitToBranch()
-        {
-            if (this.tracker == null || this.tracker.Repository == null) return;
-
-            var branchPicker = new BranchPicker(this.tracker.Repository);
-            branchPicker.Show();
-
-            //if (HasComments() && StageSelectedFiles() && branchPicker.Show() == true)
-            //{
             //    Commit();
             //}
-        }
-
         private bool StageSelectedFiles()
         {
             foreach (var item in this.dataGrid1.Items.Cast<GitFile>())

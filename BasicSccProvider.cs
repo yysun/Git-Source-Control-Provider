@@ -13,6 +13,7 @@ using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
 using Microsoft.VisualStudio.Shell;
 using System.IO;
 using System.Collections.Generic;
+using GitScc.UI;
 
 namespace GitScc
 {
@@ -132,6 +133,10 @@ namespace GitScc
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandHistory);
                 menu = new MenuCommand(new EventHandler(ShowHistoryWindow), cmd);
                 mcs.AddCommand(menu);
+
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesCommitToBranch);
+                menu = new MenuCommand(new EventHandler(OnSwitchBranchCommand), cmd);
+                mcs.AddCommand(menu);
             }
 
 
@@ -236,6 +241,9 @@ namespace GitScc
                 case CommandId.icmdSccCommandEditIgnore:
                 case CommandId.icmdSccCommandHistory:
                 case CommandId.icmdSccCommandPendingChanges:
+                case CommandId.icmdPendingChangesAmend:
+                case CommandId.icmdPendingChangesCommit:
+                case CommandId.icmdPendingChangesCommitToBranch:
                     if (sccService.IsSolutionGitControlled) cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
 
@@ -410,6 +418,14 @@ namespace GitScc
             {
                 ErrorHandler.ThrowOnFailure(windowFrame.Show());
             }
+        }
+
+        private void OnSwitchBranchCommand(object sender, EventArgs e)
+        {
+            if (sccService.CurrentTracker == null || sccService.CurrentTracker.Repository == null) return;
+
+            var branchPicker = new BranchPicker(sccService.CurrentTracker.Repository);
+            branchPicker.Show();
         }
 
         #endregion

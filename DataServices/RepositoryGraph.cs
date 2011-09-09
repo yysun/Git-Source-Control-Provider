@@ -17,6 +17,7 @@ namespace GitScc.DataServices
         private List<Ref> refs;
         private List<GraphNode> nodes;
         private List<GraphLink> links;
+        private bool isSimplified;
 
         public RepositoryGraph(string repoFolder)
         {
@@ -121,7 +122,7 @@ namespace GitScc.DataServices
 
             int i = 0;
 
-            var commits = SimplifiedCommits();
+            var commits = isSimplified ? SimplifiedCommits() : Commits;
 
             foreach (var commit in commits)
             {
@@ -211,6 +212,11 @@ namespace GitScc.DataServices
             }
 
             return commits.Where(c => !c.deleted).ToList();
+        }
+
+        public bool IsSimplified {
+            get { return isSimplified; }
+            set { isSimplified = value; commits = null; nodes = null; links = null; }
         }
     }
 }

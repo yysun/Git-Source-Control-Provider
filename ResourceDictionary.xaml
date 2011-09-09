@@ -22,8 +22,8 @@
 					<Border x:Name="Bd" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true" Margin="0,0,4,0" CornerRadius="4">
 						<Border.Background>
 							<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-								<GradientStop Color="White" Offset="0"/>
-								<GradientStop Color="#FFFFF846" Offset="1"/>
+								<GradientStop Color="#FFEDEDED" Offset="0"/>
+								<GradientStop Color="#FFB6B6B6" Offset="1"/>
 							</LinearGradientBrush>
 						</Border.Background>
 						<VisualStateManager.VisualStateGroups>

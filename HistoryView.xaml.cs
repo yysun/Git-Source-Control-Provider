@@ -41,13 +41,11 @@ namespace GitScc
 
         internal void Refresh(GitFileStatusTracker tracker)
         {
+            this.HistoryGraph.Show(tracker);
+
             this.tracker = tracker;
-            if (tracker == null)
-            {
-                //clear all UI
-                return;
-            }
-            
+            if (tracker == null) return;
+
             double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
             if (delta < 1000) return; //no refresh within 1 second
 
@@ -55,11 +53,9 @@ namespace GitScc
                 .Where(r => r.Type == RefTypes.Branch)
                 .Select(r => r.Name);
 
-            //this.tagList.ItemsSource = tracker.RepositoryGraph.Refs
-            //    .Where(r => r.Type == "tag")
-            //    .Select(r => r.Name);                
-            
-            this.HistoryGraph.Show(tracker);
+            this.tagList.ItemsSource = tracker.RepositoryGraph.Refs
+                .Where(r => r.Type == RefTypes.Tag)
+                .Select(r => r.Name);
 
             lastTimeRefresh = DateTime.Now;
         }
@@ -71,7 +67,18 @@ namespace GitScc
 
         private void button1_Click(object sender, RoutedEventArgs e)
         {
-            this.HistoryGraph.SaveToFile();
+            var dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.DefaultExt = ".xps";
+            dlg.Filter = "XPS documents (.xps)|*.xps";
+            if (dlg.ShowDialog() == true)
+            {
+                this.HistoryGraph.SaveToFile(dlg.FileName);
+            }
+        }
+
+        private void checkBox1_Click(object sender, RoutedEventArgs e)
+        {
+            this.HistoryGraph.SetSimplified(checkBox1.IsChecked==true);
         }
 
     }

@@ -71,6 +71,7 @@ namespace GitScc.UI
         int maxX, maxY;
 
         private GitFileStatusTracker tracker;
+        private bool showSimplifiedGraph;
 
         internal void Show(GitFileStatusTracker tracker)
         {
@@ -82,6 +83,8 @@ namespace GitScc.UI
             var dispatcher = Dispatcher.CurrentDispatcher;
             Action act = () =>
             {
+                this.tracker.RepositoryGraph.IsSimplified = showSimplifiedGraph;
+
                 var commits = tracker.RepositoryGraph.Nodes;
                 if (commits.Count <= 0) return;
 
@@ -149,6 +152,7 @@ namespace GitScc.UI
                     #endregion
 
                     #region Add Remote Branches
+                    m = 0;
                     foreach (var name in commit.Refs.Where(r => r.Type == RefTypes.RemoteBranch))
                     {
                         var control = new CommitRemote
@@ -263,6 +267,8 @@ namespace GitScc.UI
                 #endregion
 
                 AdjustCanvasSize();
+
+                this.scrollRoot.ScrollToRightEnd();
             };
 
             dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
@@ -278,20 +284,27 @@ namespace GitScc.UI
             return PADDING + y * GRID_HEIGHT;
         }
 
-        internal void SaveToFile()
+        internal void SaveToFile(string fileName)
         {
             Transform transform = canvasContainer.LayoutTransform;
             canvasContainer.LayoutTransform = null;
             Size size = new Size(canvasContainer.Width, canvasContainer.Height);
             canvasContainer.Measure(size);
             canvasContainer.Arrange(new Rect(size));
-            Package package = Package.Open(@"E:\Users\Eric\Pictures\GitScc\test.xps", System.IO.FileMode.Create);
+            Package package = Package.Open(fileName, System.IO.FileMode.Create);
             XpsDocument doc = new XpsDocument(package);
             XpsDocumentWriter writer = XpsDocument.CreateXpsDocumentWriter(doc);
             writer.Write(canvasContainer);
             doc.Close();
             package.Close();
             canvasContainer.LayoutTransform = transform;
+        }
+
+        internal void SetSimplified(bool isSimplified)
+        {
+            this.showSimplifiedGraph = isSimplified;
+            if (this.tracker == null) return;
+            Show(this.tracker);
         }
     }
 }

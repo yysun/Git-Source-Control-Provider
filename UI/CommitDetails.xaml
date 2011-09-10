@@ -5,6 +5,31 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="800">
+	<UserControl.Resources>
+		<ControlTemplate x:Key="BackButtonControlTemplate" TargetType="{x:Type Button}">
+			<Grid Width="24" Height="24">
+				<VisualStateManager.VisualStateGroups>
+					<VisualStateGroup x:Name="CommonStates">
+						<VisualState x:Name="Normal"/>
+						<VisualState x:Name="MouseOver">
+							<Storyboard>
+								<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="ellipse">
+									<EasingColorKeyFrame KeyTime="0" Value="#FF99B6D1"/>
+								</ColorAnimationUsingKeyFrames>
+								<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)" Storyboard.TargetName="textBlock">
+									<EasingColorKeyFrame KeyTime="0" Value="White"/>
+								</ColorAnimationUsingKeyFrames>
+							</Storyboard>
+						</VisualState>
+						<VisualState x:Name="Pressed"/>
+						<VisualState x:Name="Disabled"/>
+					</VisualStateGroup>
+				</VisualStateManager.VisualStateGroups>
+				<Ellipse x:Name="ellipse" Fill="#FFF4F4F5" HorizontalAlignment="Stretch" Stroke="#FF99B6D1" Width="Auto" StrokeThickness="2"/>
+				<TextBlock x:Name="textBlock" Margin="0,1,0,0" TextWrapping="Wrap" d:LayoutOverrides="Width, Height" Foreground="#FF99B6D1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"><Span FontFamily="Wingdings 2" Language="en-us"><Run Text="Ó"/></Span></TextBlock>
+			</Grid>
+		</ControlTemplate>
+	</UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -14,8 +39,8 @@
 
         <Grid>
             <Label Content="Commit" Height="23" HorizontalAlignment="Left" Margin="6,2,0,0" Name="label1" VerticalAlignment="Top" />
-            <Button Content="back to graphic view" Height="23" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,12,0" Padding="10,0"
-                Command="cmd:HistoryViewCommands.CloseCommitDetails"/>
+            <Button Content="back to graphic view" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0" Padding="10,0"
+                Command="cmd:HistoryViewCommands.CloseCommitDetails" Template="{DynamicResource BackButtonControlTemplate}" ToolTip="Back to graphic view" />
             <Grid.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="#FFF2F2F2" Offset="0" />

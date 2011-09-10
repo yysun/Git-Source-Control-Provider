@@ -79,6 +79,7 @@ namespace GitScc
         private void checkBox1_Click(object sender, RoutedEventArgs e)
         {
             this.HistoryGraph.SetSimplified(checkBox1.IsChecked==true);
+            this.lableView.Content = checkBox1.IsChecked == true ? "Simplified view: ON" : "Simplified view: OFF";
         }
 
         private void branchList_PreviewMouseDown(object sender, MouseButtonEventArgs e)

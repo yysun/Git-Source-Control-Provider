@@ -37,10 +37,9 @@
             <ListBox x:Name="tagList" Margin="70,26,160,14" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" ItemTemplate="{DynamicResource DataTemplate1}" 
                      Background="#00000000" BorderBrush="{x:Null}" Height="20" ItemContainerStyle="{DynamicResource ListBoxItemStyle1}"
                      ScrollViewer.HorizontalScrollBarVisibility="hidden"/>
-            
-            <Button Content="Export graph ..." Height="23" HorizontalAlignment="Right" Margin="0,31,20,0" Name="button1" VerticalAlignment="Top" Click="button1_Click" BorderBrush="{x:Null}" Padding="4,1" IsEnabled="True" />
-            <CheckBox Content="Show simplified graph" Height="23" HorizontalAlignment="Right" Margin="0,7,20,0" Name="checkBox1" VerticalAlignment="Top" Click="checkBox1_Click" />
-            <Grid.Background>
+                <CheckBox Content="Show simplified graph" HorizontalAlignment="Right" Margin="0,8,14,0" Name="checkBox1" Click="checkBox1_Click" Template="{DynamicResource ShowSimpleGraphCheckBoxControlTemplate}" VerticalAlignment="Top" ToolTip="Toggle View" />
+                <Label Content="Simplified view: off" HorizontalAlignment="Right" Margin="0,0,12,4" Name="lableView" VerticalAlignment="Bottom" FontSize="9.333" />
+                <Grid.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="#FFF2F2F2" Offset="0" />
                     <GradientStop Color="#FFDBDBDB" Offset="1" />
@@ -48,6 +47,8 @@
                 </LinearGradientBrush>
             </Grid.Background>
         </Grid>
+        <Button Content="Button" HorizontalAlignment="Right" Margin="0,8,43,28" Template="{DynamicResource SaveButtonControlTemplate}" Click="button1_Click" ToolTip="Export graph ..." />
+        <Button Content="Button" HorizontalAlignment="Right" Margin="0,8,72,28" Template="{DynamicResource CompareButtonControlTemplate}" ToolTip="Compare ..." RenderTransformOrigin="1.25,0.5" IsEnabled="False" />
     </Grid>
         
         <my:CommitDetails x:Name="details" RenderTransformOrigin="0,0" Visibility="Collapsed" Background="White">

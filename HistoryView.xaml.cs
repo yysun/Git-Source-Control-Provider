@@ -15,6 +15,7 @@ using System.Windows.Threading;
 using NGit.Revwalk;
 using NGit.Revplot;
 using GitScc.DataServices;
+using System.Windows.Media.Animation;
 
 namespace GitScc
 {
@@ -42,7 +43,6 @@ namespace GitScc
         internal void Refresh(GitFileStatusTracker tracker)
         {
             this.HistoryGraph.Show(tracker);
-
             this.tracker = tracker;
             if (tracker == null) return;
 
@@ -81,5 +81,44 @@ namespace GitScc
             this.HistoryGraph.SetSimplified(checkBox1.IsChecked==true);
         }
 
+        private void branchList_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var listbox = sender as ListBox;
+            Point clickPoint = e.GetPosition(listbox);
+            var element = listbox.InputHitTest(clickPoint) as TextBlock;
+
+            if(element!=null) ShowCommitDetails(element.Text);
+        }
+
+        private void ShowCommitDetails(string id)
+        {
+            if (id != null)
+            {
+                this.details.RenderTransform.SetValue(TranslateTransform.XProperty, this.ActualWidth);
+                this.details.Visibility = Visibility.Visible;
+                var animationDuration = TimeSpan.FromSeconds(.5);
+                var animation = new DoubleAnimation(0, new Duration(animationDuration));
+                animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
+                this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+
+                this.details.Show(this.tracker, id);
+            }
+        }
+
+        private void CommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            var animationDuration = TimeSpan.FromSeconds(.2);
+            var animation = new DoubleAnimation(this.ActualWidth+100, new Duration(animationDuration));
+            animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseIn };
+            animation.Completed += (o, _) => this.details.Visibility = Visibility.Collapsed;
+            this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+        }
+
+
+    }
+
+    public static class HistoryViewCommands
+    {
+        public static readonly RoutedUICommand CloseCommitDetails = new RoutedUICommand("Close", "Close", typeof(HistoryView));
     }
 }

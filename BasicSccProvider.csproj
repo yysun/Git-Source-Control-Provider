@@ -130,6 +130,9 @@
     <Compile Include="UI\CommitBox.xaml.cs">
       <DependentUpon>CommitBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\CommitDetails.xaml.cs">
+      <DependentUpon>CommitDetails.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\CommitHead.xaml.cs">
       <DependentUpon>CommitHead.xaml</DependentUpon>
     </Compile>
@@ -203,6 +206,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="UI\CommitDetails.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UI\CommitHead.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -234,6 +241,7 @@
       <Name>Sharpen</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <!--
     To specify a different registry root to register your package, uncomment the TargetRegistryRoot

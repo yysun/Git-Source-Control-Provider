@@ -23,9 +23,27 @@ namespace GitScc.UI
         internal const int HEIGHT = 120;
         internal const int WIDTH = 200;
 
+        public bool Selected { get; set; }
+
         public CommitBox()
         {
             InitializeComponent();
+        }
+
+        private void root_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            this.Selected = !this.Selected;
+            VisualStateManager.GoToElementState(this.root, this.Selected ? "SelectedSate" : "NotSelectedState", true);
+        }
+
+        private void txtComment_MouseEnter(object sender, MouseEventArgs e)
+        {
+            VisualStateManager.GoToElementState(this.root, "MouseOverState", true);
+        }
+
+        private void txtComment_MouseLeave(object sender, MouseEventArgs e)
+        {
+            VisualStateManager.GoToElementState(this.root, "NormalState", true);
         }
     }
 }

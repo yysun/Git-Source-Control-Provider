@@ -33,11 +33,60 @@
 			</Grid>
 		</ControlTemplate>
 	</UserControl.Resources>
-    <Grid Height="120" Width="200">
+    <Grid x:Name="root" Height="120" Width="200" PreviewMouseDown="root_PreviewMouseDown" RenderTransformOrigin="0.5,0.5" MouseEnter="txtComment_MouseEnter" MouseLeave="txtComment_MouseLeave">
+    	<Grid.RenderTransform>
+    		<TransformGroup>
+    			<ScaleTransform/>
+    			<SkewTransform/>
+    			<RotateTransform/>
+    			<TranslateTransform/>
+    		</TransformGroup>
+    	</Grid.RenderTransform>
+    	<VisualStateManager.VisualStateGroups>
+    		<VisualStateGroup x:Name="VisualStateGroup">
+    			<VisualStateGroup.Transitions>
+    				<VisualTransition GeneratedDuration="0:0:0.1"/>
+    			</VisualStateGroup.Transitions>
+
+    			<VisualState x:Name="NormalState"/>
+    			<VisualState x:Name="MouseOverState">
+
+    				<Storyboard>
+    					<DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" Storyboard.TargetName="root">
+    						<EasingDoubleKeyFrame KeyTime="0" Value="1.5"/>
+    					</DoubleAnimationUsingKeyFrames>
+    					<DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" Storyboard.TargetName="root">
+    						<EasingDoubleKeyFrame KeyTime="0" Value="1.5"/>
+    					</DoubleAnimationUsingKeyFrames>
+    				</Storyboard>
+
+    			</VisualState>
+    		</VisualStateGroup>
+    		<VisualStateGroup x:Name="VisualStateGroup1">
+    			<VisualState x:Name="SelectedSate">
+    				<Storyboard>
+    					<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Stroke).(SolidColorBrush.Color)" Storyboard.TargetName="rectangle1">
+    						<EasingColorKeyFrame KeyTime="0" Value="#FFFFAB9D"/>
+    					</ColorAnimationUsingKeyFrames>
+    					<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Fill).(GradientBrush.GradientStops)[1].(GradientStop.Color)" Storyboard.TargetName="rectangle1">
+    						<EasingColorKeyFrame KeyTime="0" Value="#FFFFDFCD"/>
+    					</ColorAnimationUsingKeyFrames>
+    				</Storyboard>
+    			</VisualState>
+    			<VisualState x:Name="NotSelectedState"/>
+			</VisualStateGroup>	
+    	</VisualStateManager.VisualStateGroups>
         <Rectangle HorizontalAlignment="Stretch" Margin="0" 
                    Name="rectangle1" Stroke="#FF99B6D1" 
-                   VerticalAlignment="Stretch" StrokeThickness="4" RadiusX="4" RadiusY="4" Fill="#FFF2FBFF" />
-        <ScrollViewer Margin="6,30,6,24" VerticalScrollBarVisibility="Auto" >
+                   VerticalAlignment="Stretch" StrokeThickness="4" RadiusX="4" RadiusY="4" >
+        	<Rectangle.Fill>
+        		<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+        			<GradientStop Color="White" Offset="0"/>
+        			<GradientStop Color="#FFE8FEFF" Offset="1"/>
+        		</LinearGradientBrush>
+        	</Rectangle.Fill>
+        </Rectangle>
+        <ScrollViewer x:Name="scrollViewer" Margin="6,30,6,24" VerticalScrollBarVisibility="Auto" >
             <TextBlock Name="txtComment" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="6,0,6,0"
                        Text="{Binding Comments}" FontSize="10" TextWrapping="Wrap" TextAlignment="Justify" />
         </ScrollViewer>

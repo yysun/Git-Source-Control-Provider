@@ -14,7 +14,8 @@
     </UserControl.Resources>
     
     <UserControl.CommandBindings>
-        <CommandBinding Command="cmd:HistoryViewCommands.CloseCommitDetails"  Executed="CommandBinding_Executed" />
+        <CommandBinding Command="cmd:HistoryViewCommands.CloseCommitDetails"  Executed="CloseCommitDetails_Executed" />
+        <CommandBinding Command="cmd:HistoryViewCommands.OpenCommitDetails"  Executed="OpenCommitDetails_Executed" />
     </UserControl.CommandBindings>
     
     <Grid x:Name="Main" Margin="4">

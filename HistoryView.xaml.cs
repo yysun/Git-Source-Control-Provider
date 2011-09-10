@@ -105,7 +105,7 @@ namespace GitScc
             }
         }
 
-        private void CommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
+        private void CloseCommitDetails_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             var animationDuration = TimeSpan.FromSeconds(.2);
             var animation = new DoubleAnimation(this.ActualWidth+100, new Duration(animationDuration));
@@ -114,11 +114,15 @@ namespace GitScc
             this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
         }
 
-
+        private void OpenCommitDetails_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            ShowCommitDetails(e.Parameter as string);
+        }
     }
 
     public static class HistoryViewCommands
     {
-        public static readonly RoutedUICommand CloseCommitDetails = new RoutedUICommand("Close", "Close", typeof(HistoryView));
+        public static readonly RoutedUICommand CloseCommitDetails = new RoutedUICommand("CloseCommitDetails", "CloseCommitDetails", typeof(HistoryView));
+        public static readonly RoutedUICommand OpenCommitDetails = new RoutedUICommand("OpenCommitDetails", "OpenCommitDetails", typeof(HistoryView));
     }
 }

@@ -100,7 +100,8 @@ namespace GitScc.UI
                     var box = new CommitBox();
                     box.DataContext = new
                     {
-                        Id = commit.Id.Substring(0, 5),
+                        Id = commit.Id,
+                        ShortId = commit.Id.Substring(0, 5),
                         Comments = commit.Message,
                         Author = commit.CommitterName,
                         Date = commit.CommitDateRelative,

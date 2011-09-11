@@ -32,5 +32,11 @@ namespace GitScc.UI
             this.tracker = tracker;
             this.label1.Content = p;
         }
+
+        internal void Show(GitFileStatusTracker tracker, string p, string p_2)
+        {
+            this.tracker = tracker;
+            this.label1.Content = string.Format("{0} vs {1}", p, p_2);
+        }
     }
 }

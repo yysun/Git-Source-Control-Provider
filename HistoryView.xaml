@@ -16,6 +16,7 @@
     <UserControl.CommandBindings>
         <CommandBinding Command="cmd:HistoryViewCommands.CloseCommitDetails"  Executed="CloseCommitDetails_Executed" />
         <CommandBinding Command="cmd:HistoryViewCommands.OpenCommitDetails"  Executed="OpenCommitDetails_Executed" />
+        <CommandBinding Command="cmd:HistoryViewCommands.SelectCommit"  Executed="SelectCommit_Executed" />
     </UserControl.CommandBindings>
     
     <Grid x:Name="Main" Margin="4">
@@ -28,18 +29,18 @@
 
         <my:HistoryGraph Grid.Row="1" x:Name="HistoryGraph" />
         <Grid>
-            <Label Content="Branches:" Height="28" HorizontalAlignment="Left" Margin="6,2,0,0" Name="label1" VerticalAlignment="Top" />
-            <Label Content="Tags:" Height="28" HorizontalAlignment="Left" Margin="6,26,0,0" Name="label2" VerticalAlignment="Top" />
-            <ListBox x:Name="branchList" Margin="70,4,160,36" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" ItemTemplate="{DynamicResource DataTemplate1}" 
+            <Label Content="Branches" Height="28" HorizontalAlignment="Left" Margin="6,2,0,0" Name="label1" VerticalAlignment="Top" FontSize="10" />
+            <Label Content="Tags" Height="28" HorizontalAlignment="Left" Margin="6,26,0,0" Name="label2" VerticalAlignment="Top" FontSize="10" />
+            <ListBox x:Name="branchList" Margin="60,4,160,36" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" ItemTemplate="{DynamicResource DataTemplate1}" 
                      Background="#00000000" BorderBrush="{x:Null}" Height="20" ItemContainerStyle="{DynamicResource ListBoxItemStyle1}"
                      ScrollViewer.HorizontalScrollBarVisibility="hidden" PreviewMouseDown="branchList_PreviewMouseDown" />
 
-            <ListBox x:Name="tagList" Margin="70,26,160,14" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" ItemTemplate="{DynamicResource DataTemplate1}" 
+            <ListBox x:Name="tagList" Margin="60,26,160,14" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" ItemTemplate="{DynamicResource DataTemplate1}" 
                      Background="#00000000" BorderBrush="{x:Null}" Height="20" ItemContainerStyle="{DynamicResource ListBoxItemStyle1}"
-                     ScrollViewer.HorizontalScrollBarVisibility="hidden"/>
+                     ScrollViewer.HorizontalScrollBarVisibility="hidden" PreviewMouseDown="branchList_PreviewMouseDown" />
                 <CheckBox Content="Show simplified graph" HorizontalAlignment="Right" Margin="0,8,14,0" Name="checkBox1" Click="checkBox1_Click" Template="{DynamicResource ShowSimpleGraphCheckBoxControlTemplate}" VerticalAlignment="Top" ToolTip="Toggle View" />
                 <Label Content="Simplified view: off" HorizontalAlignment="Right" Margin="0,0,12,4" Name="lableView" VerticalAlignment="Bottom" FontSize="9.333" />
-                <Grid.Background>
+				<Grid.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="#FFF2F2F2" Offset="0" />
                     <GradientStop Color="#FFDBDBDB" Offset="1" />
@@ -48,10 +49,11 @@
             </Grid.Background>
         </Grid>
         <Button Content="Button" HorizontalAlignment="Right" Margin="0,8,43,28" Template="{DynamicResource SaveButtonControlTemplate}" Click="button1_Click" ToolTip="Export graph ..." />
-        <Button Content="Button" HorizontalAlignment="Right" Margin="0,8,72,28" Template="{DynamicResource CompareButtonControlTemplate}" ToolTip="Compare ..." RenderTransformOrigin="1.25,0.5" IsEnabled="False" />
-    </Grid>
+        <Button Content="Button" HorizontalAlignment="Right" Margin="0,8,72,28" Template="{DynamicResource CompareButtonControlTemplate}" ToolTip="Select two commits to compare ..." Name="btnCompare" Click="btnCompare_Click" />
+		<Button Content="0" HorizontalAlignment="Right" Margin="0,8,100,0" Name="btnCommitCount" VerticalAlignment="Top" Template="{DynamicResource CommitCountControlTemplate}" RenderTransformOrigin="-1.125,0.438" />
+        </Grid>
         
-        <my:CommitDetails x:Name="details" RenderTransformOrigin="0,0" Visibility="Collapsed" Background="White">
+        <my:CommitDetails x:Name="details" Visibility="Collapsed" Background="White">
             <my:CommitDetails.RenderTransform>
         			<TranslateTransform/>
         	</my:CommitDetails.RenderTransform>

@@ -34,6 +34,7 @@ namespace GitScc.UI
         {
             this.Selected = !this.Selected;
             VisualStateManager.GoToElementState(this.root, this.Selected ? "SelectedSate" : "NotSelectedState", true);
+            HistoryViewCommands.SelectCommit.Execute(this.txtId.Text, null);
         }
 
         private void txtComment_MouseEnter(object sender, MouseEventArgs e)

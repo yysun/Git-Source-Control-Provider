@@ -147,4 +147,19 @@
     		<TextBlock x:Name="textBlock" Margin="0" TextWrapping="Wrap" d:LayoutOverrides="Width, Height" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#FF99B6D6" FontSize="14.667"><Span FontFamily="Webdings" Language="en-us"><Run Text="~"/></Span></TextBlock>
     	</Grid>
     </ControlTemplate>
+    <ControlTemplate x:Key="CommitCountControlTemplate" TargetType="{x:Type Button}">
+    	<Grid Width="16" Height="16">
+    		<Ellipse Fill="White" Stroke="#FF99B6D1" StrokeThickness="2"/>
+            <TextBlock TextWrapping="Wrap" Text="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#FF576B7C" FontSize="8" FontWeight="Bold" Margin="0,0,0,1"/>
+    	</Grid>
+    </ControlTemplate>
+    <Style x:Key="ButtonFocusVisual">
+    	<Setter Property="Control.Template">
+    		<Setter.Value>
+    			<ControlTemplate>
+    				<Rectangle Margin="2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+    			</ControlTemplate>
+    		</Setter.Value>
+    	</Setter>
+    </Style>
 </ResourceDictionary>

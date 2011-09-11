@@ -1,21 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
-using NGit.Revwalk;
-using NGit.Revplot;
-using GitScc.DataServices;
 using System.Windows.Media.Animation;
+using GitScc.DataServices;
 
 namespace GitScc
 {
@@ -26,11 +17,13 @@ namespace GitScc
     {
         HistoryToolWindow toolWindow;
         private GitFileStatusTracker tracker;
+        private ObservableCollection<string> selectedCommits;
 
         public HistoryView(HistoryToolWindow toolWindow)
         {
             InitializeComponent();
             this.toolWindow = toolWindow;
+            this.selectedCommits = new ObservableCollection<string>();
         }
 
         public void InsertNewEditor(object editor)
@@ -43,6 +36,8 @@ namespace GitScc
         internal void Refresh(GitFileStatusTracker tracker)
         {
             this.HistoryGraph.Show(tracker);
+            SetSelectedCommitCount();
+
             this.tracker = tracker;
             if (tracker == null) return;
 
@@ -80,6 +75,8 @@ namespace GitScc
         {
             this.HistoryGraph.SetSimplified(checkBox1.IsChecked==true);
             this.lableView.Content = checkBox1.IsChecked == true ? "Simplified view: ON" : "Simplified view: OFF";
+            this.selectedCommits.Clear();
+            SetSelectedCommitCount();
         }
 
         private void branchList_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -119,11 +116,44 @@ namespace GitScc
         {
             ShowCommitDetails(e.Parameter as string);
         }
+
+        private void SelectCommit_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            var commit = e.Parameter as string;
+            if (this.selectedCommits.Contains(commit)) 
+                selectedCommits.Remove(commit);
+            else
+                this.selectedCommits.Add(commit);
+
+            SetSelectedCommitCount();
+        }
+
+        private void btnCompare_Click(object sender, RoutedEventArgs e)
+        {
+            this.details.RenderTransform.SetValue(TranslateTransform.XProperty, this.ActualWidth);
+            this.details.Visibility = Visibility.Visible;
+            var animationDuration = TimeSpan.FromSeconds(.5);
+            var animation = new DoubleAnimation(0, new Duration(animationDuration));
+            animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
+            this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+
+            this.details.Show(this.tracker, this.selectedCommits[0], this.selectedCommits[1]);
+        }
+
+        private void SetSelectedCommitCount()
+        {
+            this.btnCompare.IsEnabled = this.selectedCommits.Count() == 2;
+            this.btnCommitCount.Visibility = this.selectedCommits.Count() > 0 ?
+                Visibility.Visible : Visibility.Collapsed;
+            this.btnCommitCount.Content = this.selectedCommits.Count().ToString();
+        }
     }
 
     public static class HistoryViewCommands
     {
         public static readonly RoutedUICommand CloseCommitDetails = new RoutedUICommand("CloseCommitDetails", "CloseCommitDetails", typeof(HistoryView));
         public static readonly RoutedUICommand OpenCommitDetails = new RoutedUICommand("OpenCommitDetails", "OpenCommitDetails", typeof(HistoryView));
+        public static readonly RoutedUICommand SelectCommit = new RoutedUICommand("SelectCommit", "SelectCommit", typeof(HistoryView));
+    
     }
 }

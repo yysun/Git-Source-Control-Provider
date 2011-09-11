@@ -145,6 +145,9 @@
     <Compile Include="UI\HistoryGraph.xaml.cs">
       <DependentUpon>HistoryGraph.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\Loading.xaml.cs">
+      <DependentUpon>Loading.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="HistoryToolWindow.resx">
@@ -170,6 +173,7 @@
     </Content>
     <Content Include="Resources\Images_24bit.bmp" />
     <Content Include="Resources\Images_32bit.bmp" />
+    <Resource Include="Resources\Loading.png" />
     <Content Include="Resources\SccGlyphs.bmp" />
     <Content Include="solution explorer.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -223,6 +227,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\HistoryGraph.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Loading.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

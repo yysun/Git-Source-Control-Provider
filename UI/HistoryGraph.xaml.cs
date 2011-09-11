@@ -80,7 +80,9 @@ namespace GitScc.UI
             this.tracker = tracker;
             if (tracker == null) return;
 
+            loading.Visibility = Visibility.Visible;
             var dispatcher = Dispatcher.CurrentDispatcher;
+
             Action act = () =>
             {
                 this.tracker.RepositoryGraph.IsSimplified = showSimplifiedGraph;
@@ -270,8 +272,9 @@ namespace GitScc.UI
                 AdjustCanvasSize();
 
                 this.scrollRoot.ScrollToRightEnd();
-            };
 
+                loading.Visibility = Visibility.Collapsed;
+            };
             dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
         }
 

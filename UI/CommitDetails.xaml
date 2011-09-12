@@ -29,7 +29,39 @@
 				<TextBlock x:Name="textBlock" Margin="0,1,0,0" TextWrapping="Wrap" d:LayoutOverrides="Width, Height" Foreground="#FF99B6D1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"><Span FontFamily="Wingdings 2" Language="en-us"><Run Text="Ó"/></Span></TextBlock>
 			</Grid>
 		</ControlTemplate>
-	</UserControl.Resources>
+
+        <Style TargetType="{x:Type ListBoxItem}">
+            <Style.Triggers>
+                <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                    <Setter Property="Background" Value="#FFDBDBDB"></Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <ControlTemplate x:Key="btnSwitchControlTemplate" TargetType="{x:Type Button}">
+        	<Grid Width="24" Height="24">
+        		<VisualStateManager.VisualStateGroups>
+        			<VisualStateGroup x:Name="CommonStates">
+        				<VisualState x:Name="Normal"/>
+        				<VisualState x:Name="MouseOver">
+        					<Storyboard>
+        						<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="ellipse">
+        							<EasingColorKeyFrame KeyTime="0" Value="#FF99B6D1"/>
+        						</ColorAnimationUsingKeyFrames>
+        						<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)" Storyboard.TargetName="textBlock">
+        							<EasingColorKeyFrame KeyTime="0" Value="White"/>
+        						</ColorAnimationUsingKeyFrames>
+        					</Storyboard>
+        				</VisualState>
+        				<VisualState x:Name="Pressed"/>
+        				<VisualState x:Name="Disabled"/>
+        			</VisualStateGroup>
+        		</VisualStateManager.VisualStateGroups>
+        		<Ellipse x:Name="ellipse" Fill="#FFF4F4F5" Stroke="#FF99B6D1" StrokeThickness="2"/>
+        		<TextBlock x:Name="textBlock" Margin="0" TextWrapping="Wrap" d:LayoutOverrides="Width, Height" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#FF99B6D1" FontWeight="Bold"><Span FontSize="17.3333333333333" FontFamily="Wingdings 3" Language="en-us"><Run Text="F"/></Span></TextBlock>
+        	</Grid>
+        </ControlTemplate>
+
+    </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -38,11 +70,12 @@
         </Grid.RowDefinitions>
 
         <Grid>
-            <Label Content="Commit" Height="22" HorizontalAlignment="Left" Margin="6,2,0,0" Name="lblCommit" VerticalAlignment="Top" FontSize="10"/>
-            <Label Content="" Height="22" HorizontalAlignment="Left" Margin="6,18,0,0" Name="lblMessage" VerticalAlignment="Top" FontSize="10"/>
-            <Label Content="" Height="22" HorizontalAlignment="Left" Margin="6,34,0,0" Name="lblAuthor" VerticalAlignment="Top" FontSize="10"/>
+            <Label Content="Commit" HorizontalAlignment="Left" Margin="6,2,0,0" Name="lblCommit" VerticalAlignment="Top" />
+            <Label Content="Message" HorizontalAlignment="Left" Margin="6,28,0,0" Name="lblMessage" VerticalAlignment="Top" />
+            <Label Content="Author"  HorizontalAlignment="Right" Margin="0,0,6,0" Name="lblAuthor" VerticalAlignment="Bottom" FontSize="10"/>
             <Button Content="back to graphic view" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,6,10,0" Padding="10,0"
                 Command="cmd:HistoryViewCommands.CloseCommitDetails" Template="{DynamicResource BackButtonControlTemplate}" ToolTip="Back to graphic view" />
+            <Button HorizontalAlignment="Right" Margin="0,6,40,0" Name="btnSwitch" VerticalAlignment="Top" Click="btnSwitch_Click" Template="{DynamicResource btnSwitchControlTemplate}" RenderTransformOrigin="-1.5,0.542" ToolTip="Reverse the comparison order" />
             <Grid.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="#FFF2F2F2" Offset="0" />
@@ -54,19 +87,32 @@
 
         <Grid x:Name="detailsGrid" Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250"/>
-                <ColumnDefinition Width="4"/>
-                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="400"/>
                 <ColumnDefinition Width="4"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TreeView x:Name="fileTree" Grid.Column="0" Margin="4 4 2 4">
+            <Grid Height="36" HorizontalAlignment="Stretch" VerticalAlignment="Top" >
+                <Grid.Background>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="#FFCBCBCB" Offset="0" />
+                        <GradientStop Color="White" Offset="1" />
+                    </LinearGradientBrush>
+                </Grid.Background>
+                <RadioButton Content="Show Files" Height="16" HorizontalAlignment="Left" Margin="12,8,0,0" Name="radioShowFileTree" VerticalAlignment="Top" Checked="radioShowFileTree_Checked" />
+                <RadioButton Content="Show Changes" Height="16" HorizontalAlignment="Left" Margin="120,8,0,0" Name="radioShowChanges" VerticalAlignment="Top" Checked="radioShowChanges_Checked" />
+            </Grid>
+            
+            <GridSplitter Grid.Column="1"
+                      VerticalAlignment="Stretch" HorizontalAlignment="Left" Width="4" ResizeDirection="Columns" />
+            
+            <TreeView x:Name="fileTree" Margin="10,38,0,10" BorderBrush="{x:Null}" VerticalContentAlignment="Stretch" 
+                      HorizontalAlignment="Stretch" SelectedItemChanged="fileTree_SelectedItemChanged">
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding Children}"
                                               DataType="{x:Type model:GitTreeObject}">
 
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" Height="18">
                             <TextBlock Text="{Binding Name}" />
                         </StackPanel>
 
@@ -80,26 +126,30 @@
                     </Style>
                 </TreeView.ItemContainerStyle>
             </TreeView>
+           
+            <DataGrid x:Name="patchList" Margin="10,38,0,10" AutoGenerateColumns="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                      GridLinesVisibility="None"  Foreground="#FF333333" Sorting="dataGrid1_Sorting" IsReadOnly="True" SelectedValuePath="Name"
+                      SelectionMode="Single" Visibility="Collapsed" SelectionChanged="patchList_SelectionChanged">
 
-            <GridSplitter Grid.Column="1"
-                      VerticalAlignment="Stretch" HorizontalAlignment="Left" Width="4" ResizeDirection="Columns" />
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Status" Binding="{Binding ChangeType}" Width="80"  />
+                    <DataGridTextColumn Header="File" Binding="{Binding Name}" Width="280" />
+                </DataGrid.Columns>
 
-            <ListBox x:Name="patchList" Grid.Column="2" Margin="2 4 2 4">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding ChangeType}" />
-                            <TextBlock Text="{Binding Name}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+            </DataGrid>
 
-            <GridSplitter Grid.Column="3"
-                      VerticalAlignment="Stretch" HorizontalAlignment="Left" Width="4" ResizeDirection="Columns" />
-
-            <Grid  Grid.Column="4" Background="White" Margin="2 4 4 4">
-                <ContentControl x:Name="diffEditorHost" />
+            <Grid Grid.Column="2" Height="36" HorizontalAlignment="Stretch" VerticalAlignment="Top" >
+                <Grid.Background>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="#FFCBCBCB" Offset="0" />
+                        <GradientStop Color="White" Offset="1" />
+                    </LinearGradientBrush>
+                </Grid.Background>
+                <TextBlock x:Name="txtFileName" Text="" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" />
+            </Grid>
+            
+            <Grid  Grid.Column="2" Background="White" Margin="2,38,10,10" HorizontalAlignment="Stretch">
+                <ContentControl x:Name="editor" />
             </Grid>
         </Grid>
     </Grid>

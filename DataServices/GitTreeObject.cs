@@ -17,6 +17,7 @@ namespace GitScc.DataServices
 
         private bool isExpanded;
         private IEnumerable<GitTreeObject> children;
+        private byte[] content;
 
         public IEnumerable<GitTreeObject> Children
         {
@@ -54,6 +55,20 @@ namespace GitScc.DataServices
             }
         }
 
+        public byte[] Content
+        {
+            get
+            {
+                if (!IsTree && content == null)
+                {
+                    var blob = this.repository.Open(ObjectId.FromString(this.Id));
+                    if (blob != null) content = blob.GetCachedBytes();
+                }
+                return content;
+            }
+        }
+
+        #region INotifyPropertyChanged
         private void NotifyPropertyChanged(String info)
         {
             if (PropertyChanged != null)
@@ -63,5 +78,6 @@ namespace GitScc.DataServices
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+        #endregion
     }
 }

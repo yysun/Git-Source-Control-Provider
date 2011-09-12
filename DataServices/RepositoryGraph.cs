@@ -254,7 +254,7 @@ namespace GitScc.DataServices
             var id2 = GetTreeIdFromCommitId(repository, toCommitId);
             if (id1 == null || id2 == null) return null;
             else
-                return GetChanges(repository, id1, id2);
+                return GetChanges(repository, id2, id1);
         }
 
         public Change[] GetChanges(string commitId)
@@ -270,7 +270,7 @@ namespace GitScc.DataServices
 
                 var pid = commit.Parents[0].Id;
                 var pcommit = walk.ParseCommit(pid);
-                return GetChanges(repository, pcommit.Tree.Id, commit.Tree.Id);
+                return GetChanges(repository, commit.Tree.Id, pcommit.Tree.Id);
             }
             finally
             {
@@ -351,5 +351,30 @@ namespace GitScc.DataServices
         }
         #endregion
 
+        internal byte[] GetFileContent(string commitId, string fileName)
+        {
+            if (repository == null) return null;
+            RevWalk walk = null;
+            try
+            {
+                var id = repository.Resolve(commitId);
+                walk = new RevWalk(repository);
+                RevCommit commit = walk.ParseCommit(id);
+                if (commit == null || commit.Tree == null) return null;
+                var commitTree = new Tree(repository, commit.Tree.Id, repository.Open(commit.Tree.Id).GetBytes());
+                var entry = commitTree.FindBlobMember(fileName);
+                if (entry != null)
+                {
+                    var blob = repository.Open(entry.GetId());
+                    if (blob != null) return blob.GetCachedBytes();
+                }
+            }
+            finally
+            {
+                if (walk != null) walk.Dispose();
+            }
+
+            return null;
+        }
     }
 }

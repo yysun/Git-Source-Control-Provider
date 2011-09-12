@@ -23,6 +23,7 @@ namespace GitScc
         {
             InitializeComponent();
             this.toolWindow = toolWindow;
+            this.details.toolWindow = toolWindow;
             this.selectedCommits = new ObservableCollection<string>();
         }
 
@@ -149,6 +150,12 @@ namespace GitScc
             this.btnCommitCount.Visibility = this.selectedCommits.Count() > 0 ?
                 Visibility.Visible : Visibility.Collapsed;
             this.btnCommitCount.Content = this.selectedCommits.Count().ToString();
+        }
+
+        private void btnCommitCount_Click(object sender, RoutedEventArgs e)
+        {
+            //selectedCommits.Clear();
+            //SetSelectedCommitCount();
         }
     }
 

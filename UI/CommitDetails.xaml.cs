@@ -27,16 +27,28 @@ namespace GitScc.UI
         }
 
 
-        internal void Show(GitFileStatusTracker tracker, string p)
+        internal void Show(GitFileStatusTracker tracker, string commitId)
         {
             this.tracker = tracker;
-            this.label1.Content = p;
+            var repositoryGraph = tracker.RepositoryGraph;
+            var commit = repositoryGraph.GetCommit(commitId);    
+            this.lblCommit.Content = "Hash: " + commit.Id;
+            this.lblMessage.Content = "Message: " + commit.Message;
+            this.lblAuthor.Content = commit.CommitterName + " " + commit.CommitDateRelative;
+            this.detailsGrid.ColumnDefinitions[0].Width = new GridLength(250);
+            this.fileTree.ItemsSource = repositoryGraph.GetTree(commitId).Children;
+            this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId);
         }
 
-        internal void Show(GitFileStatusTracker tracker, string p, string p_2)
+        internal void Show(GitFileStatusTracker tracker, string commitId1, string commitId2)
         {
             this.tracker = tracker;
-            this.label1.Content = string.Format("{0} vs {1}", p, p_2);
+            this.lblCommit.Content = commitId1;
+            this.lblMessage.Content = "";
+            this.lblAuthor.Content = commitId2;
+            var repositoryGraph = tracker.RepositoryGraph;
+            this.detailsGrid.ColumnDefinitions[0].Width = new GridLength(0);
+            this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId1, commitId2);
         }
     }
 }

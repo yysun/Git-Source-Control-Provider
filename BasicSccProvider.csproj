@@ -87,11 +87,13 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataServices\Change.cs" />
     <Compile Include="DataServices\Commit.cs" />
     <Compile Include="DataServices\GraphLink.cs" />
     <Compile Include="DataServices\GraphNode.cs" />
     <Compile Include="DataServices\Ref.cs" />
     <Compile Include="DataServices\RepositoryGraph.cs" />
+    <Compile Include="DataServices\GitTreeObject.cs" />
     <Compile Include="GitToolCommands.cs" />
     <Compile Include="HistoryToolWindow.cs" />
     <Compile Include="GitFileStatusTracker.cs" />

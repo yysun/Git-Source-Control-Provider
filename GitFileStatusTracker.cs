@@ -511,7 +511,7 @@ namespace GitScc
             {
                 if (repositoryGraph == null)
                 {
-                    repositoryGraph = HasGitRepository ? new RepositoryGraph(this.GitWorkingDirectory) : null;
+                    repositoryGraph = HasGitRepository ? new RepositoryGraph(this.repository) : null;
                 }
                 return repositoryGraph;
             }

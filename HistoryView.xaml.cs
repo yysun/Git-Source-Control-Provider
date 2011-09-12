@@ -35,24 +35,27 @@ namespace GitScc
 
         internal void Refresh(GitFileStatusTracker tracker)
         {
-            this.HistoryGraph.Show(tracker);
+            CloseCommitDetails_Executed(this, null);
+            selectedCommits.Clear();
             SetSelectedCommitCount();
+            this.HistoryGraph.Show(tracker);
 
             this.tracker = tracker;
-            if (tracker == null) return;
+            if (tracker != null)
+            {
+                double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
+                if (delta < 1000) return; //no refresh within 1 second
 
-            double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
-            if (delta < 1000) return; //no refresh within 1 second
+                this.branchList.ItemsSource = tracker.RepositoryGraph.Refs
+                    .Where(r => r.Type == RefTypes.Branch)
+                    .Select(r => r.Name);
 
-            this.branchList.ItemsSource = tracker.RepositoryGraph.Refs
-                .Where(r => r.Type == RefTypes.Branch)
-                .Select(r => r.Name);
+                this.tagList.ItemsSource = tracker.RepositoryGraph.Refs
+                    .Where(r => r.Type == RefTypes.Tag)
+                    .Select(r => r.Name);
 
-            this.tagList.ItemsSource = tracker.RepositoryGraph.Refs
-                .Where(r => r.Type == RefTypes.Tag)
-                .Select(r => r.Name);
-
-            lastTimeRefresh = DateTime.Now;
+                lastTimeRefresh = DateTime.Now;
+            }
         }
 
         private void OpenFile(string fileName)
@@ -108,7 +111,7 @@ namespace GitScc
             var animationDuration = TimeSpan.FromSeconds(.2);
             var animation = new DoubleAnimation(this.ActualWidth+100, new Duration(animationDuration));
             animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseIn };
-            animation.Completed += (o, _) => this.details.Visibility = Visibility.Collapsed;
+            //animation.Completed += (o, _) => this.details.Visibility = Visibility.Hidden;
             this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
         }
 

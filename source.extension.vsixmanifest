@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="C4128D99-2000-41D1-A6C3-704E6C1A3DE2" Version="0.6.4" Language="en-US" Publisher="Yiyisun@hotmail.com" />
+    <Identity Id="C4128D99-2000-41D1-A6C3-704E6C1A3DE2" Version="0.8.0" Language="en-US" Publisher="Yiyisun@hotmail.com" />
     <DisplayName>Git Source Control Provider</DisplayName>
     <Description>Git Source Control Provider is a plug-in that integrates git with Visual Studio.</Description><MoreInfo>http://gitscc.codeplex.com</MoreInfo><License>License.txt</License><GettingStartedGuide>http://gitscc.codeplex.com/documentation</GettingStartedGuide><Icon /><PreviewImage>solution explorer.png</PreviewImage><Tags>source control</Tags>
   </Metadata>
@@ -10,6 +10,5 @@
   </Installation>
   <Dependencies>
     <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="4.5" />
-  </Dependencies>
+  </Dependencies><Assets><Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="DiffClassifier" Path="|DiffClassifier|" /></Assets>
 </PackageManifest>
-    <MefComponent>DiffClassifier.dll</MefComponent>

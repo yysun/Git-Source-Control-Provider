@@ -44,7 +44,7 @@
             <GridSplitter Grid.Row="1" Grid.ColumnSpan="2"
                       VerticalAlignment="Top" HorizontalAlignment="Stretch" Name="gridSplitter2" Height="4" />
 
-            <Label Content="Changed Files (select file to cmmit, or right click to stage/unstage file):" Height="28" HorizontalAlignment="Left" Name="label3" VerticalAlignment="Center" 
+            <Label Content="Changed Files (select file to commit, or right click to stage/unstage file):" Height="28" HorizontalAlignment="Left" Name="label3" VerticalAlignment="Center" 
                Margin="12,0,0,0" Foreground="#FF333333" Grid.Row="2"/>
 
             <RichTextBox HorizontalAlignment="Stretch" Name="textBoxComments" VerticalAlignment="Stretch" Margin="10,0,10,10" 

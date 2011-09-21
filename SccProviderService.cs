@@ -234,8 +234,8 @@ namespace GitScc
         public int GetGlyphTipText([InAttribute] IVsHierarchy phierHierarchy, [InAttribute] uint itemidNode, out string pbstrTooltipText)
         {
             pbstrTooltipText = "";
-            GitFileStatus status = GetFileStatus(phierHierarchy, itemidNode);
-            pbstrTooltipText = status.ToString(); //TODO: use resources
+            //GitFileStatus status = GetFileStatus(phierHierarchy, itemidNode);
+            //pbstrTooltipText = status.ToString(); //TODO: use resources
             return VSConstants.S_OK;
         }
         #endregion

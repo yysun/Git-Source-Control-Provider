@@ -80,7 +80,7 @@ namespace GitScc
 
             ((PendingChangesView) control).Refresh(tracker);
 
-            var repository = (tracker == null || !tracker.HasGitRepository) ? " (no repository)" :
+            var repository = (tracker == null || !tracker.HasGitRepository) ? "" :
                 string.Format(" - {1} - ({0})", tracker.CurrentBranch, tracker.GitWorkingDirectory);
 
             this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption") + repository;

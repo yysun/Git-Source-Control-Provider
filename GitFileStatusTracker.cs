@@ -344,29 +344,36 @@ namespace GitScc
         /// <returns></returns>
         public string DiffFile(string fileName)
         {
-            if (!this.HasGitRepository) return null;
-            
-            HistogramDiff hd = new HistogramDiff();
-            hd.SetFallbackAlgorithm(null);
-
-            var fullName = GetFullPath(fileName);
-            
-            RawText b = new RawText(File.Exists(GetFullPath(fileName)) ? 
-                                    File.ReadAllBytes(fullName) : new byte[0]);
-            RawText a = new RawText(GetFileContent(fileName) ?? new byte[0]);
-            
-            var list = hd.Diff(RawTextComparator.DEFAULT, a, b);
-
-            using (Stream mstream = new MemoryStream(),
-                          stream = new BufferedStream(mstream))
+            try
             {
-                DiffFormatter df = new DiffFormatter(stream);
-                df.Format(list, a, b);
-                df.Flush();
-                stream.Seek(0, SeekOrigin.Begin);
-                var ret = new StreamReader(stream).ReadToEnd();
+                if (!this.HasGitRepository) return "";
 
-                return ret;
+                HistogramDiff hd = new HistogramDiff();
+                hd.SetFallbackAlgorithm(null);
+
+                var fullName = GetFullPath(fileName);
+
+                RawText b = new RawText(File.Exists(GetFullPath(fileName)) ?
+                                        File.ReadAllBytes(fullName) : new byte[0]);
+                RawText a = new RawText(GetFileContent(fileName) ?? new byte[0]);
+
+                var list = hd.Diff(RawTextComparator.DEFAULT, a, b);
+
+                using (Stream mstream = new MemoryStream(),
+                              stream = new BufferedStream(mstream))
+                {
+                    DiffFormatter df = new DiffFormatter(stream);
+                    df.Format(list, a, b);
+                    df.Flush();
+                    stream.Seek(0, SeekOrigin.Begin);
+                    var ret = new StreamReader(stream).ReadToEnd();
+
+                    return ret;
+                }
+            }
+            catch 
+            {
+                return "";
             }
         }
 

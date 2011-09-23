@@ -234,8 +234,8 @@ namespace GitScc
         public int GetGlyphTipText([InAttribute] IVsHierarchy phierHierarchy, [InAttribute] uint itemidNode, out string pbstrTooltipText)
         {
             pbstrTooltipText = "";
-            //GitFileStatus status = GetFileStatus(phierHierarchy, itemidNode);
-            //pbstrTooltipText = status.ToString(); //TODO: use resources
+            GitFileStatus status = GetFileStatus(phierHierarchy, itemidNode);
+            pbstrTooltipText = status.ToString(); //TODO: use resources
             return VSConstants.S_OK;
         }
         #endregion
@@ -425,11 +425,10 @@ namespace GitScc
 
             if (Directory.Exists(fileName) || File.Exists(fileName))
             {
-
                 try
                 {
                     StringBuilder sb = new StringBuilder(1024);
-                    GetShortPathName(fileName, sb, 1024);
+                    GetShortPathName(fileName.ToUpper(), sb, 1024);
                     GetLongPathName(sb.ToString(), sb, 1024);
                     return sb.ToString();
                 }

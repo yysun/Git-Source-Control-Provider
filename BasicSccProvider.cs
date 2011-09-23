@@ -190,7 +190,6 @@ namespace GitScc
                 return VSConstants.S_OK;
             }
 
-
             // Process our Commands
             switch (prgCmds[0].cmdID)
             {
@@ -198,8 +197,9 @@ namespace GitScc
                     OLECMDTEXT cmdtxtStructure = (OLECMDTEXT)Marshal.PtrToStructure(pCmdText, typeof(OLECMDTEXT));
                     if (cmdtxtStructure.cmdtextf == (uint)OLECMDTEXTF.OLECMDTEXTF_NAME)
                     {
-                        string menuText = string.IsNullOrEmpty(sccService.CurrentBranchName) ?
-                            "Git" : "Git (" + sccService.CurrentBranchName + ")";
+                        var branchName = sccService.CurrentBranchName;
+                        string menuText = string.IsNullOrEmpty(branchName) ?
+                            "Git" : "Git (" + branchName + ")";
 
                         SetOleCmdText(pCmdText, menuText);
                     }

@@ -193,5 +193,22 @@ namespace GitScc.UI
         {
             this.Show(this.tracker, this.commitId2, this.commitId1);
         }
+
+        private void menuSaveFile_Click(object sender, RoutedEventArgs e)
+        {
+            var selection = this.fileTree.SelectedValue as GitTreeObject;
+            if (selection != null)
+            {
+                var fileName = selection.Name;
+                Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+                dlg.FileName = Path.GetFileName(fileName);
+                dlg.DefaultExt = Path.GetExtension(fileName);
+                dlg.Filter = "All files (*.*)|*.*";
+                if (dlg.ShowDialog() == true)
+                {
+                    File.WriteAllBytes(dlg.FileName, selection.Content);
+                }
+            }
+        }
     }
 }

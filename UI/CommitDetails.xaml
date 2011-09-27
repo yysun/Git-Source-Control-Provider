@@ -125,6 +125,12 @@
                                  Value="{Binding IsExpanded, Mode=TwoWay}" />
                     </Style>
                 </TreeView.ItemContainerStyle>
+
+                <TreeView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Save File As ..." Name="menuSaveFile" Click="menuSaveFile_Click" />
+                    </ContextMenu>
+                </TreeView.ContextMenu>
             </TreeView>
            
             <DataGrid x:Name="patchList" Margin="10,38,0,10" AutoGenerateColumns="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"

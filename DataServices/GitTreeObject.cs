@@ -61,8 +61,12 @@ namespace GitScc.DataServices
             {
                 if (!IsTree && content == null)
                 {
-                    var blob = this.repository.Open(ObjectId.FromString(this.Id));
-                    if (blob != null) content = blob.GetCachedBytes();
+                    try
+                    {
+                        var blob = this.repository.Open(ObjectId.FromString(this.Id));
+                        if (blob != null) content = blob.GetCachedBytes();
+                    }
+                    catch { } //better than crash
                 }
                 return content;
             }

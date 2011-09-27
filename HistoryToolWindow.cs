@@ -1,10 +1,11 @@
 using System;
 using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio;
 
 namespace GitScc
 {
-
     [Guid("9175DE5D-630E-4E7B-A352-CFFD6132553C")]
     public class HistoryToolWindow : ToolWindowWithEditor
     {
@@ -40,12 +41,22 @@ namespace GitScc
 
         internal void Refresh(GitFileStatusTracker tracker)
         {
-            ((HistoryView) control).Refresh(tracker);
+            var frame = this.Frame as IVsWindowFrame;
+            if (frame == null || frame.IsVisible() == VSConstants.S_FALSE) return;
 
-            var repository = (tracker == null || !tracker.HasGitRepository) ? "" :
-                string.Format(" - {1} - ({0})", tracker.CurrentBranch, tracker.GitWorkingDirectory);
+            this.Caption = Resources.ResourceManager.GetString("HistoryToolWindowCaption");
 
-            this.Caption = Resources.ResourceManager.GetString("HistoryToolWindowCaption") + repository;
+            try
+            {
+                ((HistoryView)control).Refresh(tracker);
+
+                var repository = (tracker == null || !tracker.HasGitRepository) ? "" :
+                    string.Format(" - {1} - ({0})", tracker.CurrentBranch, tracker.GitWorkingDirectory);
+
+                this.Caption = Resources.ResourceManager.GetString("HistoryToolWindowCaption") + repository;
+            }
+            catch { } // better than crash
+
         }
 
     }

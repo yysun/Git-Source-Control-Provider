@@ -234,12 +234,17 @@ namespace GitScc
 
             fileName = GetRelativeFileName(fileName);
 
-            var entry = commitTree.FindBlobMember(fileName);
-            if (entry != null)
+            try
             {
-                var blob = repository.Open(entry.GetId());
-                if (blob != null) return blob.GetCachedBytes();
+                var entry = commitTree.FindBlobMember(fileName);
+                if (entry != null)
+                {
+                    var blob = repository.Open(entry.GetId());
+                    if (blob != null) return blob.GetCachedBytes();
+                }
+
             }
+            catch { } // better than crash
 
             return null;
         }

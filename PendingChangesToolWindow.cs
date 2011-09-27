@@ -1,18 +1,9 @@
 using System;
-using System.Collections;
-using System.ComponentModel;
 using System.ComponentModel.Design;
-using System.Drawing;
-using Microsoft.Win32;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-
-using IServiceProvider = System.IServiceProvider;
-using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 using Microsoft.VisualStudio;
-using System.Collections.Generic;
 
 namespace GitScc
 {
@@ -76,15 +67,20 @@ namespace GitScc
 
         internal void Refresh(GitFileStatusTracker tracker)
         {
-            //if (((IVsWindowFrame)this.Frame).IsVisible() == VSConstants.S_FALSE) return;
+            var frame = this.Frame as IVsWindowFrame;
+            if (frame == null || frame.IsVisible() == VSConstants.S_FALSE) return;
 
-            ((PendingChangesView) control).Refresh(tracker);
+            this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption");
+            try
+            {
+                ((PendingChangesView)control).Refresh(tracker);
 
-            var repository = (tracker == null || !tracker.HasGitRepository) ? "" :
-                string.Format(" - {1} - ({0})", tracker.CurrentBranch, tracker.GitWorkingDirectory);
+                var repository = (tracker == null || !tracker.HasGitRepository) ? "" :
+                    string.Format(" - {1} - ({0})", tracker.CurrentBranch, tracker.GitWorkingDirectory);
 
-            this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption") + repository;
-                
+                this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption") + repository;
+            }
+            catch { } // better than crash
         }
     }
 }

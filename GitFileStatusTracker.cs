@@ -160,7 +160,7 @@ namespace GitScc
                 }
                 if (File.Exists(fileName))
                 {
-                    if (ignoreRules.Any(rule=>rule.IsMatch(fileName, false)))
+                    if (ignoreRules != null && ignoreRules.Any(rule => rule.IsMatch(fileName, false)))
                     {
                         return GitFileStatus.Ignored;
                     }

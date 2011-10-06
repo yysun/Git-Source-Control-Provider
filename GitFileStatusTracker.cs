@@ -407,12 +407,21 @@ namespace GitScc
             if (string.IsNullOrEmpty(message))
                 throw new ArgumentException("Commit message must not be null or empty!", "message");
 
-            var git = new Git(this.repository);
-            var rev = git.Commit().SetMessage(message).Call();
-
+            string msg = "";
+            if (GitBash.Exists)
+            {
+                message = message.Replace("\"", "\\\"");
+                msg = GitBash.Run(string.Format("commit -m \"{0}\"", message), this.GitWorkingDirectory);
+            }
+            else
+            {
+                var git = new Git(this.repository);
+                var rev = git.Commit().SetMessage(message).Call();
+                msg = rev.Name;
+            }
             Refresh();
 
-            return rev.Name;
+            return msg;
         }
 
         public string AmendCommit(string message)

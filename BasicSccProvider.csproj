@@ -94,6 +94,7 @@
     <Compile Include="DataServices\Ref.cs" />
     <Compile Include="DataServices\RepositoryGraph.cs" />
     <Compile Include="DataServices\GitTreeObject.cs" />
+    <Compile Include="GitBash.cs" />
     <Compile Include="GitToolCommands.cs" />
     <Compile Include="HistoryToolWindow.cs" />
     <Compile Include="GitFileStatusTracker.cs" />

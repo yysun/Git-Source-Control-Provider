@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using GitScc.DataServices;
 using NGit;
 using NGit.Api;
 using NGit.Diff;
 using NGit.Dircache;
+using NGit.Ignore;
 using NGit.Revwalk;
 using NGit.Storage.File;
 using NGit.Treewalk;
 using NGit.Treewalk.Filter;
-using NGit.Ignore;
-using GitScc.DataServices;
 
 namespace GitScc
 {
@@ -27,8 +26,6 @@ namespace GitScc
         private GitIndex index;
         private IList<IgnoreRule> ignoreRules;
 
-        //private IgnoreHandler ignoreHandler;
-
         private Dictionary<string, GitFileStatus> cache;
 
         public GitFileStatusTracker(string workingFolder)
@@ -36,6 +33,26 @@ namespace GitScc
             this.cache = new Dictionary<string, GitFileStatus>();
             this.initFolder = workingFolder;
             Refresh();
+        }
+
+        private Repository Open(DirectoryInfo directory)
+        {
+            var name = directory.FullName;
+            if (name.EndsWith(Constants.DOT_GIT_EXT))
+            {
+                return Git.Open(name).GetRepository();
+            }
+
+            var subDirectories = directory.GetDirectories(Constants.DOT_GIT);
+            if (subDirectories.Length > 0)
+            {
+                return Git.Open(subDirectories[0].FullName).GetRepository(); ;
+            }
+
+            if (directory.Parent == null) return null;
+
+            return Open(directory.Parent);
+
         }
 
         public void Refresh()
@@ -48,7 +65,8 @@ namespace GitScc
             {
                 try
                 {
-                    this.repository = Git.Open(initFolder).GetRepository();
+                    //this.repository = Git.Open(initFolder).GetRepository();
+                    this.repository = Open(new DirectoryInfo(initFolder));
 
                     if (this.repository != null)
                     {
@@ -264,7 +282,7 @@ namespace GitScc
         /// <returns>folder that has .git subfolder</returns>
         public static string GetRepositoryDirectory(string folder)
         {
-            if(string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder)) return null;
+            if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder)) return null;
 
             var directory = new DirectoryInfo(folder);
 
@@ -376,7 +394,7 @@ namespace GitScc
                     return ret;
                 }
             }
-            catch 
+            catch
             {
                 return "";
             }
@@ -418,7 +436,7 @@ namespace GitScc
             var repo = new FileRepository(gitFolder);
             repo.Create();
             var dir = Directory.CreateDirectory(gitFolder);
-            dir.Attributes = FileAttributes.Directory | FileAttributes.Hidden;  
+            dir.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
         }
 
         private IEnumerable<GitFile> changedFiles;
@@ -477,9 +495,12 @@ namespace GitScc
 
                 if (Directory.Exists(fileName)) continue; // this excludes sub modules
 
-                var status = GetFileStatusNoCache(fileName);
-                this.cache[fileName] = status;
-                //Debug.WriteLine(string.Format("==== Fill cache for {0} <- {1}", fileName, status));
+                if (!this.cache.ContainsKey(fileName))
+                {
+                    var status = GetFileStatusNoCache(fileName);
+                    this.cache[fileName] = status;
+                    //Debug.WriteLine(string.Format("==== Fill cache for {0} <- {1}", fileName, status));
+                }
             }
         }
 

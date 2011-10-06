@@ -27,14 +27,52 @@ namespace GitScc.UI
 
         #region zoom upon mouse wheel
 
+        private bool isDragging = false;
+        private Point offset;
+
+        private void canvasContainer_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            this.isDragging = true;
+            this.canvasContainer.CaptureMouse();
+            offset = e.GetPosition(this.canvasContainer);
+            offset.X *= this.Scaler.ScaleX;
+            offset.Y *= this.Scaler.ScaleY;
+        }
+
+        private void canvasContainer_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (this.isDragging)
+            {
+                this.isDragging = false;
+                this.canvasContainer.ReleaseMouseCapture();
+            }
+        }
+
+        private void canvasContainer_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (this.isDragging)
+            {
+                Point newPosition = e.GetPosition(this.canvasRoot);
+                Point newPoint = new Point(newPosition.X - offset.X, newPosition.Y - offset.Y);
+                this.canvasContainer.SetValue(Canvas.LeftProperty, newPoint.X);
+                this.canvasContainer.SetValue(Canvas.TopProperty, newPoint.Y);
+
+                //var animationDuration = TimeSpan.FromSeconds(.1);
+                //Translator.BeginAnimation(TranslateTransform.XProperty,
+                //    new DoubleAnimation(newPosition.X, new Duration(animationDuration)));
+
+                //Translator.BeginAnimation(TranslateTransform.YProperty,
+                //    new DoubleAnimation(newPosition.Y, new Duration(animationDuration))); 
+                AdjustCanvasSize();
+            }
+        }
         private void AdjustCanvasSize()
         {
-            
+
             this.canvasContainer.Width = (PADDING * 2 + maxX * GRID_WIDTH);
             this.canvasRoot.Width = this.canvasContainer.Width * this.Scaler.ScaleX;
 
-            
-            this.canvasContainer.Height = (PADDING * 2 + (maxY+1) * GRID_HEIGHT);
+            this.canvasContainer.Height = (PADDING * 2 + (maxY + 1) * GRID_HEIGHT);
             this.canvasRoot.Height = this.canvasContainer.Height * this.Scaler.ScaleY;
         }
 

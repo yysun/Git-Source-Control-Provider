@@ -10,10 +10,10 @@
                   VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" 
                   PreviewMouseWheel="scrollRoot_PreviewMouseWheel">
         <Canvas x:Name="canvasRoot" Background="White">
-            <Canvas x:Name="canvasContainer">
-                <!--MouseLeftButtonDown="canvasContainer_MouseLeftButtonDown" 
+                <Canvas x:Name="canvasContainer" Background="White"
+                    MouseLeftButtonDown="canvasContainer_MouseLeftButtonDown" 
                     MouseLeftButtonUp="canvasContainer_MouseLeftButtonUp" 
-                    MouseMove="canvasContainer_MouseMove"-->
+                    MouseMove="canvasContainer_MouseMove">
                 <Canvas.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform x:Name="Scaler" CenterX="0" CenterY="0" ScaleX="1" ScaleY="1" />

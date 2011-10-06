@@ -41,13 +41,13 @@ namespace GitScc
 
         internal void Refresh(GitFileStatusTracker tracker)
         {
-            var frame = this.Frame as IVsWindowFrame;
-            if (frame == null || frame.IsVisible() == VSConstants.S_FALSE) return;
-
-            this.Caption = Resources.ResourceManager.GetString("HistoryToolWindowCaption");
+            //var frame = this.Frame as IVsWindowFrame;
+            //if (frame == null) return;
 
             try
             {
+                this.Caption = Resources.ResourceManager.GetString("HistoryToolWindowCaption");
+
                 ((HistoryView)control).Refresh(tracker);
 
                 var repository = (tracker == null || !tracker.HasGitRepository) ? "" :

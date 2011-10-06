@@ -67,12 +67,13 @@ namespace GitScc
 
         internal void Refresh(GitFileStatusTracker tracker)
         {
-            var frame = this.Frame as IVsWindowFrame;
-            if (frame == null || frame.IsVisible() == VSConstants.S_FALSE) return;
+            //var frame = this.Frame as IVsWindowFrame;
+            //if (frame == null) return;
 
-            this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption");
             try
             {
+                this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption");
+
                 ((PendingChangesView)control).Refresh(tracker);
 
                 var repository = (tracker == null || !tracker.HasGitRepository) ? "" :

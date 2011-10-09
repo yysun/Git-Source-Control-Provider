@@ -412,6 +412,7 @@ namespace GitScc
             {
                 message = message.Replace("\"", "\\\"");
                 msg = GitBash.Run(string.Format("commit -m \"{0}\"", message), this.GitWorkingDirectory);
+                if(msg.IndexOf('\n') > 0) msg = msg.Split('\n')[0];
             }
             else
             {

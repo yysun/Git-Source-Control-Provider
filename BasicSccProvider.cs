@@ -425,7 +425,9 @@ namespace GitScc
         {
             if (sccService.CurrentTracker == null || sccService.CurrentTracker.Repository == null) return;
 
-            var branchPicker = new BranchPicker(sccService.CurrentTracker.Repository);
+            var branchPicker = new BranchPicker(
+                sccService.CurrentTracker.Repository,
+                sccService.CurrentTracker.RepositoryGraph.Refs);
             branchPicker.Show();
         }
 

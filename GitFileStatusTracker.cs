@@ -122,9 +122,14 @@ namespace GitScc
 
             if (!this.cache.ContainsKey(fileName))
             {
-                var status = GetFileStatusNoCache(fileName);
-                this.cache.Add(fileName, status);
-                //Debug.WriteLine(string.Format("GetFileStatus {0} - {1}", fileName, status));
+                var status = GitFileStatus.NotControlled;
+                try
+                {
+                    status = GetFileStatusNoCache(fileName);
+                    this.cache.Add(fileName, status);
+                    //Debug.WriteLine(string.Format("GetFileStatus {0} - {1}", fileName, status));
+                }
+                catch { }
                 return status;
             }
             else

@@ -36,27 +36,34 @@ namespace GitScc
 
         internal void Refresh(GitFileStatusTracker tracker)
         {
-            CloseCommitDetails_Executed(this, null);
-            selectedCommits.Clear();
-            SetSelectedCommitCount();
-            this.HistoryGraph.Show(tracker);
-
-            this.tracker = tracker;
-            if (tracker != null)
+            try
             {
-                double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
-                if (delta < 1000) return; //no refresh within 1 second
+                this.branchList.ItemsSource = null;
+                this.tagList.ItemsSource = null;
 
-                this.branchList.ItemsSource = tracker.RepositoryGraph.Refs
-                    .Where(r => r.Type == RefTypes.Branch)
-                    .Select(r => r.Name);
+                CloseCommitDetails_Executed(this, null);
+                selectedCommits.Clear();
+                SetSelectedCommitCount();
+                this.HistoryGraph.Show(tracker);
 
-                this.tagList.ItemsSource = tracker.RepositoryGraph.Refs
-                    .Where(r => r.Type == RefTypes.Tag)
-                    .Select(r => r.Name);
+                this.tracker = tracker;
+                if (tracker != null)
+                {
+                    double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
+                    if (delta < 1000) return; //no refresh within 1 second
 
-                lastTimeRefresh = DateTime.Now;
+                    this.branchList.ItemsSource = tracker.RepositoryGraph.Refs
+                        .Where(r => r.Type == RefTypes.Branch)
+                        .Select(r => r.Name);
+
+                    this.tagList.ItemsSource = tracker.RepositoryGraph.Refs
+                        .Where(r => r.Type == RefTypes.Tag)
+                        .Select(r => r.Name);
+
+                    lastTimeRefresh = DateTime.Now;
+                }
             }
+            catch { }
         }
 
         private void OpenFile(string fileName)

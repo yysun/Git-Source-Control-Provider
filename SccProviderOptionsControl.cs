@@ -33,20 +33,19 @@ namespace GitScc
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.Container components = null;
-        private GroupBox groupBox1;
-        private Button button3;
-        private Button button2;
-        private Button button1;
-        private TextBox textBox3;
-        private Label label3;
-        private TextBox textBox2;
-        private Label label2;
-        private TextBox textBox1;
-        private Label label1;
         private OpenFileDialog openFileDialog1;
-        private Button button4;
-        private TextBox textBox4;
+        private Label label1;
+        private TextBox textBox1;
+        private Label label2;
+        private TextBox textBox2;
+        private Label label3;
+        private TextBox textBox3;
+        private Button button1;
+        private Button button2;
+        private Button button3;
         private Label label4;
+        private TextBox textBox4;
+        private Button button4;
         private CheckBox checkBox1;
         private CheckBox checkBox2;
         private CheckBox checkBox3;
@@ -85,131 +84,79 @@ namespace GitScc
         /// </summary>
         private void InitializeComponent()
         {
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.checkBox3 = new System.Windows.Forms.CheckBox();
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.button4 = new System.Windows.Forms.Button();
-            this.textBox4 = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.button3 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.textBox3 = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.groupBox1.SuspendLayout();
+            this.label1 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
+            this.textBox4 = new System.Windows.Forms.TextBox();
+            this.button4 = new System.Windows.Forms.Button();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.checkBox2 = new System.Windows.Forms.CheckBox();
+            this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
-            // groupBox1
+            // openFileDialog1
             // 
-            this.groupBox1.Controls.Add(this.checkBox3);
-            this.groupBox1.Controls.Add(this.checkBox2);
-            this.groupBox1.Controls.Add(this.checkBox1);
-            this.groupBox1.Controls.Add(this.button4);
-            this.groupBox1.Controls.Add(this.textBox4);
-            this.groupBox1.Controls.Add(this.label4);
-            this.groupBox1.Controls.Add(this.button3);
-            this.groupBox1.Controls.Add(this.button2);
-            this.groupBox1.Controls.Add(this.button1);
-            this.groupBox1.Controls.Add(this.textBox3);
-            this.groupBox1.Controls.Add(this.label3);
-            this.groupBox1.Controls.Add(this.textBox2);
-            this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Controls.Add(this.textBox1);
-            this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox1.Location = new System.Drawing.Point(0, 0);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(463, 323);
-            this.groupBox1.TabIndex = 11;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Git Source Control Provider Options";
+            this.openFileDialog1.FileName = "openFileDialog1";
             // 
-            // checkBox3
+            // label1
             // 
-            this.checkBox3.AutoSize = true;
-            this.checkBox3.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.checkBox3.Location = new System.Drawing.Point(6, 282);
-            this.checkBox3.Name = "checkBox3";
-            this.checkBox3.Size = new System.Drawing.Size(168, 17);
-            this.checkBox3.TabIndex = 25;
-            this.checkBox3.Text = "Use TortoiseGit Style Icon Set";
-            this.checkBox3.UseVisualStyleBackColor = true;
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(3, 10);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(124, 13);
+            this.label1.TabIndex = 11;
+            this.label1.Text = "Path to Git Bash (sh.exe)";
             // 
-            // checkBox2
+            // textBox1
             // 
-            this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(135, 190);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(204, 17);
-            this.checkBox2.TabIndex = 24;
-            this.checkBox2.Text = "Do not expand TortoiseGit commands";
-            this.checkBox2.UseVisualStyleBackColor = true;
+            this.textBox1.Location = new System.Drawing.Point(6, 26);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(283, 20);
+            this.textBox1.TabIndex = 12;
             // 
-            // checkBox1
+            // label2
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(135, 124);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(220, 17);
-            this.checkBox1.TabIndex = 23;
-            this.checkBox1.Text = "Do not expand Git Extensions commands";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(3, 63);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(111, 13);
+            this.label2.TabIndex = 13;
+            this.label2.Text = "Path to Git Extensions";
             // 
-            // button4
+            // textBox2
             // 
-            this.button4.Location = new System.Drawing.Point(364, 162);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
-            this.button4.TabIndex = 22;
-            this.button4.Text = "Browse ...";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            this.textBox2.Location = new System.Drawing.Point(6, 80);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(283, 20);
+            this.textBox2.TabIndex = 14;
             // 
-            // textBox4
+            // label3
             // 
-            this.textBox4.Location = new System.Drawing.Point(6, 164);
-            this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(348, 20);
-            this.textBox4.TabIndex = 21;
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(3, 209);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(286, 13);
+            this.label3.TabIndex = 15;
+            this.label3.Text = "Path to Diff Tool (Optional, by default diffmerge.exe is used)";
             // 
-            // label4
+            // textBox3
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(3, 147);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(95, 13);
-            this.label4.TabIndex = 20;
-            this.label4.Text = "Path to TortoiseGit";
-            // 
-            // button3
-            // 
-            this.button3.Location = new System.Drawing.Point(364, 242);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 23);
-            this.button3.TabIndex = 19;
-            this.button3.Text = "Browse ...";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(364, 96);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 18;
-            this.button2.Text = "Browse ...";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.textBox3.Location = new System.Drawing.Point(6, 226);
+            this.textBox3.Name = "textBox3";
+            this.textBox3.Size = new System.Drawing.Size(283, 20);
+            this.textBox3.TabIndex = 16;
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(364, 42);
+            this.button1.Location = new System.Drawing.Point(295, 23);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 17;
@@ -217,68 +164,108 @@ namespace GitScc
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // textBox3
+            // button2
             // 
-            this.textBox3.Location = new System.Drawing.Point(6, 244);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(348, 20);
-            this.textBox3.TabIndex = 16;
+            this.button2.Location = new System.Drawing.Point(295, 77);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.TabIndex = 18;
+            this.button2.Text = "Browse ...";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
-            // label3
+            // button3
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(3, 227);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(286, 13);
-            this.label3.TabIndex = 15;
-            this.label3.Text = "Path to Diff Tool (Optional, by default diffmerge.exe is used)";
+            this.button3.Location = new System.Drawing.Point(295, 223);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(75, 23);
+            this.button3.TabIndex = 19;
+            this.button3.Text = "Browse ...";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
-            // textBox2
+            // label4
             // 
-            this.textBox2.Location = new System.Drawing.Point(6, 98);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(348, 20);
-            this.textBox2.TabIndex = 14;
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(3, 129);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(95, 13);
+            this.label4.TabIndex = 20;
+            this.label4.Text = "Path to TortoiseGit";
             // 
-            // label2
+            // textBox4
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 81);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(111, 13);
-            this.label2.TabIndex = 13;
-            this.label2.Text = "Path to Git Extensions";
+            this.textBox4.Location = new System.Drawing.Point(6, 146);
+            this.textBox4.Name = "textBox4";
+            this.textBox4.Size = new System.Drawing.Size(283, 20);
+            this.textBox4.TabIndex = 21;
             // 
-            // textBox1
+            // button4
             // 
-            this.textBox1.Location = new System.Drawing.Point(6, 44);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(348, 20);
-            this.textBox1.TabIndex = 12;
+            this.button4.Location = new System.Drawing.Point(295, 143);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(75, 23);
+            this.button4.TabIndex = 22;
+            this.button4.Text = "Browse ...";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
-            // label1
+            // checkBox1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(3, 28);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(124, 13);
-            this.label1.TabIndex = 11;
-            this.label1.Text = "Path to Git Bash (sh.exe)";
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(66, 105);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(220, 17);
+            this.checkBox1.TabIndex = 23;
+            this.checkBox1.Text = "Do not expand Git Extensions commands";
+            this.checkBox1.UseVisualStyleBackColor = true;
             // 
-            // openFileDialog1
+            // checkBox2
             // 
-            this.openFileDialog1.FileName = "openFileDialog1";
+            this.checkBox2.AutoSize = true;
+            this.checkBox2.Location = new System.Drawing.Point(66, 172);
+            this.checkBox2.Name = "checkBox2";
+            this.checkBox2.Size = new System.Drawing.Size(204, 17);
+            this.checkBox2.TabIndex = 24;
+            this.checkBox2.Text = "Do not expand TortoiseGit commands";
+            this.checkBox2.UseVisualStyleBackColor = true;
+            // 
+            // checkBox3
+            // 
+            this.checkBox3.AutoSize = true;
+            this.checkBox3.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.checkBox3.Location = new System.Drawing.Point(6, 264);
+            this.checkBox3.Name = "checkBox3";
+            this.checkBox3.Size = new System.Drawing.Size(168, 17);
+            this.checkBox3.TabIndex = 25;
+            this.checkBox3.Text = "Use TortoiseGit Style Icon Set";
+            this.checkBox3.UseVisualStyleBackColor = true;
             // 
             // SccProviderOptionsControl
             // 
             this.AllowDrop = true;
-            this.Controls.Add(this.groupBox1);
+            this.AutoScroll = true;
+            this.AutoSize = true;
+            this.Controls.Add(this.checkBox3);
+            this.Controls.Add(this.checkBox2);
+            this.Controls.Add(this.checkBox1);
+            this.Controls.Add(this.button4);
+            this.Controls.Add(this.textBox4);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.button3);
+            this.Controls.Add(this.button2);
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.textBox3);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.textBox2);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.label1);
             this.Name = "SccProviderOptionsControl";
-            this.Size = new System.Drawing.Size(463, 323);
+            this.Size = new System.Drawing.Size(1559, 604);
             this.Load += new System.EventHandler(this.SccProviderOptionsControl_Load);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
         #endregion

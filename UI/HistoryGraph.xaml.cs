@@ -115,8 +115,14 @@ namespace GitScc.UI
         {
             this.tracker = tracker;
             if (tracker == null) return;
-            
+
+            if (tracker.RepositoryGraph != null)
+                this.tracker.RepositoryGraph.IsSimplified = showSimplifiedGraph;
+
             var commits = tracker.RepositoryGraph.Nodes;
+            
+            maxX = commits.Count();
+            maxY = commits.Max(c => c.X);
 
             loading.Visibility = Visibility.Visible;
             var dispatcher = Dispatcher.CurrentDispatcher;
@@ -127,11 +133,6 @@ namespace GitScc.UI
 
                 if (tracker != null && tracker.HasGitRepository && commits.Count > 0)
                 {
-                    this.tracker.RepositoryGraph.IsSimplified = showSimplifiedGraph;
-
-                    maxX = commits.Count();
-                    maxY = commits.Max(c => c.X);
-
                     for (int i = commits.Count() - 1; i >= 0; i--)
                     {
                         var commit = commits[i];

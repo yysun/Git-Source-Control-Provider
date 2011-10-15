@@ -92,7 +92,7 @@ namespace GitScc
                                              InitViewFlags: 0,
                                              pInitView: initView);
 
-                    docData.SetStateFlags((uint)BUFFERSTATEFLAGS.BSF_USER_READONLY); //set read only
+                    //docData.SetStateFlags((uint)BUFFERSTATEFLAGS.BSF_USER_READONLY); //set read only
 
                     //Associate our IVsTextLines with our new code window.
                     ErrorHandler.ThrowOnFailure(this.codeWindow.SetBuffer((IVsTextLines)docData));

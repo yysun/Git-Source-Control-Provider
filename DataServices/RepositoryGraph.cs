@@ -369,11 +369,11 @@ namespace GitScc.DataServices
                     if (blob != null) return blob.GetCachedBytes();
                 }
             }
+            catch { }
             finally
             {
                 if (walk != null) walk.Dispose();
             }
-
             return null;
         }
     }

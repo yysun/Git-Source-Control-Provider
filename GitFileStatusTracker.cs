@@ -120,13 +120,15 @@ namespace GitScc
             if (!HasGitRepository || string.IsNullOrEmpty(fileName))
                 return GitFileStatus.NotControlled;
 
-            if (!this.cache.ContainsKey(fileName))
+            var cacheKey = GetCacheKey(fileName);
+
+            if (!this.cache.ContainsKey(cacheKey))
             {
                 var status = GitFileStatus.NotControlled;
                 try
                 {
                     status = GetFileStatusNoCache(fileName);
-                    this.cache.Add(fileName, status);
+                    this.cache[cacheKey] = status;
                     //Debug.WriteLine(string.Format("GetFileStatus {0} - {1}", fileName, status));
                 }
                 catch { }
@@ -134,7 +136,7 @@ namespace GitScc
             }
             else
             {
-                return this.cache[fileName];
+                return this.cache[cacheKey];
             }
         }
 
@@ -437,21 +439,38 @@ namespace GitScc
             if (string.IsNullOrEmpty(message))
                 throw new ArgumentException("Commit message must not be null or empty!", "message");
 
-            var git = new Git(this.repository);
-            var rev = git.Commit().SetAmend(true).SetMessage(message).Call();
-
+            string msg = "";
+            if (GitBash.Exists)
+            {
+                message = message.Replace("\"", "\\\"");
+                msg = GitBash.Run(string.Format("commit --amend -m \"{0}\"", message), this.GitWorkingDirectory);
+                if (msg.IndexOf('\n') > 0) msg = msg.Split('\n')[0];
+            }
+            else
+            {
+                var git = new Git(this.repository);
+                var rev = git.Commit().SetAmend(true).SetMessage(message).Call();
+                msg = rev.Name;
+            }
             Refresh();
 
-            return rev.Name;
+            return msg;
         }
 
         public static void Init(string folderName)
         {
-            var gitFolder = Path.Combine(folderName, Constants.DOT_GIT);
-            var repo = new FileRepository(gitFolder);
-            repo.Create();
-            var dir = Directory.CreateDirectory(gitFolder);
-            dir.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
+            //if (GitBash.Exists)
+            //{
+            //    GitBash.Run("init", folderName);
+            //}
+            //else
+            //{
+                var gitFolder = Path.Combine(folderName, Constants.DOT_GIT);
+                var repo = new FileRepository(gitFolder);
+                repo.Create();
+                var dir = Directory.CreateDirectory(gitFolder);
+                dir.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
+            //}
         }
 
         private IEnumerable<GitFile> changedFiles;
@@ -509,14 +528,20 @@ namespace GitScc
                 var fileName = GetFullPath(treeWalk.PathString);
 
                 if (Directory.Exists(fileName)) continue; // this excludes sub modules
-
-                if (!this.cache.ContainsKey(fileName))
+                
+                var cacheKey = GetCacheKey(fileName);
+                if (!this.cache.ContainsKey(cacheKey))
                 {
                     var status = GetFileStatusNoCache(fileName);
-                    this.cache[fileName] = status;
+                    this.cache[cacheKey] = status;
                     //Debug.WriteLine(string.Format("==== Fill cache for {0} <- {1}", fileName, status));
                 }
             }
+        }
+
+        private string GetCacheKey(string fileName)
+        {
+            return GetRelativeFileName(fileName);
         }
 
         private string GetFullPath(string fileName)

@@ -23,7 +23,14 @@ namespace GitScc
     {
         public GitFileStatus Status { get; set; }
         public string FileName { get; set; }
-        public bool IsStaged { get; set; }
+        public bool IsStaged {
+            get
+            {
+                return Status == GitFileStatus.Added ||
+                       Status == GitFileStatus.Staged ||
+                       Status == GitFileStatus.Removed;
+            }
+        }
 
         public bool isSelected;
         public bool IsSelected 

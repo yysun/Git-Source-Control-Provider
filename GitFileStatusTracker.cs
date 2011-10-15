@@ -24,9 +24,8 @@ namespace GitScc
         private Repository repository;
         private Tree commitTree;
         private GitIndex index;
-        private IList<IgnoreRule> ignoreRules;
-
         private Dictionary<string, GitFileStatus> cache;
+        private IEnumerable<string> changedFiles;
 
         public GitFileStatusTracker(string workingFolder)
         {
@@ -85,9 +84,11 @@ namespace GitScc
                         this.index = repository.GetIndex();
                         this.index.RereadIfNecessary();
 
-                        ignoreRules = File.ReadAllLines(Path.Combine(this.initFolder, Constants.GITIGNORE_FILENAME))
-                                          .Where(line => !line.StartsWith("#") && line.Trim().Length > 0)
-                                          .Select(line => new IgnoreRule(line)).ToList();
+                        //ignoreRules = File.ReadAllLines(Path.Combine(this.initFolder, Constants.GITIGNORE_FILENAME))
+                        //                  .Where(line => !line.StartsWith("#") && line.Trim().Length > 0)
+                        //                  .Select(line => new IgnoreRule(line)).ToList();
+
+                        this.changedFiles = GetChangedFiles();
                     }
                 }
                 catch (Exception ex)
@@ -185,12 +186,14 @@ namespace GitScc
                 }
                 if (File.Exists(fileName))
                 {
-                    if (ignoreRules != null && ignoreRules.Any(rule => rule.IsMatch(fileName, false)))
+                    if (changedFiles.Any(file => string.Compare(file, fileName, true) == 0))
+                    {
+                        return GitFileStatus.New;
+                    }
+                    else
                     {
                         return GitFileStatus.Ignored;
                     }
-
-                    return GitFileStatus.New;
                 }
             }
 
@@ -473,37 +476,36 @@ namespace GitScc
             //}
         }
 
-        private IEnumerable<GitFile> changedFiles;
         public IEnumerable<GitFile> ChangedFiles
         {
             get
             {
-                if (changedFiles == null)
+                if (changedFiles == null) changedFiles = GetChangedFiles();
+                
+                foreach(string f in changedFiles)
                 {
-                    FillCache();
-
-                    changedFiles = from f in this.cache
-                                   where f.Value != GitFileStatus.Tracked &&
-                                         f.Value != GitFileStatus.NotControlled &&
-                                         f.Value != GitFileStatus.Ignored
-                                   select new GitFile
-                                   {
-                                       FileName = GetRelativeFileName(f.Key),
-                                       Status = f.Value,
-                                       IsStaged = f.Value == GitFileStatus.Added ||
-                                                  f.Value == GitFileStatus.Staged ||
-                                                  f.Value == GitFileStatus.Removed
-                                   };
+                    this.cache[this.GetCacheKey(f)] = GetFileStatusNoCache(f);
                 }
-                return changedFiles;
+
+                return from f in this.cache
+                       where f.Value != GitFileStatus.Tracked &&
+                             f.Value != GitFileStatus.NotControlled &&
+                             f.Value != GitFileStatus.Ignored
+                       select new GitFile
+                       {
+                           FileName = GetRelativeFileName(f.Key),
+                           Status = f.Value
+                       };
             }
         }
 
         private const int INDEX = 1;
         private const int WORKDIR = 2;
 
-        public void FillCache()
+        public IList<string> GetChangedFiles()
         {
+            var list = new List<string>();
+
             var treeWalk = new TreeWalk(this.repository);
             treeWalk.Recursive = true;
             treeWalk.Filter = TreeFilter.ANY_DIFF;
@@ -526,17 +528,10 @@ namespace GitScc
             while (treeWalk.Next())
             {
                 var fileName = GetFullPath(treeWalk.PathString);
-
                 if (Directory.Exists(fileName)) continue; // this excludes sub modules
-                
-                var cacheKey = GetCacheKey(fileName);
-                if (!this.cache.ContainsKey(cacheKey))
-                {
-                    var status = GetFileStatusNoCache(fileName);
-                    this.cache[cacheKey] = status;
-                    //Debug.WriteLine(string.Format("==== Fill cache for {0} <- {1}", fileName, status));
-                }
+                list.Add(fileName);
             }
+            return list;
         }
 
         private string GetCacheKey(string fileName)

@@ -81,7 +81,10 @@ namespace GitScc
 
                 this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption") + repository;
             }
-            catch { } // better than crash
+            catch (Exception ex)
+            {
+                Log.WriteLine("Pending Changes Tool Window Refresh: {0}", ex.ToString());
+            }
         }
     }
 }

@@ -55,7 +55,10 @@ namespace GitScc
 
                 this.Caption = Resources.ResourceManager.GetString("HistoryToolWindowCaption") + repository;
             }
-            catch { } // better than crash
+            catch (Exception ex)
+            {
+                Log.WriteLine("History Tool Window Refresh: {0}", ex.ToString());
+            }
 
         }
 

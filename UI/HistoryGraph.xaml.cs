@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO.Packaging;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -6,10 +8,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using System.Xaml;
-using System.IO.Packaging;
-using System.Windows.Xps.Packaging;
 using System.Windows.Xps;
+using System.Windows.Xps.Packaging;
 using GitScc.DataServices;
 
 namespace GitScc.UI
@@ -114,25 +114,25 @@ namespace GitScc.UI
         internal void Show(GitFileStatusTracker tracker)
         {
             this.tracker = tracker;
-            if (tracker == null) return;
-
-            if (tracker.RepositoryGraph != null)
-                this.tracker.RepositoryGraph.IsSimplified = showSimplifiedGraph;
-
-            var commits = tracker.RepositoryGraph.Nodes;
+            maxX = maxY = 0;
+            loading.Visibility = Visibility.Visible;            
             
-            maxX = commits.Count();
-            maxY = commits.Max(c => c.X);
-
-            loading.Visibility = Visibility.Visible;
-            var dispatcher = Dispatcher.CurrentDispatcher;
+            IList<GraphNode> commits = null;
+            if (tracker != null && tracker.HasGitRepository)
+            {
+                this.tracker.RepositoryGraph.IsSimplified = showSimplifiedGraph;
+                commits = tracker.RepositoryGraph.Nodes;
+            }
 
             Action act = () =>
             {
                 canvasContainer.Children.Clear();
 
-                if (tracker != null && tracker.HasGitRepository && commits.Count > 0)
+                if (commits!=null)
                 {
+                    maxX = commits.Count();
+                    maxY = commits.Max(c => c.X);
+
                     for (int i = commits.Count() - 1; i >= 0; i--)
                     {
                         var commit = commits[i];
@@ -316,7 +316,8 @@ namespace GitScc.UI
 
                 loading.Visibility = Visibility.Collapsed;
             };
-            dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+
+            this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
         }
 
         private double GetScreenX(double x)

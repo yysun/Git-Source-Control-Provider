@@ -63,7 +63,10 @@ namespace GitScc
                     lastTimeRefresh = DateTime.Now;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Log.WriteLine("History View Refresh: {0}", ex.ToString());
+            }
         }
 
         private void OpenFile(string fileName)

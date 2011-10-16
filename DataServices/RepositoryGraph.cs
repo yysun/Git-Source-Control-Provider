@@ -37,11 +37,20 @@ namespace GitScc.DataServices
                     PlotWalk plotWalk = null;
                     try
                     {
-
                         plotWalk = new PlotWalk(repository);
+
                         var heads = repository.GetAllRefs().Values.Select(r =>
-                            plotWalk.LookupCommit(repository.Resolve(r.GetObjectId().Name))).ToList();
-                        plotWalk.MarkStart(heads);
+                           plotWalk.LookupCommit(repository.Resolve(r.GetObjectId().Name)));
+                        
+                        foreach (var h in heads)
+                        {
+                            try
+                            {
+                                plotWalk.MarkStart(h);
+                            }
+                            catch { } // better than crash
+                        }
+                        
                         PlotCommitList<PlotLane> pcl = new PlotCommitList<PlotLane>();
                         pcl.Source(plotWalk);
                         pcl.FillTo(200);
@@ -193,11 +202,11 @@ namespace GitScc.DataServices
                     var cid = commit.ChildIds[0];
                     var pid = commit.ParentIds[0];
 
-                    var parent = Commits.Where(c => c.Id == pid).First();
-                    var child = Commits.Where(c => c.Id == cid).First();
+                    var parent = Commits.Where(c => c.Id == pid).FirstOrDefault();
+                    var child = Commits.Where(c => c.Id == cid).FirstOrDefault();
 
-                    parent.ChildIds[parent.ChildIds.IndexOf(commit.Id)] = cid;
-                    child.ParentIds[child.ParentIds.IndexOf(commit.Id)] = pid;
+                    if(parent!=null) parent.ChildIds[parent.ChildIds.IndexOf(commit.Id)] = cid;
+                    if(child!=null) child.ParentIds[child.ParentIds.IndexOf(commit.Id)] = pid;
 
                     commit.ChildIds.Clear();
                     commit.ParentIds.Clear();

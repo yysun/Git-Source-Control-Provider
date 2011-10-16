@@ -99,9 +99,11 @@ namespace BasicSccProvider.Tests
             string[] lines = { "First line", "Second line", "Third line" };
 
             File.WriteAllLines(tempFile, lines);
+            tracker.Refresh();
             Assert.AreEqual(GitFileStatus.New, tracker.GetFileStatus(tempFile));
 
             tracker.StageFile(tempFile);
+            tracker.Refresh();
             Assert.AreEqual(GitFileStatus.Added, tracker.GetFileStatus(tempFile));
 
             tracker.Commit("test commit");
@@ -116,6 +118,7 @@ namespace BasicSccProvider.Tests
             Assert.AreEqual(GitFileStatus.Deleted, tracker.GetFileStatus(tempFile));
 
             tracker.RemoveFile(tempFile);
+            tracker.Refresh();
             Assert.AreEqual(GitFileStatus.Removed, tracker.GetFileStatus(tempFile));
         }
 

@@ -83,16 +83,12 @@ namespace GitScc
                         }
                         this.index = repository.GetIndex();
                         this.index.RereadIfNecessary();
-
-                        //ignoreRules = File.ReadAllLines(Path.Combine(this.initFolder, Constants.GITIGNORE_FILENAME))
-                        //                  .Where(line => !line.StartsWith("#") && line.Trim().Length > 0)
-                        //                  .Select(line => new IgnoreRule(line)).ToList();
-
                         this.changedFiles = GetChangedFiles();
                     }
                 }
                 catch (Exception ex)
                 {
+                    Log.WriteLine("Refresh: {0}\r\n{1}", this.initFolder, ex.ToString());
                 }
             }
         }
@@ -132,7 +128,10 @@ namespace GitScc
                     this.cache[cacheKey] = status;
                     //Debug.WriteLine(string.Format("GetFileStatus {0} - {1}", fileName, status));
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Log.WriteLine("Get File Status: {0}\r\n{1}", fileName, ex.ToString());
+                }
                 return status;
             }
             else
@@ -143,6 +142,8 @@ namespace GitScc
 
         private GitFileStatus GetFileStatusNoCache(string fileName)
         {
+            if (changedFiles == null) changedFiles = GetChangedFiles();
+
             //Debug.WriteLine(string.Format("===+ GetFileStatusNoCache {0}", fileName));
 
             var fileNameRel = GetRelativeFileName(fileName);
@@ -272,7 +273,10 @@ namespace GitScc
                 }
 
             }
-            catch { } // better than crash
+            catch (Exception ex)
+            {
+                Log.WriteLine("Get File Content: {0}\r\n{1}", fileName, ex.ToString());
+            }
 
             return null;
         }
@@ -332,7 +336,7 @@ namespace GitScc
             }
 
             this.index.Write();
-            this.cache[fileName] = GetFileStatusNoCache(fileName);
+            //this.cache[GetCacheKey(fileName)] = GetFileStatusNoCache(fileName);
         }
 
         /// <summary>
@@ -357,7 +361,7 @@ namespace GitScc
                 this.index.Remove(repository.WorkTree, fileName);
             }
             this.index.Write();
-            this.cache[fileName] = GetFileStatusNoCache(fileName);
+            //this.cache[GetCacheKey(fileName)] = GetFileStatusNoCache(fileName);
         }
 
         public void RemoveFile(string fileName)
@@ -367,7 +371,7 @@ namespace GitScc
             this.index.RereadIfNecessary();
             this.index.Remove(repository.WorkTree, fileName);
             this.index.Write();
-            this.cache[fileName] = GetFileStatusNoCache(fileName);
+            //this.cache[GetCacheKey(fileName)] = GetFileStatusNoCache(fileName);
         }
 
         /// <summary>
@@ -404,8 +408,10 @@ namespace GitScc
                     return ret;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Log.WriteLine("Refresh: {0}\r\n{1}", this.initFolder, ex.ToString());
+
                 return "";
             }
         }
@@ -583,6 +589,22 @@ namespace GitScc
                 }
                 return repositoryGraph;
             }
+        }
+    }
+
+    public abstract class Log
+    {
+        private static string logFileName = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+            "gitscc.log");
+
+        public static void WriteLine(string format, params object[] objects)
+        {
+#if(DEBUG)
+            var msg = string.Format(format, objects);
+            msg = string.Format("{0} {1}\r\n\r\n", DateTime.UtcNow.ToString(), msg);
+            File.AppendAllText(logFileName, msg);
+#endif
         }
     }
 }

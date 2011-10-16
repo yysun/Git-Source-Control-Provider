@@ -118,13 +118,22 @@ namespace GitScc.DataServices
 
         private void GenerateGraph()
         {
+            GenerateGraph(Commits);
+            if (IsSimplified)
+            {
+                GenerateGraph(GetSimplifiedCommits());
+            }
+        }
+
+        private void GenerateGraph(IList<Commit> commits)
+        {
             nodes = new List<GraphNode>();
             links = new List<GraphLink>();
             var lanes = new List<string>();
 
             int i = 0;
 
-            var commits = isSimplified ? SimplifiedCommits() : Commits;
+            //var commits = isSimplified ? SimplifiedCommits() : Commits;
 
             foreach (var commit in commits)
             {
@@ -176,6 +185,7 @@ namespace GitScc.DataServices
                     var cnode = (from n in nodes
                                  where n.Id == ch.Id
                                  select n).FirstOrDefault();
+
                     if (cnode != null)
                     {
                         links.Add(new GraphLink
@@ -192,28 +202,42 @@ namespace GitScc.DataServices
             }
         }
 
-        private List<Commit> SimplifiedCommits()
+        private List<Commit> GetSimplifiedCommits()
         {
             foreach (var commit in Commits)
             {
                 if (commit.ParentIds.Count() == 1 && commit.ChildIds.Count() == 1 && !this.Refs.Any(r=>r.Id==commit.Id))
-                {
-                    commit.deleted = true;
+                {                   
                     var cid = commit.ChildIds[0];
                     var pid = commit.ParentIds[0];
 
                     var parent = Commits.Where(c => c.Id == pid).FirstOrDefault();
                     var child = Commits.Where(c => c.Id == cid).FirstOrDefault();
 
-                    if(parent!=null) parent.ChildIds[parent.ChildIds.IndexOf(commit.Id)] = cid;
-                    if(child!=null) child.ParentIds[child.ParentIds.IndexOf(commit.Id)] = pid;
+                    if (parent != null && child != null)
+                    {
+                        int x1 = GetLane(parent.Id);
+                        int x2 = GetLane(commit.Id);
+                        int x3 = GetLane(child.Id);
 
-                    commit.ChildIds.Clear();
-                    commit.ParentIds.Clear();
+                        if (x1 == x2 && x2 == x3)
+                        {
+                            commit.deleted = true;
+                            parent.ChildIds[parent.ChildIds.IndexOf(commit.Id)] = cid;
+                            child.ParentIds[child.ParentIds.IndexOf(commit.Id)] = pid;
+                        }
+                        //commit.ChildIds.Clear();
+                        //commit.ParentIds.Clear();
+                    }
                 }
             }
 
             return commits.Where(c => !c.deleted).ToList();
+        }
+
+        private int GetLane(string id)
+        {
+            return Nodes.Where(n=>n.Id == id).Select(n=>n.X).FirstOrDefault(); 
         }
 
         public bool IsSimplified {
@@ -235,7 +259,7 @@ namespace GitScc.DataServices
 
         internal Commit GetCommit(string commitId)
         {
-            commitId = repository.Resolve(commitId).Name;
+            //commitId = repository.Resolve(commitId).Name;
             return Commits.Where(c => c.Id.StartsWith(commitId)).FirstOrDefault();
         }
 

@@ -257,10 +257,26 @@ namespace GitScc.DataServices
                 commit.Tree.Id;
         }
 
-        internal Commit GetCommit(string commitId)
+        public Commit GetCommit(string commitId)
         {
             //commitId = repository.Resolve(commitId).Name;
-            return Commits.Where(c => c.Id.StartsWith(commitId)).FirstOrDefault();
+            //return Commits.Where(c => c.Id.StartsWith(commitId)).FirstOrDefault();
+            var id = repository.Resolve(commitId);
+            if (id == null) return null;
+
+            RevWalk walk = new RevWalk(repository);
+            RevCommit commit = walk.ParseCommit(id);
+            walk.Dispose();
+            return commit == null || commit.Tree == null ? null : new Commit
+                {
+                    Id = commit.Id.Name,
+                    ParentIds = commit.Parents.Select(p => p.Id.Name).ToList(),
+                    CommitDateRelative = RelativeDateFormatter.Format(commit.GetAuthorIdent().GetWhen()),
+                    CommitterName = commit.GetCommitterIdent().GetName(),
+                    CommitterEmail = commit.GetCommitterIdent().GetEmailAddress(),
+                    CommitDate = commit.GetCommitterIdent().GetWhen(),
+                    Message = commit.GetShortMessage(),
+                };
         }
 
         public GitTreeObject GetTree(string commitId)
@@ -384,7 +400,7 @@ namespace GitScc.DataServices
         }
         #endregion
 
-        internal byte[] GetFileContent(string commitId, string fileName)
+        public byte[] GetFileContent(string commitId, string fileName)
         {
             if (repository == null) return null;
             RevWalk walk = null;

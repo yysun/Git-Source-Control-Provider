@@ -52,19 +52,26 @@ namespace GitScc.UI
         {
             this.tracker = tracker;
             var repositoryGraph = tracker.RepositoryGraph;
-            var commit = repositoryGraph.GetCommit(commitId);    
-            this.lblCommit.Content = "Hash: " + commit.Id;
-            this.lblMessage.Content = "Message: " + commit.Message;
-            this.lblAuthor.Content = commit.CommitterName + " " + commit.CommitDateRelative;
-            this.fileTree.ItemsSource = repositoryGraph.GetTree(commitId).Children;
-            this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId);
-            this.radioShowFileTree.IsChecked = true;
-            this.radioShowFileTree.IsEnabled = true;
-            this.toolWindow.ClearEditor();
-            this.commitId1 = commit.ParentIds.Count > 0 ? commit.ParentIds[0] : null;
-            this.commitId2 = commit.Id;
-            this.btnSwitch.Visibility = Visibility.Collapsed;
-            this.txtFileName.Text = "";
+            var commit = repositoryGraph.GetCommit(commitId);
+            if (commit == null)
+            {
+                this.lblCommit.Content = "Cannot find commit: " + commit.Id;
+            }
+            else
+            {
+                this.lblCommit.Content = "Hash: " + commit.Id;
+                this.lblMessage.Content = "Message: " + commit.Message;
+                this.lblAuthor.Content = commit.CommitterName + " " + commit.CommitDateRelative;
+                this.fileTree.ItemsSource = repositoryGraph.GetTree(commitId).Children;
+                this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId);
+                this.radioShowFileTree.IsChecked = true;
+                this.radioShowFileTree.IsEnabled = true;
+                this.toolWindow.ClearEditor();
+                this.commitId1 = commit.ParentIds.Count > 0 ? commit.ParentIds[0] : null;
+                this.commitId2 = commit.Id;
+                this.btnSwitch.Visibility = Visibility.Collapsed;
+                this.txtFileName.Text = "";
+            }
         }
 
         internal void Show(GitFileStatusTracker tracker, string commitId1, string commitId2)

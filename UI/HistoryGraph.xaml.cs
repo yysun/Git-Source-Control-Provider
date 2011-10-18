@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Windows.Xps;
@@ -56,24 +57,18 @@ namespace GitScc.UI
                 Point newPoint = new Point(newPosition.X - offset.X, newPosition.Y - offset.Y);
                 this.canvasContainer.SetValue(Canvas.LeftProperty, newPoint.X);
                 this.canvasContainer.SetValue(Canvas.TopProperty, newPoint.Y);
-
-                //var animationDuration = TimeSpan.FromSeconds(.1);
-                //Translator.BeginAnimation(TranslateTransform.XProperty,
-                //    new DoubleAnimation(newPosition.X, new Duration(animationDuration)));
-
-                //Translator.BeginAnimation(TranslateTransform.YProperty,
-                //    new DoubleAnimation(newPosition.Y, new Duration(animationDuration))); 
-                AdjustCanvasSize();
             }
         }
-        private void AdjustCanvasSize()
+        private void AdjustCanvasSize(double scale)
         {
-
             this.canvasContainer.Width = (PADDING * 2 + maxX * GRID_WIDTH);
-            this.canvasRoot.Width = this.canvasContainer.Width * this.Scaler.ScaleX;
+            this.canvasRoot.Width = this.canvasContainer.Width * scale;
 
             this.canvasContainer.Height = (PADDING * 2 + (maxY + 1) * GRID_HEIGHT);
-            this.canvasRoot.Height = this.canvasContainer.Height * this.Scaler.ScaleY;
+            this.canvasRoot.Height = this.canvasContainer.Height * scale;
+
+            this.canvasContainer.SetValue(Canvas.LeftProperty, 0.0);
+            this.canvasContainer.SetValue(Canvas.TopProperty, 0.0);
         }
 
         private void scrollRoot_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -97,7 +92,7 @@ namespace GitScc.UI
             //this.Scaler.BeginAnimation(ScaleTransform.ScaleXProperty, scaleAnimate);
             //this.Scaler.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimate);
 
-            AdjustCanvasSize();
+            AdjustCanvasSize(newScale);
         }
 
         #endregion
@@ -310,7 +305,7 @@ namespace GitScc.UI
                     #endregion
                 }
 
-                AdjustCanvasSize();
+                AdjustCanvasSize(this.Scaler.ScaleX);
 
                 this.scrollRoot.ScrollToRightEnd();
 

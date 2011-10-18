@@ -29,11 +29,11 @@
 					</VisualStateGroup>
 				</VisualStateManager.VisualStateGroups>
 				<Ellipse x:Name="ellipse" Fill="#FFF2FBFF" Height="Auto" Stroke="#FF99B6D1" StrokeThickness="1" VerticalAlignment="Stretch"/>
-				<TextBlock x:Name="textBlock" Margin="0,1,0,0" TextWrapping="Wrap" Text="i" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Global Serif" Foreground="#FF99B6D1" Height="Auto" Width="Auto" FontSize="9.333" d:LayoutOverrides="Width" FontWeight="Bold" FontStyle="Italic"/>
+				<TextBlock x:Name="textBlock" Margin="0,3,0,0" TextWrapping="Wrap" Text="ü" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Wingdings" Foreground="#FF99B6D1" Height="Auto" Width="Auto" FontSize="10.667" d:LayoutOverrides="Width" FontWeight="Normal" FontStyle="Normal"/>
 			</Grid>
 		</ControlTemplate>
 	</UserControl.Resources>
-    <Grid x:Name="root" Height="120" Width="200" PreviewMouseDown="root_PreviewMouseDown" RenderTransformOrigin="0.5,0.5" MouseEnter="txtComment_MouseEnter" MouseLeave="txtComment_MouseLeave">
+    <Grid x:Name="root" Height="120" Width="200" RenderTransformOrigin="0.5,0.5" MouseEnter="txtComment_MouseEnter" MouseLeave="txtComment_MouseLeave" MouseUp="root_MouseUp">
     	<Grid.RenderTransform>
     		<TransformGroup>
     			<ScaleTransform/>
@@ -96,7 +96,6 @@
                    Text="{Binding Author}" Foreground="#D1000000" />
         <TextBlock x:Name="txtDate" FontSize="10"  HorizontalAlignment="Right" Margin="0,0,12,6" VerticalAlignment="Bottom" TextAlignment="Right" 
                    Text="{Binding Date}" Foreground="#D1000000" />
-        <Button HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12,0,0,8" Template="{DynamicResource ButtonControlTemplate1}"
-                Command="cmd:HistoryViewCommands.OpenCommitDetails" CommandParameter="{Binding Id}" />
+        <Button HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12,0,0,8" Template="{DynamicResource ButtonControlTemplate1}" Click="Button_Click" />
     </Grid>
 </UserControl>

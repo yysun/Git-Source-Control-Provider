@@ -30,11 +30,9 @@ namespace GitScc.UI
             InitializeComponent();
         }
 
-        private void root_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        private void root_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            this.Selected = !this.Selected;
-            VisualStateManager.GoToElementState(this.root, this.Selected ? "SelectedSate" : "NotSelectedState", true);
-            HistoryViewCommands.SelectCommit.Execute(this.txtId.Text, null);
+            HistoryViewCommands.OpenCommitDetails.Execute(this.txtId.Text, null);
         }
 
         private void txtComment_MouseEnter(object sender, MouseEventArgs e)
@@ -45,6 +43,14 @@ namespace GitScc.UI
         private void txtComment_MouseLeave(object sender, MouseEventArgs e)
         {
             VisualStateManager.GoToElementState(this.root, "NormalState", true);
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            this.Selected = !this.Selected;
+            VisualStateManager.GoToElementState(this.root, this.Selected ? "SelectedSate" : "NotSelectedState", true);
+            HistoryViewCommands.SelectCommit.Execute(this.txtId.Text, null);
+            e.Handled = true;
         }
     }
 }

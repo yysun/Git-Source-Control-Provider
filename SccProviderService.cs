@@ -760,7 +760,9 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
             if (this.CurrentTracker != null && this.CurrentTracker.HasGitRepository)
             {
                 var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
-                dte.ItemOperations.OpenFile(Path.Combine(this.CurrentTracker.GitWorkingDirectory, ".gitignore"));
+                var fn = Path.Combine(this.CurrentTracker.GitWorkingDirectory, ".gitignore");
+                if (!File.Exists(fn)) File.WriteAllText(fn, "# git ignore file");
+                dte.ItemOperations.OpenFile(fn);
             }
         }
 

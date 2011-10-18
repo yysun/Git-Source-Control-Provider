@@ -64,13 +64,18 @@ namespace GitScc.UI
                 this.lblAuthor.Content = commit.CommitterName + " " + commit.CommitDateRelative;
                 this.fileTree.ItemsSource = repositoryGraph.GetTree(commitId).Children;
                 this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId);
-                this.radioShowFileTree.IsChecked = true;
+                //this.radioShowFileTree.IsChecked = true;
                 this.radioShowFileTree.IsEnabled = true;
                 this.toolWindow.ClearEditor();
                 this.commitId1 = commit.ParentIds.Count > 0 ? commit.ParentIds[0] : null;
                 this.commitId2 = commit.Id;
                 this.btnSwitch.Visibility = Visibility.Collapsed;
                 this.txtFileName.Text = "";
+
+                this.radioShowChanges.IsChecked = true;
+                this.fileTree.Visibility = Visibility.Collapsed;
+                this.patchList.Visibility = Visibility.Visible;
+
             }
         }
 

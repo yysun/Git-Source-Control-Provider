@@ -131,9 +131,8 @@ namespace GitScc.DataServices
             links = new List<GraphLink>();
             var lanes = new List<string>();
 
+            var buf = new List<string>();
             int i = 0;
-
-            //var commits = isSimplified ? SimplifiedCommits() : Commits;
 
             foreach (var commit in commits)
             {
@@ -142,44 +141,48 @@ namespace GitScc.DataServices
                 var refs = from r in this.Refs
                            where r.Id == id
                            select r;
-                
-                var children = from c in commits
+
+                var children = (from c in commits
                                where c.ParentIds.Contains(id)
-                               select c;
+                               select c).ToList();
 
-                var lane = -1;
-                if (children.Count() > 1)
-                {
-                    lanes.Clear();
-                }
-                else 
-                {
-                    var child = children.Where(c=>c.ParentIds.IndexOf(id)==0)
-                                        .Select(c=>c.Id).FirstOrDefault();
-
-                    lane = lanes.IndexOf(child);
-                }
+                var parents = (from c in commits
+                              where c.ChildIds.Contains(id)
+                              select c).ToList();
+                var lane = lanes.IndexOf(id);
 
                 if (lane < 0)
                 {
                     lanes.Add(id);
                     lane = lanes.Count - 1;
                 }
-                else
+
+                int m = parents.Count() - 1;
+                for (int n = m; n>=0; n--)
                 {
-                    lanes[lane] = id;
+                    if (lanes.IndexOf(parents[n].Id) <= 0)
+                    {
+                        if (n == m)
+                            lanes[lane] = parents[n].Id;
+                        else
+                            lanes.Add(parents[n].Id);
+                    }
                 }
-                
-                var node = new GraphNode 
+                lanes.Remove(id);
+
+                var node = new GraphNode
                 {
-                    X = lane, Y = i++, Id = id, Message = commit.Message,
+                    X = lane,
+                    Y = i++,
+                    Id = id,
+                    Message = commit.Message,
                     CommitterName = commit.CommitterName,
                     CommitDateRelative = commit.CommitDateRelative,
                     Refs = refs.ToArray(),
                 };
 
                 nodes.Add(node);
-                
+
                 foreach (var ch in children)
                 {
                     var cnode = (from n in nodes
@@ -406,15 +409,13 @@ namespace GitScc.DataServices
             RevWalk walk = null;
             try
             {
-                var id = repository.Resolve(commitId);
-                walk = new RevWalk(repository);
-                RevCommit commit = walk.ParseCommit(id);
-                if (commit == null || commit.Tree == null) return null;
-                var commitTree = new Tree(repository, commit.Tree.Id, repository.Open(commit.Tree.Id).GetBytes());
-                var entry = commitTree.FindBlobMember(fileName);
-                if (entry != null)
+                var head = repository.Resolve(commitId);
+                RevTree revTree = head == null ? null : new RevWalk(repository).ParseTree(head);
+
+                var entry = TreeWalk.ForPath(repository, fileName, revTree);
+                if (!entry.IsSubtree)
                 {
-                    var blob = repository.Open(entry.GetId());
+                    var blob = repository.Open(entry.GetObjectId(0));
                     if (blob != null) return blob.GetCachedBytes();
                 }
             }

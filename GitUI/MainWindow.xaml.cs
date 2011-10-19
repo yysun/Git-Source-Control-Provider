@@ -32,7 +32,7 @@ namespace GitUI
         {
             this.gitViewModel =
             this.graph.GitViewModel =
-            this.toolBar.GitViewModel = GitViewModel.Current;
+            this.topToolBar.GitViewModel = GitViewModel.Current;
 
             if (gitViewModel.Tacker.HasGitRepository)
                 this.Title = gitViewModel.Tacker.GitWorkingDirectory;
@@ -63,30 +63,77 @@ namespace GitUI
             this.graph.ExportGraph();
         }
 
+        private void rootGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            ShowTopToolBar();
+            ShowBottomToolBarBar();
+        }
+
         private void Grid_PreviewMouseMove(object sender, MouseEventArgs e)
         {
             var y = e.GetPosition(rootGrid).Y;
             //System.Diagnostics.Debug.WriteLine(y);
-            if (y < 60 && toolBar.Visibility == Visibility.Collapsed)
+            if (y < 60)
             {
-                toolBar.Visibility = Visibility.Visible;
-                this.toolBar.RenderTransform.SetValue(TranslateTransform.YProperty, -60.0);
-                this.toolBar.Visibility = Visibility.Visible;
+                ShowTopToolBar();
+            }
+            else if (y > 60)
+            {
+                HideTopToolBar();
+            }
+        }
+
+        private void ShowTopToolBar()
+        {
+            if (this.topToolBar.Visibility == Visibility.Collapsed)
+            {
+                this.topToolBar.Visibility = Visibility.Visible;
+                this.topToolBar.RenderTransform.SetValue(TranslateTransform.YProperty, -60.0);
+                this.topToolBar.Visibility = Visibility.Visible;
                 var animationDuration = TimeSpan.FromSeconds(1.0);
                 var animation = new DoubleAnimation(0, new Duration(animationDuration));
                 animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
-                this.toolBar.RenderTransform.BeginAnimation(TranslateTransform.YProperty, animation);
-
+                this.topToolBar.RenderTransform.BeginAnimation(TranslateTransform.YProperty, animation);
             }
-            else if (y > 60 && toolBar.Visibility == Visibility.Visible)
+        }
+
+        private void HideTopToolBar()
+        {
+            if (this.topToolBar.Visibility == Visibility.Visible)
             {
                 var animationDuration = TimeSpan.FromSeconds(1.0);
                 var animation = new DoubleAnimation(-60.0, new Duration(animationDuration));
                 animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
-                animation.Completed += (o, _) => this.toolBar.Visibility = Visibility.Collapsed;
-                this.toolBar.RenderTransform.BeginAnimation(TranslateTransform.YProperty, animation);
-
+                animation.Completed += (o, _) => this.topToolBar.Visibility = Visibility.Collapsed;
+                this.topToolBar.RenderTransform.BeginAnimation(TranslateTransform.YProperty, animation);
             }
         }
+
+        private void ShowBottomToolBarBar()
+        {
+            if (this.bottomToolBar.Visibility == Visibility.Collapsed)
+            {
+                this.bottomToolBar.Visibility = Visibility.Visible;
+                this.bottomToolBar.RenderTransform.SetValue(TranslateTransform.YProperty, 60.0);
+                this.bottomToolBar.Visibility = Visibility.Visible;
+                var animationDuration = TimeSpan.FromSeconds(1.0);
+                var animation = new DoubleAnimation(0, new Duration(animationDuration));
+                animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
+                this.bottomToolBar.RenderTransform.BeginAnimation(TranslateTransform.YProperty, animation);
+            }
+        }
+
+        private void HideBottomToolBar()
+        {
+            if (this.bottomToolBar.Visibility == Visibility.Visible)
+            {
+                var animationDuration = TimeSpan.FromSeconds(1.0);
+                var animation = new DoubleAnimation(60.0, new Duration(animationDuration));
+                animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
+                animation.Completed += (o, _) => this.bottomToolBar.Visibility = Visibility.Collapsed;
+                this.bottomToolBar.RenderTransform.BeginAnimation(TranslateTransform.YProperty, animation);
+            }
+        }
+
     }
 }

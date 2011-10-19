@@ -6,17 +6,25 @@
     <Window.CommandBindings>
         <CommandBinding Command="cmd:HistoryViewCommands.ExportGraph"  Executed="ExportGraph" />
     </Window.CommandBindings>
-    <Grid x:Name="rootGrid" PreviewMouseMove="Grid_PreviewMouseMove">
+    <Grid x:Name="rootGrid" PreviewMouseMove="Grid_PreviewMouseMove" PreviewMouseRightButtonDown="rootGrid_PreviewMouseRightButtonDown">
         <!--<Grid.RowDefinitions>
             <RowDefinition Height="60"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>-->
         <GitScc_UI:HistoryGraph HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="graph"/>
-        <my:MainToolBar x:Name="toolBar" Height="60" Visibility="Collapsed"
+        <my:MainToolBar x:Name="topToolBar" Height="60" Visibility="Collapsed"
                         HorizontalAlignment="Stretch" VerticalAlignment="Top">
             <my:MainToolBar.RenderTransform>
                 <TranslateTransform Y="-60" />
             </my:MainToolBar.RenderTransform>
         </my:MainToolBar>
+
+        <my:BottomToolBar x:Name="bottomToolBar" Height="60" Visibility="Collapsed"
+                        HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
+            <my:BottomToolBar.RenderTransform>
+                <TranslateTransform Y="60" />
+            </my:BottomToolBar.RenderTransform>
+        </my:BottomToolBar>
+
     </Grid>
 </Window>

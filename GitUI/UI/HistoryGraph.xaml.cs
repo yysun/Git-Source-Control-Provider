@@ -55,14 +55,6 @@ namespace GitScc.UI
                 Point newPoint = new Point(newPosition.X - offset.X, newPosition.Y - offset.Y);
                 this.canvasContainer.SetValue(Canvas.LeftProperty, newPoint.X);
                 this.canvasContainer.SetValue(Canvas.TopProperty, newPoint.Y);
-
-                //var animationDuration = TimeSpan.FromSeconds(.1);
-                //Translator.BeginAnimation(TranslateTransform.XProperty,
-                //    new DoubleAnimation(newPosition.X, new Duration(animationDuration)));
-
-                //Translator.BeginAnimation(TranslateTransform.YProperty,
-                //    new DoubleAnimation(newPosition.Y, new Duration(animationDuration))); 
-                AdjustCanvasSize();
             }
         }
         private void AdjustCanvasSize()
@@ -73,6 +65,9 @@ namespace GitScc.UI
 
             this.canvasContainer.Height = (PADDING * 2 + (maxY+1) * GRID_HEIGHT);
             this.canvasRoot.Height = this.canvasContainer.Height * this.Scaler.ScaleY;
+
+            this.canvasContainer.SetValue(Canvas.LeftProperty, 0.0);
+            this.canvasContainer.SetValue(Canvas.TopProperty, 0.0);
         }
 
         private void scrollRoot_PreviewMouseWheel(object sender, MouseWheelEventArgs e)

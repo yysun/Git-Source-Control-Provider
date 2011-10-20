@@ -123,7 +123,7 @@ namespace GitScc.UI
             {
                 canvasContainer.Children.Clear();
 
-                if (commits!=null)
+                if (commits!=null && commits.Count>0)
                 {
                     maxX = commits.Count();
                     maxY = commits.Max(c => c.X);

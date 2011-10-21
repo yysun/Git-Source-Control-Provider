@@ -15,11 +15,13 @@ namespace BasicSccProvider.Tests
     {
         protected string tempFolder;
         protected string tempFile;
+        protected string[] lines;
         
         public GitFileStatusTrackerTest()
         {
             tempFolder = Environment.CurrentDirectory + "\\" + Guid.NewGuid().ToString();
             tempFile = Path.Combine(tempFolder, "test");
+            lines = new string[] { "First line", "Second line", "Third line" };
         }
 
         private TestContext testContextInstance;
@@ -98,19 +100,17 @@ namespace BasicSccProvider.Tests
             GitFileStatusTracker.Init(tempFolder);
             GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
 
-            string[] lines = { "First line", "Second line", "Third line" };
-
             File.WriteAllLines(tempFile, lines);
             Assert.AreEqual(GitFileStatus.New, tracker.GetFileStatus(tempFile));
 
             tracker.StageFile(tempFile);
             Assert.AreEqual(GitFileStatus.Added, tracker.GetFileStatus(tempFile));
 
-            //tracker.UnStageFile(tempFile);
-            //Assert.AreEqual(GitFileStatus.New, tracker.GetFileStatus(tempFile));
+            tracker.UnStageFile(tempFile);
+            Assert.AreEqual(GitFileStatus.New, tracker.GetFileStatus(tempFile));
 
-            //tracker.StageFile(tempFile);
-            //Assert.AreEqual(GitFileStatus.Added, tracker.GetFileStatus(tempFile));
+            tracker.StageFile(tempFile);
+            Assert.AreEqual(GitFileStatus.Added, tracker.GetFileStatus(tempFile));
 
             tracker.Commit("test commit");
             Assert.AreEqual(GitFileStatus.Tracked, tracker.GetFileStatus(tempFile));
@@ -119,11 +119,11 @@ namespace BasicSccProvider.Tests
             tracker.Refresh();
             Assert.AreEqual(GitFileStatus.Modified, tracker.GetFileStatus(tempFile));
 
-            //tracker.StageFile(tempFile);
-            //Assert.AreEqual(GitFileStatus.Staged, tracker.GetFileStatus(tempFile));
+            tracker.StageFile(tempFile);
+            Assert.AreEqual(GitFileStatus.Staged, tracker.GetFileStatus(tempFile));
 
-            //tracker.UnStageFile(tempFile);
-            //Assert.AreEqual(GitFileStatus.Modified, tracker.GetFileStatus(tempFile));
+            tracker.UnStageFile(tempFile);
+            Assert.AreEqual(GitFileStatus.Modified, tracker.GetFileStatus(tempFile));
 
             File.Delete(tempFile);
             tracker.Refresh();
@@ -132,16 +132,14 @@ namespace BasicSccProvider.Tests
             tracker.StageFile(tempFile);
             Assert.AreEqual(GitFileStatus.Removed, tracker.GetFileStatus(tempFile));
 
-            //tracker.UnStageFile(tempFile);
-            //Assert.AreEqual(GitFileStatus.Deleted, tracker.GetFileStatus(tempFile));
+            tracker.UnStageFile(tempFile);
+            Assert.AreEqual(GitFileStatus.Deleted, tracker.GetFileStatus(tempFile));
         }
 
         [TestMethod]
         public void GetFileContentTest()
         {
             GitFileStatusTracker.Init(tempFolder);
-
-            string[] lines = { "First line", "Second line", "Third line" };
             File.WriteAllLines(tempFile, lines);
 
             GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
@@ -170,7 +168,6 @@ namespace BasicSccProvider.Tests
 
             GitFileStatusTracker.Init(tempFolder);
 
-            string[] lines = { "First line", "Second line", "Third line" };
             File.WriteAllLines(tempFile, lines);
             tracker = new GitFileStatusTracker(tempFolder);
             fileContent = tracker.GetFileContent(tempFile + ".bad");
@@ -191,7 +188,6 @@ namespace BasicSccProvider.Tests
         {
             GitFileStatusTracker.Init(tempFolder);
 
-            string[] lines = { "First line", "Second line", "Third line" };
             File.WriteAllLines(tempFile, lines);
 
             GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
@@ -216,54 +212,47 @@ namespace BasicSccProvider.Tests
         public void LastCommitMessageTest()
         {
             GitFileStatusTracker.Init(tempFolder);
-            string[] lines = { "First line", "Second line", "Third line" };
             File.WriteAllLines(tempFile, lines);
 
             GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
             tracker.StageFile(tempFile);
             
             tracker.Commit("test message");
-            Assert.AreEqual("test message", tracker.LastCommitMessage);
+            Assert.IsTrue(tracker.LastCommitMessage.StartsWith("test message"));
         }
 
         [TestMethod]
         public void AmendCommitTest()
         {
             GitFileStatusTracker.Init(tempFolder);
-            string[] lines = { "First line", "Second line", "Third line" };
             File.WriteAllLines(tempFile, lines);
 
             GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
             tracker.StageFile(tempFile);
 
             tracker.Commit("test message");
-            Assert.AreEqual("test message", tracker.LastCommitMessage);
+            Assert.IsTrue(tracker.LastCommitMessage.StartsWith("test message"));
 
             File.WriteAllText(tempFile, "changed text");
             tracker.StageFile(tempFile);
             tracker.AmendCommit("new message");
-            Assert.AreEqual("new message", tracker.LastCommitMessage);
+            Assert.IsTrue(tracker.LastCommitMessage.StartsWith("new message"));
         }
 
         [TestMethod]
         public void DiffFileTest()
         {
             GitFileStatusTracker.Init(tempFolder);
-            string[] lines = { "First line", "Second line", "Third line" };
             File.WriteAllLines(tempFile, lines);
 
             GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
             tracker.StageFile(tempFile);
-
             tracker.Commit("test message");
-            Assert.AreEqual("test message", tracker.LastCommitMessage);
-
             File.WriteAllText(tempFile, "changed text");
             var diff = tracker.DiffFile(tempFile);
             Console.WriteLine(diff);
             Assert.IsTrue(diff.StartsWith("@@ -1,3 +1 @@"));
         }
-
     }
 
     [TestClass()]
@@ -285,8 +274,8 @@ namespace BasicSccProvider.Tests
         {
             GitBash.GitExePath = @"C:\Program Files (x86)\Git\bin\sh.exe";
             tempFolder = Environment.CurrentDirectory + "\\" + Guid.NewGuid().ToString();
-            Directory.CreateDirectory(Path.Combine(tempFolder, "folder č"));
-            tempFile = Path.Combine(tempFolder, "folder č\\test");
+            Directory.CreateDirectory(Path.Combine(tempFolder, "folder 中文 čćšđžČĆŠĐŽ"));
+            tempFile = Path.Combine(tempFolder, "folder 中文 čćšđžČĆŠĐŽ\\test");
         }
     }
 }

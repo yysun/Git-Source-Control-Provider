@@ -158,6 +158,20 @@ namespace GitScc
                     {
                         return GitFileStatus.MergeConflict;
                     }
+
+                    if (workingTreeIterator == null)
+                    {
+                        // in index, not in workdir => missing
+                        return GitFileStatus.Deleted;
+                    }
+                    else
+                    {
+                        if (workingTreeIterator.IsModified(dirCacheIterator.GetDirCacheEntry(), true))
+                        {
+                            // in index, in workdir, content differs => modified
+                            return GitFileStatus.Modified;
+                        }
+                    }
                 }
                 if (treeIterator != null)
                 {
@@ -187,22 +201,6 @@ namespace GitScc
                         if (workingTreeIterator != null)
                         {
                             return !workingTreeIterator.IsEntryIgnored() ? GitFileStatus.New : GitFileStatus.Ignored;
-                        }
-                    }
-                }
-                if (dirCacheIterator != null)
-                {
-                    if (workingTreeIterator == null)
-                    {
-                        // in index, not in workdir => missing
-                        return GitFileStatus.Deleted;
-                    }
-                    else
-                    {
-                        if (workingTreeIterator.IsModified(dirCacheIterator.GetDirCacheEntry(), true))
-                        {
-                            // in index, in workdir, content differs => modified
-                            return GitFileStatus.Modified;
                         }
                     }
                 }
@@ -352,7 +350,8 @@ namespace GitScc
                    GetRepositoryDirectory(directory.Parent.FullName);
         }
 
-        #region Git operations: init, stage, unstage(reset), rm, commit/amend commit
+        #region Git operations: init, stage, unstage(rm --cache), commit/amend commit
+
         /// <summary>
         /// Requires absolute path
         /// </summary>
@@ -360,36 +359,34 @@ namespace GitScc
         public void UnStageFile(string fileName)
         {
             if (!this.HasGitRepository) return;
-            var fileNameRel = GetRelativeFileNameForGit(fileName);
 
-            var git = new Git(this.repository);
-            git.Rm().AddFilepattern(fileNameRel).Call();
-
+            var fileNameRel = GetRelativeFileName(fileName);
             var head = repository.Resolve(Constants.HEAD);
-            if (head != null)
+
+            Tree commitTree = null;
+            TreeEntry treeEntry = null;
+            if (head == null)
             {
-                RevWalk revWalk = new RevWalk(repository);
-                RevTree headTree = revWalk.ParseTree(head);
-                if (headTree != null)
-                {
-                    try
-                    {
-                        var entry = TreeWalk.ForPath(repository, fileName, headTree);
-                        if (!entry.IsSubtree)
-                        {
-                            DirCacheEntry dce = new DirCacheEntry(entry.PathString);
-                            var dc = repository.LockDirCache();
-                            DirCacheBuilder builder = dc.Builder();
-                            builder.Add(dce);
-                            builder.Commit();
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.WriteLine("Unstage File Content: {0}\r\n{1}", fileName, ex.ToString());
-                    }
-                }
+                commitTree = new Tree(repository);
             }
+            else
+            {
+                var revTree = new RevWalk(repository).ParseTree(head);
+                var treeId = revTree.Id;
+                commitTree = new Tree(repository, treeId, repository.Open(treeId).GetBytes());
+                if(commitTree!=null) treeEntry = commitTree.FindBlobMember(fileNameRel);
+            }
+            var index = repository.GetIndex();
+            index.RereadIfNecessary();
+            index.Remove(repository.WorkTree, fileName);
+
+            if (treeEntry != null)
+            {
+                index.AddEntry(treeEntry);
+            }
+
+            index.Write();
+
             this.cache.Remove(GetCacheKey(fileName));
         }
 
@@ -400,34 +397,87 @@ namespace GitScc
         public void StageFile(string fileName)
         {
             if (!this.HasGitRepository) return;
-            var fileNameRel = GetRelativeFileNameForGit(fileName);
-            var git = new Git(this.repository);
+            var index = repository.GetIndex();
+            index.RereadIfNecessary();
+            index.Remove(repository.WorkTree, fileName);
+
             if (File.Exists(fileName))
             {
-                git.Add().AddFilepattern(fileNameRel).Call();
+                var content = File.ReadAllBytes(fileName);
+                index.Add(repository.WorkTree, fileName, content);
             }
             else
             {
-                git.Rm().AddFilepattern(fileNameRel).Call();
+                //stage deleted
+                index.Remove(repository.WorkTree, fileName);
             }
-
+            index.Write();
             this.cache.Remove(GetCacheKey(fileName));
         }
 
-        /////// <summary>
-        /////// Requires absolute path
-        /////// </summary>
-        /////// <param name="fileName"></param>
-        ////public void RemoveFile(string fileName)
-        ////{
-        ////    if (!this.HasGitRepository) return;
-        ////    var fileNameRel = GetRelativeFileNameForGit(fileName);
+        #region under research ...
+        /// <summary>
+        /// Requires absolute path
+        /// </summary>
+        /// <param name="fileName"></param>
+        //public void UnStageFile(string fileName)
+        //{
+        //    if (!this.HasGitRepository) return;
+        //    var fileNameRel = GetRelativeFileNameForGit(fileName);
 
-        ////    var git = new Git(this.repository);
-        ////    var rev = git.Rm().AddFilepattern(fileNameRel).Call();
+        //    GitBash.Run(string.Format("rm --cache {0}", GetRelativeFileName(fileName)), this.GitWorkingDirectory);
 
-        ////    this.cache.Remove(GetCacheKey(fileName));
-        ////}
+        //    var git = new Git(this.repository);
+
+        //    var head = repository.Resolve(Constants.HEAD);
+        //    if (head != null)
+        //    {
+        //        RevWalk revWalk = new RevWalk(repository);
+        //        RevTree headTree = revWalk.ParseTree(head);
+        //        if (headTree != null)
+        //        {
+        //            try
+        //            {
+        //                var entry = TreeWalk.ForPath(repository, fileName, headTree);
+        //                if (!entry.IsSubtree)
+        //                {
+        //                    DirCacheEntry dce = new DirCacheEntry(entry.PathString);
+        //                    var dc = repository.LockDirCache();
+        //                    DirCacheBuilder builder = dc.Builder();
+        //                    builder.Add(dce);
+        //                    builder.Commit();
+        //                }
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                Log.WriteLine("Unstage File Content: {0}\r\n{1}", fileName, ex.ToString());
+        //            }
+        //        }
+        //    }
+        //    this.cache.Remove(GetCacheKey(fileName));
+        //}
+
+        /// <summary>
+        /// Requires absolute path
+        /// </summary>
+        /// <param name="fileName"></param>
+        //public void StageFile(string fileName)
+        //{
+        //    if (!this.HasGitRepository) return;
+        //    var fileNameRel = GetRelativeFileNameForGit(fileName);
+        //    var git = new Git(this.repository);
+        //    if (File.Exists(fileName))
+        //    {
+        //        git.Add().AddFilepattern(fileNameRel).Call();
+        //    }
+        //    else
+        //    {
+        //        git.Rm().AddFilepattern(fileNameRel).Call();
+        //    }
+
+        //    this.cache.Remove(GetCacheKey(fileName));
+        //} 
+        #endregion
 
         public string Commit(string message)
         {
@@ -489,7 +539,7 @@ namespace GitScc
                 {
                     var revWalk = new RevWalk(this.repository);
                     var commit = revWalk.ParseCommit(headId);
-                    return commit == null ? null : commit.GetShortMessage();
+                    return commit == null ? null : commit.GetFullMessage();
                 }
                 return null;
             }

@@ -6,8 +6,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BasicSccProvider.Tests
 {
-
-
     /// <summary>
     ///This is a test class for GitFileStatusTrackerTest and is intended
     ///to contain all GitFileStatusTrackerTest Unit Tests
@@ -15,6 +13,14 @@ namespace BasicSccProvider.Tests
     [TestClass()]
     public class GitFileStatusTrackerTest
     {
+        protected string tempFolder;
+        protected string tempFile;
+        
+        public GitFileStatusTrackerTest()
+        {
+            tempFolder = Environment.CurrentDirectory + "\\" + Guid.NewGuid().ToString();
+            tempFile = Path.Combine(tempFolder, "test");
+        }
 
         private TestContext testContextInstance;
 
@@ -67,18 +73,17 @@ namespace BasicSccProvider.Tests
         [TestMethod()]
         public void GetRepositoryDirectoryTest()
         {
-            var tempFolder = Environment.CurrentDirectory + "\\_gitscc_test_0";
-            var newFolder = tempFolder + "\\t t";
-            Directory.CreateDirectory(newFolder);
             GitFileStatusTracker.Init(tempFolder);
-            var folder = GitFileStatusTracker.GetRepositoryDirectory(newFolder);
-            Assert.AreEqual(tempFolder, folder);
+            var newFolder = tempFolder + "\\t t\\a a";
+            Directory.CreateDirectory(newFolder);
+            GitFileStatusTracker tracker = new GitFileStatusTracker(newFolder);
+            Assert.AreEqual(tempFolder, tracker.GitWorkingDirectory);
         }
 
         [TestMethod()]
         public void HasGitRepositoryTest()
         {
-            var tempFolder = Environment.CurrentDirectory + "\\_gitscc_test_1";
+            
             GitFileStatusTracker.Init(tempFolder);
             GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
 
@@ -90,21 +95,22 @@ namespace BasicSccProvider.Tests
         [TestMethod]
         public void GetFileStatusTest()
         {
-            var tempFolder = Environment.CurrentDirectory + "\\_gitscc_test_2";
-            var tempFile = Path.Combine(tempFolder, "test");
-
             GitFileStatusTracker.Init(tempFolder);
             GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
 
             string[] lines = { "First line", "Second line", "Third line" };
 
             File.WriteAllLines(tempFile, lines);
-            tracker.Refresh();
             Assert.AreEqual(GitFileStatus.New, tracker.GetFileStatus(tempFile));
 
             tracker.StageFile(tempFile);
-            tracker.Refresh();
             Assert.AreEqual(GitFileStatus.Added, tracker.GetFileStatus(tempFile));
+
+            //tracker.UnStageFile(tempFile);
+            //Assert.AreEqual(GitFileStatus.New, tracker.GetFileStatus(tempFile));
+
+            //tracker.StageFile(tempFile);
+            //Assert.AreEqual(GitFileStatus.Added, tracker.GetFileStatus(tempFile));
 
             tracker.Commit("test commit");
             Assert.AreEqual(GitFileStatus.Tracked, tracker.GetFileStatus(tempFile));
@@ -113,21 +119,26 @@ namespace BasicSccProvider.Tests
             tracker.Refresh();
             Assert.AreEqual(GitFileStatus.Modified, tracker.GetFileStatus(tempFile));
 
+            //tracker.StageFile(tempFile);
+            //Assert.AreEqual(GitFileStatus.Staged, tracker.GetFileStatus(tempFile));
+
+            //tracker.UnStageFile(tempFile);
+            //Assert.AreEqual(GitFileStatus.Modified, tracker.GetFileStatus(tempFile));
+
             File.Delete(tempFile);
             tracker.Refresh();
             Assert.AreEqual(GitFileStatus.Deleted, tracker.GetFileStatus(tempFile));
 
-            tracker.RemoveFile(tempFile);
-            tracker.Refresh();
+            tracker.StageFile(tempFile);
             Assert.AreEqual(GitFileStatus.Removed, tracker.GetFileStatus(tempFile));
+
+            //tracker.UnStageFile(tempFile);
+            //Assert.AreEqual(GitFileStatus.Deleted, tracker.GetFileStatus(tempFile));
         }
 
         [TestMethod]
         public void GetFileContentTest()
         {
-            var tempFolder = Environment.CurrentDirectory + "\\_gitscc_test_3";
-            var tempFile = Path.Combine(tempFolder, "test");
-
             GitFileStatusTracker.Init(tempFolder);
 
             string[] lines = { "First line", "Second line", "Third line" };
@@ -151,12 +162,33 @@ namespace BasicSccProvider.Tests
         }
 
         [TestMethod]
+        public void GetFileContentTestNegative()
+        {
+            GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
+            var fileContent = tracker.GetFileContent(tempFile + ".bad");
+            Assert.IsNull(fileContent);
+
+            GitFileStatusTracker.Init(tempFolder);
+
+            string[] lines = { "First line", "Second line", "Third line" };
+            File.WriteAllLines(tempFile, lines);
+            tracker = new GitFileStatusTracker(tempFolder);
+            fileContent = tracker.GetFileContent(tempFile + ".bad");
+            Assert.IsNull(fileContent);
+
+            tracker.StageFile(tempFile);
+            fileContent = tracker.GetFileContent(tempFile + ".bad");
+            Assert.IsNull(fileContent);
+
+            tracker.Commit("test");
+
+            fileContent = tracker.GetFileContent(tempFile + ".bad");
+            Assert.IsNull(fileContent);
+        }
+
+        [TestMethod]
         public void GetChangedFilesTest()
         {
-
-            var tempFolder = Environment.CurrentDirectory + "\\_gitscc_test_5";
-            var tempFile = Path.Combine(tempFolder, "test");
-
             GitFileStatusTracker.Init(tempFolder);
 
             string[] lines = { "First line", "Second line", "Third line" };
@@ -183,9 +215,6 @@ namespace BasicSccProvider.Tests
         [TestMethod]
         public void LastCommitMessageTest()
         {
-            var tempFolder = Environment.CurrentDirectory + "\\_gitscc_test_6";
-            var tempFile = Path.Combine(tempFolder, "test");
-
             GitFileStatusTracker.Init(tempFolder);
             string[] lines = { "First line", "Second line", "Third line" };
             File.WriteAllLines(tempFile, lines);
@@ -200,9 +229,6 @@ namespace BasicSccProvider.Tests
         [TestMethod]
         public void AmendCommitTest()
         {
-            var tempFolder = Environment.CurrentDirectory + "\\_gitscc_test_7";
-            var tempFile = Path.Combine(tempFolder, "test");
-
             GitFileStatusTracker.Init(tempFolder);
             string[] lines = { "First line", "Second line", "Third line" };
             File.WriteAllLines(tempFile, lines);
@@ -222,9 +248,6 @@ namespace BasicSccProvider.Tests
         [TestMethod]
         public void DiffFileTest()
         {
-            var tempFolder = Environment.CurrentDirectory + "\\_gitscc_test_8";
-            var tempFile = Path.Combine(tempFolder, "test");
-
             GitFileStatusTracker.Init(tempFolder);
             string[] lines = { "First line", "Second line", "Third line" };
             File.WriteAllLines(tempFile, lines);
@@ -239,6 +262,31 @@ namespace BasicSccProvider.Tests
             var diff = tracker.DiffFile(tempFile);
             Console.WriteLine(diff);
             Assert.IsTrue(diff.StartsWith("@@ -1,3 +1 @@"));
+        }
+
+    }
+
+    [TestClass()]
+    public class GitFileStatusTrackerTest_WithSubFolder : GitFileStatusTrackerTest
+    {
+        public GitFileStatusTrackerTest_WithSubFolder()
+        {
+            GitBash.GitExePath = null;
+            tempFolder = Environment.CurrentDirectory + "\\" + Guid.NewGuid().ToString();
+            Directory.CreateDirectory(Path.Combine(tempFolder, "中文 1č"));
+            tempFile = Path.Combine(tempFolder, "中文 1č\\testč");
+        }
+    }
+
+    [TestClass()]
+    public class GitFileStatusTrackerTest_WithSubFolder_UsingGitBash : GitFileStatusTrackerTest
+    {
+        public GitFileStatusTrackerTest_WithSubFolder_UsingGitBash()
+        {
+            GitBash.GitExePath = @"C:\Program Files (x86)\Git\bin\sh.exe";
+            tempFolder = Environment.CurrentDirectory + "\\" + Guid.NewGuid().ToString();
+            Directory.CreateDirectory(Path.Combine(tempFolder, "folder č"));
+            tempFile = Path.Combine(tempFolder, "folder č\\test");
         }
     }
 }

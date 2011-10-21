@@ -17,7 +17,7 @@ namespace GitScc
             {
                 try
                 {
-                    gitExePath = Path.Combine(Path.GetDirectoryName(value), "git.exe");
+                    gitExePath = value == null ? null : Path.Combine(Path.GetDirectoryName(value), "git.exe");
                 }
                 catch{}
             }

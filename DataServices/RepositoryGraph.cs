@@ -406,15 +406,13 @@ namespace GitScc.DataServices
             RevWalk walk = null;
             try
             {
-                var id = repository.Resolve(commitId);
-                walk = new RevWalk(repository);
-                RevCommit commit = walk.ParseCommit(id);
-                if (commit == null || commit.Tree == null) return null;
-                var commitTree = new Tree(repository, commit.Tree.Id, repository.Open(commit.Tree.Id).GetBytes());
-                var entry = commitTree.FindBlobMember(fileName);
-                if (entry != null)
+                var head = repository.Resolve(commitId);
+                RevTree revTree = head == null ? null : new RevWalk(repository).ParseTree(head);
+
+                var entry = TreeWalk.ForPath(repository, fileName, revTree);
+                if (!entry.IsSubtree)
                 {
-                    var blob = repository.Open(entry.GetId());
+                    var blob = repository.Open(entry.GetObjectId(0));
                     if (blob != null) return blob.GetCachedBytes();
                 }
             }

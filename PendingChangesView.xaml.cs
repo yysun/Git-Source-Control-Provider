@@ -55,7 +55,7 @@ namespace GitScc
             var checkBox = sender as CheckBox;
             foreach (var item in this.dataGrid1.Items.Cast<GitFile>())
             {
-                ((GitFile) item).IsSelected = checkBox.IsChecked == true;
+                ((GitFile)item).IsSelected = checkBox.IsChecked == true;
             }
         }
 
@@ -71,19 +71,23 @@ namespace GitScc
             var dispatcher = Dispatcher.CurrentDispatcher;
             Action act = () =>
             {
-                var ret = tracker.DiffFile(fileName);
-                ret = ret.Replace("\r", "").Replace("\n", "\r\n");
-
-                var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), ".diff");
-                File.WriteAllText(tmpFileName, ret);
-
-                var tuple = this.toolWindow.SetDisplayedFile(tmpFileName);
-                if (tuple != null)
+                try
                 {
-                    this.DiffEditor.Content = tuple.Item1;
-                    this.textView = tuple.Item2;
-                    diffLines = ret.Split('\n');
+                    var ret = tracker.DiffFile(fileName);
+                    ret = ret.Replace("\r", "").Replace("\n", "\r\n");
+
+                    var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), ".diff");
+                    File.WriteAllText(tmpFileName, ret);
+
+                    var tuple = this.toolWindow.SetDisplayedFile(tmpFileName);
+                    if (tuple != null)
+                    {
+                        this.DiffEditor.Content = tuple.Item1;
+                        this.textView = tuple.Item2;
+                        diffLines = ret.Split('\n');
+                    }
                 }
+                catch { }
 
             };
 
@@ -193,7 +197,7 @@ namespace GitScc
 
         private string Comments
         {
-            get 
+            get
             {
                 TextRange textRange = new TextRange(
                     this.textBoxComments.Document.ContentStart,
@@ -217,7 +221,7 @@ namespace GitScc
                     MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return false;
             }
-            else 
+            else
                 return true;
         }
 
@@ -268,8 +272,6 @@ namespace GitScc
             }
         }
 
-            //    Commit();
-            //}
         private bool StageSelectedFiles()
         {
             foreach (var item in this.dataGrid1.Items.Cast<GitFile>())
@@ -378,9 +380,9 @@ Note: if the file is included project, you need to delete the file from project 
             GetSelectedFileFullName(fileName =>
             {
                 if (MessageBox.Show("Are you sure you want to delete file: " + Path.GetFileName(fileName) + deleteMsg,
-                                   "Delete File",  
-                                   MessageBoxButton.YesNo, 
-                                   MessageBoxImage.Question) ==  MessageBoxResult.Yes)
+                                   "Delete File",
+                                   MessageBoxButton.YesNo,
+                                   MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
                     File.Delete(fileName);
                 }
@@ -391,48 +393,49 @@ Note: if the file is included project, you need to delete the file from project 
 
         private void DiffEditor_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (this.textView != null &&
-                diffLines != null && diffLines.Length > 0)
+            int start = 1, column = 1;
+            try
             {
-                int line, column;
-                textView.GetCaretPos(out line, out column);
-                var start = 1;
-                string text = diffLines[line];
-                while (true || line < 0)
+                if (this.textView != null && diffLines != null && diffLines.Length > 0)
                 {
-                    var match = Regex.Match(text, "@@(.+)@@\r");
-                    if (match.Success)
-                    {
-                        var s = match.Groups[1].Value;
-                        s = s.Substring(s.IndexOf('+') + 1);
-                        s = s.Substring(0, s.IndexOf(','));
-                        start += Convert.ToInt32(s) - 2;
+                    int line;
+                    textView.GetCaretPos(out line, out column);
 
-                        //if (!text.StartsWith("@@")) start -= 3;
-                        break;
-                    }
-                    else if (text.StartsWith("-"))
+                    string text = diffLines[line];
+                    while (true || line < 0)
                     {
-                        start--;
-                    }
+                        var match = Regex.Match(text, "@@(.+)@@\r");
+                        if (match.Success)
+                        {
+                            var s = match.Groups[1].Value;
+                            s = s.Substring(s.IndexOf('+') + 1);
+                            s = s.Substring(0, s.IndexOf(','));
+                            start += Convert.ToInt32(s) - 2;
+                            //if (!text.StartsWith("@@")) start -= 3;
+                            break;
+                        }
+                        else if (text.StartsWith("-"))
+                        {
+                            start--;
+                        }
 
-                    if (text.Contains("\r"))
-                    {
-                        start++;
+                        if (text.Contains("\r"))
+                        {
+                            start++;
+                        }
+                        text = --line>=0 ? diffLines[--line] : "";
                     }
-                    text = diffLines[--line];
                 }
-
-                GetSelectedFileFullName((fileName) =>
-                {
-                    var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
-                    dte.ItemOperations.OpenFile(fileName);
-                    var selection = dte.ActiveDocument.Selection as EnvDTE.TextSelection;
-                    selection.MoveToLineAndOffset(start, column);
-                });
             }
+            catch { }
+            GetSelectedFileFullName((fileName) =>
+            {
+                var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
+                dte.ItemOperations.OpenFile(fileName);
+                var selection = dte.ActiveDocument.Selection as EnvDTE.TextSelection;
+                selection.MoveToLineAndOffset(start, column);
+            });
         }
-
     }
 
     public static class ExtHelper

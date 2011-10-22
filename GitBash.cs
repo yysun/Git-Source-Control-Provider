@@ -69,7 +69,7 @@ namespace GitScc
 
             var pinfo = new ProcessStartInfo("cmd.exe")
             {
-                Arguments = "/C \"\"" + gitExePath + "\"\" " + args,
+                Arguments = "/C \"\"" + gitExePath + "\" " + args + "\"",
                 CreateNoWindow = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,

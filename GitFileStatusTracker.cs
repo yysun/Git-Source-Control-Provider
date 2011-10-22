@@ -655,35 +655,61 @@ namespace GitScc
         /// Diff working file with last commit
         /// </summary>
         /// <param name="fileName">Expect relative path</param>
-        /// <returns></returns>
+        /// <returns>diff file in temp folder</returns>
         public string DiffFile(string fileName)
         {
             try
             {
                 if (!this.HasGitRepository) return "";
 
-                HistogramDiff hd = new HistogramDiff();
-                hd.SetFallbackAlgorithm(null);
+                var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), ".diff");
 
-                var fullName = GetFullPath(fileName);
-
-                RawText b = new RawText(File.Exists(GetFullPath(fileName)) ?
-                                        File.ReadAllBytes(fullName) : new byte[0]);
-                RawText a = new RawText(GetFileContent(fileName) ?? new byte[0]);
-
-                var list = hd.Diff(RawTextComparator.DEFAULT, a, b);
-
-                using (Stream mstream = new MemoryStream(),
-                              stream = new BufferedStream(mstream))
+                if (head == null)
                 {
-                    DiffFormatter df = new DiffFormatter(stream);
-                    df.Format(list, a, b);
-                    df.Flush();
-                    stream.Seek(0, SeekOrigin.Begin);
-                    var ret = new StreamReader(stream).ReadToEnd();
-
-                    return ret;
+                    tmpFileName = Path.ChangeExtension(tmpFileName, Path.GetExtension(fileName));
+                    File.Copy(GetFullPath(fileName), tmpFileName);
+                    return tmpFileName;
                 }
+
+                if (GitBash.Exists)
+                {
+                    var fileNameRel = GetRelativeFileName(fileName);
+
+                    GitBash.RunCmd(string.Format("diff HEAD -- \"{0}\" > \"{1}\"", fileNameRel, tmpFileName), this.GitWorkingDirectory);
+                }
+                else
+                {
+                    HistogramDiff hd = new HistogramDiff();
+                    hd.SetFallbackAlgorithm(null);
+
+                    var fullName = GetFullPath(fileName);
+
+                    RawText b = new RawText(File.Exists(GetFullPath(fileName)) ?
+                                            File.ReadAllBytes(fullName) : new byte[0]);
+                    RawText a = new RawText(GetFileContent(fileName) ?? new byte[0]);
+
+                    var list = hd.Diff(RawTextComparator.DEFAULT, a, b);
+
+                    using (Stream stream = File.Create(tmpFileName))
+                    {
+                        DiffFormatter df = new DiffFormatter(stream);
+                        df.Format(list, a, b);
+                        df.Flush();
+                    }
+
+                    //using (Stream mstream = new MemoryStream(),
+                    //              stream = new BufferedStream(mstream))
+                    //{
+                    //    DiffFormatter df = new DiffFormatter(stream);
+                    //    df.Format(list, a, b);
+                    //    df.Flush();
+                    //    stream.Seek(0, SeekOrigin.Begin);
+                    //    var ret = new StreamReader(stream).ReadToEnd();
+                    //    File.WriteAllText(tmpFileName, ret);
+                    //}
+                }
+
+                return tmpFileName;
             }
             catch (Exception ex)
             {
@@ -693,6 +719,61 @@ namespace GitScc
             }
         }
 
+        public string DiffFile(string fileName, string commitId1, string commitId2)
+        {
+            try
+            {
+                if (!this.HasGitRepository) return "";
+
+                var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), ".diff");
+                var fileNameRel = GetRelativeFileName(fileName);
+
+                if (GitBash.Exists)
+                {
+                    GitBash.RunCmd(string.Format("diff {2} {3} -- \"{0}\" > \"{1}\"", fileNameRel, tmpFileName, commitId1, commitId2), this.GitWorkingDirectory);
+                }
+                else
+                {
+                    HistogramDiff hd = new HistogramDiff();
+                    hd.SetFallbackAlgorithm(null);
+
+                    RawText a = string.IsNullOrWhiteSpace(commitId1) ? new RawText(new byte[0]) :
+                        new RawText(this.RepositoryGraph.GetFileContent(commitId1, fileNameRel) ?? new byte[0]);
+                    RawText b = string.IsNullOrWhiteSpace(commitId2) ? new RawText(new byte[0]) :
+                        new RawText(this.RepositoryGraph.GetFileContent(commitId2, fileNameRel) ?? new byte[0]);
+
+                    var list = hd.Diff(RawTextComparator.DEFAULT, a, b);
+
+                    using (Stream stream = new FileStream(tmpFileName, System.IO.FileMode.CreateNew))
+                    {
+                        DiffFormatter df = new DiffFormatter(stream);
+                        df.Format(list, a, b);
+                        df.Flush();
+                    }
+
+                    //using (Stream mstream = new MemoryStream(),
+                    //      stream = new BufferedStream(mstream))
+                    //{
+                    //    DiffFormatter df = new DiffFormatter(stream);
+                    //    df.Format(list, a, b);
+                    //    df.Flush();
+                    //    stream.Seek(0, SeekOrigin.Begin);
+                    //    var ret = new StreamReader(stream).ReadToEnd();
+                    //    ret = ret.Replace("\r", "").Replace("\n", "\r\n");
+                    //    File.WriteAllText(tmpFileName, ret);
+                    //}
+
+                }
+
+                return tmpFileName;
+            }
+            catch (Exception ex)
+            {
+                Log.WriteLine("Refresh: {0}\r\n{1}", this.initFolder, ex.ToString());
+
+                return "";
+            }
+        }
         #region Changed Files
         public IEnumerable<GitFile> ChangedFiles
         {

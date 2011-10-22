@@ -68,6 +68,7 @@ namespace GitScc
             if (fileName == null)
             {
                 this.toolWindow.ClearEditor();
+                diffLines = new string[0];
                 return;
             }
 
@@ -76,18 +77,22 @@ namespace GitScc
             {
                 try
                 {
-                    var ret = tracker.DiffFile(fileName);
-                    ret = ret.Replace("\r", "").Replace("\n", "\r\n");
+                    //var ret = tracker.DiffFile(fileName);
+                    //ret = ret.Replace("\r", "").Replace("\n", "\r\n");
 
-                    var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), ".diff");
-                    File.WriteAllText(tmpFileName, ret);
+                    //var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), ".diff");
+                    //File.WriteAllText(tmpFileName, ret);
 
-                    var tuple = this.toolWindow.SetDisplayedFile(tmpFileName);
-                    if (tuple != null)
+                    var tmpFileName = tracker.DiffFile(fileName);
+                    if (!string.IsNullOrWhiteSpace(tmpFileName) && File.Exists(tmpFileName))
                     {
-                        this.DiffEditor.Content = tuple.Item1;
-                        this.textView = tuple.Item2;
-                        diffLines = ret.Split('\n');
+                        var tuple = this.toolWindow.SetDisplayedFile(tmpFileName);
+                        if (tuple != null)
+                        {
+                            this.DiffEditor.Content = tuple.Item1;
+                            this.textView = tuple.Item2;
+                            diffLines = File.ReadAllLines(tmpFileName);
+                        }
                     }
                 }
                 catch { }
@@ -435,7 +440,6 @@ Note: if the file is included project, you need to delete the file from project 
                             s = s.Substring(s.IndexOf('+') + 1);
                             s = s.Substring(0, s.IndexOf(','));
                             start += Convert.ToInt32(s) - 2;
-                            //if (!text.StartsWith("@@")) start -= 3;
                             break;
                         }
                         else if (text.StartsWith("-"))

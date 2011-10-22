@@ -186,37 +186,7 @@ namespace GitScc.UI
                 {
                     try
                     {
-                        HistogramDiff hd = new HistogramDiff();
-                        hd.SetFallbackAlgorithm(null);
-
-                        RawText a = string.IsNullOrWhiteSpace(commitId1) ? new RawText(new byte[0]) :
-                            new RawText(tracker.RepositoryGraph.GetFileContent(commitId1, selection.Name) ?? new byte[0]);
-                        RawText b = string.IsNullOrWhiteSpace(commitId2) ? new RawText(new byte[0]) :
-                            new RawText(tracker.RepositoryGraph.GetFileContent(commitId2, selection.Name) ?? new byte[0]);
-
-                        var list = hd.Diff(RawTextComparator.DEFAULT, a, b);
-
-                        var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), ".diff");
-
-                        //using (Stream stream = new FileStream(tmpFileName, FileMode.CreateNew))
-                        //{
-                        //    DiffFormatter df = new DiffFormatter(stream);
-                        //    df.Format(list, a, b);
-                        //    df.Flush();
-                        //}
-
-                        using (Stream mstream = new MemoryStream(),
-                              stream = new BufferedStream(mstream))
-                        {
-                            DiffFormatter df = new DiffFormatter(stream);
-                            df.Format(list, a, b);
-                            df.Flush();
-                            stream.Seek(0, SeekOrigin.Begin);
-                            var ret = new StreamReader(stream).ReadToEnd();
-                            ret = ret.Replace("\r", "").Replace("\n", "\r\n");
-                            File.WriteAllText(tmpFileName, ret);
-                        }
-
+                        var tmpFileName = this.tracker.DiffFile(selection.Name, commitId1, commitId2);
                         ShowFile(tmpFileName);
                     }
                     catch { }

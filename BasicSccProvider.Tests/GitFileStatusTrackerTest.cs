@@ -249,7 +249,8 @@ namespace BasicSccProvider.Tests
             tracker.StageFile(tempFile);
             tracker.Commit("test message");
             File.WriteAllText(tempFile, "changed text");
-            var diff = tracker.DiffFile(tempFile);
+            var diffFile = tracker.DiffFile(tempFile);
+            var diff = File.ReadAllText(diffFile);
             Console.WriteLine(diff);
             Assert.IsTrue(diff.StartsWith("@@ -1,3 +1 @@"));
         }
@@ -274,7 +275,7 @@ namespace BasicSccProvider.Tests
         {
             GitBash.GitExePath = @"C:\Program Files (x86)\Git\bin\sh.exe";
             tempFolder = Environment.CurrentDirectory + "\\" + Guid.NewGuid().ToString();
-            Directory.CreateDirectory(Path.Combine(tempFolder, "folder"));
+            Directory.CreateDirectory(Path.Combine(tempFolder, "folder")); // 中文 čćšđžČĆŠĐŽ
             tempFile = Path.Combine(tempFolder, "folder\\test");
         }
     }

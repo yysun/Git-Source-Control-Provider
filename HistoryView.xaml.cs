@@ -122,7 +122,7 @@ namespace GitScc
             var animationDuration = TimeSpan.FromSeconds(.2);
             var animation = new DoubleAnimation(this.ActualWidth+100, new Duration(animationDuration));
             animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseIn };
-            //animation.Completed += (o, _) => this.details.Visibility = Visibility.Hidden;
+            animation.Completed += (o, _) => this.details.Visibility = Visibility.Hidden;
             this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
         }
 

@@ -16,5 +16,6 @@ namespace GitScc.DataServices
         public DateTime CommitDate { get; set; }
         public string CommitDateRelative { get; set; }
         internal bool deleted { get; set; }
+        internal int lane { get; set; }
     }
 }

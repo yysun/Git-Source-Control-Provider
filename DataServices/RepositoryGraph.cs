@@ -53,7 +53,7 @@ namespace GitScc.DataServices
                         
                         PlotCommitList<PlotLane> pcl = new PlotCommitList<PlotLane>();
                         pcl.Source(plotWalk);
-                        pcl.FillTo(200);
+                        pcl.FillTo(10000);
 
                         commits = pcl.Select(c => new Commit
                         {
@@ -64,6 +64,7 @@ namespace GitScc.DataServices
                             CommitterEmail = c.GetCommitterIdent().GetEmailAddress(),
                             CommitDate = c.GetCommitterIdent().GetWhen(),
                             Message = c.GetShortMessage(),
+                            lane=c.GetLane().GetPosition(),
                         }).ToList();
 
                         commits.ForEach(commit => commit.ChildIds =
@@ -131,9 +132,8 @@ namespace GitScc.DataServices
             links = new List<GraphLink>();
             var lanes = new List<string>();
 
+            var buf = new List<string>();
             int i = 0;
-
-            //var commits = isSimplified ? SimplifiedCommits() : Commits;
 
             foreach (var commit in commits)
             {
@@ -142,21 +142,29 @@ namespace GitScc.DataServices
                 var refs = from r in this.Refs
                            where r.Id == id
                            select r;
-                
-                var children = from c in commits
+
+                var children = (from c in commits
                                where c.ParentIds.Contains(id)
-                               select c;
+                               select c).ToList();
+
+                var parents = (from c in commits
+                              where c.ChildIds.Contains(id)
+                              select c).ToList();
+
+                children.ForEach(c => buf.Remove(c.Id));
+                parents.ForEach(p => buf.Add(p.Id));
+                while (buf.IndexOf(id) >= 0) buf.Remove(id);
 
                 var lane = -1;
-                if (children.Count() > 1)
+
+                if (buf.Count <= 1)
                 {
                     lanes.Clear();
                 }
-                else 
+                else
                 {
-                    var child = children.Where(c=>c.ParentIds.IndexOf(id)==0)
-                                        .Select(c=>c.Id).FirstOrDefault();
-
+                    var child = children.Where(c => c.ParentIds.IndexOf(id) >= 0)
+                                       .Select(c => c.Id).FirstOrDefault();
                     lane = lanes.IndexOf(child);
                 }
 
@@ -169,17 +177,20 @@ namespace GitScc.DataServices
                 {
                     lanes[lane] = id;
                 }
-                
-                var node = new GraphNode 
+
+                var node = new GraphNode
                 {
-                    X = lane, Y = i++, Id = id, Message = commit.Message,
+                    X = lane,
+                    Y = i++,
+                    Id = id,
+                    Message = commit.Message,
                     CommitterName = commit.CommitterName,
                     CommitDateRelative = commit.CommitDateRelative,
                     Refs = refs.ToArray(),
                 };
 
                 nodes.Add(node);
-                
+
                 foreach (var ch in children)
                 {
                     var cnode = (from n in nodes

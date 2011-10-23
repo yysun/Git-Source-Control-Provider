@@ -23,5 +23,15 @@ namespace GitScc.UI
         {
             InitializeComponent();
         }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (this.textBlock.Text == "HEAD")
+            {
+                this.border.Background = this.border.BorderBrush = 
+                this.polygon.Fill = new SolidColorBrush(Color.FromArgb(128, 255, 0, 0));
+                this.textBlock.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+            }
+        }
     }
 }

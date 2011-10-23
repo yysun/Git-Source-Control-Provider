@@ -110,20 +110,21 @@ namespace GitScc.UI
         {
             this.tracker = tracker;
             maxX = maxY = 0;
+            
             loading.Visibility = Visibility.Visible;            
             
-            IList<GraphNode> commits = null;
-            if (tracker != null && tracker.HasGitRepository)
-            {
-                this.tracker.RepositoryGraph.IsSimplified = showSimplifiedGraph;
-                commits = tracker.RepositoryGraph.Nodes;
-            }
-
             Action act = () =>
             {
                 try
                 {
                     canvasContainer.Children.Clear();
+
+                    IList<GraphNode> commits = null;
+                    if (tracker != null && tracker.HasGitRepository)
+                    {
+                        this.tracker.RepositoryGraph.IsSimplified = showSimplifiedGraph;
+                        commits = tracker.RepositoryGraph.Nodes;
+                    }
 
                     if (commits != null && commits.Count > 0)
                     {

@@ -32,18 +32,18 @@ namespace GitScc
             // the object returned by the Content property.
             base.Content = control;
 
-            var sccProviderService = BasicSccProvider.GetServiceEx<SccProviderService>();
-            if (sccProviderService != null)
-            {
-                Refresh(sccProviderService.CurrentTracker);
-            }
+            //var sccProviderService = BasicSccProvider.GetServiceEx<SccProviderService>();
+            //if (sccProviderService != null)
+            //{
+            //    Refresh(sccProviderService.CurrentTracker);
+            //}
         }
 
         internal void Refresh(GitFileStatusTracker tracker)
         {
-            //var frame = this.Frame as IVsWindowFrame;
-            //if (frame == null) return;
-
+            var frame = this.Frame as IVsWindowFrame;
+            if (frame == null || frame.IsVisible() == 1) return;
+            
             try
             {
                 this.Caption = Resources.ResourceManager.GetString("HistoryToolWindowCaption");

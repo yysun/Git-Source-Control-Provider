@@ -123,6 +123,8 @@ namespace GitScc
 
         private GitFileStatus GetFileStatusNoCache(string fileName)
         {
+            if (Directory.Exists(fileName)) return GitFileStatus.Ignored;
+
             var fileNameRel = GetRelativeFileNameForGit(fileName);
             var dirCache = repository.ReadDirCache();
             TreeWalk treeWalk = new TreeWalk(this.repository) { Recursive = true };
@@ -305,12 +307,14 @@ namespace GitScc
             {
                 var head = repository.Resolve(Constants.HEAD);
                 RevTree revTree = head == null ? null : new RevWalk(repository).ParseTree(head);
-
-                var entry = TreeWalk.ForPath(repository, fileName, revTree);
-                if (!entry.IsSubtree)
+                if (revTree != null)
                 {
-                    var blob = repository.Open(entry.GetObjectId(0));
-                    if (blob != null) return blob.GetCachedBytes();
+                    var entry = TreeWalk.ForPath(repository, fileName, revTree);
+                    if (!entry.IsSubtree)
+                    {
+                        var blob = repository.Open(entry.GetObjectId(0));
+                        if (blob != null) return blob.GetCachedBytes();
+                    }
                 }
             }
             catch (Exception ex)

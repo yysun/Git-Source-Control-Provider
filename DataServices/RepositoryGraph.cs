@@ -53,7 +53,7 @@ namespace GitScc.DataServices
                         
                         PlotCommitList<PlotLane> pcl = new PlotCommitList<PlotLane>();
                         pcl.Source(plotWalk);
-                        pcl.FillTo(10000);
+                        pcl.FillTo(200);
 
                         commits = pcl.Select(c => new Commit
                         {
@@ -64,7 +64,6 @@ namespace GitScc.DataServices
                             CommitterEmail = c.GetCommitterIdent().GetEmailAddress(),
                             CommitDate = c.GetCommitterIdent().GetWhen(),
                             Message = c.GetShortMessage(),
-                            lane=c.GetLane().GetPosition(),
                         }).ToList();
 
                         commits.ForEach(commit => commit.ChildIds =

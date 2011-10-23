@@ -27,11 +27,6 @@ namespace GitScc
             this.selectedCommits = new ObservableCollection<string>();
         }
 
-        public void InsertNewEditor(object editor)
-        {
-            //diffEditorHost.Content = editor;
-        }
-
         DateTime lastTimeRefresh = DateTime.Now.AddDays(-1);
 
         internal void Refresh(GitFileStatusTracker tracker)
@@ -67,11 +62,6 @@ namespace GitScc
             {
                 Log.WriteLine("History View Refresh: {0}", ex.ToString());
             }
-        }
-
-        private void OpenFile(string fileName)
-        {
-            this.toolWindow.SetDisplayedFile(fileName);
         }
 
         private void button1_Click(object sender, RoutedEventArgs e)
@@ -112,46 +102,73 @@ namespace GitScc
                 var animation = new DoubleAnimation(0, new Duration(animationDuration));
                 animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
                 this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
-
                 this.details.Show(this.tracker, id);
             }
         }
 
         private void CloseCommitDetails_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            var animationDuration = TimeSpan.FromSeconds(.2);
-            var animation = new DoubleAnimation(this.ActualWidth+100, new Duration(animationDuration));
-            animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseIn };
-            animation.Completed += (o, _) => this.details.Visibility = Visibility.Hidden;
-            this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+            try
+            {
+                var animationDuration = TimeSpan.FromSeconds(.2);
+                var animation = new DoubleAnimation(this.ActualWidth + 200, new Duration(animationDuration));
+                animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseIn };
+                animation.Completed += (o, _) => this.details.Visibility = Visibility.Collapsed;
+                this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+            }
+            catch (Exception ex)
+            {
+                Log.WriteLine("History Tool Window - CloseCommitDetails_Executed: {0}", ex.ToString());
+            }
         }
 
         private void OpenCommitDetails_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            ShowCommitDetails(e.Parameter as string);
+            try
+            {
+                ShowCommitDetails(e.Parameter as string);
+            }
+            catch (Exception ex)
+            {
+                Log.WriteLine("History Tool Window - OpenCommitDetails_Executed: {0}", ex.ToString());
+            }
         }
 
         private void SelectCommit_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            var commit = e.Parameter as string;
-            if (this.selectedCommits.Contains(commit)) 
-                selectedCommits.Remove(commit);
-            else
-                this.selectedCommits.Add(commit);
+            try
+            {
+                var commit = e.Parameter as string;
+                if (this.selectedCommits.Contains(commit))
+                    selectedCommits.Remove(commit);
+                else
+                    this.selectedCommits.Add(commit);
 
-            SetSelectedCommitCount();
+                SetSelectedCommitCount();
+            }
+            catch (Exception ex)
+            {
+                Log.WriteLine("History Tool Window - SelectCommit_Executed: {0}", ex.ToString());
+            }
         }
 
         private void btnCompare_Click(object sender, RoutedEventArgs e)
         {
-            this.details.RenderTransform.SetValue(TranslateTransform.XProperty, this.ActualWidth);
-            this.details.Visibility = Visibility.Visible;
-            var animationDuration = TimeSpan.FromSeconds(.5);
-            var animation = new DoubleAnimation(0, new Duration(animationDuration));
-            animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
-            this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+            try
+            {
+                this.details.RenderTransform.SetValue(TranslateTransform.XProperty, this.ActualWidth);
+                this.details.Visibility = Visibility.Visible;
+                var animationDuration = TimeSpan.FromSeconds(.5);
+                var animation = new DoubleAnimation(0, new Duration(animationDuration));
+                animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
+                this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
 
-            this.details.Show(this.tracker, this.selectedCommits[0], this.selectedCommits[1]);
+                this.details.Show(this.tracker, this.selectedCommits[0], this.selectedCommits[1]);
+            }
+            catch (Exception ex)
+            {
+                Log.WriteLine("History Tool Window - btnCompare_Click: {0}", ex.ToString());
+            }
         }
 
         private void SetSelectedCommitCount()

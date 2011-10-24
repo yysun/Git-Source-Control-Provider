@@ -149,33 +149,26 @@ namespace GitScc.DataServices
                 var parents = (from c in commits
                               where c.ChildIds.Contains(id)
                               select c).ToList();
-
-                children.ForEach(c => buf.Remove(c.Id));
-                parents.ForEach(p => buf.Add(p.Id));
-                while (buf.IndexOf(id) >= 0) buf.Remove(id);
-
-                var lane = -1;
-
-                if (buf.Count <= 1)
-                {
-                    lanes.Clear();
-                }
-                else
-                {
-                    var child = children.Where(c => c.ParentIds.IndexOf(id) >= 0)
-                                       .Select(c => c.Id).FirstOrDefault();
-                    lane = lanes.IndexOf(child);
-                }
+                var lane = lanes.IndexOf(id);
 
                 if (lane < 0)
                 {
                     lanes.Add(id);
                     lane = lanes.Count - 1;
                 }
-                else
+
+                int m = parents.Count() - 1;
+                for (int n = m; n>=0; n--)
                 {
-                    lanes[lane] = id;
+                    if (lanes.IndexOf(parents[n].Id) <= 0)
+                    {
+                        if (n == m)
+                            lanes[lane] = parents[n].Id;
+                        else
+                            lanes.Add(parents[n].Id);
+                    }
                 }
+                lanes.Remove(id);
 
                 var node = new GraphNode
                 {

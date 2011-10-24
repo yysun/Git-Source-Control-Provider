@@ -402,9 +402,9 @@ Note: if the file is included project, you need to delete the file from project 
                     textView.GetCaretPos(out line, out column);
 
                     string text = diffLines[line];
-                    while (true || line < 0)
+                    while (line >=0)
                     {
-                        var match = Regex.Match(text, "@@(.+)@@\r");
+                        var match = Regex.Match(text, "^@@(.+)@@");
                         if (match.Success)
                         {
                             var s = match.Groups[1].Value;
@@ -419,15 +419,16 @@ Note: if the file is included project, you need to delete the file from project 
                             start--;
                         }
 
-                        if (text.Contains("\r"))
-                        {
-                            start++;
-                        }
-                        text = --line>=0 ? diffLines[--line] : "";
+                        start++;
+                        --line;
+                        text = line>=0 ? diffLines[line] : "";
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Log.WriteLine("Pending Changes View - DiffEditor_MouseDoubleClick: {0}", ex.ToString());
+            } 
             GetSelectedFileFullName((fileName) =>
             {
                 var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();

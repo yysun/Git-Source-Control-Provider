@@ -13,6 +13,8 @@ using System.Windows.Xps;
 using System.Windows.Xps.Packaging;
 using GitScc.DataServices;
 using System.Text;
+using System.Windows.Media.Imaging;
+using System.IO;
 
 namespace GitScc.UI
 {
@@ -260,7 +262,7 @@ namespace GitScc.UI
                                 else if (y1 > y2 && !flip)
                                 {
                                     var x3 = x2 - CommitBox.WIDTH / 2;
-                                    var path = new Path
+                                    var path = new System.Windows.Shapes.Path
                                     {
                                         Stroke = new SolidColorBrush(Color.FromArgb(255, 153, 182, 209)),
                                         StrokeThickness = 4,
@@ -290,7 +292,7 @@ namespace GitScc.UI
                                 else
                                 {
                                     var x3 = x1 + CommitBox.WIDTH / 2;
-                                    var path = new Path
+                                    var path = new System.Windows.Shapes.Path
                                     {
                                         Stroke = new SolidColorBrush(Color.FromArgb(255, 153, 182, 209)),
                                         StrokeThickness = 4,
@@ -360,6 +362,14 @@ namespace GitScc.UI
 
         internal void SaveToFile(string fileName)
         {
+            if (string.IsNullOrWhiteSpace(fileName)) return;
+            var ext = System.IO.Path.GetExtension(fileName);
+            if (ext == ".png") ExportToPng(fileName);
+            else if (ext == ".xps") ExportToXps(fileName);
+        }
+
+        private void ExportToXps(string fileName)
+        {
             Transform transform = canvasContainer.LayoutTransform;
             canvasContainer.LayoutTransform = null;
             Size size = new Size(canvasContainer.Width, canvasContainer.Height);
@@ -374,11 +384,33 @@ namespace GitScc.UI
             canvasContainer.LayoutTransform = transform;
         }
 
+        private void ExportToPng(string fileName)
+        {
+            Transform transform = canvasContainer.LayoutTransform;
+            canvasContainer.LayoutTransform = null;
+            Size size = new Size(canvasContainer.Width, canvasContainer.Height);
+            canvasContainer.Measure(size);
+            canvasContainer.Arrange(new Rect(size));
+            RenderTargetBitmap renderBitmap =
+              new RenderTargetBitmap( (int)size.Width*300/96, (int)size.Height*300/96, 300d, 300d,
+                PixelFormats.Pbgra32);
+            renderBitmap.Render(canvasContainer);
+
+            using (FileStream outStream = new FileStream(fileName, FileMode.Create))
+            {
+                PngBitmapEncoder encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+                encoder.Save(outStream);
+            }
+            canvasContainer.LayoutTransform = transform;
+        }
+
         internal void SetSimplified(bool isSimplified)
         {
             this.showSimplifiedGraph = isSimplified;
             if (this.tracker == null) return;
             Show(this.tracker);
         }
+
     }
 }

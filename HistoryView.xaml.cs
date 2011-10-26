@@ -66,12 +66,19 @@ namespace GitScc
 
         private void button1_Click(object sender, RoutedEventArgs e)
         {
-            var dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.DefaultExt = ".xps";
-            dlg.Filter = "XPS documents (.xps)|*.xps";
-            if (dlg.ShowDialog() == true)
+            try
             {
-                this.HistoryGraph.SaveToFile(dlg.FileName);
+                var dlg = new Microsoft.Win32.SaveFileDialog();
+                dlg.DefaultExt = ".xps";
+                dlg.Filter = "XPS documents (.xps)|*.xps";
+                if (dlg.ShowDialog() == true)
+                {
+                    this.HistoryGraph.SaveToFile(dlg.FileName);
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error");
             }
         }
 

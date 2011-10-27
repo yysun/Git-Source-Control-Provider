@@ -442,14 +442,26 @@ Note: if the file is included project, you need to delete the file from project 
             if (dataGrid1.Items.Count == 0)
             {
                 ShowStatusMessage("Starting to pull rebase");
-                tracker.PullRebase();
-                ShowStatusMessage("Pull rebase success!");
+                string returnedMessage = tracker.PullRebase();
+                if (returnedMessage.Contains("Current branch master is up to date."))
+                    ShowStatusMessage("Current branch master is up to date.");
+                else if (returnedMessage.Contains("When you have resolved this problem run \"git rebase --continue\"."))
+                {
+                    ShowDialog("Rebase fail.\n" + returnedMessage, MessageBoxImage.Error);
+                    ShowStatusMessage("Rebase fail.");
+                }
+                else
+                    ShowStatusMessage("Pull rebase success!");
+                Clipboard.SetText(returnedMessage);
             }
             else
             {
-                MessageBox.Show("Can not pull, you have unstaged changes", "Git SS Provider", MessageBoxButton.OK,
-                                MessageBoxImage.Exclamation);
+                ShowDialog("Can not pull, you have unstaged changes", MessageBoxImage.Exclamation);
             }
+        }
+        private MessageBoxResult ShowDialog(string message, MessageBoxImage img = MessageBoxImage.None, MessageBoxButton btn = MessageBoxButton.OK)
+        {
+            return MessageBox.Show(message, "Git SS Provider", btn, img);
         }
     }
 

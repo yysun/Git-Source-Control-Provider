@@ -114,12 +114,6 @@ namespace GitScc
                 process.WaitForExit();
 
                 Debug.WriteLine(output);
-
-                if (!string.IsNullOrEmpty(error))
-                {
-                    Debug.WriteLine("STDERR: " + error);
-                    throw new Exception(error);
-                }
                 return output;
             }
         }

@@ -691,6 +691,11 @@ namespace GitScc
                 return repositoryGraph;
             }
         }
+
+        public void PullRebase()
+        {
+            GitBash.RunGitShCmd("pull --rebase", GitWorkingDirectory);
+        }
     }
 
     public abstract class Log

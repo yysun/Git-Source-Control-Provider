@@ -283,8 +283,7 @@ namespace GitScc
                 }
             }
 
-            bool hasStaged = tracker == null ? false :
-                             tracker.ChangedFiles.Any(f => f.IsStaged);
+            bool hasStaged = tracker != null && tracker.ChangedFiles.Any(f => f.IsStaged);
 
             if (!hasStaged)
             {
@@ -436,6 +435,21 @@ Note: if the file is included project, you need to delete the file from project 
                 var selection = dte.ActiveDocument.Selection as EnvDTE.TextSelection;
                 selection.MoveToLineAndOffset(start, column);
             });
+        }
+
+        public void PullRebase()
+        {
+            if (dataGrid1.Items.Count == 0)
+            {
+                ShowStatusMessage("Starting to pull rebase");
+                tracker.PullRebase();
+                ShowStatusMessage("Pull rebase success!");
+            }
+            else
+            {
+                MessageBox.Show("Can not pull, you have unstaged changes", "Git SS Provider", MessageBoxButton.OK,
+                                MessageBoxImage.Exclamation);
+            }
         }
     }
 

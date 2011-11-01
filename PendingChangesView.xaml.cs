@@ -474,6 +474,11 @@ Note: if the file is included project, you need to delete the file from project 
         {
             return MessageBox.Show(message, "Git SS Provider", btn, img);
         }
+
+        public void Push()
+        {
+            ShowStatusMessage(tracker.Push());
+        }
     }
 
     public static class ExtHelper

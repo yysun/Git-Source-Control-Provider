@@ -310,7 +310,7 @@ namespace GitScc
                 if (revTree != null)
                 {
                     var entry = TreeWalk.ForPath(repository, fileName, revTree);
-                    if (!entry.IsSubtree)
+                    if (entry != null && !entry.IsSubtree)
                     {
                         var blob = repository.Open(entry.GetObjectId(0));
                         if (blob != null) return blob.GetCachedBytes();

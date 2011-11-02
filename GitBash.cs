@@ -114,7 +114,8 @@ namespace GitScc
                 process.WaitForExit();
 
                 Debug.WriteLine(output);
-                return output;
+                Debugger.Launch();
+                return output + error;
             }
         }
     }

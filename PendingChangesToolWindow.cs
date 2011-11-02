@@ -52,6 +52,10 @@ namespace GitScc
             menu = new MenuCommand(OnPushCommand, cmd);
             mcs.AddCommand(menu);
 
+            cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingPush);
+            menu = new MenuCommand(OnPushCommand, cmd);
+            mcs.AddCommand(menu);
+
             cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesAmend);
             menu = new MenuCommand(new EventHandler(OnAmendCommitCommand), cmd);
             mcs.AddCommand(menu);

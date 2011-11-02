@@ -477,7 +477,12 @@ Note: if the file is included project, you need to delete the file from project 
 
         public void Push()
         {
+<<<<<<< HEAD
             ShowStatusMessage(tracker.Push());
+=======
+            string x = tracker.Push();
+            ShowStatusMessage(x);
+>>>>>>> Push command
         }
     }
 

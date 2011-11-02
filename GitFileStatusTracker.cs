@@ -698,13 +698,7 @@ namespace GitScc
 
         public string Push()
         {
-            var git = Git.Open(GitWorkingDirectory);
-            var pushCommand = git.Push();
-            var pushResults = pushCommand.Call();
-            var sb = new StringBuilder();
-            foreach (var pushResult in pushResults)
-                sb.AppendLine(pushResult.ToString());
-            return sb.ToString();
+            return GitBash.RunGitShCmd("push", GitWorkingDirectory);
         }
     }
 

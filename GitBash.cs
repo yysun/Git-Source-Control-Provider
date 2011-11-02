@@ -11,6 +11,7 @@ namespace GitScc
     public abstract class GitBash
     {
         private static string gitExePath;
+        private static string shExePath;
         public static string GitExePath
         {
             set
@@ -18,6 +19,7 @@ namespace GitScc
                 try
                 {
                     gitExePath = value == null ? null : Path.Combine(Path.GetDirectoryName(value), "git.exe");
+                    shExePath = value == null ? null : Path.Combine(Path.GetDirectoryName(value), "sh.exe");
                 }
                 catch{}
             }
@@ -83,6 +85,37 @@ namespace GitScc
 
                 if (!string.IsNullOrEmpty(error))
                     throw new Exception(error);
+            }
+        }
+
+        public static string RunGitShCmd(string args, string workingDirectory)
+        {
+            if (string.IsNullOrWhiteSpace(shExePath) || !File.Exists(shExePath))
+                throw new Exception("Sh Executable not found");
+
+            Debug.WriteLine(string.Format("{2}>{0} {1}", shExePath, args, workingDirectory));
+
+            var gitArgs = string.Format("--login -i -c \"git {0}\"", args);
+
+            var pinfo = new ProcessStartInfo(shExePath)
+            {
+                Arguments = gitArgs,
+                CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                WorkingDirectory = workingDirectory
+            };
+
+            using (var process = Process.Start(pinfo))
+            {
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                Debug.WriteLine(output);
+                Debugger.Launch();
+                return output + error;
             }
         }
     }

@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,8 +12,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.VisualStudio.TextManager.Interop;
-using NGit.Api;
-using GitScc.UI;
 
 namespace GitScc
 {
@@ -283,8 +282,7 @@ namespace GitScc
                 }
             }
 
-            bool hasStaged = tracker == null ? false :
-                             tracker.ChangedFiles.Any(f => f.IsStaged);
+            bool hasStaged = tracker != null && tracker.ChangedFiles.Any(f => f.IsStaged);
 
             if (!hasStaged)
             {
@@ -436,6 +434,52 @@ Note: if the file is included project, you need to delete the file from project 
                 var selection = dte.ActiveDocument.Selection as EnvDTE.TextSelection;
                 selection.MoveToLineAndOffset(start, column);
             });
+        }
+
+        public void PullRebase()
+        {
+            if (dataGrid1.Items.Count == 0)
+            {
+                ShowStatusMessage("Starting to pull rebase");
+                
+                string returnedMessage = tracker.PullRebase().Substring(159);
+                if (returnedMessage.Contains("Current branch master is up to date."))
+                {
+                    ShowStatusMessage("Current branch master is up to date.");
+                }
+                else if (returnedMessage.Contains("When you have resolved this problem run \"git rebase --continue\"."))
+                {
+                    var match = Regex.Match(returnedMessage, @"CONFLICT \(content\): Merge conflict in (?'file'[\w\/\.]+)");
+                    var files = new StringBuilder();
+                    while (match.Success)
+                    {
+                        files.AppendLine(match.Groups["file"].Value);
+                        match = match.NextMatch();
+                    }
+                    ShowDialog(string.Format("Rebase fail.\nConflicts:\n{0}", files), MessageBoxImage.Error);
+                    ShowStatusMessage("Rebase fail.");
+                }
+                else
+                {
+                    ShowStatusMessage("Pull rebase success!");
+                }
+                
+            }
+            else
+            {
+                ShowDialog("Can not pull, you have unstaged changes", MessageBoxImage.Exclamation);
+            }
+        }
+        private MessageBoxResult ShowDialog(string message, MessageBoxImage img = MessageBoxImage.None, MessageBoxButton btn = MessageBoxButton.OK)
+        {
+            return MessageBox.Show(message, "Git SS Provider", btn, img);
+        }
+
+        public void Push()
+        {
+            string x = tracker.Push();
+            ShowStatusMessage(x);
+            ShowDialog(x);
         }
     }
 

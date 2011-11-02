@@ -44,6 +44,14 @@ namespace GitScc
             var menu = new MenuCommand(new EventHandler(OnCommitCommand), cmd);
             mcs.AddCommand(menu);
 
+            cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingPullRebase);
+            menu = new MenuCommand(OnPullRebaseCommand, cmd);
+            mcs.AddCommand(menu);
+
+            cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingPush);
+            menu = new MenuCommand(OnPushCommand, cmd);
+            mcs.AddCommand(menu);
+
             cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesAmend);
             menu = new MenuCommand(new EventHandler(OnAmendCommitCommand), cmd);
             mcs.AddCommand(menu);
@@ -58,6 +66,16 @@ namespace GitScc
         private void OnCommitCommand(object sender, EventArgs e)
         {
             ((PendingChangesView) control).Commit();
+        }
+
+        private void OnPullRebaseCommand(object sender, EventArgs e)
+        {
+            ((PendingChangesView)control).PullRebase();
+        }
+        
+        private void OnPushCommand(object sender, EventArgs e)
+        {
+            ((PendingChangesView)control).Push();
         }
 
         private void OnAmendCommitCommand(object sender, EventArgs e)

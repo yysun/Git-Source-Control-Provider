@@ -9,12 +9,11 @@ using NGit;
 using NGit.Api;
 using NGit.Diff;
 using NGit.Dircache;
-using NGit.Ignore;
 using NGit.Revwalk;
 using NGit.Storage.File;
 using NGit.Treewalk;
 using NGit.Treewalk.Filter;
-using System.Diagnostics;
+using System.Text;
 
 namespace GitScc
 {
@@ -690,6 +689,16 @@ namespace GitScc
                 }
                 return repositoryGraph;
             }
+        }
+
+        public string PullRebase()
+        {
+            return GitBash.RunGitShCmd("pull --rebase", GitWorkingDirectory);
+        }
+
+        public string Push()
+        {
+            return GitBash.RunGitShCmd("push", GitWorkingDirectory);
         }
     }
 

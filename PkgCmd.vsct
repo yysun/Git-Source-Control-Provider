@@ -198,6 +198,36 @@
         </Strings>
       </Button>
 
+      <Button guid="guidSccProviderCmdSet" id="icmdPendingPullRebase" priority="0x0000" type="Button">
+        <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <CommandFlag>IconAndText</CommandFlag>
+        <Strings>
+          <ButtonText>Pull Rebase</ButtonText>
+        </Strings>
+      </Button>
+        
+        <Button guid="guidSccProviderCmdSet" id="icmdPendingPush" priority="0x0000" type="Button">
+        <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <CommandFlag>IconAndText</CommandFlag>
+        <Strings>
+          <ButtonText>Push</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidSccProviderCmdSet" id="icmdPendingPush" priority="0x0000" type="Button">
+        <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <CommandFlag>IconAndText</CommandFlag>
+        <Strings>
+          <ButtonText>Push</ButtonText>
+        </Strings>
+      </Button>
+
       <Button guid="guidSccProviderCmdSet" id="icmdPendingChangesAmend" priority="0x0001" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
         <CommandFlag>DynamicVisibility</CommandFlag>
@@ -316,6 +346,8 @@
       <IDSymbol name="icmdPendingChangesCommit" value="0x111"/>
       <IDSymbol name="icmdPendingChangesAmend" value="0x112"/>
       <IDSymbol name="icmdPendingChangesCommitToBranch" value="0x113"/>
+      <IDSymbol name="icmdPendingPullRebase" value="0x114"/>      
+      <IDSymbol name="icmdPendingPush" value="0x115"/>      
 
       <IDSymbol name="igrpGitExtCommands" value="0x800"/>
       <IDSymbol name="imnuGitExtMenu" value="0x801"/>

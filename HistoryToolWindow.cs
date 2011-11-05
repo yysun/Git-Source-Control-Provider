@@ -41,8 +41,8 @@ namespace GitScc
 
         internal void Refresh(GitFileStatusTracker tracker)
         {
-            var frame = this.Frame as IVsWindowFrame;
-            if (frame == null || frame.IsVisible() == 1) return;
+            //var frame = this.Frame as IVsWindowFrame;
+            //if (frame == null || frame.IsVisible() == 1) return;
             
             try
             {

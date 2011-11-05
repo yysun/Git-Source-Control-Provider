@@ -133,6 +133,7 @@ namespace GitScc
         {
             try
             {
+                this.toolWindow.ClearEditor();
                 ShowCommitDetails(e.Parameter as string);
             }
             catch (Exception ex)

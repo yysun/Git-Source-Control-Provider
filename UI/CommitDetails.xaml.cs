@@ -50,6 +50,7 @@ namespace GitScc.UI
 
         internal void Show(GitFileStatusTracker tracker, string commitId)
         {
+
             this.tracker = tracker;
             var repositoryGraph = tracker.RepositoryGraph;
             var commit = repositoryGraph.GetCommit(commitId);
@@ -75,7 +76,6 @@ namespace GitScc.UI
                 this.radioShowChanges.IsChecked = true;
                 this.fileTree.Visibility = Visibility.Collapsed;
                 this.patchList.Visibility = Visibility.Visible;
-
             }
         }
 
@@ -105,7 +105,7 @@ namespace GitScc.UI
             var name1 = names1.Count() == 0 ? commitId1 : string.Join(", ", names1.ToArray());
             var name2 = names2.Count() == 0 ? commitId2 : string.Join(", ", names2.ToArray());
 
-            this.lblCommit.Content = string.Format ("[{1}] {0}", msg1, name1);
+            this.lblCommit.Content = string.Format("[{1}] {0}", msg1, name1);
             this.lblMessage.Content = string.Format("[{1}] {0}", msg2, name2);
             this.lblAuthor.Content = "";
 

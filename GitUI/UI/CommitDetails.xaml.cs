@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using GitScc.DataServices;
 using NGit.Diff;
+using System.Diagnostics;
 
 namespace GitScc.UI
 {
@@ -49,6 +50,9 @@ namespace GitScc.UI
 
         internal void Show(GitFileStatusTracker tracker, string commitId)
         {
+            var sw = new Stopwatch();
+            sw.Start();
+
             this.tracker = tracker;
             var repositoryGraph = tracker.RepositoryGraph;
             var commit = repositoryGraph.GetCommit(commitId);
@@ -62,7 +66,7 @@ namespace GitScc.UI
                 this.lblMessage.Content = "Message: " + commit.Message;
                 this.lblAuthor.Content = commit.CommitterName + " " + commit.CommitDateRelative;
                 this.fileTree.ItemsSource = repositoryGraph.GetTree(commitId).Children;
-                this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId);
+                //this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId);
                 this.radioShowFileTree.IsChecked = true;
                 this.radioShowFileTree.IsEnabled = true;
                 //this.toolWindow.ClearEditor();
@@ -70,7 +74,15 @@ namespace GitScc.UI
                 this.commitId2 = commit.Id;
                 this.btnSwitch.Visibility = Visibility.Collapsed;
                 this.txtFileName.Text = "";
+
+                this.radioShowChanges.IsChecked = true;
+                this.fileTree.Visibility = Visibility.Collapsed;
+                this.patchList.Visibility = Visibility.Visible;
+
             }
+
+            sw.Stop();
+            this.lblCommit.Content = sw.ElapsedMilliseconds.ToString();
         }
 
         internal void Show(GitFileStatusTracker tracker, string commitId1, string commitId2)
@@ -129,6 +141,8 @@ namespace GitScc.UI
 
         private void fileTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
+            if (this.fileTree.Visibility != Visibility.Visible) return;
+
             var selection = this.fileTree.SelectedValue as GitTreeObject;
             if (selection != null)
             {
@@ -136,13 +150,17 @@ namespace GitScc.UI
                 var dispatcher = Dispatcher.CurrentDispatcher;
                 Action act = () =>
                 {
-                    var content = selection.Content;
-                    if (content != null)
+                    try
                     {
-                        var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), Path.GetExtension(selection.Name));
-                        File.WriteAllBytes(tmpFileName, content);
-                        ShowFile(tmpFileName);
+                        var content = selection.Content;
+                        if (content != null)
+                        {
+                            var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), Path.GetExtension(selection.Name));
+                            File.WriteAllBytes(tmpFileName, content);
+                            ShowFile(tmpFileName);
+                        }
                     }
+                    catch { }
                 };
                 dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
             }
@@ -150,6 +168,8 @@ namespace GitScc.UI
 
         private void patchList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (this.patchList.Visibility != Visibility.Visible) return;
+
             var selection = (this.patchList.SelectedItem) as Change;
             if (selection != null)
             {
@@ -157,38 +177,12 @@ namespace GitScc.UI
                 var dispatcher = Dispatcher.CurrentDispatcher;
                 Action act = () =>
                 {
-                    HistogramDiff hd = new HistogramDiff();
-                    hd.SetFallbackAlgorithm(null);
-
-                    RawText a = string.IsNullOrWhiteSpace(commitId1) ? new RawText(new byte[0]) :
-                        new RawText(tracker.RepositoryGraph.GetFileContent(commitId1, selection.Name) ?? new byte[0]);
-                    RawText b = string.IsNullOrWhiteSpace(commitId2) ? new RawText(new byte[0]) :
-                        new RawText(tracker.RepositoryGraph.GetFileContent(commitId2, selection.Name) ?? new byte[0]);
-
-                    var list = hd.Diff(RawTextComparator.DEFAULT, a, b);
-
-                    var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), ".diff");
-
-                    //using (Stream stream = new FileStream(tmpFileName, FileMode.CreateNew))
-                    //{
-                    //    DiffFormatter df = new DiffFormatter(stream);
-                    //    df.Format(list, a, b);
-                    //    df.Flush();
-                    //}
-
-                    using (Stream mstream = new MemoryStream(),
-                          stream = new BufferedStream(mstream))
+                    try
                     {
-                        DiffFormatter df = new DiffFormatter(stream);
-                        df.Format(list, a, b);
-                        df.Flush();
-                        stream.Seek(0, SeekOrigin.Begin);
-                        var ret = new StreamReader(stream).ReadToEnd();
-                        ret = ret.Replace("\r", "").Replace("\n", "\r\n");
-                        File.WriteAllText(tmpFileName, ret);
+                        var tmpFileName = this.tracker.DiffFile(selection.Name, commitId1, commitId2);
+                        ShowFile(tmpFileName);
                     }
-
-                    ShowFile(tmpFileName);
+                    catch { }
                 };
 
                 dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);

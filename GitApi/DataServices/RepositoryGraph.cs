@@ -413,7 +413,7 @@ namespace GitScc.DataServices
                 RevTree revTree = head == null ? null : new RevWalk(repository).ParseTree(head);
 
                 var entry = TreeWalk.ForPath(repository, fileName, revTree);
-                if (!entry.IsSubtree)
+                if (entry != null && !entry.IsSubtree)
                 {
                     var blob = repository.Open(entry.GetObjectId(0));
                     if (blob != null) return blob.GetCachedBytes();

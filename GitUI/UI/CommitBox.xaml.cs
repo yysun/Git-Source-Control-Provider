@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using GitUI;
 
 namespace GitScc.UI
 {
@@ -34,15 +35,15 @@ namespace GitScc.UI
         {
             this.Selected = !this.Selected;
             //VisualStateManager.GoToElementState(this.root, this.Selected ? "SelectedSate" : "NotSelectedState", true);
-            //HistoryViewCommands.SelectCommit.Execute(this.txtId.Text, null);
+            HistoryViewCommands.OpenCommitDetails.Execute(this.txtId.Text, null);
         }
 
-        private void txtComment_MouseEnter(object sender, MouseEventArgs e)
+        private void root_MouseEnter(object sender, MouseEventArgs e)
         {
             VisualStateManager.GoToElementState(this.root, "MouseOverState", true);
         }
 
-        private void txtComment_MouseLeave(object sender, MouseEventArgs e)
+        private void root_MouseLeave(object sender, MouseEventArgs e)
         {
             VisualStateManager.GoToElementState(this.root, "NormalState", true);
         }

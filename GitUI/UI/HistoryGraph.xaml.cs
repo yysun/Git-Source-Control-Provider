@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Packaging;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Windows.Xps;
@@ -19,6 +22,15 @@ namespace GitScc.UI
     /// </summary>
     public partial class HistoryGraph : UserControl
     {
+        public GitUI.GitViewModel GitViewModel
+        {
+            set
+            {
+                this.tracker = value.Tacker;
+                Show(tracker);
+            }
+        }
+
         public HistoryGraph()
         {
             InitializeComponent();
@@ -57,17 +69,19 @@ namespace GitScc.UI
                 this.canvasContainer.SetValue(Canvas.TopProperty, newPoint.Y);
             }
         }
-        private void AdjustCanvasSize()
-        {
-            
-            this.canvasContainer.Width = (PADDING * 2 + maxX * GRID_WIDTH);
-            this.canvasRoot.Width = this.canvasContainer.Width * this.Scaler.ScaleX;
 
-            this.canvasContainer.Height = (PADDING * 2 + (maxY+1) * GRID_HEIGHT);
-            this.canvasRoot.Height = this.canvasContainer.Height * this.Scaler.ScaleY;
+        private void AdjustCanvasSize(double scale)
+        {
+            this.canvasContainer.Width = (PADDING * 2 + maxX * GRID_WIDTH);
+            this.canvasRoot.Width = this.canvasContainer.Width * scale;
+
+            this.canvasContainer.Height = (PADDING * 2 + (maxY + 1) * GRID_HEIGHT);
+            this.canvasRoot.Height = this.canvasContainer.Height * scale;
 
             this.canvasContainer.SetValue(Canvas.LeftProperty, 0.0);
             this.canvasContainer.SetValue(Canvas.TopProperty, 0.0);
+
+            this.scrollRoot.ScrollToRightEnd();
         }
 
         private void scrollRoot_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -91,7 +105,7 @@ namespace GitScc.UI
             //this.Scaler.BeginAnimation(ScaleTransform.ScaleXProperty, scaleAnimate);
             //this.Scaler.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimate);
 
-            AdjustCanvasSize();
+            AdjustCanvasSize(newScale);
         }
 
         #endregion
@@ -101,215 +115,244 @@ namespace GitScc.UI
         const int GRID_HEIGHT = 180;
         const int GRID_WIDTH = 300;
         int maxX, maxY;
+        string lastHash = null;
 
         private GitFileStatusTracker tracker;
 
         internal void Show(GitFileStatusTracker tracker)
         {
             this.tracker = tracker;
-            maxX = maxY = 0;
+
             loading.Visibility = Visibility.Visible;            
             
-            IList<GraphNode> commits = null;
-            if (tracker != null && tracker.HasGitRepository)
-            {
-                commits = tracker.RepositoryGraph.Nodes;
-            }
-
             Action act = () =>
             {
-                canvasContainer.Children.Clear();
-
-                if (commits != null)
+                try
                 {
-                    maxX = commits.Count();
-                    maxY = commits.Max(c => c.X);
+                    IList<GraphNode> commits = null;
+                    string hash = null;
 
-                    for (int i = commits.Count() - 1; i >= 0; i--)
+                    if (tracker != null && tracker.HasGitRepository)
                     {
-                        var commit = commits[i];
-
-                        #region Add commit box
-
-                        var box = new CommitBox();
-                        box.DataContext = new
-                        {
-                            Id = commit.Id,
-                            ShortId = commit.Id.Substring(0, 5),
-                            Comments = commit.Message,
-                            Author = commit.CommitterName,
-                            Date = commit.CommitDateRelative,
-                        };
-
-                        double left = GetScreenX(maxX - commit.Y);
-                        double top = GetScreenY(commit.X);
-
-                        Canvas.SetLeft(box, left);
-                        Canvas.SetTop(box, top);
-                        Canvas.SetZIndex(box, 10);
-
-                        this.canvasContainer.Children.Add(box);
-
-                        #endregion
-
-                        #region Add Branches
-
-                        var m = 0;
-                        foreach (var name in commit.Refs.Where(r => r.Type == RefTypes.Branch || r.Type == RefTypes.HEAD))
-                        {
-                            var control = new CommitHead
-                            {
-                                DataContext = new { Text = name },
-                            };
-
-                            Canvas.SetLeft(control, left + CommitBox.WIDTH + 4);
-                            Canvas.SetTop(control, top + m++ * 30);
-
-                            this.canvasContainer.Children.Add(control);
-                        }
-                        #endregion
-
-                        #region Add Tags
-                        m = 0;
-                        foreach (var name in commit.Refs.Where(r => r.Type == RefTypes.Tag))
-                        {
-                            var control = new CommitTag
-                            {
-                                DataContext = new { Text = name },
-                            };
-
-                            Canvas.SetLeft(control, left + m++ * 100); // TODO: get width of the control
-                            Canvas.SetTop(control, top - 24);
-
-                            this.canvasContainer.Children.Add(control);
-                        }
-
-                        #endregion
-
-                        #region Add Remote Branches
-                        m = 0;
-                        foreach (var name in commit.Refs.Where(r => r.Type == RefTypes.RemoteBranch))
-                        {
-                            var control = new CommitRemote
-                            {
-                                DataContext = new { Text = name },
-                            };
-
-                            Canvas.SetLeft(control, left + m++ * 100); // TODO: get width of the control
-                            Canvas.SetTop(control, top + CommitBox.HEIGHT + 4);
-
-                            this.canvasContainer.Children.Add(control);
-                        }
-                        #endregion
+                        commits = tracker.RepositoryGraph.Nodes;
+                        hash = GetHashCode(commits);
                     }
 
-                    #region Add commit links
+                    bool changed = lastHash == null ? hash != null : !lastHash.Equals(hash);
 
-                    var links = tracker.RepositoryGraph.Links;
-
-                    foreach (var link in links)
+                    if (changed)
                     {
-                        // current node
-                        double x1 = link.Y1;
-                        double y1 = link.X1;
+                        lastHash = hash;
 
-                        // parent node
-                        double x2 = link.Y2;
-                        double y2 = link.X2;
+                        canvasContainer.Children.Clear();
+                        maxX = maxY = 0;
 
-                        bool flip = links.Any(lnk => lnk.X1 == x2 && lnk.Y2 == y2 && lnk.X1 == lnk.X2);
-
-                        x1 = GetScreenX(maxX - x1);
-                        y1 = GetScreenY(y1) + CommitBox.HEIGHT / 2;
-                        x2 = GetScreenX(maxX - x2) + CommitBox.WIDTH;
-                        y2 = GetScreenY(y2) + CommitBox.HEIGHT / 2;
-
-                        if (y1 == y2)
+                        if (changed && commits != null && commits.Count > 0)
                         {
-                            var line = new Line
+                            maxX = commits.Count();
+                            maxY = commits.Max(c => c.X);
+
+                            for (int i = commits.Count() - 1; i >= 0; i--)
                             {
-                                Stroke = new SolidColorBrush(Color.FromArgb(255, 153, 182, 209)),
-                                StrokeThickness = 4,
-                            };
-                            line.X1 = x1;
-                            line.Y1 = y1;
-                            line.X2 = x2;
-                            line.Y2 = y2;
-                            this.canvasContainer.Children.Add(line);
+                                var commit = commits[i];
+
+                                #region Add commit box
+
+                                var box = new CommitBox();
+                                box.DataContext = new
+                                {
+                                    Id = commit.Id,
+                                    ShortId = commit.Id.Substring(0, 7),
+                                    Comments = commit.Message,
+                                    Author = commit.CommitterName,
+                                    Date = commit.CommitDateRelative,
+                                };
+
+                                double left = GetScreenX(maxX - commit.Y);
+                                double top = GetScreenY(commit.X);
+
+                                Canvas.SetLeft(box, left);
+                                Canvas.SetTop(box, top);
+                                Canvas.SetZIndex(box, 10);
+
+                                this.canvasContainer.Children.Add(box);
+
+                                #endregion
+
+                                #region Add Branches
+
+                                var m = 0;
+                                foreach (var name in commit.Refs.Where(r => r.Type == RefTypes.Branch || r.Type == RefTypes.HEAD))
+                                {
+                                    var control = new CommitHead
+                                    {
+                                        DataContext = new { Text = name },
+                                    };
+
+                                    Canvas.SetLeft(control, left + CommitBox.WIDTH + 4);
+                                    Canvas.SetTop(control, top + m++ * 30);
+
+                                    this.canvasContainer.Children.Add(control);
+                                }
+                                #endregion
+
+                                #region Add Tags
+                                m = 0;
+                                foreach (var name in commit.Refs.Where(r => r.Type == RefTypes.Tag))
+                                {
+                                    var control = new CommitTag
+                                    {
+                                        DataContext = new { Text = name },
+                                    };
+
+                                    Canvas.SetLeft(control, left + m++ * 100); // TODO: get width of the control
+                                    Canvas.SetTop(control, top - 24);
+
+                                    this.canvasContainer.Children.Add(control);
+                                }
+
+                                #endregion
+
+                                #region Add Remote Branches
+                                m = 0;
+                                foreach (var name in commit.Refs.Where(r => r.Type == RefTypes.RemoteBranch))
+                                {
+                                    var control = new CommitRemote
+                                    {
+                                        DataContext = new { Text = name },
+                                    };
+
+                                    Canvas.SetLeft(control, left + m++ * 100); // TODO: get width of the control
+                                    Canvas.SetTop(control, top + CommitBox.HEIGHT + 4);
+
+                                    this.canvasContainer.Children.Add(control);
+                                }
+                                #endregion
+                            }
+
+                            #region Add commit links
+
+                            var links = tracker.RepositoryGraph.Links;
+
+                            foreach (var link in links)
+                            {
+                                // current node
+                                double x1 = link.Y1;
+                                double y1 = link.X1;
+
+                                // parent node
+                                double x2 = link.Y2;
+                                double y2 = link.X2;
+
+                                bool flip = links.Any(lnk => lnk.X1 == x2 && lnk.Y2 == y2 && lnk.X1 == lnk.X2);
+
+                                x1 = GetScreenX(maxX - x1);
+                                y1 = GetScreenY(y1) + CommitBox.HEIGHT / 2;
+                                x2 = GetScreenX(maxX - x2) + CommitBox.WIDTH;
+                                y2 = GetScreenY(y2) + CommitBox.HEIGHT / 2;
+
+                                if (y1 == y2)
+                                {
+                                    var line = new Line
+                                    {
+                                        Stroke = new SolidColorBrush(Color.FromArgb(255, 153, 182, 209)),
+                                        StrokeThickness = 4,
+                                    };
+                                    line.X1 = x1;
+                                    line.Y1 = y1;
+                                    line.X2 = x2;
+                                    line.Y2 = y2;
+                                    this.canvasContainer.Children.Add(line);
+                                }
+                                else if (y1 > y2 && !flip)
+                                {
+                                    var x3 = x2 - CommitBox.WIDTH / 2;
+                                    var path = new System.Windows.Shapes.Path
+                                    {
+                                        Stroke = new SolidColorBrush(Color.FromArgb(255, 153, 182, 209)),
+                                        StrokeThickness = 4,
+                                    };
+
+                                    PathSegmentCollection pscollection = new PathSegmentCollection();
+
+                                    pscollection.Add(new LineSegment(new Point(x2, y1), true));
+
+                                    BezierSegment curve = new BezierSegment(
+                                        new Point(x2, y1), new Point(x3, y1), new Point(x3, y2), true);
+                                    pscollection.Add(curve);
+
+                                    PathFigure pf = new PathFigure
+                                    {
+                                        StartPoint = new Point(x1, y1),
+                                        Segments = pscollection,
+                                    };
+                                    PathFigureCollection pfcollection = new PathFigureCollection();
+                                    pfcollection.Add(pf);
+                                    PathGeometry pathGeometry = new PathGeometry();
+                                    pathGeometry.Figures = pfcollection;
+                                    path.Data = pathGeometry;
+
+                                    this.canvasContainer.Children.Add(path);
+                                }
+                                else
+                                {
+                                    var x3 = x1 + CommitBox.WIDTH / 2;
+                                    var path = new System.Windows.Shapes.Path
+                                    {
+                                        Stroke = new SolidColorBrush(Color.FromArgb(255, 153, 182, 209)),
+                                        StrokeThickness = 4,
+                                    };
+
+                                    PathSegmentCollection pscollection = new PathSegmentCollection();
+
+                                    BezierSegment curve = new BezierSegment(
+                                        new Point(x3, y1), new Point(x3, y2), new Point(x1, y2), true);
+                                    pscollection.Add(curve);
+
+                                    pscollection.Add(new LineSegment(new Point(x2, y2), true));
+
+                                    PathFigure pf = new PathFigure
+                                    {
+                                        StartPoint = new Point(x3, y1),
+                                        Segments = pscollection,
+                                    };
+                                    PathFigureCollection pfcollection = new PathFigureCollection();
+                                    pfcollection.Add(pf);
+                                    PathGeometry pathGeometry = new PathGeometry();
+                                    pathGeometry.Figures = pfcollection;
+                                    path.Data = pathGeometry;
+
+                                    this.canvasContainer.Children.Add(path);
+                                }
+                            }
+
+                            #endregion
                         }
-                        else if (y1 > y2 && !flip)
-                        {
-                            var x3 = x2 - CommitBox.WIDTH / 2;
-                            var path = new Path
-                            {
-                                Stroke = new SolidColorBrush(Color.FromArgb(255, 153, 182, 209)),
-                                StrokeThickness = 4,
-                            };
 
-                            PathSegmentCollection pscollection = new PathSegmentCollection();
-
-                            pscollection.Add(new LineSegment(new Point(x2, y1), true));
-
-                            BezierSegment curve = new BezierSegment(
-                                new Point(x2, y1), new Point(x3, y1), new Point(x3, y2), true);
-                            pscollection.Add(curve);
-
-                            PathFigure pf = new PathFigure
-                            {
-                                StartPoint = new Point(x1, y1),
-                                Segments = pscollection,
-                            };
-                            PathFigureCollection pfcollection = new PathFigureCollection();
-                            pfcollection.Add(pf);
-                            PathGeometry pathGeometry = new PathGeometry();
-                            pathGeometry.Figures = pfcollection;
-                            path.Data = pathGeometry;
-
-                            this.canvasContainer.Children.Add(path);
-                        }
-                        else
-                        {
-                            var x3 = x1 + CommitBox.WIDTH / 2;
-                            var path = new Path
-                            {
-                                Stroke = new SolidColorBrush(Color.FromArgb(255, 153, 182, 209)),
-                                StrokeThickness = 4,
-                            };
-
-                            PathSegmentCollection pscollection = new PathSegmentCollection();
-
-                            BezierSegment curve = new BezierSegment(
-                                new Point(x3, y1), new Point(x3, y2), new Point(x1, y2), true);
-                            pscollection.Add(curve);
-
-                            pscollection.Add(new LineSegment(new Point(x2, y2), true));
-
-                            PathFigure pf = new PathFigure
-                            {
-                                StartPoint = new Point(x3, y1),
-                                Segments = pscollection,
-                            };
-                            PathFigureCollection pfcollection = new PathFigureCollection();
-                            pfcollection.Add(pf);
-                            PathGeometry pathGeometry = new PathGeometry();
-                            pathGeometry.Figures = pfcollection;
-                            path.Data = pathGeometry;
-
-                            this.canvasContainer.Children.Add(path);
-                        }
+                        AdjustCanvasSize(this.Scaler.ScaleX);
                     }
 
-                    #endregion
                 }
-
-                AdjustCanvasSize();
-
-                this.scrollRoot.ScrollToRightEnd();
-
+                catch (Exception ex)
+                {
+                    Log.WriteLine("History Graph Show: {0}", ex.ToString());
+                }
                 loading.Visibility = Visibility.Collapsed;
             };
-            
+
             this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+        }
+
+        private string GetHashCode(IList<GraphNode> commits)
+        {
+            if (commits == null) return null;
+            var sb = new StringBuilder();
+            foreach (var c in commits)
+            {
+                sb.Append(c.Id.Substring(5));
+                foreach (var r in c.Refs) sb.Append(r.Id.Substring(5));
+            }
+            return sb.ToString();
         }
 
         private double GetScreenX(double x)
@@ -323,6 +366,14 @@ namespace GitScc.UI
         }
 
         internal void SaveToFile(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName)) return;
+            var ext = System.IO.Path.GetExtension(fileName);
+            if (ext == ".png") ExportToPng(fileName);
+            else if (ext == ".xps") ExportToXps(fileName);
+        }
+
+        private void ExportToXps(string fileName)
         {
             Transform transform = canvasContainer.LayoutTransform;
             canvasContainer.LayoutTransform = null;
@@ -338,24 +389,25 @@ namespace GitScc.UI
             canvasContainer.LayoutTransform = transform;
         }
 
-        public GitUI.GitViewModel GitViewModel
+        private void ExportToPng(string fileName)
         {
-            set
-            {
-                this.tracker = value.Tacker;
-                Show(tracker);
-            }
-        }
+            Transform transform = canvasContainer.LayoutTransform;
+            canvasContainer.LayoutTransform = null;
+            Size size = new Size(canvasContainer.Width, canvasContainer.Height);
+            canvasContainer.Measure(size);
+            canvasContainer.Arrange(new Rect(size));
+            RenderTargetBitmap renderBitmap =
+              new RenderTargetBitmap( (int)size.Width*300/96, (int)size.Height*300/96, 300d, 300d,
+                PixelFormats.Pbgra32);
+            renderBitmap.Render(canvasContainer);
 
-        public void ExportGraph()
-        {
-            var dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.DefaultExt = ".xps";
-            dlg.Filter = "XPS documents (.xps)|*.xps";
-            if (dlg.ShowDialog() == true)
+            using (FileStream outStream = new FileStream(fileName, FileMode.Create))
             {
-                this.SaveToFile(dlg.FileName);
+                PngBitmapEncoder encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+                encoder.Save(outStream);
             }
+            canvasContainer.LayoutTransform = transform;
         }
     }
 }

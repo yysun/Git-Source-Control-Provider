@@ -19,9 +19,25 @@ namespace GitUI.UI
     /// </summary>
     public partial class BottomToolBar : UserControl
     {
+        private GitViewModel gitViewModel;
+        internal GitViewModel GitViewModel
+        {
+            set
+            {
+                gitViewModel = value;
+                this.txtDirectory.Text = gitViewModel.Tacker.GitWorkingDirectory;
+            }
+        }
         public BottomToolBar()
         {
             InitializeComponent();
         }
+
+        private void btnGo_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+
     }
 }

@@ -11,11 +11,17 @@ namespace GitUI
 {
     public static class HistoryViewCommands
     {
-        //public static readonly RoutedUICommand CloseCommitDetails = new RoutedUICommand("CloseCommitDetails", "CloseCommitDetails", typeof(MainWindow));
-        //public static readonly RoutedUICommand OpenCommitDetails = new RoutedUICommand("OpenCommitDetails", "OpenCommitDetails", typeof(MainWindow));
-        //public static readonly RoutedUICommand SelectCommit = new RoutedUICommand("SelectCommit", "SelectCommit", typeof(MainWindow));
+        public static readonly RoutedUICommand CloseCommitDetails = new RoutedUICommand("CloseCommitDetails", "CloseCommitDetails", typeof(MainWindow));
+        public static readonly RoutedUICommand OpenCommitDetails = new RoutedUICommand("OpenCommitDetails", "OpenCommitDetails", typeof(MainWindow));
+        public static readonly RoutedUICommand SelectCommit = new RoutedUICommand("SelectCommit", "SelectCommit", typeof(MainWindow));
         public static readonly RoutedUICommand SimplifiedView = new RoutedUICommand("SimplifiedView", "SimplifiedView", typeof(GitViewModel));
         public static readonly RoutedUICommand ExportGraph = new RoutedUICommand("ExportGraph", "ExportGraph", typeof(GitScc.UI.HistoryGraph));
+
+        public static readonly RoutedUICommand CheckOut = new RoutedUICommand("CheckOut", "CheckOut", typeof(GitViewModel));
+        public static readonly RoutedUICommand NewTag = new RoutedUICommand("NewTag", "NewTag", typeof(GitViewModel));
+        public static readonly RoutedUICommand DeleteTag = new RoutedUICommand("DeleteTag", "DeleteTag", typeof(GitViewModel));
+        public static readonly RoutedUICommand NewBranch = new RoutedUICommand("NewBranch", "NewBranch", typeof(GitViewModel));
+        public static readonly RoutedUICommand DeleteBranch = new RoutedUICommand("DeleteBranch", "DeleteBranch", typeof(GitViewModel));
     }
 
     public class GitViewModel

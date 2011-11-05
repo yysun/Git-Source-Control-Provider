@@ -1,18 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using GitScc;
 using System.Windows.Media.Animation;
+using GitScc;
 
 namespace GitUI
 {
@@ -23,16 +15,31 @@ namespace GitUI
     {
         private GitViewModel gitViewModel;
 
+        private string TryFindFile(string[] paths)
+        {
+            foreach (var path in paths)
+            {
+                if (File.Exists(path)) return path;
+            }
+            return null;
+        }
+
         public MainWindow()
         {
             InitializeComponent();
+
+            GitBash.GitExePath = TryFindFile(new string[] {
+                    @"C:\Program Files\Git\bin\sh.exe",
+                    @"C:\Program Files (x86)\Git\bin\sh.exe",
+            });
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             this.gitViewModel =
             this.graph.GitViewModel =
-            this.topToolBar.GitViewModel = GitViewModel.Current;
+            this.topToolBar.GitViewModel =
+            this.bottomToolBar.GitViewModel = GitViewModel.Current;
 
             if (gitViewModel.Tacker.HasGitRepository)
                 this.Title = gitViewModel.Tacker.GitWorkingDirectory;
@@ -60,27 +67,40 @@ namespace GitUI
 
         private void ExportGraph(object sender, ExecutedRoutedEventArgs e)
         {
-            this.graph.ExportGraph();
+            var dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.DefaultExt = ".xps";
+            dlg.Filter = "XPS documents (.xps)|*.xps";
+            if (dlg.ShowDialog() == true)
+            {
+                this.graph.SaveToFile(dlg.FileName);
+            }
         }
 
         private void rootGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            ShowTopToolBar();
-            ShowBottomToolBarBar();
+            if (this.bottomToolBar.Visibility == Visibility.Collapsed)
+            {
+                ShowTopToolBar();
+                ShowBottomToolBarBar();
+            }
+            else
+            {
+                HideTopToolBar();
+                HideBottomToolBar();
+            }
         }
 
         private void Grid_PreviewMouseMove(object sender, MouseEventArgs e)
         {
             var y = e.GetPosition(rootGrid).Y;
-            //System.Diagnostics.Debug.WriteLine(y);
             if (y < 60)
             {
                 ShowTopToolBar();
             }
-            else if (y > 60)
-            {
-                HideTopToolBar();
-            }
+            //else if (y > this.ActualHeight - 60)
+            //{
+            //    ShowBottomToolBarBar();
+            //}
         }
 
         private void ShowTopToolBar()
@@ -135,5 +155,51 @@ namespace GitUI
             }
         }
 
+        private void ShowCommitDetails(string id)
+        {
+            if (id != null)
+            {
+                this.details.RenderTransform.SetValue(TranslateTransform.XProperty, this.ActualWidth);
+                this.details.Visibility = Visibility.Visible;
+                var animationDuration = TimeSpan.FromSeconds(.5);
+                var animation = new DoubleAnimation(0, new Duration(animationDuration));
+                animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
+                loading.Visibility = Visibility.Visible;
+                animation.Completed += (_, e) => 
+                {
+                    this.details.Show(this.gitViewModel.Tacker, id);
+                    loading.Visibility = Visibility.Collapsed;
+                };
+                this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+                //this.details.Show(this.gitViewModel.Tacker, id);
+            }
+        }
+
+        private void OpenCommitDetails_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            try
+            {
+                ShowCommitDetails(e.Parameter as string);
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+        private void CloseCommitDetails_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            try
+            {
+                var animationDuration = TimeSpan.FromSeconds(.2);
+                var animation = new DoubleAnimation(this.ActualWidth + 200, new Duration(animationDuration));
+                animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseIn };
+                animation.Completed += (o, _) => this.details.Visibility = Visibility.Collapsed;
+                this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+            }
+            catch (Exception ex)
+            {
+                
+            }
+        }
     }
 }

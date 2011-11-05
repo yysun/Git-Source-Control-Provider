@@ -15,8 +15,10 @@ namespace GitScc
         Removed,
         Added,
         Deleted,
-        MergeConflict,
+        Conflict,
         Ignored,
+        Renamed,
+        Copied
     }
 
     public class GitFile : INotifyPropertyChanged
@@ -28,7 +30,8 @@ namespace GitScc
             {
                 return Status == GitFileStatus.Added ||
                        Status == GitFileStatus.Staged ||
-                       Status == GitFileStatus.Removed;
+                       Status == GitFileStatus.Removed ||
+                       Status == GitFileStatus.Renamed;
             }
         }
 

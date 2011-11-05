@@ -4,6 +4,9 @@
         xmlns:GitScc_UI="clr-namespace:GitScc.UI" x:Class="GitUI.MainWindow" Height="350" Width="525" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" WindowStartupLocation="CenterScreen" WindowState="Maximized">
 
     <Window.CommandBindings>
+        <CommandBinding Command="cmd:HistoryViewCommands.OpenCommitDetails"  Executed="OpenCommitDetails_Executed" />        
+        <CommandBinding Command="cmd:HistoryViewCommands.CloseCommitDetails"  Executed="CloseCommitDetails_Executed" />
+        <!--<CommandBinding Command="cmd:HistoryViewCommands.SelectCommit"  Executed="SelectCommit_Executed" />-->        
         <CommandBinding Command="cmd:HistoryViewCommands.ExportGraph"  Executed="ExportGraph" />
     </Window.CommandBindings>
     <Grid x:Name="rootGrid" PreviewMouseMove="Grid_PreviewMouseMove" PreviewMouseRightButtonDown="rootGrid_PreviewMouseRightButtonDown">
@@ -26,5 +29,12 @@
             </my:BottomToolBar.RenderTransform>
         </my:BottomToolBar>
 
+        <GitScc_UI:CommitDetails x:Name="details" Visibility="Collapsed" Background="White">
+            <GitScc_UI:CommitDetails.RenderTransform>
+                <TranslateTransform/>
+            </GitScc_UI:CommitDetails.RenderTransform>
+        </GitScc_UI:CommitDetails>
+
+        <GitScc_UI:Loading x:Name="loading"  HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" />
     </Grid>
 </Window>

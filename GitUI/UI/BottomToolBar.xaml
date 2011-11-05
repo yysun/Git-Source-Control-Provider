@@ -5,7 +5,16 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="50" d:DesignWidth="500">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="ResourceDictionary.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>    
     <Grid Background="Gainsboro">
-            
+        <Button x:Name="btnBack"  HorizontalAlignment="Left" Template="{DynamicResource BackButtonControlTemplate}" ToolTip="Back" Content="" Margin="8,0,0,0" IsEnabled="False" />
+        <TextBox x:Name="txtDirectory" Margin="40,0,200,0" TextWrapping="Wrap" Text="" VerticalAlignment="Center"/>
+        <Button x:Name="btnGo" HorizontalAlignment="Right" Template="{DynamicResource GoButtonControlTemplate}" ToolTip="Back" Content="" Margin="0,0,168,0" RenderTransformOrigin="18.833,0.46" Click="btnGo_Click" />
     </Grid>
 </UserControl>

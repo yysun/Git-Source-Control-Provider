@@ -14,6 +14,7 @@ using Microsoft.VisualStudio.Shell;
 using System.IO;
 using System.Collections.Generic;
 using GitScc.UI;
+using System.Reflection;
 
 namespace GitScc
 {
@@ -35,8 +36,8 @@ namespace GitScc
     // Register a sample tool window visible only when the provider is active
     [MsVsShell.ProvideToolWindow(typeof(PendingChangesToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
     [MsVsShell.ProvideToolWindowVisibility(typeof(PendingChangesToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]
-    [MsVsShell.ProvideToolWindow(typeof(HistoryToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
-    [MsVsShell.ProvideToolWindowVisibility(typeof(HistoryToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]  
+    //[MsVsShell.ProvideToolWindow(typeof(HistoryToolWindow), Style = VsDockStyle.Tabbed, Orientation = ToolWindowOrientation.Bottom)]
+    //[MsVsShell.ProvideToolWindowVisibility(typeof(HistoryToolWindow), "C4128D99-0000-41D1-A6C3-704E6C1A3DE2")]  
     //Register the source control provider's service (implementing IVsScciProvider interface)
     [MsVsShell.ProvideService(typeof(SccProviderService), ServiceName = "Git Source Control Service")]
     // Register the source control provider to be visible in Tools/Options/SourceControl/Plugin dropdown selector
@@ -402,7 +403,10 @@ namespace GitScc
 
         private void ShowHistoryWindow(object sender, EventArgs e)
         {
-            ShowToolWindow(typeof(HistoryToolWindow));
+            //ShowToolWindow(typeof(HistoryToolWindow));
+            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            path = Path.Combine(path, "GitUI.exe");
+            Process.Start(path, "\"" + sccService.CurrentTracker.GitWorkingDirectory + "\"");
         }
 
         private void ShowToolWindow(Type type)

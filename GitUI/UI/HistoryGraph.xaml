@@ -1,0 +1,29 @@
+﻿<UserControl xmlns:my="clr-namespace:GitScc.UI" x:Class="GitScc.UI.HistoryGraph" xmlns:cmd="clr-namespace:GitUI"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="600">
+   
+    <Grid>
+        <ScrollViewer x:Name="scrollRoot" 
+                  VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" 
+                  PreviewMouseWheel="scrollRoot_PreviewMouseWheel">
+            <Canvas x:Name="canvasRoot" Background="White">
+            <Canvas x:Name="canvasContainer" Background="White"
+                    MouseLeftButtonDown="canvasContainer_MouseLeftButtonDown" 
+                    MouseLeftButtonUp="canvasContainer_MouseLeftButtonUp" 
+                    MouseMove="canvasContainer_MouseMove">
+                <Canvas.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform x:Name="Scaler" CenterX="0" CenterY="0" ScaleX="1" ScaleY="1" />
+                    </TransformGroup>
+                </Canvas.RenderTransform>
+            </Canvas>
+           
+        </Canvas>
+    </ScrollViewer>
+        <my:Loading x:Name="loading"  HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" />
+    </Grid>
+</UserControl>

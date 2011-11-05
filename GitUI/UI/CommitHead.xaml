@@ -1,0 +1,15 @@
+﻿<UserControl x:Class="GitScc.UI.CommitHead"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="18" d:DesignWidth="100">
+    <StackPanel Height="18" Orientation="Horizontal">
+        <Polygon Points="0,0.5 1,0 1,1" Fill="#93F87C7C" Width="12" Height="6" Stretch="Fill" Stroke="{x:Null}" />
+        <Border BorderThickness="1" CornerRadius="4" BorderBrush="#93F87C7C" Background="#93F87C7C">
+            <TextBlock Padding="10,0" Text="{Binding Text}" FontSize="10"
+                       VerticalAlignment="Center" HorizontalAlignment="Center" ></TextBlock>
+        </Border>
+    </StackPanel>
+</UserControl>

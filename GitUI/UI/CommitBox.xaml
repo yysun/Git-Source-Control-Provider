@@ -1,0 +1,102 @@
+﻿<UserControl x:Class="GitScc.UI.CommitBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="120" d:DesignWidth="200">
+	<UserControl.Resources>
+		<ControlTemplate x:Key="ButtonControlTemplate1" TargetType="{x:Type Button}">
+			<Grid Width="12" Height="12">
+				<VisualStateManager.VisualStateGroups>
+					<VisualStateGroup x:Name="CommonStates">
+						<VisualState x:Name="Normal"/>
+						<VisualState x:Name="MouseOver">
+							<Storyboard>
+								<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)" Storyboard.TargetName="textBlock">
+									<EasingColorKeyFrame KeyTime="0" Value="White"/>
+								</ColorAnimationUsingKeyFrames>
+								<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="ellipse">
+									<EasingColorKeyFrame KeyTime="0" Value="#FF99B6D1"/>
+								</ColorAnimationUsingKeyFrames>
+								<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Stroke).(SolidColorBrush.Color)" Storyboard.TargetName="ellipse">
+									<EasingColorKeyFrame KeyTime="0" Value="#FF80ABD2"/>
+								</ColorAnimationUsingKeyFrames>
+							</Storyboard>
+						</VisualState>
+						<VisualState x:Name="Pressed"/>
+						<VisualState x:Name="Disabled"/>
+					</VisualStateGroup>
+				</VisualStateManager.VisualStateGroups>
+				<Ellipse x:Name="ellipse" Fill="#FFF2FBFF" Height="Auto" Stroke="#FF99B6D1" StrokeThickness="1" VerticalAlignment="Stretch"/>
+				<TextBlock x:Name="textBlock" Margin="0,1,0,0" TextWrapping="Wrap" Text="i" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Global Serif" Foreground="#FF99B6D1" Height="Auto" Width="Auto" FontSize="9.333" d:LayoutOverrides="Width" FontWeight="Bold" FontStyle="Italic"/>
+			</Grid>
+		</ControlTemplate>
+	</UserControl.Resources>
+    <Grid x:Name="root" Height="120" Width="200" PreviewMouseDown="root_PreviewMouseDown" RenderTransformOrigin="0.5,0.5" MouseEnter="txtComment_MouseEnter" MouseLeave="txtComment_MouseLeave">
+    	<Grid.RenderTransform>
+    		<TransformGroup>
+    			<ScaleTransform/>
+    			<SkewTransform/>
+    			<RotateTransform/>
+    			<TranslateTransform/>
+    		</TransformGroup>
+    	</Grid.RenderTransform>
+    	<VisualStateManager.VisualStateGroups>
+    		<VisualStateGroup x:Name="VisualStateGroup">
+    			<VisualStateGroup.Transitions>
+    				<VisualTransition GeneratedDuration="0:0:0.1"/>
+    			</VisualStateGroup.Transitions>
+
+    			<VisualState x:Name="NormalState"/>
+    			<VisualState x:Name="MouseOverState">
+
+    				<Storyboard>
+    					<DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" Storyboard.TargetName="root">
+    						<EasingDoubleKeyFrame KeyTime="0" Value="1.5"/>
+    					</DoubleAnimationUsingKeyFrames>
+    					<DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" Storyboard.TargetName="root">
+    						<EasingDoubleKeyFrame KeyTime="0" Value="1.5"/>
+    					</DoubleAnimationUsingKeyFrames>
+    				</Storyboard>
+
+    			</VisualState>
+    		</VisualStateGroup>
+    		<VisualStateGroup x:Name="VisualStateGroup1">
+    			<VisualState x:Name="SelectedSate">
+    				<Storyboard>
+    					<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Stroke).(SolidColorBrush.Color)" Storyboard.TargetName="rectangle1">
+    						<EasingColorKeyFrame KeyTime="0" Value="#FFFFAB9D"/>
+    					</ColorAnimationUsingKeyFrames>
+    					<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Fill).(GradientBrush.GradientStops)[1].(GradientStop.Color)" Storyboard.TargetName="rectangle1">
+    						<EasingColorKeyFrame KeyTime="0" Value="#FFFFDFCD"/>
+    					</ColorAnimationUsingKeyFrames>
+    				</Storyboard>
+    			</VisualState>
+    			<VisualState x:Name="NotSelectedState"/>
+			</VisualStateGroup>	
+    	</VisualStateManager.VisualStateGroups>
+        <Rectangle HorizontalAlignment="Stretch" Margin="0" 
+                   Name="rectangle1" Stroke="#FF99B6D1" 
+                   VerticalAlignment="Stretch" StrokeThickness="4" RadiusX="4" RadiusY="4" >
+        	<Rectangle.Fill>
+        		<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+        			<GradientStop Color="White" Offset="0"/>
+        			<GradientStop Color="#FFE8FEFF" Offset="1"/>
+        		</LinearGradientBrush>
+        	</Rectangle.Fill>
+        </Rectangle>
+        <ScrollViewer x:Name="scrollViewer" Margin="6,30,6,24" VerticalScrollBarVisibility="Auto" >
+            <TextBlock Name="txtComment" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="6,0,6,0"
+                       Text="{Binding Comments}" FontSize="10" TextWrapping="Wrap" TextAlignment="Justify" />
+        </ScrollViewer>
+        <TextBlock Name="txtId" FontSize="10"  HorizontalAlignment="Right" Margin="0,12,18,0" VerticalAlignment="Top" TextAlignment="Right" FontWeight="Bold" 
+                   Text="{Binding ShortId}" />
+        <TextBlock Name="txtAuthor" FontSize="10"  HorizontalAlignment="Left" Margin="12,12,0,0" VerticalAlignment="Top" TextAlignment="Left" 
+                   Text="{Binding Author}" Foreground="#D1000000" />
+        <TextBlock x:Name="txtDate" FontSize="10"  HorizontalAlignment="Right" Margin="0,0,12,6" VerticalAlignment="Bottom" TextAlignment="Right" 
+                   Text="{Binding Date}" Foreground="#D1000000" />
+        <Button HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12,0,0,8" Template="{DynamicResource ButtonControlTemplate1}"
+                CommandParameter="{Binding Id}" />
+    </Grid>
+</UserControl>

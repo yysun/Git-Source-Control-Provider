@@ -1,0 +1,42 @@
+﻿<UserControl x:Class="GitUI.UI.MainToolBar" xmlns:cmd="clr-namespace:GitUI"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="60" d:DesignWidth="500">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="ResourceDictionary.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                <GradientStop Color="#FFF2F2F2" Offset="0" />
+                <GradientStop Color="#FFDBDBDB" Offset="1" />
+                <GradientStop Color="#FFD8D5D5" Offset="0.331" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <Label Content="Branches" Height="28" HorizontalAlignment="Left" Margin="6,2,0,0" Name="label1" VerticalAlignment="Top" FontSize="10" />
+        <Label Content="Tags" Height="28" HorizontalAlignment="Left" Margin="6,26,0,0" Name="label2" VerticalAlignment="Top" FontSize="10" />
+        <ListBox x:Name="branchList" Margin="60,4,160,36" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" ItemTemplate="{DynamicResource DataTemplate1}" 
+                     Background="#00000000" BorderBrush="{x:Null}" Height="20" ItemContainerStyle="{DynamicResource ListBoxItemStyle1}"
+                     ScrollViewer.HorizontalScrollBarVisibility="hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+
+        <ListBox x:Name="tagList" Margin="60,26,160,14" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" ItemTemplate="{DynamicResource DataTemplate1}" 
+                     Background="#00000000" BorderBrush="{x:Null}" Height="20" ItemContainerStyle="{DynamicResource ListBoxItemStyle1}"
+                     ScrollViewer.HorizontalScrollBarVisibility="hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+        <CheckBox Content="Show simplified graph" HorizontalAlignment="Right" Margin="0,8,14,0" Name="checkBox1" Template="{DynamicResource ShowSimpleGraphCheckBoxControlTemplate}" 
+                  VerticalAlignment="Top" ToolTip="Toggle View"  Click="checkBox1_Click"/>
+        
+        <Label Content="Simplified view: off" HorizontalAlignment="Right" Margin="0,0,12,4" Name="lableView" VerticalAlignment="Bottom" FontSize="9.333" />
+
+        <Button Content="Button" HorizontalAlignment="Right" Margin="0,8,43,28" Template="{DynamicResource SaveButtonControlTemplate}" Command="cmd:HistoryViewCommands.ExportGraph" ToolTip="Export graph ..." />
+        <!--<Button Content="Button" HorizontalAlignment="Right" Margin="0,8,72,28" Template="{DynamicResource CompareButtonControlTemplate}" ToolTip="Select two commits to compare ..." Name="btnCompare" Click="btnCompare_Click" />
+        <Button Content="0" HorizontalAlignment="Right" Margin="0,8,100,0" Name="btnCommitCount" VerticalAlignment="Top" Template="{DynamicResource CommitCountControlTemplate}" RenderTransformOrigin="-1.125,0.438" Click="btnCommitCount_Click" ToolTip="Click to clear selection" />-->
+     </Grid>
+</UserControl>

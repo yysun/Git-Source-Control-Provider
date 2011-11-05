@@ -50,7 +50,6 @@ namespace GitScc.UI
 
         internal void Show(GitFileStatusTracker tracker, string commitId)
         {
-
             try
             {
                 this.tracker = tracker;
@@ -126,6 +125,11 @@ namespace GitScc.UI
                 this.commitId2 = commitId2;
                 this.btnSwitch.Visibility = Visibility.Visible;
                 this.txtFileName.Text = "";
+            }
+            catch(Exception ex) 
+            {
+                this.lblCommit.Content = ex.Message + " Please try again.";
+            }
             }
             catch(Exception ex) 
             {

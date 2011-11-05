@@ -2,6 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicSccProvider", "BasicSccProvider.csproj", "{ADECE07A-5D80-4950-9DA5-A681CE2F5106}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C756204F-28E1-473A-8160-E697E3303F1B} = {C756204F-28E1-473A-8160-E697E3303F1B}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicSccProvider.Tests", "BasicSccProvider.Tests\BasicSccProvider.Tests.csproj", "{AE3D1ACA-680D-4CDE-B71E-B7B135F32899}"
 EndProject
@@ -23,6 +26,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGit.Test", "ngit\NGit.Test\NGit.Test.csproj", "{E1FA8F29-5BAB-4FB7-8362-B8CE67ECF7C2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiffClassifier", "DiffClassifier\DiffClassifier.csproj", "{57D5E6BB-DC11-49CF-9F49-7C3F3EC11F09}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitApi", "GitApi\GitApi.csproj", "{161E81E2-25E5-4134-8D2D-595419B1265B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitUI", "GitUI\GitUI.csproj", "{C756204F-28E1-473A-8160-E697E3303F1B}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
@@ -61,6 +68,14 @@ Global
 		{57D5E6BB-DC11-49CF-9F49-7C3F3EC11F09}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57D5E6BB-DC11-49CF-9F49-7C3F3EC11F09}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57D5E6BB-DC11-49CF-9F49-7C3F3EC11F09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{161E81E2-25E5-4134-8D2D-595419B1265B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{161E81E2-25E5-4134-8D2D-595419B1265B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{161E81E2-25E5-4134-8D2D-595419B1265B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{161E81E2-25E5-4134-8D2D-595419B1265B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C756204F-28E1-473A-8160-E697E3303F1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C756204F-28E1-473A-8160-E697E3303F1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C756204F-28E1-473A-8160-E697E3303F1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C756204F-28E1-473A-8160-E697E3303F1B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

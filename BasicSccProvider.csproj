@@ -87,21 +87,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataServices\Change.cs" />
-    <Compile Include="DataServices\Commit.cs" />
-    <Compile Include="DataServices\GraphLink.cs" />
-    <Compile Include="DataServices\GraphNode.cs" />
-    <Compile Include="DataServices\Ref.cs" />
-    <Compile Include="DataServices\RepositoryGraph.cs" />
-    <Compile Include="DataServices\GitTreeObject.cs" />
-    <Compile Include="GitBash.cs" />
     <Compile Include="GitToolCommands.cs" />
-    <Compile Include="HistoryToolWindow.cs" />
-    <Compile Include="GitFileStatusTracker.cs" />
     <Compile Include="GitSccOptions.cs" />
-    <Compile Include="HistoryView.xaml.cs">
-      <DependentUpon>HistoryView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="ToolWindowWithEditor.cs" />
     <Compile Include="PendingChangesView.xaml.cs">
       <DependentUpon>PendingChangesView.xaml</DependentUpon>
@@ -125,37 +112,12 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="SccProviderService.cs" />
-    <Compile Include="GitFileStatus.cs" />
     <Compile Include="PendingChangesToolWindow.cs" />
     <Compile Include="UI\BranchPicker.xaml.cs">
       <DependentUpon>BranchPicker.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\CommitBox.xaml.cs">
-      <DependentUpon>CommitBox.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UI\CommitDetails.xaml.cs">
-      <DependentUpon>CommitDetails.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UI\CommitHead.xaml.cs">
-      <DependentUpon>CommitHead.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UI\CommitRemote.xaml.cs">
-      <DependentUpon>CommitRemote.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UI\CommitTag.xaml.cs">
-      <DependentUpon>CommitTag.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UI\HistoryGraph.xaml.cs">
-      <DependentUpon>HistoryGraph.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UI\Loading.xaml.cs">
-      <DependentUpon>Loading.xaml</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="HistoryToolWindow.resx">
-      <DependentUpon>HistoryToolWindow.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Resources.resx">
       <SubType>Designer</SubType>
       <Generator>ResXFileCodeGenerator</Generator>
@@ -170,6 +132,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="GitUI.exe">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="License.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
@@ -193,10 +158,6 @@
     <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="HistoryView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="PendingChangesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -209,39 +170,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UI\CommitBox.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="UI\CommitDetails.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="UI\CommitHead.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="UI\CommitRemote.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UI\CommitTag.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UI\HistoryGraph.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="UI\Loading.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="DiffClassifier\DiffClassifier.csproj">
       <Project>{57D5E6BB-DC11-49CF-9F49-7C3F3EC11F09}</Project>
       <Name>DiffClassifier</Name>
+    </ProjectReference>
+    <ProjectReference Include="GitApi\GitApi.csproj">
+      <Project>{161E81E2-25E5-4134-8D2D-595419B1265B}</Project>
+      <Name>GitApi</Name>
+    </ProjectReference>
+    <ProjectReference Include="GitUI\GitUI.csproj">
+      <Project>{C756204F-28E1-473A-8160-E697E3303F1B}</Project>
+      <Name>GitUI</Name>
     </ProjectReference>
     <ProjectReference Include="ngit\NGit\NGit.csproj">
       <Project>{E3BFF8B4-189C-496A-A817-7E8B31E22B91}</Project>

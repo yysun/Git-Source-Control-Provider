@@ -1,0 +1,22 @@
+﻿<Window xmlns:my="clr-namespace:GitUI.UI" xmlns:cmd="clr-namespace:GitUI"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:GitScc_UI="clr-namespace:GitScc.UI" x:Class="GitUI.MainWindow" Height="350" Width="525" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" WindowStartupLocation="CenterScreen" WindowState="Maximized">
+
+    <Window.CommandBindings>
+        <CommandBinding Command="cmd:HistoryViewCommands.ExportGraph"  Executed="ExportGraph" />
+    </Window.CommandBindings>
+    <Grid x:Name="rootGrid" PreviewMouseMove="Grid_PreviewMouseMove">
+        <!--<Grid.RowDefinitions>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>-->
+        <GitScc_UI:HistoryGraph HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="graph"/>
+        <my:MainToolBar x:Name="toolBar" Height="60" Visibility="Collapsed"
+                        HorizontalAlignment="Stretch" VerticalAlignment="Top">
+            <my:MainToolBar.RenderTransform>
+                <TranslateTransform Y="-60" />
+            </my:MainToolBar.RenderTransform>
+        </my:MainToolBar>
+    </Grid>
+</Window>

@@ -15,6 +15,7 @@ using GitScc.DataServices;
 using System.Text;
 using System.Windows.Media.Imaging;
 using System.IO;
+using System.Diagnostics;
 
 namespace GitScc.UI
 {
@@ -121,6 +122,9 @@ namespace GitScc.UI
             
             Action act = () =>
             {
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+
                 try
                 {
                     IList<GraphNode> commits = null;
@@ -332,7 +336,12 @@ namespace GitScc.UI
                 {
                     Log.WriteLine("History Graph Show: {0}", ex.ToString());
                 }
+
                 loading.Visibility = Visibility.Collapsed;
+
+                stopwatch.Stop();
+                Debug.WriteLine("**** HistoryGraph Refresh: " + stopwatch.ElapsedMilliseconds);
+
             };
 
             this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);

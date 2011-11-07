@@ -13,6 +13,7 @@ using System.Windows.Threading;
 using Microsoft.VisualStudio.TextManager.Interop;
 using NGit.Api;
 using GitScc.UI;
+using System.Diagnostics;
 
 namespace GitScc
 {
@@ -165,6 +166,9 @@ namespace GitScc
             var dispatcher = Dispatcher.CurrentDispatcher;
             Action act = () =>
             {
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+
                 var selectedFile = GetSelectedFileName();
                 this.dataGrid1.BeginInit();
 
@@ -180,6 +184,9 @@ namespace GitScc
                 this.dataGrid1.EndInit();
 
                 this.dataGrid1.SelectedValue = selectedFile;
+
+                stopwatch.Stop();
+                Debug.WriteLine("**** PendingChangesView Refresh: " + stopwatch.ElapsedMilliseconds);
             };
 
             dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);

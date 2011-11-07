@@ -25,6 +25,8 @@ namespace GitScc
         private Repository repository;
         //private Tree commitTree;
         //private GitIndex index;
+        private DirCache dirCache;
+        private ObjectId head;
         private Dictionary<string, GitFileStatus> cache;
         private IEnumerable<string> changedFiles;
 
@@ -60,12 +62,16 @@ namespace GitScc
             this.cache.Clear();
             this.changedFiles = null;
             this.repositoryGraph = null;
+            this.dirCache = null;
+            this.head = null;
 
             if (!string.IsNullOrEmpty(initFolder))
             {
                 try
                 {
                     this.repository = Open(new DirectoryInfo(initFolder));
+                    dirCache = repository.ReadDirCache();
+                    head = repository.Resolve(Constants.HEAD);
                 }
                 catch (Exception ex)
                 {
@@ -126,9 +132,7 @@ namespace GitScc
             if (Directory.Exists(fileName)) return GitFileStatus.Ignored;
 
             var fileNameRel = GetRelativeFileNameForGit(fileName);
-            var dirCache = repository.ReadDirCache();
             TreeWalk treeWalk = new TreeWalk(this.repository) { Recursive = true };
-            var head = repository.Resolve(Constants.HEAD);
             RevTree revTree = head == null ? null : new RevWalk(repository).ParseTree(head);
 
             if (revTree != null)

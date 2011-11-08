@@ -23,6 +23,8 @@ namespace GitScc
         private string initFolder;
 
         private Repository repository;
+        private Tree commitTree;
+        private GitIndex index;
         private DirCache dirCache;
         private ObjectId head;
         private Dictionary<string, GitFileStatus> cache;
@@ -57,6 +59,9 @@ namespace GitScc
 
         public void Refresh()
         {
+            this.index = null;
+            this.commitTree = null;
+
             this.cache.Clear();
             this.changedFiles = null;
             this.repositoryGraph = null;
@@ -70,6 +75,22 @@ namespace GitScc
                     this.repository = Open(new DirectoryInfo(initFolder));
                     dirCache = repository.ReadDirCache();
                     head = repository.Resolve(Constants.HEAD);
+
+                    if (this.repository != null)
+                    {
+                        if (head == null)
+                        {
+                            this.commitTree = new Tree(repository);
+                        }
+                        else
+                        {
+                            var treeId = ObjectId.FromString(repository.Open(head).GetBytes(), 5);
+                            this.commitTree = new Tree(repository, treeId, repository.Open(treeId).GetBytes());
+                        }
+                        this.index = repository.GetIndex();
+                        this.index.RereadIfNecessary();
+                    }
+
                 }
                 catch (Exception ex)
                 {
@@ -109,7 +130,7 @@ namespace GitScc
                 var status = GitFileStatus.NotControlled;
                 try
                 {
-                    status = GetFileStatusNoCache(fileName);
+                    status = GetFileStatusNoCacheOld(fileName);
                     this.cache[cacheKey] = status;
                     //Debug.WriteLine(string.Format("GetFileStatus {0} - {1}", fileName, status));
                 }
@@ -154,7 +175,7 @@ namespace GitScc
             var status = GitFileStatus.NotControlled;
             if (treeWalk.Next())
             {
-                status = GetFileChangedStatus(treeWalk);
+                status = GetFileStatus(treeWalk);
             }
 
             if (status == GitFileStatus.NotControlled)
@@ -170,7 +191,7 @@ namespace GitScc
             return GitFileStatus.NotControlled;
         }
 
-        private GitFileStatus GetFileChangedStatus(TreeWalk treeWalk)
+        private GitFileStatus GetFileStatus(TreeWalk treeWalk)
         {
             AbstractTreeIterator treeIterator = treeWalk.GetTree<AbstractTreeIterator>(TREE);
             DirCacheIterator dirCacheIterator = treeWalk.GetTree<DirCacheIterator>(INDEX);
@@ -229,7 +250,64 @@ namespace GitScc
                 }
             }
 
-            return GitFileStatus.NotControlled; // or Tracked
+            return GitFileStatus.NotControlled;
+        }
+
+        public GitFileStatus GetFileStatusNoCacheOld(string fileName)
+        {
+            //Debug.WriteLine(string.Format("===+ GetFileStatusNoCache {0}", fileName));
+
+            var fileNameRel = GetRelativeFileName(fileName);
+
+            TreeEntry treeEntry = this.commitTree == null ? null : this.commitTree.FindBlobMember(fileNameRel);
+            GitIndex.Entry indexEntry = this.index==null? null : this.index.GetEntry(fileNameRel);
+
+            //the order of 'if' below is important
+            if (indexEntry != null)
+            {
+                if (treeEntry == null)
+                {
+                    return GitFileStatus.Added;
+                }
+                if (treeEntry != null && !treeEntry.GetId().Equals(indexEntry.GetObjectId()))
+                {
+                    return GitFileStatus.Staged;
+                }
+                if (!File.Exists(fileName))
+                {
+                    return GitFileStatus.Deleted;
+                }
+                if (File.Exists(fileName) && indexEntry.IsModified(repository.WorkTree, true))
+                {
+                    return GitFileStatus.Modified;
+                }
+                if (indexEntry.GetStage() != 0)
+                {
+                    return GitFileStatus.MergeConflict;
+                }
+                if (treeEntry != null && treeEntry.GetId().Equals(indexEntry.GetObjectId()))
+                {
+                    return GitFileStatus.Tracked;
+                }
+            }
+            else // <-- index entry == null
+            {
+                if (treeEntry != null && !(treeEntry is Tree))
+                {
+                    return GitFileStatus.Removed;
+                }
+                if (File.Exists(fileName))
+                {
+                    //if (ignoreRules.Any(rule => rule.IsMatch(fileName, false)))
+                    //{
+                    //    return GitFileStatus.Ignored;
+                    //}
+
+                    return GitFileStatus.New;
+                }
+            }
+
+            return GitFileStatus.NotControlled;
         }
 
         #endregion
@@ -629,21 +707,6 @@ namespace GitScc
             {
                 if (changedFiles == null) changedFiles = GetChangedFiles();
                 return changedFiles;
-
-                //foreach (string f in changedFiles)
-                //{
-                //    this.cache[this.GetCacheKey(f)] = GetFileStatusNoCache(f);
-                //}
-
-                //return from f in this.cache
-                //       where f.Value != GitFileStatus.Tracked &&
-                //             f.Value != GitFileStatus.NotControlled &&
-                //             f.Value != GitFileStatus.Ignored
-                //       select new GitFile
-                //       {
-                //           FileName = GetRelativeFileName(f.Key),
-                //           Status = f.Value
-                //       };
             }
         }
 
@@ -683,7 +746,7 @@ namespace GitScc
                 list.Add(new GitFile
                 {
                     FileName = GetRelativeFileName(fileName),
-                    Status = GetFileChangedStatus(treeWalk)
+                    Status = GetFileStatus(treeWalk)
                 });
             }
             return list;

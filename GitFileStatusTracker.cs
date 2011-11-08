@@ -23,12 +23,10 @@ namespace GitScc
         private string initFolder;
 
         private Repository repository;
-        //private Tree commitTree;
-        //private GitIndex index;
         private DirCache dirCache;
         private ObjectId head;
         private Dictionary<string, GitFileStatus> cache;
-        private IEnumerable<string> changedFiles;
+        private IEnumerable<GitFile> changedFiles;
 
         public GitFileStatusTracker(string workingFolder)
         {
@@ -127,7 +125,7 @@ namespace GitScc
             }
         }
 
-        private GitFileStatus GetFileStatusNoCache(string fileName)
+        public GitFileStatus GetFileStatusNoCache(string fileName)
         {
             if (Directory.Exists(fileName)) return GitFileStatus.Ignored;
 
@@ -152,76 +150,88 @@ namespace GitScc
                 new IndexDiffFilter(INDEX, WORKDIR)
             };
             treeWalk.Filter = AndTreeFilter.Create(filters);
+
+            var status = GitFileStatus.NotControlled;
             if (treeWalk.Next())
             {
-                AbstractTreeIterator treeIterator = treeWalk.GetTree<AbstractTreeIterator>(TREE);
-                DirCacheIterator dirCacheIterator = treeWalk.GetTree<DirCacheIterator>(INDEX);
-                WorkingTreeIterator workingTreeIterator = treeWalk.GetTree<WorkingTreeIterator>(WORKDIR);
-                if (dirCacheIterator != null)
-                {
-                    DirCacheEntry dirCacheEntry = dirCacheIterator.GetDirCacheEntry();
-                    if (dirCacheEntry != null && dirCacheEntry.Stage > 0)
-                    {
-                        return GitFileStatus.MergeConflict;
-                    }
+                status = GetFileChangedStatus(treeWalk);
+            }
 
-                    if (workingTreeIterator == null)
+            if (status == GitFileStatus.NotControlled)
+            {
+                var dirCacheEntry2 = dirCache.GetEntry(fileNameRel);
+                if (dirCacheEntry2 != null)
+                {
+                    var treeEntry2 = TreeWalk.ForPath(repository, fileNameRel, revTree);
+                    if (treeEntry2 != null && treeEntry2.GetObjectId(0).Equals(dirCacheEntry2.GetObjectId()))
+                        return GitFileStatus.Tracked;
+                }
+            }
+            return GitFileStatus.NotControlled;
+        }
+
+        private GitFileStatus GetFileChangedStatus(TreeWalk treeWalk)
+        {
+            AbstractTreeIterator treeIterator = treeWalk.GetTree<AbstractTreeIterator>(TREE);
+            DirCacheIterator dirCacheIterator = treeWalk.GetTree<DirCacheIterator>(INDEX);
+            WorkingTreeIterator workingTreeIterator = treeWalk.GetTree<WorkingTreeIterator>(WORKDIR);
+            if (dirCacheIterator != null)
+            {
+                DirCacheEntry dirCacheEntry = dirCacheIterator.GetDirCacheEntry();
+                if (dirCacheEntry != null && dirCacheEntry.Stage > 0)
+                {
+                    return GitFileStatus.MergeConflict;
+                }
+
+                if (workingTreeIterator == null)
+                {
+                    // in index, not in workdir => missing
+                    return GitFileStatus.Deleted;
+                }
+                else
+                {
+                    if (workingTreeIterator.IsModified(dirCacheIterator.GetDirCacheEntry(), true))
                     {
-                        // in index, not in workdir => missing
-                        return GitFileStatus.Deleted;
-                    }
-                    else
-                    {
-                        if (workingTreeIterator.IsModified(dirCacheIterator.GetDirCacheEntry(), true))
-                        {
-                            // in index, in workdir, content differs => modified
-                            return GitFileStatus.Modified;
-                        }
+                        // in index, in workdir, content differs => modified
+                        return GitFileStatus.Modified;
                     }
                 }
-                if (treeIterator != null)
+            }
+            if (treeIterator != null)
+            {
+                if (dirCacheIterator != null)
                 {
-                    if (dirCacheIterator != null)
+                    if (!treeIterator.IdEqual(dirCacheIterator) || treeIterator.EntryRawMode != dirCacheIterator.EntryRawMode)
                     {
-                        if (!treeIterator.IdEqual(dirCacheIterator) || treeIterator.EntryRawMode != dirCacheIterator.EntryRawMode)
-                        {
-                            // in repo, in index, content diff => changed
-                            return GitFileStatus.Staged;
-                        }
-                    }
-                    else
-                    {
-                        return GitFileStatus.Removed;
+                        // in repo, in index, content diff => changed
+                        return GitFileStatus.Staged;
                     }
                 }
                 else
                 {
-                    if (dirCacheIterator != null)
+                    return GitFileStatus.Removed;
+                }
+            }
+            else
+            {
+                if (dirCacheIterator != null)
+                {
+                    // not in repo, in index => added
+                    return GitFileStatus.Added;
+                }
+                else
+                {
+                    // not in repo, not in index => untracked
+                    if (workingTreeIterator != null)
                     {
-                        // not in repo, in index => added
-                        return GitFileStatus.Added;
-                    }
-                    else
-                    {
-                        // not in repo, not in index => untracked
-                        if (workingTreeIterator != null)
-                        {
-                            return !workingTreeIterator.IsEntryIgnored() ? GitFileStatus.New : GitFileStatus.Ignored;
-                        }
+                        return !workingTreeIterator.IsEntryIgnored() ? GitFileStatus.New : GitFileStatus.Ignored;
                     }
                 }
             }
 
-            var dirCacheEntry2 = dirCache.GetEntry(fileNameRel);
-            if (dirCacheEntry2 != null)
-            {
-                var treeEntry2 = TreeWalk.ForPath(repository, fileNameRel, revTree);
-                if (treeEntry2 != null && treeEntry2.GetObjectId(0).Equals(dirCacheEntry2.GetObjectId()))
-                    return GitFileStatus.Tracked;
-            }
+            return GitFileStatus.NotControlled; // or Tracked
+        }
 
-            return GitFileStatus.NotControlled;
-        } 
         #endregion
 
         #region Full/Relative File Name, Cache Key
@@ -618,21 +628,22 @@ namespace GitScc
             get
             {
                 if (changedFiles == null) changedFiles = GetChangedFiles();
+                return changedFiles;
 
-                foreach (string f in changedFiles)
-                {
-                    this.cache[this.GetCacheKey(f)] = GetFileStatusNoCache(f);
-                }
+                //foreach (string f in changedFiles)
+                //{
+                //    this.cache[this.GetCacheKey(f)] = GetFileStatusNoCache(f);
+                //}
 
-                return from f in this.cache
-                       where f.Value != GitFileStatus.Tracked &&
-                             f.Value != GitFileStatus.NotControlled &&
-                             f.Value != GitFileStatus.Ignored
-                       select new GitFile
-                       {
-                           FileName = GetRelativeFileName(f.Key),
-                           Status = f.Value
-                       };
+                //return from f in this.cache
+                //       where f.Value != GitFileStatus.Tracked &&
+                //             f.Value != GitFileStatus.NotControlled &&
+                //             f.Value != GitFileStatus.Ignored
+                //       select new GitFile
+                //       {
+                //           FileName = GetRelativeFileName(f.Key),
+                //           Status = f.Value
+                //       };
             }
         }
 
@@ -640,9 +651,9 @@ namespace GitScc
         private const int INDEX = 1;
         private const int WORKDIR = 2;
 
-        public IList<string> GetChangedFiles()
+        public IList<GitFile> GetChangedFiles()
         {
-            var list = new List<string>();
+            var list = new List<GitFile>();
 
             var treeWalk = new TreeWalk(this.repository);
             treeWalk.Recursive = true;
@@ -665,9 +676,15 @@ namespace GitScc
 
             while (treeWalk.Next())
             {
+                WorkingTreeIterator workingTreeIterator = treeWalk.GetTree<WorkingTreeIterator>(WORKDIR);
+                if (workingTreeIterator.IsEntryIgnored()) continue;
                 var fileName = GetFullPath(treeWalk.PathString);
                 if (Directory.Exists(fileName)) continue; // this excludes sub modules
-                list.Add(fileName);
+                list.Add(new GitFile
+                {
+                    FileName = GetRelativeFileName(fileName),
+                    Status = GetFileChangedStatus(treeWalk)
+                });
             }
             return list;
         } 

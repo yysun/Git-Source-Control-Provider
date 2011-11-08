@@ -24,10 +24,12 @@ namespace GitScc.UI
     /// </summary>
     public partial class HistoryGraph : UserControl
     {
+        private SccProviderService service;
 
         public HistoryGraph()
         {
             InitializeComponent();
+            this.service = BasicSccProvider.GetServiceEx<SccProviderService>();
         }
 
         #region zoom upon mouse wheel
@@ -118,8 +120,9 @@ namespace GitScc.UI
         {
             this.tracker = tracker;
 
-            loading.Visibility = Visibility.Visible;            
+            loading.Visibility = Visibility.Visible;
             
+            var dispatcher = Dispatcher.CurrentDispatcher;
             Action act = () =>
             {
                 Stopwatch stopwatch = new Stopwatch();
@@ -342,9 +345,12 @@ namespace GitScc.UI
                 stopwatch.Stop();
                 Debug.WriteLine("**** HistoryGraph Refresh: " + stopwatch.ElapsedMilliseconds);
 
+                service.NoRefresh = false;
+                service.lastTimeRefresh = DateTime.Now; //important!!
+
             };
 
-            this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+            dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
         }
 
         private string GetHashCode(IList<GraphNode> commits)

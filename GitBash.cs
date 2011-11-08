@@ -31,7 +31,7 @@ namespace GitScc
             if (string.IsNullOrWhiteSpace(gitExePath) || !File.Exists(gitExePath))
                 throw new Exception("Git Executable not found");
 
-            Debug.WriteLine(string.Format("{2}>{0} {1}", gitExePath, args, workingDirectory));
+            //Debug.WriteLine(string.Format("{2}>{0} {1}", gitExePath, args, workingDirectory));
 
             var pinfo = new ProcessStartInfo(gitExePath)
             {
@@ -49,11 +49,11 @@ namespace GitScc
                 string error = process.StandardError.ReadToEnd();
                 process.WaitForExit();
 
-                Debug.WriteLine(output);
+                //Debug.WriteLine(output);
 
                 if (!string.IsNullOrEmpty(error))
                 {
-                    Debug.WriteLine("STDERR: " + error);
+                    //Debug.WriteLine("STDERR: " + error);
                     throw new Exception(error);
                 }
                 return output;

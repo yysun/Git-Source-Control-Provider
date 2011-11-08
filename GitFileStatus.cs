@@ -17,6 +17,8 @@ namespace GitScc
         Deleted,
         MergeConflict,
         Ignored,
+        Renamed,
+        Copied
     }
 
     public class GitFile : INotifyPropertyChanged

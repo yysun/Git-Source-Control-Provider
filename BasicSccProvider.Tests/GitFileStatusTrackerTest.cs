@@ -274,8 +274,8 @@ namespace BasicSccProvider.Tests
         {
             GitBash.GitExePath = @"C:\Program Files (x86)\Git\bin\sh.exe";
             tempFolder = Environment.CurrentDirectory + "\\" + Guid.NewGuid().ToString();
-            Directory.CreateDirectory(Path.Combine(tempFolder, "folder 中文 čćšđžČĆŠĐŽ"));
-            tempFile = Path.Combine(tempFolder, "folder 中文 čćšđžČĆŠĐŽ\\test");
+            Directory.CreateDirectory(Path.Combine(tempFolder, "folder"));
+            tempFile = Path.Combine(tempFolder, "folder\\test");
         }
     }
 }

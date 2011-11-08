@@ -788,7 +788,7 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
         public int UpdateSolution_Begin(ref int pfCancelUpdate)
         {
             Debug.WriteLine("Git Source Control Provider: suppress refresh before build...");
-            noRefresh = true;
+            NoRefresh = true;
             return VSConstants.S_OK;
         }
 
@@ -800,7 +800,7 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
         public int UpdateSolution_Done(int fSucceeded, int fModified, int fCancelCommand)
         {
             Debug.WriteLine("Git Source Control Provider: resume refresh after build...");
-            noRefresh = false;
+            NoRefresh = false;
             return VSConstants.S_OK;
         }
 
@@ -819,7 +819,7 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
             if (string.IsNullOrEmpty(projectName)) return;
             string projectDirecotry = Path.GetDirectoryName(projectName);
 
-            Debug.WriteLine("==== Adding project: " + projectDirecotry);
+            //Debug.WriteLine("==== Adding project: " + projectDirecotry);
 
             string gitfolder = GitFileStatusTracker.GetRepositoryDirectory(projectDirecotry);
 
@@ -830,7 +830,7 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
             if (gitfolder.Length < monitorFolder.Length) monitorFolder = gitfolder;
             trackers.Add(new GitFileStatusTracker(gitfolder));
             
-            Debug.WriteLine("==== Added git tracker: " + gitfolder);
+            //Debug.WriteLine("==== Added git tracker: " + gitfolder);
            
         }
 
@@ -919,35 +919,43 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
 
         #region new Refresh methods
 
-        bool noRefresh = false;
-        bool NodesGlyphsDirty = false;
-        
-        private DateTime lastTimeRefresh = DateTime.Now;
+        internal bool NodesGlyphsDirty = false;
+        internal bool NoRefresh = false;
+        internal DateTime lastTimeRefresh = DateTime.Now;
 
         internal void Refresh()
         {
-            if (!noRefresh)
-            {
-                NodesGlyphsDirty = true;
-                lastTimeRefresh = DateTime.Now;
-            }
-        }
-
-        public void UpdateNodesGlyphs()
-        {
-            if (NodesGlyphsDirty && !noRefresh)
+            if (!NoRefresh)
             {
                 double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
                 if (delta > 500)
                 {
                     Debug.WriteLine("==== Refresh: " + Math.Floor(delta).ToString());
-                    noRefresh = true;
-                    OpenTracker();
-                    RefreshNodesGlyphs();
-                    RefreshToolWindows();
-                    noRefresh = false;
-                    NodesGlyphsDirty = false;
+                    NodesGlyphsDirty = true;
                 }
+            }
+            lastTimeRefresh = DateTime.Now;
+        }
+
+        public void UpdateNodesGlyphs()
+        {
+            if (NodesGlyphsDirty && !NoRefresh)
+            {
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+
+                NoRefresh = true;
+                OpenTracker();
+                RefreshNodesGlyphs();
+                RefreshToolWindows();
+
+                //noRefresh = false;
+                NodesGlyphsDirty = false;
+
+                stopwatch.Stop();
+                Debug.WriteLine("==== UpdateNodesGlyphs: " + stopwatch.ElapsedMilliseconds);
+
+                lastTimeRefresh = DateTime.Now; //important !!
             }
         }
 

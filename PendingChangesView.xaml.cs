@@ -22,6 +22,7 @@ namespace GitScc
     /// </summary>
     public partial class PendingChangesView : UserControl
     {
+        private SccProviderService service;
         private GitFileStatusTracker tracker;
         private ToolWindowWithEditor toolWindow;
         private IVsTextView textView;
@@ -31,6 +32,7 @@ namespace GitScc
         {
             InitializeComponent();
             this.toolWindow = toolWindow;
+            this.service = BasicSccProvider.GetServiceEx<SccProviderService>();
         }
 
         #region Events
@@ -69,7 +71,7 @@ namespace GitScc
                 return;
             }
 
-            var dispatcher = Dispatcher.CurrentDispatcher;
+            //var dispatcher = Dispatcher.CurrentDispatcher;
             Action act = () =>
             {
                 try
@@ -92,7 +94,7 @@ namespace GitScc
 
             };
 
-            dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+            this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
         }
 
         private void dataGrid1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -153,8 +155,10 @@ namespace GitScc
             this.tracker = tracker;
             if (tracker == null)
             {
+                service.NoRefresh = true;
                 this.dataGrid1.ItemsSource = null;
                 ClearUI();
+                service.NoRefresh = false;
                 return;
             }
 
@@ -166,6 +170,8 @@ namespace GitScc
             var dispatcher = Dispatcher.CurrentDispatcher;
             Action act = () =>
             {
+                service.NoRefresh = true;
+
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
 
@@ -187,6 +193,9 @@ namespace GitScc
 
                 stopwatch.Stop();
                 Debug.WriteLine("**** PendingChangesView Refresh: " + stopwatch.ElapsedMilliseconds);
+
+                service.NoRefresh = false;
+                service.lastTimeRefresh = DateTime.Now; //important!!
             };
 
             dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
@@ -238,10 +247,14 @@ namespace GitScc
             {
                 try
                 {
+                    service.NoRefresh = true;
                     ShowStatusMessage("Committing ...");
                     var id = tracker.Commit(Comments);
                     ShowStatusMessage("Commit successfully. Commit Hash: " + id);
                     ClearUI();
+                    service.NoRefresh = false;
+                    service.lastTimeRefresh = DateTime.Now;
+                    service.NodesGlyphsDirty = true;
                 }
                 catch (Exception ex)
                 {
@@ -264,11 +277,14 @@ namespace GitScc
                 {
                     try
                     {
+                        service.NoRefresh = true;
                         ShowStatusMessage("Amending last Commit ...");
                         var id = tracker.AmendCommit(Comments);
                         ShowStatusMessage("Amend last commit successfully. Commit Hash: " + id);
                         ClearUI();
-
+                        service.NoRefresh = false;
+                        service.lastTimeRefresh = DateTime.Now;
+                        service.NodesGlyphsDirty = true;
                     }
                     catch (Exception ex)
                     {
@@ -283,10 +299,11 @@ namespace GitScc
         {
             foreach (var item in this.dataGrid1.Items.Cast<GitFile>())
             {
-                //var item = (GitFile) _item;
                 if (item.IsSelected && !item.IsStaged)
                 {
                     tracker.StageFile(System.IO.Path.Combine(this.tracker.GitWorkingDirectory, item.FileName));
+                    ShowStatusMessage("Staged :" + item.FileName);
+                    service.lastTimeRefresh = DateTime.Now;
                 }
             }
 

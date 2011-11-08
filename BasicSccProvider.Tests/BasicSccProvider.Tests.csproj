@@ -84,6 +84,7 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GetFileStatusTest.cs" />
     <Compile Include="GitFileStatusTrackerTest.cs" />
     <Compile Include="PackageTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -101,6 +102,10 @@
     <ProjectReference Include="..\ngit\NGit\NGit.csproj">
       <Project>{E3BFF8B4-189C-496A-A817-7E8B31E22B91}</Project>
       <Name>NGit</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ngit\NSch\NSch.csproj">
+      <Project>{A19E6F3F-A25B-4B01-8922-CF0CC35C781D}</Project>
+      <Name>NSch</Name>
     </ProjectReference>
     <ProjectReference Include="..\ngit\Sharpen\Sharpen.csproj">
       <Project>{72944A6C-45FF-4EF8-B349-8C9CABF519D4}</Project>

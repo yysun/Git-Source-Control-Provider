@@ -25,6 +25,9 @@ namespace GitScc
         public const int icmdPendingChangesAmend = 0x112;
         public const int icmdPendingChangesCommitToBranch = 0x113;
 
+        public const int icmdPendingChangesRefresh = 0x114;
+        public const int icmdHistoryViewRefresh = 0x115;
+
         // Define the list of menus (these include toolbars)
         public const int imnuHistoryToolWindowToolbarMenu = 0x200;
         public const int imnuPendingChangesToolWindowToolbarMenu = 0x202;

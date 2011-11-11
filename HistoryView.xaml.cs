@@ -40,12 +40,11 @@ namespace GitScc
                 selectedCommits.Clear();
                 SetSelectedCommitCount();
                 this.HistoryGraph.Show(tracker);
-
                 this.tracker = tracker;
                 if (tracker != null)
                 {
-                    double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
-                    if (delta < 1000) return; //no refresh within 1 second
+                    //double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
+                    //if (delta < 1000) return; //no refresh within 1 second
 
                     this.branchList.ItemsSource = tracker.RepositoryGraph.Refs
                         .Where(r => r.Type == RefTypes.Branch)
@@ -54,14 +53,14 @@ namespace GitScc
                     this.tagList.ItemsSource = tracker.RepositoryGraph.Refs
                         .Where(r => r.Type == RefTypes.Tag)
                         .Select(r => r.Name);
-
-                    lastTimeRefresh = DateTime.Now;
                 }
             }
             catch (Exception ex)
             {
                 Log.WriteLine("History View Refresh: {0}", ex.ToString());
             }
+
+            lastTimeRefresh = DateTime.Now;
         }
 
         private void button1_Click(object sender, RoutedEventArgs e)

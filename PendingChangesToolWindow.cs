@@ -13,7 +13,7 @@ namespace GitScc
     [Guid("75EDECF4-68D8-4B7B-92A9-5915461DA6D9")]
     public class PendingChangesToolWindow : ToolWindowWithEditor
     {
-        //private PendingChangesView control;
+        private SccProviderService sccProviderService;
 
         public PendingChangesToolWindow()
         {
@@ -47,12 +47,12 @@ namespace GitScc
             cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesAmend);
             menu = new MenuCommand(new EventHandler(OnAmendCommitCommand), cmd);
             mcs.AddCommand(menu);
-            
-            var sccProviderService = BasicSccProvider.GetServiceEx<SccProviderService>();
-            if (sccProviderService != null)
-            {
-                Refresh(sccProviderService.CurrentTracker);
-            }
+
+            cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesRefresh);
+            menu = new MenuCommand(new EventHandler(OnRefreshCommand), cmd);
+            mcs.AddCommand(menu);
+
+            sccProviderService = BasicSccProvider.GetServiceEx<SccProviderService>();
         }
 
         private void OnCommitCommand(object sender, EventArgs e)
@@ -65,21 +65,31 @@ namespace GitScc
             ((PendingChangesView) control).AmendCommit();
         }
 
-        internal void Refresh(GitFileStatusTracker tracker)
+        private void OnRefreshCommand(object sender, EventArgs e)
+        {
+            Refresh(sccProviderService.CurrentTracker, true);
+        }
+
+        internal void Refresh(GitFileStatusTracker tracker, bool force = false)
         {
             //var frame = this.Frame as IVsWindowFrame;
             //if (frame == null || frame.IsVisible() == 1) return;
 
             try
             {
-                this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption");
-
-                ((PendingChangesView)control).Refresh(tracker);
-
                 var repository = (tracker == null || !tracker.HasGitRepository) ? "" :
-                    string.Format(" - {1} - ({0})", tracker.CurrentBranch, tracker.GitWorkingDirectory);
+                    string.Format(" - {0}", tracker.CurrentBranch, tracker.GitWorkingDirectory);
 
                 this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption") + repository;
+
+                if (!GitSccOptions.Current.DisableAutoRefresh || force || tracker == null)
+                {
+                    ((PendingChangesView)control).Refresh(tracker);
+                }
+                else
+                {
+                    this.Caption += " - [AUTO REFRESH DISABLED]";
+                }
             }
             catch (Exception ex)
             {

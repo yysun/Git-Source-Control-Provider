@@ -158,18 +158,17 @@ namespace GitScc
         internal void Refresh(GitFileStatusTracker tracker)
         {
             this.tracker = tracker;
+
             if (tracker == null)
             {
                 service.NoRefresh = true;
-                this.dataGrid1.ItemsSource = null;
                 ClearUI();
                 service.NoRefresh = false;
                 return;
             }
 
-            double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
+            //double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
             //if (delta < 1000) return; //no refresh within 1 second
-
             //Debug.WriteLine("==== Pending Changes Refresh {0}", delta);
 
             var dispatcher = Dispatcher.CurrentDispatcher;
@@ -184,6 +183,7 @@ namespace GitScc
                 this.dataGrid1.BeginInit();
 
                 this.dataGrid1.ItemsSource = tracker.ChangedFiles;
+
                 ICollectionView view = CollectionViewSource.GetDefaultView(this.dataGrid1.ItemsSource);
                 if (view != null)
                 {
@@ -208,8 +208,9 @@ namespace GitScc
             lastTimeRefresh = DateTime.Now;
         }
 
-        private void ClearUI()
+        internal void ClearUI()
         {
+            this.dataGrid1.ItemsSource = null;
             this.textBoxComments.Document.Blocks.Clear();
             this.toolWindow.ClearEditor();
             var chk = this.dataGrid1.FindVisualChild<CheckBox>("checkBoxAllStaged");

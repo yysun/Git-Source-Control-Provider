@@ -578,9 +578,11 @@ namespace GitScc
             string msg = "";
             if (GitBash.Exists)
             {
-                message = message.Replace("\"", "\\\"");
-                msg = GitBash.Run(string.Format("commit -m \"{0}\"", message), this.GitWorkingDirectory);
+                var msgFile = Path.Combine(this.repository.Directory, "COMMITMESSAGE");
+                File.WriteAllText(msgFile, message);
+                msg = GitBash.Run(string.Format("commit -F \"{0}\"", msgFile), this.GitWorkingDirectory);
                 if (msg.IndexOf('\n') > 0) msg = msg.Split('\n')[0];
+                File.Delete(msgFile);
             }
             else
             {
@@ -603,9 +605,11 @@ namespace GitScc
             string msg = "";
             if (GitBash.Exists)
             {
-                message = message.Replace("\"", "\\\"");
-                msg = GitBash.Run(string.Format("commit --amend -m \"{0}\"", message), this.GitWorkingDirectory);
+                var msgFile = Path.Combine(this.repository.Directory, "COMMITMESSAGE");
+                File.WriteAllText(msgFile, message);
+                msg = GitBash.Run(string.Format("commit --amend -F \"{0}\"", msgFile), this.GitWorkingDirectory);
                 if (msg.IndexOf('\n') > 0) msg = msg.Split('\n')[0];
+                File.Delete(msgFile);
             }
             else
             {

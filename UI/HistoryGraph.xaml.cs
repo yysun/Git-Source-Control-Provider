@@ -164,7 +164,7 @@ namespace GitScc.UI
                                 box.DataContext = new
                                 {
                                     Id = commit.Id,
-                                    ShortId = commit.Id.Substring(0, 5),
+                                    ShortId = commit.Id.Substring(0, 7),
                                     Comments = commit.Message,
                                     Author = commit.CommitterName,
                                     Date = commit.CommitDateRelative,

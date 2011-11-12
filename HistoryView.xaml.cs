@@ -57,6 +57,7 @@ namespace GitScc
             }
             catch (Exception ex)
             {
+                ShowStatusMessage(ex.Message);
                 Log.WriteLine("History View Refresh: {0}", ex.ToString());
             }
 
@@ -77,6 +78,7 @@ namespace GitScc
             }
             catch(Exception ex)
             {
+                ShowStatusMessage(ex.Message);
                 MessageBox.Show(ex.Message, "Error");
             }
         }
@@ -124,6 +126,7 @@ namespace GitScc
             }
             catch (Exception ex)
             {
+                ShowStatusMessage(ex.Message);
                 Log.WriteLine("History Tool Window - CloseCommitDetails_Executed: {0}", ex.ToString());
             }
         }
@@ -137,6 +140,7 @@ namespace GitScc
             }
             catch (Exception ex)
             {
+                ShowStatusMessage(ex.Message);
                 Log.WriteLine("History Tool Window - OpenCommitDetails_Executed: {0}", ex.ToString());
             }
         }
@@ -155,6 +159,7 @@ namespace GitScc
             }
             catch (Exception ex)
             {
+                ShowStatusMessage(ex.Message);
                 Log.WriteLine("History Tool Window - SelectCommit_Executed: {0}", ex.ToString());
             }
         }
@@ -174,6 +179,7 @@ namespace GitScc
             }
             catch (Exception ex)
             {
+                ShowStatusMessage(ex.Message);
                 Log.WriteLine("History Tool Window - btnCompare_Click: {0}", ex.ToString());
             }
         }
@@ -190,6 +196,12 @@ namespace GitScc
         {
             //selectedCommits.Clear();
             //SetSelectedCommitCount();
+        }
+
+        private void ShowStatusMessage(string msg)
+        {
+            var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
+            dte.StatusBar.Text = msg;
         }
     }
 

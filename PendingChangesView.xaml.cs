@@ -95,7 +95,10 @@ namespace GitScc
                         }
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    ShowStatusMessage(ex.Message);
+                }
 
             };
 
@@ -134,7 +137,10 @@ namespace GitScc
             {
                 action(fileName);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                ShowStatusMessage(ex.Message);
+            }
         }
 
         private void GetSelectedFileFullName(Action<string> action, bool fileMustExists = true)
@@ -148,7 +154,10 @@ namespace GitScc
             {
                 action(fileName);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                ShowStatusMessage(ex.Message);
+            }
         }
         #endregion
 
@@ -174,6 +183,7 @@ namespace GitScc
             var dispatcher = Dispatcher.CurrentDispatcher;
             Action act = () =>
             {
+
                 service.NoRefresh = true;
 
                 Stopwatch stopwatch = new Stopwatch();
@@ -182,25 +192,32 @@ namespace GitScc
                 var selectedFile = GetSelectedFileName();
                 this.dataGrid1.BeginInit();
 
-                this.dataGrid1.ItemsSource = tracker.ChangedFiles;
-
-                ICollectionView view = CollectionViewSource.GetDefaultView(this.dataGrid1.ItemsSource);
-                if (view != null)
+                try
                 {
-                    view.SortDescriptions.Clear();
-                    view.SortDescriptions.Add(new SortDescription(sortMemberPath, sortDirection));
-                    view.Refresh();
+                    this.dataGrid1.ItemsSource = tracker.ChangedFiles;
+
+                    ICollectionView view = CollectionViewSource.GetDefaultView(this.dataGrid1.ItemsSource);
+                    if (view != null)
+                    {
+                        view.SortDescriptions.Clear();
+                        view.SortDescriptions.Add(new SortDescription(sortMemberPath, sortDirection));
+                        view.Refresh();
+                    }
+
+                    this.dataGrid1.SelectedValue = selectedFile;
                 }
-
+                catch (Exception ex)
+                {
+                    ShowStatusMessage(ex.Message);
+                }
                 this.dataGrid1.EndInit();
-
-                this.dataGrid1.SelectedValue = selectedFile;
 
                 stopwatch.Stop();
                 Debug.WriteLine("**** PendingChangesView Refresh: " + stopwatch.ElapsedMilliseconds);
 
                 service.NoRefresh = false;
                 service.lastTimeRefresh = DateTime.Now; //important!!
+
             };
 
             dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
@@ -456,6 +473,7 @@ Note: if the file is included project, you need to delete the file from project 
             }
             catch (Exception ex)
             {
+                ShowStatusMessage(ex.Message);
                 Log.WriteLine("Pending Changes View - DiffEditor_MouseDoubleClick: {0}", ex.ToString());
             } 
             GetSelectedFileFullName((fileName) =>

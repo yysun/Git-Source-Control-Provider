@@ -15,7 +15,7 @@ namespace GitScc
         Removed,
         Added,
         Deleted,
-        MergeConflict,
+        Conflict,
         Ignored,
         Renamed,
         Copied

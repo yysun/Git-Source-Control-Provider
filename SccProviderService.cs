@@ -180,7 +180,7 @@ namespace GitScc
                     rgsiGlyphs[0] = VsStateIcon.STATEICON_EXCLUDEDFROMSCC;
                     break;
 
-                case GitFileStatus.MergeConflict:
+                case GitFileStatus.Conflict:
                     rgsiGlyphs[0] = VsStateIcon.STATEICON_DISABLED;
                     break;
             }

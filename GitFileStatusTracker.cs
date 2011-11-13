@@ -201,7 +201,7 @@ namespace GitScc
                 DirCacheEntry dirCacheEntry = dirCacheIterator.GetDirCacheEntry();
                 if (dirCacheEntry != null && dirCacheEntry.Stage > 0)
                 {
-                    return GitFileStatus.MergeConflict;
+                    return GitFileStatus.Conflict;
                 }
 
                 if (workingTreeIterator == null)
@@ -283,7 +283,7 @@ namespace GitScc
                 }
                 if (indexEntry.GetStage() != 0)
                 {
-                    return GitFileStatus.MergeConflict;
+                    return GitFileStatus.Conflict;
                 }
                 if (treeEntry != null && treeEntry.GetId().Equals(indexEntry.GetObjectId()))
                 {
@@ -418,14 +418,87 @@ namespace GitScc
         } 
         #endregion
 
+        #region repository status: branch, in the middle of xxx
         public string CurrentBranch
         {
             get
             {
-                return this.HasGitRepository ? this.repository.GetBranch() : "";
+                if (this.HasGitRepository)
+                {
+                    var branch = this.repository.GetBranch();
+
+                    if (IsInTheMiddleOfBisect) branch += " | BISECTING";
+
+                    if (IsInTheMiddleOfMerge) branch += " | MERGING";
+
+                    if (IsInTheMiddleOfPatch) branch += " | AM";
+
+                    if (IsInTheMiddleOfRebase) branch += " | REBASE";
+
+                    if (IsInTheMiddleOfRebaseI) branch += " | REBASE-i";
+
+                    return branch;
+                }
+                else
+                    return "";
             }
         }
 
+        public bool IsInTheMiddleOfBisect
+        {
+            get
+            {
+                return this.HasGitRepository ? FileExistsInRepo("BISECT_START") : false;
+            }
+        }
+
+        public bool IsInTheMiddleOfMerge
+        {
+            get
+            {
+                return this.HasGitRepository ? FileExistsInRepo("MERGE_HEAD") : false;
+            }
+        }
+
+        public bool IsInTheMiddleOfPatch
+        {
+            get
+            {
+                return this.HasGitRepository ? FileExistsInRepo("rebase-*", "applying") : false;
+            }
+        }
+
+        public bool IsInTheMiddleOfRebase
+        {
+            get
+            {
+                return this.HasGitRepository ? FileExistsInRepo("rebase-*", "rebasing") : false;
+            }
+        }
+
+        public bool IsInTheMiddleOfRebaseI
+        {
+            get
+            {
+                return this.HasGitRepository ? FileExistsInRepo("rebase-*", "interactive") : false;
+            }
+        }
+        
+        private bool FileExistsInRepo(string fileName)
+        {
+            return File.Exists(Path.Combine(this.repository.Directory, fileName));
+        }
+
+        private bool FileExistsInRepo(string directory, string fileName)
+        {
+            foreach(var dir in Directory.GetDirectories(this.repository.Directory, directory))
+            {
+                if (File.Exists(Path.Combine(dir, fileName))) return true;
+            }
+            return false;
+        }
+
+        #endregion
         /// <summary>
         /// Search Git Repository in folder and its parent folders 
         /// </summary>
@@ -655,6 +728,7 @@ namespace GitScc
         } 
         #endregion
 
+        #region Diff file
         /// <summary>
         /// Diff working file with last commit
         /// </summary>
@@ -778,6 +852,9 @@ namespace GitScc
                 return "";
             }
         }
+        
+        #endregion
+
         #region Changed Files
         public IEnumerable<GitFile> ChangedFiles
         {
@@ -949,7 +1026,7 @@ namespace GitScc
                         break;
 
                     case 'U':
-                        gitFile.Status = GitFileStatus.MergeConflict;
+                        gitFile.Status = GitFileStatus.Conflict;
                         break;
                 }
                 list.Add(gitFile);

@@ -296,14 +296,16 @@ namespace GitScc
                 {
                     return GitFileStatus.Removed;
                 }
-                if (File.Exists(fileName))
+                if (changedFiles !=null && File.Exists(fileName))
                 {
-                    //if (ignoreRules.Any(rule => rule.IsMatch(fileName, false)))
-                    //{
-                    //    return GitFileStatus.Ignored;
-                    //}
-
-                    return GitFileStatus.New;
+                    if (changedFiles.Any(f => string.Compare(f.FileName, fileNameRel, true) == 0))
+                    {
+                        return GitFileStatus.New;
+                    }
+                    else
+                    {
+                        return GitFileStatus.Ignored;
+                    }
                 }
             }
 

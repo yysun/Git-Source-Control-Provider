@@ -288,7 +288,7 @@
     </CommandPlacement>
     <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandHistory" priority="0x0004">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
-    </CommandPlacement>
+    </CommandPlacement>  
 
     <CommandPlacement guid="guidSccProviderCmdSet" id="icmdPendingChangesCommitToBranch" priority="0x0006">
       <Parent guid="guidSccProviderCmdSet" id="igrpHistoryToolWindowToolbarGroup"/>
@@ -299,9 +299,9 @@
     <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandGitBash" priority="0x0008">
       <Parent guid="guidSccProviderCmdSet" id="igrpHistoryToolWindowToolbarGroup"/>
     </CommandPlacement>
-    <!--<CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandRefresh" priority="0x0007">
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandEditIgnore" priority="0x0007">
       <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
-    </CommandPlacement>-->
+    </CommandPlacement>
     <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandGitBash" priority="0x0008">
       <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
     </CommandPlacement>

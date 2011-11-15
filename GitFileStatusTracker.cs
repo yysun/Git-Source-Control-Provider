@@ -29,6 +29,7 @@ namespace GitScc
         private ObjectId head;
         private Dictionary<string, GitFileStatus> cache;
         private IEnumerable<GitFile> changedFiles;
+        private IList<IgnoreRule> ignoreRules;
 
         public GitFileStatusTracker(string workingFolder)
         {
@@ -67,6 +68,7 @@ namespace GitScc
             this.repositoryGraph = null;
             this.dirCache = null;
             this.head = null;
+            this.ignoreRules = null;
 
             if (!string.IsNullOrEmpty(initFolder))
             {
@@ -89,8 +91,21 @@ namespace GitScc
                         }
                         this.index = repository.GetIndex();
                         this.index.RereadIfNecessary();
-                    }
 
+                        try
+                        {
+                            //load local .gitignore file
+                            var ignoreFile = Path.Combine(this.initFolder, 
+                                Constants.GITIGNORE_FILENAME);
+                            if (File.Exists(ignoreFile))
+                            {
+                                ignoreRules = File.ReadAllLines(ignoreFile)
+                                                  .Where(line => !line.StartsWith("#") && line.Trim().Length > 0)
+                                                  .Select(line => new IgnoreRule(line)).ToList();
+                            }
+                        }
+                        catch { }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -296,16 +311,15 @@ namespace GitScc
                 {
                     return GitFileStatus.Removed;
                 }
-                if (changedFiles !=null && File.Exists(fileName))
+                
+                if (File.Exists(fileName))
                 {
-                    if (changedFiles.Any(f => string.Compare(f.FileName, fileNameRel, true) == 0))
-                    {
-                        return GitFileStatus.New;
-                    }
-                    else
+                    if (ignoreRules != null && ignoreRules.Any(rule => rule.IsMatch(fileName, false)))
                     {
                         return GitFileStatus.Ignored;
                     }
+
+                    return GitFileStatus.New;
                 }
             }
 

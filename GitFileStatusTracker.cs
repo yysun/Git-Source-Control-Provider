@@ -757,8 +757,8 @@ namespace GitScc
                 if (!this.HasGitRepository) return "";
 
                 var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), ".diff");
-
-                if (head == null)
+                var status = GetFileStatus(fileName);
+                if (head == null || status == GitFileStatus.New || status == GitFileStatus.Added)
                 {
                     tmpFileName = Path.ChangeExtension(tmpFileName, Path.GetExtension(fileName));
                     File.Copy(GetFullPath(fileName), tmpFileName);
@@ -996,9 +996,10 @@ namespace GitScc
 
                 if (splitIndex < 0)
                 {
-                    status = files[n];
-                    fileName = files[n + 1];
-                    n++;
+                    //status = files[n];
+                    //fileName = files[n + 1];
+                    //n++;
+                    continue;
                 }
                 else
                 {

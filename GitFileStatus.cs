@@ -30,7 +30,8 @@ namespace GitScc
             {
                 return Status == GitFileStatus.Added ||
                        Status == GitFileStatus.Staged ||
-                       Status == GitFileStatus.Removed;
+                       Status == GitFileStatus.Removed ||
+                       Status == GitFileStatus.Renamed;
             }
         }
 

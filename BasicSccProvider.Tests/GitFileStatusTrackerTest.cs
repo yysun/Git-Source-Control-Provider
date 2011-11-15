@@ -104,12 +104,15 @@ namespace BasicSccProvider.Tests
             Assert.AreEqual(GitFileStatus.New, tracker.GetFileStatus(tempFile));
 
             tracker.StageFile(tempFile);
+            tracker.Refresh();
             Assert.AreEqual(GitFileStatus.Added, tracker.GetFileStatus(tempFile));
 
             tracker.UnStageFile(tempFile);
+            tracker.Refresh();
             Assert.AreEqual(GitFileStatus.New, tracker.GetFileStatus(tempFile));
 
             tracker.StageFile(tempFile);
+            tracker.Refresh();
             Assert.AreEqual(GitFileStatus.Added, tracker.GetFileStatus(tempFile));
 
             tracker.Commit("test commit");
@@ -120,9 +123,11 @@ namespace BasicSccProvider.Tests
             Assert.AreEqual(GitFileStatus.Modified, tracker.GetFileStatus(tempFile));
 
             tracker.StageFile(tempFile);
+            tracker.Refresh();
             Assert.AreEqual(GitFileStatus.Staged, tracker.GetFileStatus(tempFile));
 
             tracker.UnStageFile(tempFile);
+            tracker.Refresh();
             Assert.AreEqual(GitFileStatus.Modified, tracker.GetFileStatus(tempFile));
 
             File.Delete(tempFile);
@@ -130,9 +135,11 @@ namespace BasicSccProvider.Tests
             Assert.AreEqual(GitFileStatus.Deleted, tracker.GetFileStatus(tempFile));
 
             tracker.StageFile(tempFile);
+            tracker.Refresh();
             Assert.AreEqual(GitFileStatus.Removed, tracker.GetFileStatus(tempFile));
 
             tracker.UnStageFile(tempFile);
+            tracker.Refresh();
             Assert.AreEqual(GitFileStatus.Deleted, tracker.GetFileStatus(tempFile));
         }
 
@@ -252,7 +259,7 @@ namespace BasicSccProvider.Tests
             var diffFile = tracker.DiffFile(tempFile);
             var diff = File.ReadAllText(diffFile);
             Console.WriteLine(diff);
-            Assert.IsTrue(diff.StartsWith("@@ -1,3 +1 @@"));
+            Assert.IsTrue(diff.Contains("@@ -1,3 +1 @@"));
         }
     }
 

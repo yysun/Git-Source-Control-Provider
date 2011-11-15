@@ -109,6 +109,7 @@ namespace GitScc
                 }
                 catch (Exception ex)
                 {
+                    this.repository = null;
                     Log.WriteLine("Refresh: {0}\r\n{1}", this.initFolder, ex.ToString());
                 }
             }
@@ -443,16 +444,14 @@ namespace GitScc
                 {
                     var branch = this.repository.GetBranch();
 
-                    if (IsInTheMiddleOfBisect) branch += " | BISECTING";
-
-                    if (IsInTheMiddleOfMerge) branch += " | MERGING";
-
-                    if (IsInTheMiddleOfPatch) branch += " | AM";
-
-                    if (IsInTheMiddleOfRebase) branch += " | REBASE";
-
-                    if (IsInTheMiddleOfRebaseI) branch += " | REBASE-i";
-
+                    if (branch != null)
+                    {
+                        if (IsInTheMiddleOfBisect) branch += " | BISECTING";
+                        if (IsInTheMiddleOfMerge) branch += " | MERGING";
+                        if (IsInTheMiddleOfPatch) branch += " | AM";
+                        if (IsInTheMiddleOfRebase) branch += " | REBASE";
+                        if (IsInTheMiddleOfRebaseI) branch += " | REBASE-i";
+                    }
                     return branch;
                 }
                 else
@@ -507,9 +506,12 @@ namespace GitScc
 
         private bool FileExistsInRepo(string directory, string fileName)
         {
-            foreach(var dir in Directory.GetDirectories(this.repository.Directory, directory))
+            if (Directory.Exists(this.repository.Directory))
             {
-                if (File.Exists(Path.Combine(dir, fileName))) return true;
+                foreach (var dir in Directory.GetDirectories(this.repository.Directory, directory))
+                {
+                    if (File.Exists(Path.Combine(dir, fileName))) return true;
+                }
             }
             return false;
         }
@@ -546,23 +548,36 @@ namespace GitScc
             if (!this.HasGitRepository) return;
 
             var fileNameRel = GetRelativeFileName(fileName);
-            TreeEntry treeEntry = null;
 
-            if (commitTree != null) treeEntry = commitTree.FindBlobMember(fileNameRel);
-
-            //var index = repository.GetIndex();
-            //index.RereadIfNecessary();
-
-            index.Remove(repository.WorkTree, fileName);
-
-            if (treeEntry != null)
+            if (GitBash.Exists)
             {
-                index.AddEntry(treeEntry);
+                if (head == null)
+                {
+                    GitBash.Run(string.Format("rm --cached -- \"{0}\"", fileNameRel), this.GitWorkingDirectory);
+                }
+                else
+                {
+                    GitBash.Run(string.Format("reset -- \"{0}\"", fileNameRel), this.GitWorkingDirectory);
+                }
+            }
+            else
+            {
+                TreeEntry treeEntry = null;
+                if (commitTree != null) treeEntry = commitTree.FindBlobMember(fileNameRel);
+
+                //var index = repository.GetIndex();
+                //index.RereadIfNecessary();
+
+                index.Remove(repository.WorkTree, fileName);
+
+                if (treeEntry != null)
+                {
+                    index.AddEntry(treeEntry);
+                }
+                index.Write();
             }
 
-            index.Write();
-
-            //this.cache.Remove(GetCacheKey(fileName));
+            this.cache.Remove(GetCacheKey(fileName));
             this.changedFiles = null;
         }
 
@@ -575,87 +590,30 @@ namespace GitScc
             if (!this.HasGitRepository) return;
             //var index = repository.GetIndex();
             //index.RereadIfNecessary();
-
-            index.Remove(repository.WorkTree, fileName);
-
-            if (File.Exists(fileName))
+            if (GitBash.Exists)
             {
-                var content = File.ReadAllBytes(fileName);
-                index.Add(repository.WorkTree, fileName, content);
+                GitBash.Run(string.Format("add \"{0}\"", GetRelativeFileName(fileName)), this.GitWorkingDirectory);
             }
             else
             {
-                //stage deleted
                 index.Remove(repository.WorkTree, fileName);
+
+                if (File.Exists(fileName))
+                {
+                    var content = File.ReadAllBytes(fileName);
+                    index.Add(repository.WorkTree, fileName, content);
+                }
+                else
+                {
+                    //stage deleted
+                    index.Remove(repository.WorkTree, fileName);
+                }
+                index.Write();            
             }
-            index.Write();
-            //this.cache.Remove(GetCacheKey(fileName));
+
+            this.cache.Remove(GetCacheKey(fileName));
             this.changedFiles = null;
         }
-
-        #region under research ...
-        /// <summary>
-        /// Requires absolute path
-        /// </summary>
-        /// <param name="fileName"></param>
-        //public void UnStageFile(string fileName)
-        //{
-        //    if (!this.HasGitRepository) return;
-        //    var fileNameRel = GetRelativeFileNameForGit(fileName);
-
-        //    GitBash.Run(string.Format("rm --cache {0}", GetRelativeFileName(fileName)), this.GitWorkingDirectory);
-
-        //    var git = new Git(this.repository);
-
-        //    var head = repository.Resolve(Constants.HEAD);
-        //    if (head != null)
-        //    {
-        //        RevWalk revWalk = new RevWalk(repository);
-        //        RevTree headTree = revWalk.ParseTree(head);
-        //        if (headTree != null)
-        //        {
-        //            try
-        //            {
-        //                var entry = TreeWalk.ForPath(repository, fileName, headTree);
-        //                if (!entry.IsSubtree)
-        //                {
-        //                    DirCacheEntry dce = new DirCacheEntry(entry.PathString);
-        //                    var dc = repository.LockDirCache();
-        //                    DirCacheBuilder builder = dc.Builder();
-        //                    builder.Add(dce);
-        //                    builder.Commit();
-        //                }
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                Log.WriteLine("Unstage File Content: {0}\r\n{1}", fileName, ex.ToString());
-        //            }
-        //        }
-        //    }
-        //    this.cache.Remove(GetCacheKey(fileName));
-        //}
-
-        /// <summary>
-        /// Requires absolute path
-        /// </summary>
-        /// <param name="fileName"></param>
-        //public void StageFile(string fileName)
-        //{
-        //    if (!this.HasGitRepository) return;
-        //    var fileNameRel = GetRelativeFileNameForGit(fileName);
-        //    var git = new Git(this.repository);
-        //    if (File.Exists(fileName))
-        //    {
-        //        git.Add().AddFilepattern(fileNameRel).Call();
-        //    }
-        //    else
-        //    {
-        //        git.Rm().AddFilepattern(fileNameRel).Call();
-        //    }
-
-        //    this.cache.Remove(GetCacheKey(fileName));
-        //} 
-        #endregion
 
         public string Commit(string message)
         {

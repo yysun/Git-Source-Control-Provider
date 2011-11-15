@@ -327,14 +327,16 @@ namespace GitScc
 
         private bool StageSelectedFiles()
         {
-            foreach (var item in this.dataGrid1.Items.Cast<GitFile>())
+            var unstaged = this.dataGrid1.Items.Cast<GitFile>()
+                               .Where(item => item.IsSelected && !item.IsStaged)
+                               .ToArray();
+            var count = unstaged.Length;
+            int i = 0;
+            foreach (var item in unstaged)
             {
-                if (item.IsSelected && !item.IsStaged)
-                {
-                    tracker.StageFile(System.IO.Path.Combine(this.tracker.GitWorkingDirectory, item.FileName));
-                    ShowStatusMessage("Staged :" + item.FileName);
-                    service.lastTimeRefresh = DateTime.Now;
-                }
+                tracker.StageFile(System.IO.Path.Combine(this.tracker.GitWorkingDirectory, item.FileName));
+                ShowStatusMessage(string.Format("Staged ({0}/{1}): {2}", i++, count, item.FileName));
+                service.lastTimeRefresh = DateTime.Now;
             }
 
             bool hasStaged = tracker == null ? false :

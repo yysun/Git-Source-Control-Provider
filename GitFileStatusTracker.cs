@@ -516,6 +516,30 @@ namespace GitScc
             return false;
         }
 
+        public void CheckOutBranch(string branch, bool createNew = false)
+        {
+            if (!this.HasGitRepository) return;
+            if (GitBash.Exists)
+            {
+                try
+                {
+                    GitBash.Run(string.Format("checkout {0} {1}", (createNew ? "-b" : ""), branch), this.GitWorkingDirectory);
+                }
+                catch (Exception ex)
+                {
+                    if (!ex.Message.StartsWith("Switched to a new branch")) throw;
+                }
+            }
+            else
+            {
+                Git git = new Git(this.repository);
+
+                git.Checkout().SetName(branch)
+                    .SetCreateBranch(createNew)
+                    .Call();
+            }
+        }
+
         #endregion
         /// <summary>
         /// Search Git Repository in folder and its parent folders 
@@ -592,7 +616,14 @@ namespace GitScc
             //index.RereadIfNecessary();
             if (GitBash.Exists)
             {
-                GitBash.Run(string.Format("add \"{0}\"", GetRelativeFileName(fileName)), this.GitWorkingDirectory);
+                if (File.Exists(fileName))
+                {
+                    GitBash.Run(string.Format("add \"{0}\"", GetRelativeFileName(fileName)), this.GitWorkingDirectory);
+                }
+                else
+                {
+                    GitBash.Run(string.Format("rm --cached -- \"{0}\"", GetRelativeFileName(fileName)), this.GitWorkingDirectory);
+                }
             }
             else
             {
@@ -876,7 +907,7 @@ namespace GitScc
                 while (treeWalk.Next())
                 {
                     WorkingTreeIterator workingTreeIterator = treeWalk.GetTree<WorkingTreeIterator>(WORKDIR);
-                    if (workingTreeIterator.IsEntryIgnored()) continue;
+                    if (workingTreeIterator != null && workingTreeIterator.IsEntryIgnored()) continue;
                     var fileName = GetFullPath(treeWalk.PathString);
                     if (Directory.Exists(fileName)) continue; // this excludes sub modules
 

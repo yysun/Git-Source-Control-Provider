@@ -261,6 +261,54 @@ namespace BasicSccProvider.Tests
             Console.WriteLine(diff);
             Assert.IsTrue(diff.Contains("@@ -1,3 +1 @@"));
         }
+
+        [TestMethod]
+        public void FileNameCaseTest()
+        {
+            GitFileStatusTracker.Init(tempFolder);
+            File.WriteAllLines(tempFile, lines);
+
+            GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
+            tracker.StageFile(tempFile);
+
+            tracker.Commit("test message");
+            Assert.IsTrue(tracker.LastCommitMessage.StartsWith("test message"));
+            tempFile = tempFile.Replace("test", "TEST");
+            File.WriteAllText(tempFile, "changed text");
+            tracker.Refresh();
+            Assert.AreEqual(GitFileStatus.Modified, tracker.GetFileStatus(tempFile));
+        }
+
+        [TestMethod]
+        public void GetBranchTest()
+        {
+            GitFileStatusTracker.Init(tempFolder);
+            File.WriteAllLines(tempFile, lines);
+
+            GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
+            tracker.StageFile(tempFile);
+            Assert.AreEqual("master", tracker.CurrentBranch);
+
+            tracker.Commit("test message");
+            Assert.AreEqual("master", tracker.CurrentBranch);
+
+            tempFile = tempFile.Replace("test", "TEST");
+            File.WriteAllText(tempFile, "changed text");
+
+            tracker.CheckOutBranch("dev", true);
+            Assert.AreEqual("dev", tracker.CurrentBranch);
+        }
+    }
+
+    [TestClass()]
+    public class GitFileStatusTrackerTest_NonAsciiFile : GitFileStatusTrackerTest
+    {
+        public GitFileStatusTrackerTest_NonAsciiFile()
+        {
+            GitBash.GitExePath = null;
+            tempFolder = Environment.CurrentDirectory + "\\" + Guid.NewGuid().ToString();
+            tempFile = Path.Combine(tempFolder, "中文 1čtestč");
+        }
     }
 
     [TestClass()]
@@ -270,11 +318,22 @@ namespace BasicSccProvider.Tests
         {
             GitBash.GitExePath = null;
             tempFolder = Environment.CurrentDirectory + "\\" + Guid.NewGuid().ToString();
-            Directory.CreateDirectory(Path.Combine(tempFolder, "中文 1č"));
-            tempFile = Path.Combine(tempFolder, "中文 1č\\testč");
+            Directory.CreateDirectory(Path.Combine(tempFolder, "folder 1"));
+            tempFile = Path.Combine(tempFolder, "folder 1\\test");
         }
     }
 
+    [TestClass()]
+    public class GitFileStatusTrackerTest_WithSubFolder_NonAsciiFile : GitFileStatusTrackerTest
+    {
+        public GitFileStatusTrackerTest_WithSubFolder_NonAsciiFile()
+        {
+            GitBash.GitExePath = null;
+            tempFolder = Environment.CurrentDirectory + "\\" + Guid.NewGuid().ToString();
+            Directory.CreateDirectory(Path.Combine(tempFolder, "folder 1"));
+            tempFile = Path.Combine(tempFolder, "folder 1\\中文 1čtestč");
+        }
+    }
     [TestClass()]
     public class GitFileStatusTrackerTest_WithSubFolder_UsingGitBash : GitFileStatusTrackerTest
     {
@@ -282,8 +341,8 @@ namespace BasicSccProvider.Tests
         {
             GitBash.GitExePath = @"C:\Program Files (x86)\Git\bin\sh.exe";
             tempFolder = Environment.CurrentDirectory + "\\" + Guid.NewGuid().ToString();
-            Directory.CreateDirectory(Path.Combine(tempFolder, "folder")); // 中文 čćšđžČĆŠĐŽ
-            tempFile = Path.Combine(tempFolder, "folder\\test");
+            Directory.CreateDirectory(Path.Combine(tempFolder, "folder 2"));
+            tempFile = Path.Combine(tempFolder, "folder 2\\test");
         }
     }
 }

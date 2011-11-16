@@ -333,7 +333,7 @@ namespace GitScc
 
         private string GetCacheKey(string fileName)
         {
-            return GetRelativeFileName(fileName);
+            return GetRelativeFileName(fileName).ToLower();
         }
 
         private string GetFullPath(string fileName)
@@ -917,6 +917,8 @@ namespace GitScc
                         FileName = GetRelativeFileName(fileName),
                         Status = status
                     });
+
+                    this.cache[GetCacheKey(fileName)] = status;
                 }
                 return list;
             }
@@ -1036,6 +1038,8 @@ namespace GitScc
                         break;
                 }
                 list.Add(gitFile);
+                
+                this.cache[GetCacheKey(gitFile.FileName)] = gitFile.Status;
             }
             return list;
         }

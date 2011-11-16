@@ -415,7 +415,8 @@ namespace GitScc
             {
                 string fileName = null;
                 if (hierHierarchy.GetCanonicalName(itemidNode, out fileName) != VSConstants.S_OK) return null;
-                return GetCaseSensitiveFileName(fileName);
+                return fileName;
+                //return GetCaseSensitiveFileName(fileName);
             }
         }
 

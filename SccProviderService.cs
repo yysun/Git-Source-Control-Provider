@@ -415,8 +415,7 @@ namespace GitScc
             {
                 string fileName = null;
                 if (hierHierarchy.GetCanonicalName(itemidNode, out fileName) != VSConstants.S_OK) return null;
-                return fileName;
-                //return GetCaseSensitiveFileName(fileName);
+                return GetCaseSensitiveFileName(fileName);
             }
         }
 
@@ -431,7 +430,8 @@ namespace GitScc
                     StringBuilder sb = new StringBuilder(1024);
                     GetShortPathName(fileName.ToUpper(), sb, 1024);
                     GetLongPathName(sb.ToString(), sb, 1024);
-                    return sb.ToString();
+                    var fn = sb.ToString();
+                    return string.IsNullOrWhiteSpace(fn) ? fileName : fn;
                 }
                 catch { }
             }

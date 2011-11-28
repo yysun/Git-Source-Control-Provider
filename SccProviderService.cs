@@ -718,7 +718,7 @@ namespace GitScc
             {
                 string tempFile = Path.GetFileName(fileName);
                 tempFile = Path.Combine(Path.GetTempPath(), tempFile);
-                SaveFileFromRepository(fileName, tempFile);
+                CurrentTracker.SaveFileFromRepository(fileName, tempFile);
                 _sccProvider.RunDiffCommand(tempFile, fileName);
             }
         }
@@ -747,11 +747,13 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
                     " and store it from last commit? " + deleteMsg,
                     "Undo Changes", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
-                    SaveFileFromRepository(fileName, fileName);
-                    if (status == GitFileStatus.Staged || status == GitFileStatus.Removed)
-                    {
-                        CurrentTracker.UnStageFile(fileName);
-                    }
+                    //SaveFileFromRepository(fileName, fileName);
+                    //if (status == GitFileStatus.Staged || status == GitFileStatus.Removed)
+                    //{
+                    //    CurrentTracker.UnStageFile(fileName);
+                    //}
+
+                    CurrentTracker.CheckOutFile(fileName);
                 }
             }
         }
@@ -906,16 +908,16 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
             return GetFileStatus(fileName);
         }
 
-        private void SaveFileFromRepository(string fileName, string tempFile)
-        {
-            var tracker = CurrentTracker;
-            if (tracker == null) return;
-            var data = tracker.GetFileContent(fileName);
-            using (var binWriter = new BinaryWriter(File.Open(tempFile, FileMode.Create)))
-            {
-                binWriter.Write(data ?? new byte[] { });
-            }
-        }
+        //private void SaveFileFromRepository(string fileName, string tempFile)
+        //{
+        //    var tracker = CurrentTracker;
+        //    if (tracker == null) return;
+        //    var data = tracker.GetFileContent(fileName);
+        //    using (var binWriter = new BinaryWriter(File.Open(tempFile, FileMode.Create)))
+        //    {
+        //        binWriter.Write(data ?? new byte[] { });
+        //    }
+        //}
         #endregion
 
         #region new Refresh methods
@@ -933,9 +935,9 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
                 {
                     Debug.WriteLine("==== Refresh: " + Math.Floor(delta).ToString());
                     NodesGlyphsDirty = true;
+                    lastTimeRefresh = DateTime.Now;
                 }
             }
-            lastTimeRefresh = DateTime.Now;
         }
 
         public void UpdateNodesGlyphs()

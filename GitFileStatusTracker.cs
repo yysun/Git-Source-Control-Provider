@@ -1045,6 +1045,47 @@ namespace GitScc
         }
 
         #endregion
+
+        internal void SaveFileFromRepository(string fileName, string tempFile)
+        {
+            if (!this.HasGitRepository || this.head == null) return;
+
+            string fileNameRel = GetRelativeFileName(fileName);
+
+            if (GitBash.Exists)
+            {
+                GitBash.RunCmd(string.Format("show HEAD:{0} > \"{1}\"", fileNameRel, tempFile), this.GitWorkingDirectory);
+            }
+            else
+            {
+                var data = GetFileContent(fileName);
+                using (var binWriter = new BinaryWriter(File.Open(tempFile, System.IO.FileMode.Create)))
+                {
+                    binWriter.Write(data ?? new byte[] { });
+                }
+            }
+        }
+
+        internal void CheckOutFile(string fileName)
+        {
+            if (!this.HasGitRepository || this.head == null) return;
+            
+            string fileNameRel = GetRelativeFileName(fileName);
+            
+            if (GitBash.Exists)
+            {
+                GitBash.Run("checkout -- " + fileNameRel, this.GitWorkingDirectory);
+            }
+            else
+            {
+                GitFileStatus status = GetFileStatus(fileName);
+                SaveFileFromRepository(fileName, fileName);
+                if (status == GitFileStatus.Staged || status == GitFileStatus.Removed)
+                {
+                    UnStageFile(fileName);
+                }
+            }
+        }
     }
 
     public abstract class Log

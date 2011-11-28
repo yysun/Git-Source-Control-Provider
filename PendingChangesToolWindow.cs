@@ -86,7 +86,7 @@ namespace GitScc
                 {
                     ((PendingChangesView)control).Refresh(tracker);
                 }
-                else
+                if (GitSccOptions.Current.DisableAutoRefresh)
                 {
                     this.Caption += " - [AUTO REFRESH DISABLED]";
                 }

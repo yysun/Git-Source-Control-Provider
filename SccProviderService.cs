@@ -935,9 +935,9 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
                 {
                     Debug.WriteLine("==== Refresh: " + Math.Floor(delta).ToString());
                     NodesGlyphsDirty = true;
-                    lastTimeRefresh = DateTime.Now;
                 }
             }
+            lastTimeRefresh = DateTime.Now;
         }
 
         public void UpdateNodesGlyphs()

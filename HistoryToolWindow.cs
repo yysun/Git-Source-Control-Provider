@@ -47,6 +47,8 @@ namespace GitScc
 
         private void OnRefreshCommand(object sender, EventArgs e)
         {
+            sccProviderService.OpenTracker();
+            sccProviderService.RefreshNodesGlyphs();
             Refresh(sccProviderService.CurrentTracker, true);
         }
 

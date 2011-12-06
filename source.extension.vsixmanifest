@@ -3,7 +3,7 @@
   <Identifier Id="C4128D99-2000-41D1-A6C3-704E6C1A3DE2">
     <Name>Git Source Control Provider</Name>
     <Author>Yiyisun@hotmail.com</Author>
-    <Version>0.8.9</Version>
+    <Version>0.9.0</Version>
     <Description xml:space="preserve">Git Source Control Provider is a plug-in that integrates git with Visual Studio.</Description>
     <Locale>1033</Locale>
     <License>License.txt</License>
@@ -11,6 +11,11 @@
     <InstalledByMsi>false</InstalledByMsi>
     <SupportedProducts>
       <VisualStudio Version="10.0">
+        <Edition>Ultimate</Edition>
+        <Edition>Premium</Edition>
+        <Edition>Pro</Edition>
+      </VisualStudio>
+      <VisualStudio Version="11.0">
         <Edition>Ultimate</Edition>
         <Edition>Premium</Edition>
         <Edition>Pro</Edition>
@@ -25,6 +30,6 @@
   </References>
   <Content>
     <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
-    <MefComponent>DiffClassifier.dll</MefComponent>
+    <MefComponent>DiffClassifier.dll</MefComponent>  
   </Content>
 </Vsix>

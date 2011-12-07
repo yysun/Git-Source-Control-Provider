@@ -273,11 +273,11 @@ namespace GitScc
 
         internal void Commit()
         {
+            service.NoRefresh = true;
             if (HasComments() && StageSelectedFiles())
             {
                 try
                 {
-                    service.NoRefresh = true;
                     ShowStatusMessage("Committing ...");
                     var id = tracker.Commit(Comments);
                     ShowStatusMessage("Commit successfully. Commit Hash: " + id);
@@ -292,6 +292,7 @@ namespace GitScc
                     ShowStatusMessage(ex.Message);
                 }
             }
+            service.NoRefresh = false;
         }
 
         internal void AmendCommit()
@@ -303,16 +304,15 @@ namespace GitScc
             }
             else
             {
+                service.NoRefresh = true;
                 if (StageSelectedFiles())
                 {
                     try
                     {
-                        service.NoRefresh = true;
                         ShowStatusMessage("Amending last Commit ...");
                         var id = tracker.AmendCommit(Comments);
                         ShowStatusMessage("Amend last commit successfully. Commit Hash: " + id);
                         ClearUI();
-                        service.NoRefresh = false;
                         service.lastTimeRefresh = DateTime.Now;
                         service.NodesGlyphsDirty = true;
                     }
@@ -322,6 +322,7 @@ namespace GitScc
                         ShowStatusMessage(ex.Message);
                     }
                 }
+                service.NoRefresh = false;
             }
         }
 

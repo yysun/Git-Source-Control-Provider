@@ -84,7 +84,6 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GetFileStatusTest.cs" />
     <Compile Include="GitFileStatusTrackerTest.cs" />
     <Compile Include="PackageTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

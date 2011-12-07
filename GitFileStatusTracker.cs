@@ -874,7 +874,7 @@ namespace GitScc
         private const int INDEX = 1;
         private const int WORKDIR = 2;
 
-        public IList<GitFile> GetChangedFiles()
+        internal IList<GitFile> GetChangedFiles()
         {
             if (GitBash.Exists)
             {
@@ -1046,15 +1046,14 @@ namespace GitScc
 
         #endregion
 
-        internal void SaveFileFromRepository(string fileName, string tempFile)
+        public void SaveFileFromRepository(string fileName, string tempFile)
         {
             if (!this.HasGitRepository || this.head == null) return;
 
-            string fileNameRel = GetRelativeFileName(fileName);
-
             if (GitBash.Exists)
             {
-                GitBash.RunCmd(string.Format("show HEAD:{0} > \"{1}\"", fileNameRel, tempFile), this.GitWorkingDirectory);
+                string fileNameRel = GetRelativeFileNameForGit(fileName);
+                GitBash.RunCmd(string.Format("show \"HEAD:{0}\" > \"{1}\"", fileNameRel, tempFile), this.GitWorkingDirectory);
             }
             else
             {
@@ -1066,7 +1065,7 @@ namespace GitScc
             }
         }
 
-        internal void CheckOutFile(string fileName)
+        public void CheckOutFile(string fileName)
         {
             if (!this.HasGitRepository || this.head == null) return;
             
@@ -1074,7 +1073,7 @@ namespace GitScc
             
             if (GitBash.Exists)
             {
-                GitBash.Run("checkout -- " + fileNameRel, this.GitWorkingDirectory);
+                GitBash.Run(string.Format("checkout -- \"{0}\"", fileNameRel), this.GitWorkingDirectory);
             }
             else
             {

@@ -25,14 +25,19 @@ namespace GitScc.UI
         }
 
         #region show file in editor
+
         private void ShowFile(string tmpFileName)
         {
-            //var tuple = this.toolWindow.SetDisplayedFile(tmpFileName);
-            //if (tuple != null)
-            //{
-            //    this.editor.Content = tuple.Item1;
-            //}
-        } 
+            this.editor.SyntaxHighlighting = ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance.GetDefinitionByExtension(
+                Path.GetExtension(tmpFileName));
+            this.editor.ShowLineNumbers = true;
+            this.editor.Load(tmpFileName);
+        }
+
+        private void ClearEditor()
+        {
+            this.editor.Text = "";
+        }
         #endregion
 
         #region datagrid sorting
@@ -50,9 +55,6 @@ namespace GitScc.UI
 
         internal void Show(GitFileStatusTracker tracker, string commitId)
         {
-            var sw = new Stopwatch();
-            sw.Start();
-
             this.tracker = tracker;
             var repositoryGraph = tracker.RepositoryGraph;
             var commit = repositoryGraph.GetCommit(commitId);
@@ -66,10 +68,10 @@ namespace GitScc.UI
                 this.lblMessage.Content = "Message: " + commit.Message;
                 this.lblAuthor.Content = commit.CommitterName + " " + commit.CommitDateRelative;
                 this.fileTree.ItemsSource = repositoryGraph.GetTree(commitId).Children;
-                //this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId);
+                this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId);
                 this.radioShowFileTree.IsChecked = true;
                 this.radioShowFileTree.IsEnabled = true;
-                //this.toolWindow.ClearEditor();
+                ClearEditor();
                 this.commitId1 = commit.ParentIds.Count > 0 ? commit.ParentIds[0] : null;
                 this.commitId2 = commit.Id;
                 this.btnSwitch.Visibility = Visibility.Collapsed;
@@ -80,9 +82,6 @@ namespace GitScc.UI
                 this.patchList.Visibility = Visibility.Visible;
 
             }
-
-            sw.Stop();
-            this.lblCommit.Content = sw.ElapsedMilliseconds.ToString();
         }
 
         internal void Show(GitFileStatusTracker tracker, string commitId1, string commitId2)
@@ -118,7 +117,7 @@ namespace GitScc.UI
             this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId1, commitId2);
             this.radioShowChanges.IsChecked = true;
             this.radioShowFileTree.IsEnabled = false;
-            //this.toolWindow.ClearEditor();
+            ClearEditor();
             this.commitId1 = commitId1;
             this.commitId2 = commitId2;
             this.btnSwitch.Visibility = Visibility.Visible;
@@ -129,14 +128,14 @@ namespace GitScc.UI
         {
             this.fileTree.Visibility = Visibility.Visible;
             this.patchList.Visibility = Visibility.Collapsed;
-            //this.toolWindow.ClearEditor();
+            ClearEditor();
         }
 
         private void radioShowChanges_Checked(object sender, RoutedEventArgs e)
         {
             this.fileTree.Visibility = Visibility.Collapsed;
             this.patchList.Visibility = Visibility.Visible;
-            //this.toolWindow.ClearEditor();
+            ClearEditor();
         }
 
         private void fileTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)

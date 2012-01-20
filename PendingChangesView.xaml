@@ -52,10 +52,11 @@
 
             <DataGrid AutoGenerateColumns="False" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="dataGrid1" VerticalAlignment="Stretch"
                       GridLinesVisibility="None"  Foreground="#FF333333" Sorting="dataGrid1_Sorting" IsReadOnly="True" SelectedValuePath="FileName"
-                      SelectionMode="Single" SelectionChanged="dataGrid1_SelectionChanged" MouseDoubleClick="dataGrid1_MouseDoubleClick" ContextMenuOpening="dataGrid1_ContextMenuOpening">
+                      SelectionMode="Single" SelectionChanged="dataGrid1_SelectionChanged" MouseDoubleClick="dataGrid1_MouseDoubleClick" ContextMenuOpening="dataGrid1_ContextMenuOpening"
+                      CanUserResizeRows="False" CanUserDeleteRows="False" CanUserAddRows="False" CanUserReorderColumns="False" RowHeaderWidth="0">
 
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Staged">
+                    <DataGridTemplateColumn Header="Staged" CanUserResize="False">
                         <DataGridTemplateColumn.HeaderTemplate>
                             <DataTemplate>
                                 <CheckBox x:Name="checkBoxAllStaged" Click="checkBoxAllStaged_Click"  
@@ -69,8 +70,8 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Status" Binding="{Binding Status}"  />
-                    <DataGridTextColumn Header="File" Binding="{Binding FileName}" Width="400" />
+                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" CanUserResize="False" Width="100" />
+                    <DataGridTextColumn Header="File" Binding="{Binding FileName}" Width="*" />
                 </DataGrid.Columns>
 
                 <DataGrid.ContextMenu>

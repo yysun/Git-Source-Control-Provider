@@ -6,14 +6,15 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using EnvDTE;
 using Microsoft.VisualStudio.TextManager.Interop;
 using NGit.Api;
 using GitScc.UI;
 using System.Diagnostics;
+using TextRange = System.Windows.Documents.TextRange;
 
 namespace GitScc
 {
@@ -50,7 +51,11 @@ namespace GitScc
         private void checkBoxSelected_Click(object sender, RoutedEventArgs e)
         {
             var checkBox = sender as CheckBox;
-            ((GitFile)this.dataGrid1.SelectedItem).IsSelected = checkBox.IsChecked == true;
+
+            foreach (GitFile item in dataGrid1.SelectedItems)
+                item.IsSelected = checkBox != null && checkBox.IsChecked.HasValue && checkBox.IsChecked.Value;
+
+            e.Handled = true;
         }
 
         private void checkBoxAllStaged_Click(object sender, RoutedEventArgs e)
@@ -107,14 +112,31 @@ namespace GitScc
 
         private void dataGrid1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            GetSelectedFileFullName((fileName) =>
-            {
-                fileName = System.IO.Path.Combine(this.tracker.GitWorkingDirectory, fileName);
-                if (!File.Exists(fileName)) return;
+            if (dataGrid1.SelectedItems.Count != 1)
+                return;
 
-                var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
-                dte.ItemOperations.OpenFile(fileName);
-            });
+            var dep = (DependencyObject) e.OriginalSource;
+
+            while ((dep != null) && !(dep is DataGridCell))
+                dep = VisualTreeHelper.GetParent(dep);
+
+            if (dep == null)
+                return;
+
+            var cell = dep as DataGridCell;
+
+            if (cell.Column.DisplayIndex == 0) // Checkbox
+                return;
+
+            GetSelectedFileFullName(fileName => {
+                                        fileName = Path.Combine(tracker.GitWorkingDirectory, fileName);
+
+                                        if (!File.Exists(fileName))
+                                            return;
+
+                                        var dte = BasicSccProvider.GetServiceEx<DTE>();
+                                        dte.ItemOperations.OpenFile(fileName);
+                                    });
 
         }
 

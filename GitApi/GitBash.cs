@@ -54,7 +54,9 @@ namespace GitScc
                 if (!string.IsNullOrEmpty(error))
                 {
                     //Debug.WriteLine("STDERR: " + error);
-                    throw new Exception(error);
+                    //throw new Exception(error);
+
+                    output += Environment.NewLine + error;
                 }
                 return output;
             }

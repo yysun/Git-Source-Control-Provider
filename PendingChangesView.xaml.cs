@@ -283,7 +283,6 @@ namespace GitScc
                     ShowStatusMessage("Commit successfully. Commit Hash: " + id);
                     ClearUI();
                     service.NoRefresh = false;
-                    service.lastTimeRefresh = DateTime.Now;
                     service.NodesGlyphsDirty = true;
                 }
                 catch (Exception ex)
@@ -293,6 +292,7 @@ namespace GitScc
                 }
             }
             service.NoRefresh = false;
+            service.lastTimeRefresh = DateTime.Now;
         }
 
         internal void AmendCommit()
@@ -313,7 +313,6 @@ namespace GitScc
                         var id = tracker.AmendCommit(Comments);
                         ShowStatusMessage("Amend last commit successfully. Commit Hash: " + id);
                         ClearUI();
-                        service.lastTimeRefresh = DateTime.Now;
                         service.NodesGlyphsDirty = true;
                     }
                     catch (Exception ex)
@@ -322,6 +321,7 @@ namespace GitScc
                         ShowStatusMessage(ex.Message);
                     }
                 }
+                service.lastTimeRefresh = DateTime.Now;
                 service.NoRefresh = false;
             }
         }

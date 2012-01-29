@@ -924,7 +924,7 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
 
         internal bool NodesGlyphsDirty = false;
         internal bool NoRefresh = false;
-        internal DateTime lastTimeRefresh = DateTime.Now;
+        internal DateTime lastTimeRefresh = DateTime.Now.AddDays(-1); //fix #17277, #16935
 
         internal void Refresh()
         {
@@ -937,7 +937,7 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
                     NodesGlyphsDirty = true;
                 }
             }
-            lastTimeRefresh = DateTime.Now;
+            //lastTimeRefresh = DateTime.Now;
         }
 
         public void UpdateNodesGlyphs()
@@ -951,8 +951,7 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
                 OpenTracker();
                 RefreshNodesGlyphs();
                 RefreshToolWindows();
-
-                //noRefresh = false;
+                NoRefresh = false; //can't rely on tool window to set it to false
                 NodesGlyphsDirty = false;
 
                 stopwatch.Stop();

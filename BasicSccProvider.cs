@@ -109,8 +109,8 @@ namespace GitScc
 
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandGitTortoise);
                 menu = new MenuCommand(new EventHandler(OnTortoiseGitCommand), cmd);
-                mcs.AddCommand(menu);
 
+                mcs.AddCommand(menu);
                 for (int i = 0; i < GitToolCommands.GitExtCommands.Count; i++)
                 {
                     cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdGitExtCommand1 + i);
@@ -135,6 +135,10 @@ namespace GitScc
 
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesCommitToBranch);
                 menu = new MenuCommand(new EventHandler(OnSwitchBranchCommand), cmd);
+                mcs.AddCommand(menu);
+
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandAbout);
+                menu = new MenuCommand(new EventHandler(OnAbout), cmd);
                 mcs.AddCommand(menu);
             }
 
@@ -231,7 +235,7 @@ namespace GitScc
                     else
                         cmdf |= OLECMDF.OLECMDF_INVISIBLE;
                     break;
-                
+
                 case CommandId.icmdSccCommandUndo:
                 case CommandId.icmdSccCommandCompare:
                     if (sccService.CanCompareSelectedFile) cmdf |= OLECMDF.OLECMDF_ENABLED;
@@ -246,6 +250,7 @@ namespace GitScc
                     if (sccService.IsSolutionGitControlled) cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
 
+                case CommandId.icmdSccCommandAbout:
                 case CommandId.icmdSccCommandRefresh:
                     //if (sccService.IsSolutionGitControlled)
                         cmdf |= OLECMDF.OLECMDF_ENABLED;
@@ -352,7 +357,7 @@ namespace GitScc
         private void OnTortoiseGitCommand(object sender, EventArgs e)
         {
             var tortoiseGitPath = GitSccOptions.Current.TortoiseGitPath;
-            RunDetatched(tortoiseGitPath, "/command:commit");
+            RunDetatched(tortoiseGitPath, "/command:log");
         }
 
         private string GetTargetPath(GitToolCommand command)
@@ -395,7 +400,14 @@ namespace GitScc
                 RunDetatched(gitExtensionPath, GitToolCommands.GitExtCommands[idx].Command);
             }
         }
-
+        
+        private void OnAbout(object sender, EventArgs e)
+        {
+            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            path = Path.Combine(path, "Readme.txt");
+            Process.Start(path);
+        }
+        
         private void ShowPendingChangesWindow(object sender, EventArgs e)
         {
             ShowToolWindow(typeof(PendingChangesToolWindow));

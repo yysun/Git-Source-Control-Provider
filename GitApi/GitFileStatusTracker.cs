@@ -721,6 +721,7 @@ namespace GitScc
             if (GitBash.Exists)
             {
                 GitBash.Run("init", folderName);
+                GitBash.Run("config core.ignorecase true", folderName);
             }
             else
             {

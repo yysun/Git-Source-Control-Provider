@@ -404,7 +404,7 @@ namespace GitScc
         private void OnAbout(object sender, EventArgs e)
         {
             var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            path = Path.Combine(path, "Readme.txt");
+            path = Path.Combine(path, "Readme.htm");
             Process.Start(path);
         }
         

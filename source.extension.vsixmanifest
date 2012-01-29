@@ -6,7 +6,9 @@
     <Version>0.9.1</Version>
     <Description xml:space="preserve">Git Source Control Provider is a plug-in that integrates git with Visual Studio.</Description>
     <Locale>1033</Locale>
+    <MoreInfoUrl>http://visualstudiogallery.msdn.microsoft.com/63a7e40d-4d71-4fbb-a23b-d262124b8f4c</MoreInfoUrl>
     <License>License.txt</License>
+    <GettingStartedGuide>http://gitscc.codeplex.com/documentation</GettingStartedGuide>
     <PreviewImage>solution explorer.png</PreviewImage>
     <InstalledByMsi>false</InstalledByMsi>
     <SupportedProducts>
@@ -32,5 +34,6 @@
     <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
     <MefComponent>DiffClassifier.dll</MefComponent>
     <CustomExtension Type="Exe">GitUI.exe</CustomExtension>
+    <CustomExtension Type="htm">Readme.htm</CustomExtension>
   </Content>
 </Vsix>

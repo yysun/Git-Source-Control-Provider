@@ -32,6 +32,7 @@ namespace GitUI
                     @"C:\Program Files\Git\bin\sh.exe",
                     @"C:\Program Files (x86)\Git\bin\sh.exe",
             });
+
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -81,7 +82,7 @@ namespace GitUI
             if (this.bottomToolBar.Visibility == Visibility.Collapsed)
             {
                 ShowTopToolBar();
-                ShowBottomToolBarBar();
+                //ShowBottomToolBarBar();
             }
             else
             {
@@ -131,16 +132,16 @@ namespace GitUI
 
         private void ShowBottomToolBarBar()
         {
-            if (this.bottomToolBar.Visibility == Visibility.Collapsed)
-            {
-                this.bottomToolBar.Visibility = Visibility.Visible;
-                this.bottomToolBar.RenderTransform.SetValue(TranslateTransform.YProperty, 60.0);
-                this.bottomToolBar.Visibility = Visibility.Visible;
-                var animationDuration = TimeSpan.FromSeconds(1.0);
-                var animation = new DoubleAnimation(0, new Duration(animationDuration));
-                animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
-                this.bottomToolBar.RenderTransform.BeginAnimation(TranslateTransform.YProperty, animation);
-            }
+            //if (this.bottomToolBar.Visibility == Visibility.Collapsed)
+            //{
+            //    this.bottomToolBar.Visibility = Visibility.Visible;
+            //    this.bottomToolBar.RenderTransform.SetValue(TranslateTransform.YProperty, 60.0);
+            //    this.bottomToolBar.Visibility = Visibility.Visible;
+            //    var animationDuration = TimeSpan.FromSeconds(1.0);
+            //    var animation = new DoubleAnimation(0, new Duration(animationDuration));
+            //    animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
+            //    this.bottomToolBar.RenderTransform.BeginAnimation(TranslateTransform.YProperty, animation);
+            //}
         }
 
         private void HideBottomToolBar()

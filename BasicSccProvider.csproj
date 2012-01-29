@@ -132,9 +132,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="GitUI.exe">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
     <Content Include="License.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
@@ -148,6 +145,10 @@
     <Resource Include="Resources\Loading.png" />
     <Content Include="Resources\SccGlyphs.bmp" />
     <Content Include="solution explorer.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="GitUI.pkg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
@@ -183,10 +184,6 @@
     <ProjectReference Include="GitApi\GitApi.csproj">
       <Project>{161E81E2-25E5-4134-8D2D-595419B1265B}</Project>
       <Name>GitApi</Name>
-    </ProjectReference>
-    <ProjectReference Include="GitUI\GitUI.csproj">
-      <Project>{C756204F-28E1-473A-8160-E697E3303F1B}</Project>
-      <Name>GitUI</Name>
     </ProjectReference>
     <ProjectReference Include="GitUI\ICSharpCode.AvalonEdit\ICSharpCode.AvalonEdit.csproj">
       <Project>{6C55B776-26D4-4DB3-A6AB-87E783B2F3D1}</Project>

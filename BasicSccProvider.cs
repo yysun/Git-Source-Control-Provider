@@ -415,10 +415,22 @@ namespace GitScc
 
         private void ShowHistoryWindow(object sender, EventArgs e)
         {
-            //ShowToolWindow(typeof(HistoryToolWindow));
             var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            path = Path.Combine(path, "GitUI.exe");
-            Process.Start(path, "\"" + sccService.CurrentTracker.GitWorkingDirectory + "\"");
+            path = Path.Combine(path, "GitUI.pkg");
+            var tmpPath = Path.Combine(Path.GetTempPath(), "GitUI.exe");
+
+            try
+            {
+                File.Copy(path, tmpPath, true);
+            }
+            catch(Exception ex) // try copy file silently
+            {
+            }
+
+            if (File.Exists(tmpPath))
+            {
+                Process.Start(tmpPath, "\"" + sccService.CurrentTracker.GitWorkingDirectory + "\"");
+            }
         }
 
         private void ShowToolWindow(Type type)

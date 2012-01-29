@@ -164,25 +164,47 @@
     <ProjectReference Include="..\GitApi\GitApi.csproj">
       <Project>{161E81E2-25E5-4134-8D2D-595419B1265B}</Project>
       <Name>GitApi</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\ngit\NGit\NGit.csproj">
       <Project>{E3BFF8B4-189C-496A-A817-7E8B31E22B91}</Project>
       <Name>NGit</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\ngit\NSch\NSch.csproj">
       <Project>{A19E6F3F-A25B-4B01-8922-CF0CC35C781D}</Project>
       <Name>NSch</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\ngit\Sharpen\Sharpen.csproj">
       <Project>{72944A6C-45FF-4EF8-B349-8C9CABF519D4}</Project>
       <Name>Sharpen</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="ICSharpCode.AvalonEdit\ICSharpCode.AvalonEdit.csproj">
       <Project>{6C55B776-26D4-4DB3-A6AB-87E783B2F3D1}</Project>
       <Name>ICSharpCode.AvalonEdit</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\GitApi.dll" />
+    <EmbeddedResource Include="Resources\ICSharpCode.AvalonEdit.dll" />
+    <EmbeddedResource Include="Resources\ICSharpCode.SharpZipLib.dll" />
+    <EmbeddedResource Include="Resources\Mono.Posix.dll" />
+    <EmbeddedResource Include="Resources\Mono.Security.dll" />
+    <EmbeddedResource Include="Resources\NGit.dll" />
+    <EmbeddedResource Include="Resources\NSch.dll" />
+    <EmbeddedResource Include="Resources\Sharpen.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy GitUI.exe ..\..\..\GitUI.pkg</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>copy ..\..\..\GitApi\Bin\$(ConfigurationName)\*.dll Resources</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

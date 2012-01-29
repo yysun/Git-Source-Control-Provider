@@ -50,6 +50,7 @@ namespace GitScc
         private CheckBox checkBox2;
         private CheckBox checkBox3;
         private CheckBox checkBox4;
+        private CheckBox checkBox5;
         // The parent page, use to persist data
         private SccProviderOptions _customPage;
 
@@ -102,6 +103,7 @@ namespace GitScc
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.checkBox4 = new System.Windows.Forms.CheckBox();
+            this.checkBox5 = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // openFileDialog1
@@ -254,11 +256,23 @@ namespace GitScc
             this.checkBox4.Text = "Disable Auto-Refresh";
             this.checkBox4.UseVisualStyleBackColor = true;
             // 
+            // checkBox5
+            // 
+            this.checkBox5.AutoSize = true;
+            this.checkBox5.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.checkBox5.Location = new System.Drawing.Point(6, 296);
+            this.checkBox5.Name = "checkBox5";
+            this.checkBox5.Size = new System.Drawing.Size(303, 17);
+            this.checkBox5.TabIndex = 27;
+            this.checkBox5.Text = "Disable auto switch to this plug-in for Git controlled projects";
+            this.checkBox5.UseVisualStyleBackColor = true;
+            // 
             // SccProviderOptionsControl
             // 
             this.AllowDrop = true;
             this.AutoScroll = true;
             this.AutoSize = true;
+            this.Controls.Add(this.checkBox5);
             this.Controls.Add(this.checkBox4);
             this.Controls.Add(this.checkBox3);
             this.Controls.Add(this.checkBox2);
@@ -302,6 +316,7 @@ namespace GitScc
             this.checkBox2.Checked = GitSccOptions.Current.NotExpandTortoiseGit;
             this.checkBox3.Checked = GitSccOptions.Current.UseTGitIconSet;
             this.checkBox4.Checked = GitSccOptions.Current.DisableAutoRefresh;
+            this.checkBox5.Checked = GitSccOptions.Current.DisableAutoLoad;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -343,11 +358,13 @@ namespace GitScc
             GitSccOptions.Current.NotExpandTortoiseGit = this.checkBox2.Checked;
             GitSccOptions.Current.UseTGitIconSet = this.checkBox3.Checked;
             GitSccOptions.Current.DisableAutoRefresh = this.checkBox4.Checked;
+            GitSccOptions.Current.DisableAutoLoad = this.checkBox5.Checked;
             GitSccOptions.Current.SaveConfig();
 
             SccProviderService sccProviderService = (SccProviderService)GetService(typeof(SccProviderService));
             sccProviderService.Refresh();
         }
+
     }
 
 }

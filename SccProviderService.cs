@@ -245,7 +245,7 @@ namespace GitScc
         public int OnAfterOpenSolution([InAttribute] Object pUnkReserved, [InAttribute] int fNewSolution)
         {
             //automatic switch the scc provider
-            if (!Active)
+            if (!Active && !GitSccOptions.Current.DisableAutoLoad)
             {
                 OpenTracker();
                 if (trackers.Count > 0)

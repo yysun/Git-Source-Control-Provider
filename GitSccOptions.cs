@@ -22,6 +22,7 @@ namespace GitScc
         public bool NotExpandGitExtensions { get; set; }
         public bool UseTGitIconSet { get; set; }
         public bool DisableAutoRefresh { get; set; }
+        public bool DisableAutoLoad { get; set; }
 
         private static GitSccOptions gitSccOptions;
 

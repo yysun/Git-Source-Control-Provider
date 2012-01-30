@@ -55,6 +55,7 @@
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
+    <Compile Include="GitSccOptions.cs" />
     <Compile Include="GitViewModel.cs" />
     <Compile Include="UI\BottomToolBar.xaml.cs">
       <DependentUpon>BottomToolBar.xaml</DependentUpon>

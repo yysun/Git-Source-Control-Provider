@@ -40,7 +40,7 @@
 			<MenuItem Header="view details" Command="cmd:HistoryViewCommands.OpenCommitDetails" CommandParameter="{Binding Id}" />
 		</ContextMenu>
 	</UserControl.ContextMenu>    
-	<Grid x:Name="root" Height="120" Width="200" PreviewMouseDown="root_PreviewMouseDown" RenderTransformOrigin="0.5,0.5" MouseEnter="root_MouseEnter" MouseLeave="root_MouseLeave">
+	<Grid x:Name="root" Height="120" Width="200" RenderTransformOrigin="0.5,0.5" MouseEnter="root_MouseEnter" MouseLeave="root_MouseLeave" MouseLeftButtonUp="root_MouseLeftButtonUp">
 		<Grid.RenderTransform>
 			<TransformGroup>
 				<ScaleTransform/>

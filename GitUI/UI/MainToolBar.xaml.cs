@@ -53,6 +53,7 @@ namespace GitUI.UI
         {
             bool isSimplied = tracker.RepositoryGraph.IsSimplified;
             tracker.RepositoryGraph.IsSimplified = !isSimplied;
+            this.lableView.Content = !isSimplied ? "Simplified view: ON" : "Simplified view: OFF";
             gitViewModel.RefreshGraph();
         }
     }

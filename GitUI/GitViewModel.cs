@@ -69,9 +69,9 @@ namespace GitUI
         internal void Refresh()
         {
             double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
-            if (delta > 1000)
+            if (delta > 200)
             {
-                //System.Diagnostics.Debug.WriteLine("==== GitViewModel Refresh {0}", delta);
+                System.Diagnostics.Debug.WriteLine("==== GitViewModel Refresh {0}", delta);
                 tracker.Refresh();
                 GraphChanged(this, null);
                 lastTimeRefresh = DateTime.Now;

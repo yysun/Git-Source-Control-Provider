@@ -25,7 +25,7 @@ namespace GitUI.UI
             set
             {
                 gitViewModel = value;
-                this.txtDirectory.Text = gitViewModel.Tacker.GitWorkingDirectory;
+                //this.txtDirectory.Text = gitViewModel.Tacker.GitWorkingDirectory;
             }
         }
         public BottomToolBar()

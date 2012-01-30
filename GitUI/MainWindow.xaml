@@ -9,7 +9,7 @@
         <!--<CommandBinding Command="cmd:HistoryViewCommands.SelectCommit"  Executed="SelectCommit_Executed" />-->        
         <CommandBinding Command="cmd:HistoryViewCommands.ExportGraph"  Executed="ExportGraph" />
     </Window.CommandBindings>
-    <Grid x:Name="rootGrid" PreviewMouseMove="Grid_PreviewMouseMove" PreviewMouseRightButtonDown="rootGrid_PreviewMouseRightButtonDown">
+    <Grid x:Name="rootGrid" MouseRightButtonUp="rootGrid_MouseRightButtonUp">
         <!--<Grid.RowDefinitions>
             <RowDefinition Height="60"/>
             <RowDefinition Height="*"/>

@@ -27,16 +27,17 @@ namespace GitUI
         public MainWindow()
         {
             InitializeComponent();
-
-            GitBash.GitExePath = TryFindFile(new string[] {
-                    @"C:\Program Files\Git\bin\sh.exe",
-                    @"C:\Program Files (x86)\Git\bin\sh.exe",
-            });
-
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            GitBash.GitExePath = GitSccOptions.Current.GitBashPath;
+
+            if (!GitBash.Exists) GitBash.GitExePath = TryFindFile(new string[] {
+                    @"C:\Program Files\Git\bin\sh.exe",
+                    @"C:\Program Files (x86)\Git\bin\sh.exe",
+            });
+
             this.gitViewModel =
             this.graph.GitViewModel =
             this.topToolBar.GitViewModel =
@@ -77,9 +78,10 @@ namespace GitUI
             }
         }
 
-        private void rootGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        #region toolbars
+        private void rootGrid_MouseRightButtonUp(object sender, MouseButtonEventArgs e)        
         {
-            if (this.bottomToolBar.Visibility == Visibility.Collapsed)
+            if (this.topToolBar.Visibility == Visibility.Collapsed)
             {
                 ShowTopToolBar();
                 //ShowBottomToolBarBar();
@@ -154,7 +156,8 @@ namespace GitUI
                 animation.Completed += (o, _) => this.bottomToolBar.Visibility = Visibility.Collapsed;
                 this.bottomToolBar.RenderTransform.BeginAnimation(TranslateTransform.YProperty, animation);
             }
-        }
+        } 
+        #endregion
 
         private void ShowCommitDetails(string id)
         {
@@ -166,7 +169,7 @@ namespace GitUI
                 var animation = new DoubleAnimation(0, new Duration(animationDuration));
                 animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
                 loading.Visibility = Visibility.Visible;
-                animation.Completed += (_, e) => 
+                animation.Completed += (_, e) =>
                 {
                     this.details.Show(this.gitViewModel.Tacker, id);
                     loading.Visibility = Visibility.Collapsed;
@@ -202,5 +205,6 @@ namespace GitUI
                 
             }
         }
+
     }
 }

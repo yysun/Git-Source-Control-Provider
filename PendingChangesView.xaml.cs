@@ -75,6 +75,7 @@ namespace GitScc
             //var dispatcher = Dispatcher.CurrentDispatcher;
             Action act = () =>
             {
+                service.NoRefresh = true;
                 try
                 {
                     //var ret = tracker.DiffFile(fileName);
@@ -99,6 +100,7 @@ namespace GitScc
                 {
                     ShowStatusMessage(ex.Message);
                 }
+                service.NoRefresh = false;
 
             };
 

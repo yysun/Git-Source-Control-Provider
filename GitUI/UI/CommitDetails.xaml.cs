@@ -55,73 +55,93 @@ namespace GitScc.UI
 
         internal void Show(GitFileStatusTracker tracker, string commitId)
         {
-            this.tracker = tracker;
-            var repositoryGraph = tracker.RepositoryGraph;
-            var commit = repositoryGraph.GetCommit(commitId);
-            if (commit == null)
+            try
             {
-                this.lblCommit.Content = "Cannot find commit: " + commit.Id;
+                //var stopWatch = new Stopwatch();
+                //stopWatch.Start();
+
+                this.tracker = tracker;
+                var repositoryGraph = tracker.RepositoryGraph;
+                var commit = repositoryGraph.GetCommit(commitId);
+                if (commit == null)
+                {
+                    this.lblCommit.Content = "Cannot find commit: " + commit.Id;
+                }
+                else
+                {
+                    this.lblCommit.Content = "Hash: " + commit.Id;
+                    this.lblMessage.Content = "Message: " + commit.Message;
+                    this.lblAuthor.Content = commit.CommitterName + " " + commit.CommitDateRelative;
+                    //this.fileTree.ItemsSource = repositoryGraph.GetTree(commitId).Children;
+                    this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId);
+                    //this.radioShowFileTree.IsChecked = true;
+                    this.radioShowFileTree.IsEnabled = true;
+                    ClearEditor();
+                    this.commitId1 = commit.ParentIds.Count > 0 ? commit.ParentIds[0] : null;
+                    this.commitId2 = commit.Id;
+                    this.btnSwitch.Visibility = Visibility.Collapsed;
+                    this.txtFileName.Text = "";
+
+                    this.radioShowChanges.IsChecked = true;
+                    this.fileTree.Visibility = Visibility.Collapsed;
+                    this.patchList.Visibility = Visibility.Visible;
+                }
+
+                //stopWatch.Stop();
+                //this.lblCommit.Content = stopWatch.ElapsedMilliseconds.ToString();
             }
-            else
+            catch (Exception ex)
             {
-                this.lblCommit.Content = "Hash: " + commit.Id;
-                this.lblMessage.Content = "Message: " + commit.Message;
-                this.lblAuthor.Content = commit.CommitterName + " " + commit.CommitDateRelative;
-                this.fileTree.ItemsSource = repositoryGraph.GetTree(commitId).Children;
-                this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId);
-                this.radioShowFileTree.IsChecked = true;
-                this.radioShowFileTree.IsEnabled = true;
-                ClearEditor();
-                this.commitId1 = commit.ParentIds.Count > 0 ? commit.ParentIds[0] : null;
-                this.commitId2 = commit.Id;
-                this.btnSwitch.Visibility = Visibility.Collapsed;
-                this.txtFileName.Text = "";
-
-                this.radioShowChanges.IsChecked = true;
-                this.fileTree.Visibility = Visibility.Collapsed;
-                this.patchList.Visibility = Visibility.Visible;
-
+                this.lblCommit.Content = ex.Message + " Please try again.";
             }
         }
 
         internal void Show(GitFileStatusTracker tracker, string commitId1, string commitId2)
         {
-            this.tracker = tracker;
-            var repositoryGraph = tracker.RepositoryGraph;
+            try
+            {
+                this.tracker = tracker;
+                var repositoryGraph = tracker.RepositoryGraph;
 
-            var msg1 = repositoryGraph.Commits
-                .Where(r => r.Id.StartsWith(commitId1))
-                .Select(r => string.Format("{0} ({1}, {2})", r.Message, r.CommitDateRelative, r.CommitterName))
-                .First().Replace("\r", "");
+                var msg1 = repositoryGraph.Commits
+                    .Where(r => r.Id.StartsWith(commitId1))
+                    .Select(r => string.Format("{0} ({1}, {2})", r.Message, r.CommitDateRelative, r.CommitterName))
+                    .First().Replace("\r", "");
 
-            var msg2 = repositoryGraph.Commits
-                .Where(r => r.Id.StartsWith(commitId2))
-                .Select(r => string.Format("{0} ({1}, {2})", r.Message, r.CommitDateRelative, r.CommitterName))
-                .First().Replace("\r", "");
+                var msg2 = repositoryGraph.Commits
+                    .Where(r => r.Id.StartsWith(commitId2))
+                    .Select(r => string.Format("{0} ({1}, {2})", r.Message, r.CommitDateRelative, r.CommitterName))
+                    .First().Replace("\r", "");
 
-            var names1 = repositoryGraph.Refs
-                .Where(r => r.Id.StartsWith(commitId1))
-                .Select(r => r.Name);
+                var names1 = repositoryGraph.Refs
+                    .Where(r => r.Id.StartsWith(commitId1))
+                    .Select(r => r.Name);
 
-            var names2 = repositoryGraph.Refs
-                .Where(r => r.Id.StartsWith(commitId2))
-                .Select(r => r.Name);
+                var names2 = repositoryGraph.Refs
+                    .Where(r => r.Id.StartsWith(commitId2))
+                    .Select(r => r.Name);
 
-            var name1 = names1.Count() == 0 ? commitId1 : string.Join(", ", names1.ToArray());
-            var name2 = names2.Count() == 0 ? commitId2 : string.Join(", ", names2.ToArray());
+                var name1 = names1.Count() == 0 ? commitId1 : string.Join(", ", names1.ToArray());
+                var name2 = names2.Count() == 0 ? commitId2 : string.Join(", ", names2.ToArray());
 
-            this.lblCommit.Content = string.Format ("[{1}] {0}", msg1, name1);
-            this.lblMessage.Content = string.Format("[{1}] {0}", msg2, name2);
-            this.lblAuthor.Content = "";
+                this.lblCommit.Content = string.Format("[{1}] {0}", msg1, name1);
+                this.lblMessage.Content = string.Format("[{1}] {0}", msg2, name2);
+                this.lblAuthor.Content = "";
 
-            this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId1, commitId2);
-            this.radioShowChanges.IsChecked = true;
-            this.radioShowFileTree.IsEnabled = false;
-            ClearEditor();
-            this.commitId1 = commitId1;
-            this.commitId2 = commitId2;
-            this.btnSwitch.Visibility = Visibility.Visible;
-            this.txtFileName.Text = "";
+                this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId1, commitId2);
+                this.radioShowChanges.IsChecked = true;
+                this.radioShowFileTree.IsEnabled = false;
+                ClearEditor();
+                this.commitId1 = commitId1;
+                this.commitId2 = commitId2;
+                this.btnSwitch.Visibility = Visibility.Visible;
+                this.txtFileName.Text = "";
+            }
+            catch (Exception ex)
+            {
+                this.lblCommit.Content = ex.Message + " Please try again.";
+            }
+
         }
 
         private void radioShowFileTree_Checked(object sender, RoutedEventArgs e)

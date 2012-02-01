@@ -7,12 +7,12 @@
              d:DesignHeight="24" d:DesignWidth="180">
     <UserControl.ContextMenu>
         <ContextMenu>
-            <MenuItem Header="delete tag" Command="cmd:HistoryViewCommands.DeleteTag" CommandParameter="{Binding Text}" />
+            <MenuItem Header="delete tag" Click="DeleteTag_Click" />
         </ContextMenu>
     </UserControl.ContextMenu>
     <StackPanel Height="26" Orientation="Vertical">
         <Border BorderThickness="1" CornerRadius="4" BorderBrush="#B498FF7C" Background="#B498FF7C" HorizontalAlignment="Left">
-            <TextBlock Padding="10,0" Text="{Binding Text}" FontSize="10"
+            <TextBlock Padding="10,0" Text="{Binding Name}" FontSize="10"
                        VerticalAlignment="Center" HorizontalAlignment="Center" ></TextBlock>
         </Border>
         <Polygon Points="0,0 0.5,1 1,0" Fill="#B498FF7C" Width="6" Height="8" Stretch="Fill" Stroke="#B498FF7C" HorizontalAlignment="Left" Margin="10,0,0,0"/>

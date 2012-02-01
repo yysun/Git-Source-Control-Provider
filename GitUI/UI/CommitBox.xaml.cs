@@ -12,6 +12,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using GitUI;
+using Microsoft.VisualBasic;
+using GitScc.DataServices;
 
 namespace GitScc.UI
 {
@@ -24,7 +26,16 @@ namespace GitScc.UI
         internal const int HEIGHT = 120;
         internal const int WIDTH = 200;
 
-        public bool Selected { get; set; }
+        private bool selected;
+        public bool Selected
+        {
+            get { return selected; }
+            set
+            {
+                this.selected = value;
+                VisualStateManager.GoToElementState(this.root, this.selected ? "SelectedSate" : "NotSelectedState", true);
+            }
+        }
 
         public CommitBox()
         {
@@ -43,9 +54,78 @@ namespace GitScc.UI
 
         private void root_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            this.Selected = !this.Selected;
-            //VisualStateManager.GoToElementState(this.root, this.Selected ? "SelectedSate" : "NotSelectedState", true);
+            //this.Selected = !this.Selected;
             HistoryViewCommands.OpenCommitDetails.Execute(this.txtId.Text, null);
+        }
+
+        private void NewTag_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                dynamic commit = this.DataContext;
+                var text = string.Format("{0}\r\n\r\n{1}\r\n\r\n{2}, {3}",
+                    commit.ShortId, commit.Comments, commit.Author, commit.Date);
+
+                string tag = Interaction.InputBox(text, "git tag", "");
+
+                if (string.IsNullOrWhiteSpace(tag)) return;
+
+                var tag1 = ((Ref[])commit.Refs).Where(r => r.Type == RefTypes.Tag
+                    && r.Name == tag).FirstOrDefault();
+                if (tag1 != null && tag1.Id.StartsWith(commit.ShortId)) return;
+
+                string tagId = GitViewModel.Current.GetTagId(tag);
+
+                if (!string.IsNullOrWhiteSpace(tagId))
+                {
+                    MessageBox.Show("Tag already exists for " + tagId, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else
+                {
+                    var ret = GitViewModel.Current.AddTag(tag, commit.ShortId);
+                    if(!string.IsNullOrWhiteSpace(ret)) 
+                        MessageBox.Show(ret, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void NewBranch_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                dynamic commit = this.DataContext;
+                var text = string.Format("{0}\r\n\r\n{1}\r\n\r\n{2}, {3}",
+                    commit.ShortId, commit.Comments, commit.Author, commit.Date);
+
+                string branch = Interaction.InputBox(text, "git branch", "");
+
+                if (string.IsNullOrWhiteSpace(branch)) return;
+
+                var branch1 = ((Ref[])commit.Refs).Where(r => r.Type == RefTypes.Branch
+                    && r.Name == branch).FirstOrDefault();
+                if (branch1 != null && branch1.Id.StartsWith(commit.ShortId)) return;
+
+                string branchId = GitViewModel.Current.GetBranchId(branch);
+
+                if (!string.IsNullOrWhiteSpace(branchId))
+                {
+                    MessageBox.Show("Tag already exists for " + branchId, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else
+                {
+                    var ret = GitViewModel.Current.AddBranch(branch, commit.ShortId);
+                    if (!string.IsNullOrWhiteSpace(ret))
+                        MessageBox.Show(ret, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

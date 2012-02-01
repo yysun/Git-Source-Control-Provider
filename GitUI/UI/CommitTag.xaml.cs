@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using GitUI;
 
 namespace GitScc.UI
 {
@@ -22,6 +23,18 @@ namespace GitScc.UI
         public CommitTag()
         {
             InitializeComponent();
+        }
+
+        private void DeleteTag_Click(object sender, RoutedEventArgs e)
+        {
+            dynamic tag = this.DataContext;
+
+            if (MessageBox.Show("Are you sure you want to delete tag: " + tag.Name,
+                "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                var ret = GitViewModel.Current.DeleteTag(tag.Name);
+                //if(!string.IsNullOrWhiteSpace(ret)) MessageBox.Show(ret);
+            }
         }
     }
 }

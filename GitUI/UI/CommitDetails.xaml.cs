@@ -32,6 +32,7 @@ namespace GitScc.UI
                 Path.GetExtension(tmpFileName));
             this.editor.ShowLineNumbers = true;
             this.editor.Load(tmpFileName);
+            File.Delete(tmpFileName);
         }
 
         private void ClearEditor()
@@ -60,21 +61,28 @@ namespace GitScc.UI
                 //var stopWatch = new Stopwatch();
                 //stopWatch.Start();
 
+                this.fileTree.ItemsSource = null;
+                this.patchList.ItemsSource = null;
+
                 this.tracker = tracker;
                 var repositoryGraph = tracker.RepositoryGraph;
                 var commit = repositoryGraph.GetCommit(commitId);
                 if (commit == null)
                 {
                     this.lblCommit.Content = "Cannot find commit: " + commit.Id;
+                    this.radioShowChanges.IsEnabled = false;
+                    this.radioShowFileTree.IsEnabled = false;
                 }
                 else
                 {
-                    this.lblCommit.Content = "Hash: " + commit.Id;
-                    this.lblMessage.Content = "Message: " + commit.Message;
+                    this.radioShowChanges.IsEnabled = true;
+                    this.radioShowFileTree.IsEnabled = true;
+
+                    //this.lblCommit.Content = commit.Id;
+                    this.lblMessage.Content = string.Format("[{0}] {1}", commit.Id.Substring(0, 7), commit.Message.Replace("\r", ""));
                     this.lblAuthor.Content = commit.CommitterName + " " + commit.CommitDateRelative;
                     //this.fileTree.ItemsSource = repositoryGraph.GetTree(commitId).Children;
                     this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId);
-                    //this.radioShowFileTree.IsChecked = true;
                     this.radioShowFileTree.IsEnabled = true;
                     ClearEditor();
                     this.commitId1 = commit.ParentIds.Count > 0 ? commit.ParentIds[0] : null;
@@ -85,6 +93,15 @@ namespace GitScc.UI
                     this.radioShowChanges.IsChecked = true;
                     this.fileTree.Visibility = Visibility.Collapsed;
                     this.patchList.Visibility = Visibility.Visible;
+
+                    var names2 = repositoryGraph.Refs
+                        .Where(r => r.Id.StartsWith(commitId2))
+                        .Select(r => r.Name);
+
+                    var name2 = names2.Count() == 0 ? commitId2 : string.Join(", ", names2.ToArray());
+                    this.lblCommit.Content = name2;
+
+                    if (this.patchList.Items.Count > 0) this.patchList.SelectedIndex = 0;
                 }
 
                 //stopWatch.Stop();
@@ -149,6 +166,13 @@ namespace GitScc.UI
             this.fileTree.Visibility = Visibility.Visible;
             this.patchList.Visibility = Visibility.Collapsed;
             ClearEditor();
+
+            if (this.tracker != null && this.fileTree.ItemsSource == null)
+            {
+                var repositoryGraph = tracker.RepositoryGraph;
+                if(repositoryGraph!=null)
+                    this.fileTree.ItemsSource = repositoryGraph.GetTree(commitId2).Children;
+            }
         }
 
         private void radioShowChanges_Checked(object sender, RoutedEventArgs e)

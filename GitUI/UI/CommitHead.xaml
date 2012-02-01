@@ -7,14 +7,14 @@
              d:DesignHeight="18" d:DesignWidth="100" Loaded="UserControl_Loaded">
     <UserControl.ContextMenu>
         <ContextMenu>
-            <MenuItem Header="checkout" Command="cmd:HistoryViewCommands.CheckOut" CommandParameter="{Binding Text}" />
-            <MenuItem Header="delete branch" Command="cmd:HistoryViewCommands.DeleteBranch" CommandParameter="{Binding Text}" />
+            <MenuItem Header="checkout" Click="CheckoutBranch_Click" x:Name="menuCheckoutBranch" />
+            <MenuItem Header="delete branch" Click="DeleteBranch_Click" x:Name="menuDeleteBranch"/>
         </ContextMenu>
     </UserControl.ContextMenu>
     <StackPanel Height="18" Orientation="Horizontal">
         <Polygon x:Name="polygon" Points="0,0.5 1,0 1,1" Fill="#93F87C7C" Width="12" Height="6" Stretch="Fill" Stroke="{x:Null}" />
         <Border x:Name="border" BorderThickness="1" CornerRadius="4" BorderBrush="#93F87C7C" Background="#93F87C7C">
-            <TextBlock x:Name="textBlock" Padding="10,0" Text="{Binding Text}" FontSize="10"
+            <TextBlock x:Name="textBlock" Padding="10,0" Text="{Binding Name}" FontSize="10"
                        VerticalAlignment="Center" HorizontalAlignment="Center" ></TextBlock>
         </Border>
     </StackPanel>

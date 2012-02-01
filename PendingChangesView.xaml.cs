@@ -178,13 +178,9 @@ namespace GitScc
                 return;
             }
 
-            //double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
-            //if (delta < 1000) return; //no refresh within 1 second
-            //Debug.WriteLine("==== Pending Changes Refresh {0}", delta);
-
-            var dispatcher = Dispatcher.CurrentDispatcher;
-            Action act = () =>
-            {
+            //var dispatcher = Dispatcher.CurrentDispatcher;
+            //Action act = () =>
+            //{
 
                 service.NoRefresh = true;
                 ShowStatusMessage("Getting changed files ...");
@@ -227,11 +223,11 @@ namespace GitScc
                 service.NoRefresh = false;
                 service.lastTimeRefresh = DateTime.Now; //important!!
 
-            };
+            //};
 
-            dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+            //dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
 
-            lastTimeRefresh = DateTime.Now;
+            //lastTimeRefresh = DateTime.Now;
         }
 
         internal void ClearUI()
@@ -284,8 +280,6 @@ namespace GitScc
                     var id = tracker.Commit(Comments);
                     ShowStatusMessage("Commit successfully. Commit Hash: " + id);
                     ClearUI();
-                    service.NoRefresh = false;
-                    service.NodesGlyphsDirty = true;
                 }
                 catch (Exception ex)
                 {
@@ -294,7 +288,8 @@ namespace GitScc
                 }
             }
             service.NoRefresh = false;
-            service.lastTimeRefresh = DateTime.Now;
+            //service.lastTimeRefresh = DateTime.Now;
+            service.NodesGlyphsDirty = true; // force refresh
         }
 
         internal void AmendCommit()
@@ -315,7 +310,6 @@ namespace GitScc
                         var id = tracker.AmendCommit(Comments);
                         ShowStatusMessage("Amend last commit successfully. Commit Hash: " + id);
                         ClearUI();
-                        service.NodesGlyphsDirty = true;
                     }
                     catch (Exception ex)
                     {
@@ -323,8 +317,9 @@ namespace GitScc
                         ShowStatusMessage(ex.Message);
                     }
                 }
-                service.lastTimeRefresh = DateTime.Now;
                 service.NoRefresh = false;
+                //service.lastTimeRefresh = DateTime.Now;
+                service.NodesGlyphsDirty = true; // force refresh
             }
         }
 

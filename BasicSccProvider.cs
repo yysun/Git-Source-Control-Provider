@@ -416,8 +416,8 @@ namespace GitScc
         private void ShowHistoryWindow(object sender, EventArgs e)
         {
             var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            path = Path.Combine(path, "GitUI.pkg");
-            var tmpPath = Path.Combine(Path.GetTempPath(), "GitUI.exe");
+            path = Path.Combine(path, "Dragon.pkg");
+            var tmpPath = Path.Combine(Path.GetTempPath(), "Dragon.exe");
 
             try
             {

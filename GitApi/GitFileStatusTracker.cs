@@ -877,6 +877,8 @@ namespace GitScc
 
         internal IList<GitFile> GetChangedFiles()
         {
+            if (!HasGitRepository) return new List<GitFile>();
+
             if (GitBash.Exists)
             {
                 var output = GitBash.Run("status --porcelain -z --untracked-files", this.GitWorkingDirectory);

@@ -14,6 +14,8 @@ using System.Windows.Threading;
 using System.Windows.Xps;
 using System.Windows.Xps.Packaging;
 using GitScc.DataServices;
+using GitUI;
+using System.Windows.Media.Animation;
 
 namespace GitScc.UI
 {
@@ -22,15 +24,6 @@ namespace GitScc.UI
     /// </summary>
     public partial class HistoryGraph : UserControl
     {
-        public GitUI.GitViewModel GitViewModel
-        {
-            set
-            {
-                this.tracker = value.Tacker;
-                Show(tracker);
-            }
-        }
-
         public HistoryGraph()
         {
             InitializeComponent();
@@ -40,7 +33,7 @@ namespace GitScc.UI
 
         private bool isDragging = false;
         private Point offset;
-
+        
         private void canvasContainer_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             this.isDragging = true;
@@ -78,10 +71,6 @@ namespace GitScc.UI
             this.canvasContainer.Height = (PADDING * 2 + (maxY + 1) * GRID_HEIGHT);
             this.canvasRoot.Height = this.canvasContainer.Height * scale;
 
-            this.canvasContainer.SetValue(Canvas.LeftProperty, 0.0);
-            this.canvasContainer.SetValue(Canvas.TopProperty, 0.0);
-
-            this.scrollRoot.ScrollToRightEnd();
         }
 
         private void scrollRoot_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -90,21 +79,14 @@ namespace GitScc.UI
             double mouseDelta = Math.Sign(e.Delta);
 
             // calculate the new scale for the canvas
-            double newScale = this.Scaler.ScaleX + (mouseDelta * .2);
+            double newScale = this.Scaler.ScaleX + (mouseDelta * .05);
 
             // Don't allow scrolling too big or small
-            if (newScale < 0.1 || newScale > 50) return;
+            if (newScale < 0.1 || newScale > 5) return;
 
             // Set the zoom!
             this.Scaler.ScaleX = newScale;
             this.Scaler.ScaleY = newScale;
-
-            //var animationDuration = TimeSpan.FromSeconds(.2);
-            //var scaleAnimate = new DoubleAnimation(newScale, new Duration(animationDuration));
-
-            //this.Scaler.BeginAnimation(ScaleTransform.ScaleXProperty, scaleAnimate);
-            //this.Scaler.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimate);
-
             AdjustCanvasSize(newScale);
         }
 
@@ -119,13 +101,13 @@ namespace GitScc.UI
 
         private GitFileStatusTracker tracker;
 
-        internal void Show(GitFileStatusTracker tracker)
+        internal void Show(GitFileStatusTracker tracker, bool scroll)
         {
             this.tracker = tracker;
 
-            loading.Visibility = Visibility.Visible;            
-            
-            Action act = () =>
+            loading.Visibility = Visibility.Visible;
+
+            Action action = () =>
             {
                 try
                 {
@@ -166,6 +148,7 @@ namespace GitScc.UI
                                     Comments = commit.Message,
                                     Author = commit.CommitterName,
                                     Date = commit.CommitDateRelative,
+                                    Refs = commit.Refs
                                 };
 
                                 double left = GetScreenX(maxX - commit.Y);
@@ -182,30 +165,31 @@ namespace GitScc.UI
                                 #region Add Branches
 
                                 var m = 0;
-                                foreach (var name in commit.Refs.Where(r => r.Type == RefTypes.Branch || r.Type == RefTypes.HEAD))
+                                foreach (var head in commit.Refs.Where(r => r.Type == RefTypes.Branch || r.Type == RefTypes.HEAD))
                                 {
                                     var control = new CommitHead
                                     {
-                                        DataContext = new { Text = name },
+                                        DataContext = head,
                                     };
 
                                     Canvas.SetLeft(control, left + CommitBox.WIDTH + 4);
                                     Canvas.SetTop(control, top + m++ * 30);
 
                                     this.canvasContainer.Children.Add(control);
+
                                 }
                                 #endregion
 
                                 #region Add Tags
                                 m = 0;
-                                foreach (var name in commit.Refs.Where(r => r.Type == RefTypes.Tag))
+                                foreach (var tag in commit.Refs.Where(r => r.Type == RefTypes.Tag))
                                 {
                                     var control = new CommitTag
                                     {
-                                        DataContext = new { Text = name },
+                                        DataContext = tag,
                                     };
 
-                                    Canvas.SetLeft(control, left + m++ * 100); // TODO: get width of the control
+                                    Canvas.SetLeft(control, left + m++ * 80); // TODO: get width of the control
                                     Canvas.SetTop(control, top - 24);
 
                                     this.canvasContainer.Children.Add(control);
@@ -332,15 +316,29 @@ namespace GitScc.UI
                         AdjustCanvasSize(this.Scaler.ScaleX);
                     }
 
+
+                    if (scroll)
+                    {
+                        this.Scaler.ScaleX = this.Scaler.ScaleY = 1;
+                        AdjustCanvasSize(1);
+
+                        this.canvasContainer.SetValue(Canvas.LeftProperty, 0.0);
+                        this.canvasContainer.SetValue(Canvas.TopProperty, 0.0);
+
+                        this.scrollRoot.ScrollToRightEnd();
+                    }
                 }
                 catch (Exception ex)
                 {
                     Log.WriteLine("History Graph Show: {0}", ex.ToString());
                 }
+
                 loading.Visibility = Visibility.Collapsed;
+
+                HistoryViewCommands.GraphLoaded.Execute(null, this);
             };
 
-            this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+            this.Dispatcher.BeginInvoke(action);
         }
 
         private string GetHashCode(IList<GraphNode> commits)
@@ -408,6 +406,32 @@ namespace GitScc.UI
                 encoder.Save(outStream);
             }
             canvasContainer.LayoutTransform = transform;
+        }
+
+        internal void ScrollToCommit(string commitId)
+        {
+            var id = commitId.Substring(0, 7);
+            foreach (var element in this.canvasContainer.Children)
+            {
+                var box = element as CommitBox;
+                if (box != null)
+                {
+                    box.Selected = box.txtId.Text == id;
+                    if (box.Selected)
+                    {
+                        this.Scaler.ScaleX = this.Scaler.ScaleY = 1;
+                        AdjustCanvasSize(1);
+                        this.canvasContainer.SetValue(Canvas.LeftProperty, 0.0);
+                        this.canvasContainer.SetValue(Canvas.TopProperty, 0.0);
+
+                        var left = Canvas.GetLeft(box) + Canvas.GetLeft(canvasContainer) - this.ActualWidth / 2 + GRID_WIDTH / 2;
+                        var top = Canvas.GetTop(box) + Canvas.GetTop(canvasContainer) - this.ActualHeight / 2 + GRID_HEIGHT / 2;
+
+                        this.scrollRoot.ScrollToHorizontalOffset(left);
+                        this.scrollRoot.ScrollToVerticalOffset(top);
+                    }
+                }
+            }            
         }
     }
 }

@@ -53,7 +53,7 @@ namespace GitScc.DataServices
                         
                         PlotCommitList<PlotLane> pcl = new PlotCommitList<PlotLane>();
                         pcl.Source(plotWalk);
-                        pcl.FillTo(200);
+                        pcl.FillTo(100);
 
                         commits = pcl.Select(c => new Commit
                         {

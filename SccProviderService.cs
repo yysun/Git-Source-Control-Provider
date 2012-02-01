@@ -924,40 +924,39 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
 
         internal bool NodesGlyphsDirty = false;
         internal bool NoRefresh = false;
-        internal DateTime lastTimeRefresh = DateTime.Now.AddDays(-1); //fix #17277, #16935
+        internal DateTime lastTimeRefresh = DateTime.Now.AddDays(-1);
 
         internal void Refresh()
         {
             if (!NoRefresh)
             {
-                double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
-                if (delta > 500)
-                {
-                    Debug.WriteLine("==== Refresh: " + Math.Floor(delta).ToString());
-                    NodesGlyphsDirty = true;
-                }
+                NodesGlyphsDirty = true;
+                lastTimeRefresh = DateTime.Now;
             }
-            //lastTimeRefresh = DateTime.Now;
         }
 
         public void UpdateNodesGlyphs()
         {
             if (NodesGlyphsDirty && !NoRefresh)
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
+                double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
+                if (delta > 500)
+                {
+                    Stopwatch stopwatch = new Stopwatch();
+                    stopwatch.Start();
 
-                NoRefresh = true;
-                OpenTracker();
-                RefreshNodesGlyphs();
-                RefreshToolWindows();
-                NoRefresh = false; //can't rely on tool window to set it to false
-                NodesGlyphsDirty = false;
+                    NoRefresh = true;
+                    OpenTracker();
+                    RefreshNodesGlyphs();
+                    RefreshToolWindows();
+                    NoRefresh = false;  
+                    NodesGlyphsDirty = false;
 
-                stopwatch.Stop();
-                Debug.WriteLine("==== UpdateNodesGlyphs: " + stopwatch.ElapsedMilliseconds);
+                    stopwatch.Stop();
+                    Debug.WriteLine("==== UpdateNodesGlyphs: " + stopwatch.ElapsedMilliseconds);
 
-                lastTimeRefresh = DateTime.Now; //important !!
+                    lastTimeRefresh = DateTime.Now; //important !!
+                }
             }
         }
 

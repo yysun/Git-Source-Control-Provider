@@ -87,5 +87,33 @@ namespace GitScc
                     throw new Exception(error);
             }
         }
+
+        public static void OpenGitBash(string workingDirectory)
+        {
+            if (!Exists) return;
+
+            var gitBashPath = gitExePath.Replace("git.exe", "sh.exe");
+            RunDetatched("cmd.exe", string.Format("/c \"{0}\" --login -i", gitBashPath), workingDirectory);
+        }
+
+        internal static void RunDetatched(string cmd, string arguments, string workingDirectory)
+        {
+            using (Process process = new Process())
+            {
+                process.StartInfo.UseShellExecute = true;
+                process.StartInfo.ErrorDialog = false;
+                process.StartInfo.RedirectStandardOutput = false;
+                process.StartInfo.RedirectStandardInput = false;
+
+                process.StartInfo.CreateNoWindow = false;
+                process.StartInfo.FileName = cmd;
+                process.StartInfo.Arguments = arguments;
+                process.StartInfo.WorkingDirectory = workingDirectory;
+                process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+                process.StartInfo.LoadUserProfile = true;
+
+                process.Start();
+            }
+        }
     }
 }

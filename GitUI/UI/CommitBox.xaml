@@ -35,8 +35,8 @@
 	</UserControl.Resources>
 	<UserControl.ContextMenu>
 		<ContextMenu>
-			<MenuItem Header="new tag" Command="cmd:HistoryViewCommands.NewTag" CommandParameter="{Binding Id}" />
-			<MenuItem Header="new branch" Command="cmd:HistoryViewCommands.NewBranch" CommandParameter="{Binding Id}" />
+			<MenuItem Header="new tag" Click="NewTag_Click" />
+			<MenuItem Header="new branch" Click="NewBranch_Click" />
 			<MenuItem Header="view details" Command="cmd:HistoryViewCommands.OpenCommitDetails" CommandParameter="{Binding Id}" />
 		</ContextMenu>
 	</UserControl.ContextMenu>    

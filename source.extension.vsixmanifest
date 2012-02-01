@@ -34,6 +34,6 @@
     <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
     <MefComponent>DiffClassifier.dll</MefComponent>
     <CustomExtension Type="htm">Readme.htm</CustomExtension>
-    <CustomExtension Type="pg">GitUI.pkg</CustomExtension>
+    <CustomExtension Type="pkg">Dragon.pkg</CustomExtension>
   </Content>
 </Vsix>

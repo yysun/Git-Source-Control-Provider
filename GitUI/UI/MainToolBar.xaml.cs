@@ -34,14 +34,19 @@ namespace GitUI.UI
                 if (tracker.HasGitRepository)
                 {
                     this.branchList.ItemsSource = tracker.RepositoryGraph.Refs
-                         .Where(r => r.Type == RefTypes.Branch)
+                         .Where(r => (r.Type == RefTypes.Branch || r.Type == RefTypes.HEAD) && isLoaded(r))
                          .Select(r => r.Name);
 
                     this.tagList.ItemsSource = tracker.RepositoryGraph.Refs
-                        .Where(r => r.Type == RefTypes.Tag)
+                        .Where(r => r.Type == RefTypes.Tag && isLoaded(r))
                         .Select(r => r.Name);
                 }
             }
+        }
+
+        private bool isLoaded(Ref r)
+        {
+            return tracker.RepositoryGraph.Commits.Any(c => c.Id == r.Id);
         }
 
         public MainToolBar()
@@ -51,10 +56,38 @@ namespace GitUI.UI
 
         private void checkBox1_Click(object sender, RoutedEventArgs e)
         {
-            bool isSimplied = tracker.RepositoryGraph.IsSimplified;
-            tracker.RepositoryGraph.IsSimplified = !isSimplied;
-            this.lableView.Content = !isSimplied ? "Simplified view: ON" : "Simplified view: OFF";
-            gitViewModel.RefreshGraph();
+            if (tracker.HasGitRepository)
+            {
+                bool isSimplied = tracker.RepositoryGraph.IsSimplified;
+                tracker.RepositoryGraph.IsSimplified = !isSimplied;
+                this.lableView.Content = !isSimplied ? "Simplified view: ON" : "Simplified view: OFF";
+                gitViewModel.RefreshGraph();
+            }
+        }
+
+        private void branchList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var name = branchList.SelectedValue as string;
+            var id = tracker.RepositoryGraph.Refs
+                            .Where(r => (r.Type == RefTypes.Branch || r.Type == RefTypes.HEAD) && r.Name == name)
+                            .Select(r => r.Id)
+                            .FirstOrDefault();
+            if (id != null) HistoryViewCommands.ScrollToCommit.Execute(id, this);
+        }
+
+        private void tagList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var name = tagList.SelectedValue as string;
+            var id = tracker.RepositoryGraph.Refs
+                            .Where(r => r.Type == RefTypes.Tag && r.Name == name)
+                            .Select(r => r.Id)
+                            .FirstOrDefault();
+            if (id != null) HistoryViewCommands.ScrollToCommit.Execute(id, this);
+        }
+
+        private void btnRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            HistoryViewCommands.RefreshGraph.Execute(null, this);
         }
     }
 }

@@ -24,12 +24,12 @@
         <Label Content="Branches" Height="28" HorizontalAlignment="Left" Margin="6,2,0,0" x:Name="label1" VerticalAlignment="Top" FontSize="10" />
         <Label Content="Tags" Height="28" HorizontalAlignment="Left" Margin="6,26,0,0" x:Name="label2" VerticalAlignment="Top" FontSize="10" />
         <ListBox x:Name="branchList" Margin="60,3,200,67" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" ItemTemplate="{DynamicResource DataTemplate1}" 
-                     Background="#00000000" BorderBrush="{x:Null}" Height="20" ItemContainerStyle="{DynamicResource ListBoxItemStyle1}"
-                     ScrollViewer.HorizontalScrollBarVisibility="hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" SelectionChanged="branchList_SelectionChanged" />
+                     Background="#00000000" BorderBrush="{x:Null}" Height="26" ItemContainerStyle="{DynamicResource ListBoxItemStyle1}"
+                     ScrollViewer.HorizontalScrollBarVisibility="hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" MouseLeftButtonUp="branchList_MouseLeftButtonUp" VerticalAlignment="Top" />
 
         <ListBox x:Name="tagList" Margin="60,27,200,43" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" ItemTemplate="{DynamicResource DataTemplate1}" 
-                     Background="#00000000" BorderBrush="{x:Null}" Height="20" ItemContainerStyle="{DynamicResource ListBoxItemStyle1}"
-                     ScrollViewer.HorizontalScrollBarVisibility="hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" SelectionChanged="tagList_SelectionChanged" />
+                     Background="#00000000" BorderBrush="{x:Null}" Height="26" ItemContainerStyle="{DynamicResource ListBoxItemStyle1}"
+                     ScrollViewer.HorizontalScrollBarVisibility="hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" MouseLeftButtonUp="tagList_MouseLeftButtonUp" VerticalAlignment="Top" />
         <CheckBox Content="Show simplified graph" HorizontalAlignment="Right" Margin="0,8,43,0" Name="checkBox1" Template="{DynamicResource ShowSimpleGraphCheckBoxControlTemplate}" 
                   VerticalAlignment="Top" ToolTip="Toggle View"  Click="checkBox1_Click"/>
         
@@ -41,9 +41,9 @@
         <TextBox VerticalAlignment="Bottom" Margin="60,0,200,12.04" x:Name="txtSearch" TextChanged="txtSearch_TextChanged" PreviewKeyDown="txtSearch_PreviewKeyDown" PreviewMouseDown="txtSearch_PreviewMouseDown" />
         <ListBox Height="100" Margin="60,0,200,-88.96" VerticalAlignment="Bottom" x:Name="lstSearch" PreviewKeyDown="lstSearch_PreviewKeyDown" MouseDoubleClick="lstSearch_MouseDoubleClick" />
         <Button Content="Button" HorizontalAlignment="Right" Margin="0,36,72,0" Template="{DynamicResource CompareButtonControlTemplate}" ToolTip="Compare ..." x:Name="btnCompare" Click="btnCompare_Click"/>
-        <TextBlock HorizontalAlignment="Right" Margin="0,37,96,29" TextWrapping="NoWrap" Text="123456" Width="88.38" Foreground="#FFFF5656" x:Name="txtCommit1"/>
-        <TextBlock HorizontalAlignment="Right" Height="24" Margin="0,0,96,7.211" TextWrapping="NoWrap" Text="123456" VerticalAlignment="Bottom" Width="88.38" Foreground="#FFFF5656" x:Name="txtCommit2"/>
-        <Label Content="Selected Commits &#xd;&#xa;to compare" Height="48" HorizontalAlignment="Right" Margin="0,1,88.483,0" VerticalAlignment="Top" FontSize="10" Width="99.897" x:Name="lblSelectedCommits"/>
+        <TextBlock HorizontalAlignment="Right" Margin="0,43,96,23" TextWrapping="NoWrap" Text="123456" Width="88.38" Foreground="#FFFF5656" x:Name="txtCommit1" FontSize="10" />
+        <TextBlock HorizontalAlignment="Right" Height="24" Margin="0,0,96,7.211" TextWrapping="NoWrap" Text="123456" VerticalAlignment="Bottom" Width="88.38" Foreground="#FFFF5656" x:Name="txtCommit2" FontSize="10" />
+        <Label Content="Selected Commits &#xd;&#xa;to compare" Height="46" HorizontalAlignment="Right" Margin="0,1,88.483,0" VerticalAlignment="Top" FontSize="10" Width="99.897" x:Name="lblSelectedCommits"/>
         <!--<Button Content="0" HorizontalAlignment="Right" Margin="0,8,100,0" x:Name="btnCommitCount" VerticalAlignment="Top" Template="{DynamicResource CommitCountControlTemplate}" RenderTransformOrigin="-1.125,0.438" Click="btnCommitCount_Click" ToolTip="Click to clear selection" />-->
      </Grid>
 </UserControl>

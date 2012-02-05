@@ -651,7 +651,8 @@ namespace GitScc
             Debug.WriteLine("==== Close Tracker");
             trackers.Clear();
             RemoveFolderMonitor();
-            RefreshToolWindows();
+            NodesGlyphsDirty = true; // set refresh flag
+            //RefreshToolWindows();
         }
 
         private void RemoveFolderMonitor()
@@ -925,13 +926,19 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
         internal bool NodesGlyphsDirty = false;
         internal bool NoRefresh = false;
         internal DateTime lastTimeRefresh = DateTime.Now.AddDays(-1);
+        internal DateTime nextTimeRefresh = DateTime.Now;
 
         internal void Refresh()
         {
             if (!NoRefresh)
             {
-                NodesGlyphsDirty = true;
-                lastTimeRefresh = DateTime.Now;
+                double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
+                if (delta > 500)
+                {
+                    NodesGlyphsDirty = true;
+                    lastTimeRefresh = DateTime.Now;
+                    nextTimeRefresh = DateTime.Now;
+                }
             }
         }
 
@@ -939,11 +946,13 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
         {
             if (NodesGlyphsDirty && !NoRefresh)
             {
-                double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
-                if (delta > 500)
+                double delta = DateTime.Now.Subtract(nextTimeRefresh).TotalMilliseconds;
+                if (delta > 200)
                 {
-                    Stopwatch stopwatch = new Stopwatch();
-                    stopwatch.Start();
+                    Debug.WriteLine("==== UpdateNodesGlyphs: " + delta.ToString());
+
+                    //Stopwatch stopwatch = new Stopwatch();
+                    //stopwatch.Start();
 
                     NoRefresh = true;
                     OpenTracker();
@@ -952,10 +961,9 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
                     NoRefresh = false;  
                     NodesGlyphsDirty = false;
 
-                    stopwatch.Stop();
-                    Debug.WriteLine("==== UpdateNodesGlyphs: " + stopwatch.ElapsedMilliseconds);
-
-                    lastTimeRefresh = DateTime.Now; //important !!
+                    nextTimeRefresh = DateTime.Now; //important !!
+                    //stopwatch.Stop();
+                    //Debug.WriteLine("==== UpdateNodesGlyphs: " + stopwatch.ElapsedMilliseconds);
                 }
             }
         }

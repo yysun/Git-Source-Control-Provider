@@ -10,147 +10,201 @@ using System.Windows.Threading;
 
 namespace GitUI
 {
-    public static class HistoryViewCommands
-    {
-        public static readonly RoutedUICommand CloseCommitDetails = new RoutedUICommand("CloseCommitDetails", "CloseCommitDetails", typeof(MainWindow));
-        public static readonly RoutedUICommand OpenCommitDetails = new RoutedUICommand("OpenCommitDetails", "OpenCommitDetails", typeof(MainWindow));
-        public static readonly RoutedUICommand SelectCommit = new RoutedUICommand("SelectCommit", "SelectCommit", typeof(MainWindow));
-        public static readonly RoutedUICommand CompareCommits = new RoutedUICommand("CompareCommits", "CompareCommits", typeof(MainWindow));
-        public static readonly RoutedUICommand ExportGraph = new RoutedUICommand("ExportGraph", "ExportGraph", typeof(MainWindow));
-        public static readonly RoutedUICommand RefreshGraph = new RoutedUICommand("RefreshGraph", "RefreshGraph", typeof(MainWindow));
-        public static readonly RoutedUICommand ScrollToCommit = new RoutedUICommand("ScrollToCommit", "ScrollToCommit", typeof(MainWindow));
-        public static readonly RoutedUICommand GraphLoaded = new RoutedUICommand("GraphLoaded", "GraphLoaded", typeof(MainWindow));
-    }
+	public static class HistoryViewCommands
+	{
+		public static readonly RoutedUICommand CloseCommitDetails = new RoutedUICommand("CloseCommitDetails", "CloseCommitDetails", typeof(MainWindow));
+		public static readonly RoutedUICommand OpenCommitDetails = new RoutedUICommand("OpenCommitDetails", "OpenCommitDetails", typeof(MainWindow));
+		public static readonly RoutedUICommand SelectCommit = new RoutedUICommand("SelectCommit", "SelectCommit", typeof(MainWindow));
+		public static readonly RoutedUICommand CompareCommits = new RoutedUICommand("CompareCommits", "CompareCommits", typeof(MainWindow));
+		public static readonly RoutedUICommand ExportGraph = new RoutedUICommand("ExportGraph", "ExportGraph", typeof(MainWindow));
+		public static readonly RoutedUICommand RefreshGraph = new RoutedUICommand("RefreshGraph", "RefreshGraph", typeof(MainWindow));
+		public static readonly RoutedUICommand ScrollToCommit = new RoutedUICommand("ScrollToCommit", "ScrollToCommit", typeof(MainWindow));
+		public static readonly RoutedUICommand GraphLoaded = new RoutedUICommand("GraphLoaded", "GraphLoaded", typeof(MainWindow));
+	}
 
-    public class GitViewModel
-    {
-        #region singleton
-        private static GitViewModel current;
-        public static GitViewModel Current
-        {
-            get
-            {
-                if (current == null) current = new GitViewModel();
-                return current;
-            }
-        } 
-        #endregion
+	public class GitViewModel
+	{
+		#region singleton
+		private static GitViewModel current;
+		public static GitViewModel Current
+		{
+			get
+			{
+				if (current == null) current = new GitViewModel();
+				return current;
+			}
+		} 
+		#endregion
 
-        public event EventHandler GraphChanged = delegate { };
-        private GitFileStatusTracker tracker;
-        private string workingDirectory;
+		public event EventHandler GraphChanged = delegate { };
+		private GitFileStatusTracker tracker;
+		private string workingDirectory;
 
-        public GitFileStatusTracker Tracker { get { return tracker; } }
-        public string WorkingDirectory { get { return workingDirectory; } }
+		public GitFileStatusTracker Tracker { get { return tracker; } }
+		public string WorkingDirectory { get { return workingDirectory; } }
 
-        DispatcherTimer timer;
+		DispatcherTimer timer;
+		FileSystemWatcher fileSystemWatcher;
 
-        private GitViewModel()
-        {
-            var args = Environment.GetCommandLineArgs();
-            workingDirectory = args.Length > 1 ? args[1] :
-                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+		private GitViewModel()
+		{
+			var args = Environment.GetCommandLineArgs();
+			workingDirectory = args.Length > 1 ? args[1] :
+				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-            tracker = new GitFileStatusTracker(workingDirectory);
-            if (tracker.HasGitRepository) workingDirectory = tracker.GitWorkingDirectory;
-            if (Directory.Exists(workingDirectory))
-            {
-                FileSystemWatcher fileSystemWatcher = new FileSystemWatcher(workingDirectory);
+			tracker = new GitFileStatusTracker(workingDirectory);
+			if (tracker.HasGitRepository) workingDirectory = tracker.GitWorkingDirectory;
+			if (Directory.Exists(workingDirectory))
+			{
+				fileSystemWatcher = new FileSystemWatcher(workingDirectory);
 
-                fileSystemWatcher.Created += (_, e) => Refresh();
-                fileSystemWatcher.Changed += (_, e) => Refresh();
-                fileSystemWatcher.Deleted += (_, e) => Refresh();
-                fileSystemWatcher.Renamed += (_, e) => Refresh();
-                fileSystemWatcher.EnableRaisingEvents = true;
-            }
+				//fileSystemWatcher.Created += (_, e) => Refresh();
+				//fileSystemWatcher.Changed += (_, e) => Refresh();
+				//fileSystemWatcher.Deleted += (_, e) => Refresh();
+				//fileSystemWatcher.Renamed += (_, e) => Refresh();
 
-            timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(1);
-            timer.Tick +=new EventHandler(timer_Tick);
-        }
+				fileSystemWatcher.Changed +=new FileSystemEventHandler(fileSystemWatcher_Changed);
+				fileSystemWatcher.EnableRaisingEvents = true;
 
-        private bool NoRefresh;
+				timer = new DispatcherTimer();
+				timer.Interval = TimeSpan.FromMilliseconds(100);
+				timer.Tick+=new EventHandler(timer_Tick);
+				timer.Start();
+			}
+		}
 
-        private void timer_Tick(Object sender, EventArgs args)
-        {
-            timer.Stop(); // one time deal
+		#region Refresh
 
-            if (!NoRefresh)
-            {
-                NoRefresh = true;
-                tracker.Refresh();
-                GraphChanged(this, null);
-                NoRefresh = false;
-            }
-        }
+		internal DateTime lastTimeRefresh = DateTime.Now.AddDays(-1);
+		internal DateTime nextTimeRefresh = DateTime.Now.AddDays(-1);
 
-        internal void Refresh()
-        {
-            timer.Start();
+		private void fileSystemWatcher_Changed(object source, FileSystemEventArgs e)
+		{
+			if (!NoRefresh)
+			{
+				double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
+				if (delta > 500)
+				{
+					NeedRefresh = true;
+					lastTimeRefresh = DateTime.Now;
+					nextTimeRefresh = DateTime.Now;
+				}
+			}
+		}
 
-            //double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
-            //if (delta > 100)
-            //{
-                //System.Diagnostics.Debug.WriteLine("==== GitViewModel Refresh {0}", delta);
-                //tracker.Refresh();
-            //}
-            //lastTimeRefresh = DateTime.Now;
-        }
+		internal bool NoRefresh;
+		private bool NeedRefresh;
 
-        internal void RefreshGraph()
-        {
-            GraphChanged(this, null);
-        }
+		private void timer_Tick(Object sender, EventArgs args)
+		{
+			if (NeedRefresh && !NoRefresh)
+			{
+				double delta = DateTime.Now.Subtract(nextTimeRefresh).TotalMilliseconds;
+				if (delta > 200)
+				{
+					System.Diagnostics.Debug.WriteLine("$$$$ Refresh");
+					DisableAutoRefresh();
+					Refresh(true);
+					NoRefresh = false;
+					NeedRefresh = false;
+					nextTimeRefresh = DateTime.Now;
+				}
+			}
+		}
 
-        private string GitRun(string cmd)
-        {
-            if (!GitBash.Exists) throw new Exception("git.exe is not found.");
-            if (this.Tracker == null) throw new Exception("Git repository is not found.");
+		internal void Refresh(bool reload)
+		{
+			if (reload) tracker.Refresh();
+			GraphChanged(this, null);
+		}
 
-            var ret = GitBash.Run(cmd, this.Tracker.GitWorkingDirectory);
-            Refresh();
+		internal void EnableAutoRefresh()
+		{
+			timer.Start();
+			NoRefresh = false;
+			NeedRefresh = false;
+			lastTimeRefresh = DateTime.Now;
+		}
 
-            return ret;
-        }
+		internal void DisableAutoRefresh()
+		{
+			timer.Stop();
+			NoRefresh = true;
+			NeedRefresh = false;
+			lastTimeRefresh = DateTime.Now.AddSeconds(2);
+		}
 
-        internal string AddTag(string name, string id)
-        {
-            return GitRun(string.Format("tag \"{0}\" {1}", name, id));
-        }
+		#endregion
 
-        internal string GetTagId(string name)
-        {
-            return GitRun("show-ref refs/tags/" + name);
-        }
+		#region Git commands
+		
+		private string GitRun(string cmd)
+		{
+			if (!GitBash.Exists) throw new Exception("git.exe is not found.");
+			if (this.Tracker == null) throw new Exception("Git repository is not found.");
 
-        internal string DeleteTag(string name)
-        {
-            return GitRun("tag -d " + name);
-        }
+			var ret = GitBash.Run(cmd, this.Tracker.GitWorkingDirectory);
+			return ret;
+		}
 
-        internal string AddBranch(string name, string id)
-        {
-            return GitRun(string.Format("branch \"{0}\" {1}", name, id));
-        }
+		private void GitRunCmd(string cmd)
+		{
+			if (!GitBash.Exists) throw new Exception("git.exe is not found.");
+			if (this.Tracker == null) throw new Exception("Git repository is not found.");
 
-        internal string GetBranchId(string name)
-        {
-            return GitRun("show-ref refs/heads/" + name);
-        }
+			GitBash.RunCmd(cmd, this.Tracker.GitWorkingDirectory);
+		}
 
-        internal string DeleteBranch(string name)
-        {
-            return GitRun("branch -d " + name);
-        }
+		internal string AddTag(string name, string id)
+		{
+			return GitRun(string.Format("tag \"{0}\" {1}", name, id));
+		}
 
-        internal string CheckoutBranch(string name)
-        {
-            return GitRun("checkout " + name);
-        }
+		internal string GetTagId(string name)
+		{
+			return GitRun("show-ref refs/tags/" + name);
+		}
 
-        internal string Archive(string id, string fileName)
-        {
-            return GitRun(string.Format("archive {0} --format=zip --output \"{1}\"", id, fileName));
-        }
-    }
+		internal string DeleteTag(string name)
+		{
+			return GitRun("tag -d " + name);
+		}
+
+		internal string AddBranch(string name, string id)
+		{
+			return GitRun(string.Format("branch \"{0}\" {1}", name, id));
+		}
+
+		internal string GetBranchId(string name)
+		{
+			return GitRun("show-ref refs/heads/" + name);
+		}
+
+		internal string DeleteBranch(string name)
+		{
+			return GitRun("branch -d " + name);
+		}
+
+		internal string CheckoutBranch(string name)
+		{
+			return GitRun("checkout " + name);
+		}
+
+		internal string Archive(string id, string fileName)
+		{
+			return GitRun(string.Format("archive {0} --format=zip --output \"{1}\"", id, fileName));
+		}
+
+		internal void Patch(string id1, string fileName)
+		{
+			GitRunCmd(string.Format("format-patch {0} -1 --stdout > \"{1}\"", id1, fileName));
+		}
+
+		internal void Patch(string id1, string id2, string fileName)
+		{
+			GitRunCmd(string.Format("format-patch {0}..{1} -o \"{2}\"", id1, id2, fileName));
+		}
+
+		#endregion    
+	}
 }

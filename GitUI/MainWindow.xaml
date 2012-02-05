@@ -14,7 +14,7 @@
         <CommandBinding Command="cmd:HistoryViewCommands.GraphLoaded"  Executed="GraphLoaded_Executed" />
     </Window.CommandBindings>
     <Grid x:Name="rootGrid" MouseRightButtonUp="rootGrid_MouseRightButtonUp">
-        <GitScc_UI:HistoryGraph HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="graph"/>
+        <GitScc_UI:HistoryGraph HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="graph" Margin="0,90,0,0" />
 
         <my:MainToolBar x:Name="topToolBar" Height="90"
                         HorizontalAlignment="Stretch" VerticalAlignment="Top">

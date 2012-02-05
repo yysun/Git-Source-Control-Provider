@@ -325,22 +325,23 @@
     <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandGitBash" priority="0x0008">
       <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
     </CommandPlacement>
-    
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandGitExtension" priority="0x0009">
+
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandHistory" priority="0x0009">
       <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
     </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandGitTortoise" priority="0x0010">
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandGitExtension" priority="0x0010">
+      <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
+    </CommandPlacement>
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandGitTortoise" priority="0x0011">
       <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
     </CommandPlacement>
     
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdGitExtCommand1" priority="0x0002">
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdGitExtCommand1" priority="0x0000">
       <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowGitExt"/>
     </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdGitTorCommand1" priority="0x0002">
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdGitTorCommand1" priority="0x0000">
       <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowGitTor"/>
     </CommandPlacement>
-    
- 
     
   </CommandPlacements>
   

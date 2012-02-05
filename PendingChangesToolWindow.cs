@@ -94,6 +94,8 @@ namespace GitScc
                 {
                     this.Caption += " - [AUTO REFRESH DISABLED]";
                 }
+
+                sccProviderService.lastTimeRefresh = DateTime.Now;
             }
             catch (Exception ex)
             {

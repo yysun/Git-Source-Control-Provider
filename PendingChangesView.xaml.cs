@@ -72,7 +72,6 @@ namespace GitScc
                 return;
             }
 
-            //var dispatcher = Dispatcher.CurrentDispatcher;
             Action act = () =>
             {
                 service.NoRefresh = true;
@@ -178,9 +177,8 @@ namespace GitScc
                 return;
             }
 
-            //var dispatcher = Dispatcher.CurrentDispatcher;
-            //Action act = () =>
-            //{
+            Action act = () =>
+            {
 
                 service.NoRefresh = true;
                 ShowStatusMessage("Getting changed files ...");
@@ -223,11 +221,9 @@ namespace GitScc
                 service.NoRefresh = false;
                 service.lastTimeRefresh = DateTime.Now; //important!!
 
-            //};
+            };
 
-            //dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
-
-            //lastTimeRefresh = DateTime.Now;
+            this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
         }
 
         internal void ClearUI()

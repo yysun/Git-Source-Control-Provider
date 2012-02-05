@@ -8,6 +8,7 @@ using System.Windows.Threading;
 using GitScc.DataServices;
 using NGit.Diff;
 using System.Diagnostics;
+using GitUI;
 
 namespace GitScc.UI
 {
@@ -22,6 +23,7 @@ namespace GitScc.UI
         public CommitDetails()
         {
             InitializeComponent();
+            btnSwitch.Visibility = Visibility.Collapsed;
         }
 
         #region show file in editor
@@ -253,6 +255,47 @@ namespace GitScc.UI
                 if (dlg.ShowDialog() == true)
                 {
                     File.WriteAllBytes(dlg.FileName, selection.Content);
+                }
+            }
+        }
+
+        private void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.DefaultExt = ".patch";
+            dlg.Filter = "Patch (.patch)|*.patch";
+            if (btnSwitch.Visibility == Visibility.Collapsed)
+            {
+                var id = this.commitId2.Substring(0, 7);
+                dlg.FileName = id + ".patch";
+                if (dlg.ShowDialog() == true)
+                {
+                    try
+                    {
+                        GitViewModel.Current.Patch( this.commitId2, dlg.FileName);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            else
+            {
+                var id1 = this.commitId1.Substring(0, 7);
+                var id2 = this.commitId2.Substring(0, 7);
+                dlg.FileName = id1 + "-" + id2 + ".patch";
+                
+                if (dlg.ShowDialog() == true)
+                {
+                    try
+                    {
+                        GitViewModel.Current.Patch(this.commitId1, this.commitId2, dlg.FileName);
+                    }
+                    catch(Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
         }

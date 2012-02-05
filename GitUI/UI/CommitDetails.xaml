@@ -62,6 +62,29 @@
 				<TextBlock x:Name="textBlock" Margin="0" TextWrapping="Wrap" d:LayoutOverrides="Width, Height" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#FF99B6D1" FontWeight="Bold"><Span FontSize="17.3333333333333" FontFamily="Wingdings 3" Language="en-us"><Run Text="F"/></Span></TextBlock>
 			</Grid>
 		</ControlTemplate>
+		<ControlTemplate x:Key="PatchButtonTemplate" TargetType="{x:Type Button}">
+			<Grid Width="24" Height="24">
+				<VisualStateManager.VisualStateGroups>
+					<VisualStateGroup x:Name="CommonStates">
+						<VisualState x:Name="Normal"/>
+						<VisualState x:Name="MouseOver">
+							<Storyboard>
+								<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="ellipse">
+									<EasingColorKeyFrame KeyTime="0" Value="#FF99B6D1"/>
+								</ColorAnimationUsingKeyFrames>
+								<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)" Storyboard.TargetName="textBlock">
+									<EasingColorKeyFrame KeyTime="0" Value="White"/>
+								</ColorAnimationUsingKeyFrames>
+							</Storyboard>
+						</VisualState>
+						<VisualState x:Name="Pressed"/>
+						<VisualState x:Name="Disabled"/>
+					</VisualStateGroup>
+				</VisualStateManager.VisualStateGroups>
+				<Ellipse x:Name="ellipse" Fill="#FFF4F4F5" Stroke="#FF99B6D1" StrokeThickness="2"/>
+				<TextBlock x:Name="textBlock" Margin="0" TextWrapping="Wrap" d:LayoutOverrides="Width, Height" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#FF99B6D1" FontWeight="Bold"><Run FontWeight="Normal" FontSize="16" FontFamily="Webdings" Text="Í"/></TextBlock>
+			</Grid>
+		</ControlTemplate>
 
 	</UserControl.Resources>
 
@@ -77,7 +100,8 @@
 			<Label Content="Author"  HorizontalAlignment="Right" Margin="0,0,6,0" Name="lblAuthor" VerticalAlignment="Bottom" FontSize="10"/>
 			<Button Content="back to graphic view" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,6,10,0" Padding="10,0"
 					Command="cmd:HistoryViewCommands.CloseCommitDetails"  Template="{DynamicResource BackButtonControlTemplate}" ToolTip="Back to graphic view" />
-			<Button HorizontalAlignment="Right" Margin="0,6,40,0" Name="btnSwitch" VerticalAlignment="Top" Click="btnSwitch_Click" Template="{DynamicResource btnSwitchControlTemplate}" RenderTransformOrigin="-1.5,0.542" ToolTip="Reverse the comparison order" Visibility="Collapsed"  />
+			<Button HorizontalAlignment="Right" Margin="0,6,69,0" x:Name="btnSwitch" Click="btnSwitch_Click" Template="{DynamicResource btnSwitchControlTemplate}" RenderTransformOrigin="-1.5,0.542" ToolTip="Reverse the comparison order" VerticalAlignment="Top"  />
+			<Button HorizontalAlignment="Right" Margin="0,6,39,0" x:Name="btnSave" VerticalAlignment="Top" Click="btnSave_Click" Template="{DynamicResource PatchButtonTemplate}" RenderTransformOrigin="-1.5,0.542" ToolTip="Save patch ..."  />
 			<Grid.Background>
 				<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
 					<GradientStop Color="#FFF2F2F2" Offset="0" />

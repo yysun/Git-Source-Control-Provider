@@ -232,17 +232,21 @@ namespace GitUI
 			//};
 			//this.loading.BeginAnimation(UIElement.OpacityProperty, animation);
 
+			gitViewModel.DisableAutoRefresh();
+
 			this.loading.Visibility = Visibility.Collapsed;
 			this.topToolBar.GitViewModel = gitViewModel;
 			this.Title = gitViewModel.Tracker.HasGitRepository ?
 				string.Format("{0} ({1})", gitViewModel.Tracker.GitWorkingDirectory, gitViewModel.Tracker.CurrentBranch) :
 				string.Format("{0} (No Repository)", gitViewModel.WorkingDirectory);
+
+			gitViewModel.EnableAutoRefresh();
 		}
 
 		private void RefreshGraph_Executed(object sender, ExecutedRoutedEventArgs e)
 		{
 			this.loading.Visibility = Visibility.Visible;
-			gitViewModel.Refresh();
+			gitViewModel.Refresh(true);
 			this.graph.Show(gitViewModel.Tracker, true);
 		}
 		

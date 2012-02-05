@@ -64,11 +64,11 @@ namespace GitUI.UI
                 bool isSimplied = tracker.RepositoryGraph.IsSimplified;
                 tracker.RepositoryGraph.IsSimplified = !isSimplied;
                 this.lableView.Content = !isSimplied ? "Simplified view: ON" : "Simplified view: OFF";
-                gitViewModel.RefreshGraph();
+                gitViewModel.Refresh(false);
             }
         }
 
-        private void branchList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void branchList_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             var name = branchList.SelectedValue as string;
             var id = tracker.RepositoryGraph.Refs
@@ -82,7 +82,7 @@ namespace GitUI.UI
             }
         }
 
-        private void tagList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void tagList_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             var name = tagList.SelectedValue as string;
             var id = tracker.RepositoryGraph.Refs
@@ -226,5 +226,6 @@ namespace GitUI.UI
         }
 
         #endregion
+
     }
 }

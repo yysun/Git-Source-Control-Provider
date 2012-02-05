@@ -38,9 +38,12 @@
         <Button Content="Button" HorizontalAlignment="Right" Margin="0,8,72,28" Template="{DynamicResource SaveButtonControlTemplate}" Command="cmd:HistoryViewCommands.ExportGraph" ToolTip="Export graph ..." VerticalAlignment="Top" />
         <Button Content="Button" HorizontalAlignment="Right" Margin="0,8.001,13,27.999" Template="{DynamicResource ButtonRefreshTemplate}" Command="cmd:HistoryViewCommands.RefreshGraph" ToolTip="Refresh" VerticalAlignment="Top" />
         <Label Content="Commits" Height="28" HorizontalAlignment="Left" Margin="8,54,0,0" VerticalAlignment="Top" FontSize="10" />
-        <TextBox TextWrapping="Wrap" VerticalAlignment="Bottom" Margin="60,0,200,12.04" x:Name="txtSearch" TextChanged="txtSearch_TextChanged" PreviewKeyDown="txtSearch_PreviewKeyDown" PreviewMouseDown="txtSearch_PreviewMouseDown" />
-        <ListBox Height="100" Margin="60,0,200,-88.96" VerticalAlignment="Bottom" x:Name="lstSearch" Visibility="Collapsed" PreviewKeyDown="lstSearch_PreviewKeyDown" />
-         <!--<Button Content="Button" HorizontalAlignment="Right" Margin="0,8,72,28" Template="{DynamicResource CompareButtonControlTemplate}" ToolTip="Select two commits to compare ..." Name="btnCompare" Click="btnCompare_Click" />
-        <Button Content="0" HorizontalAlignment="Right" Margin="0,8,100,0" Name="btnCommitCount" VerticalAlignment="Top" Template="{DynamicResource CommitCountControlTemplate}" RenderTransformOrigin="-1.125,0.438" Click="btnCommitCount_Click" ToolTip="Click to clear selection" />-->
+        <TextBox VerticalAlignment="Bottom" Margin="60,0,200,12.04" x:Name="txtSearch" TextChanged="txtSearch_TextChanged" PreviewKeyDown="txtSearch_PreviewKeyDown" PreviewMouseDown="txtSearch_PreviewMouseDown" />
+        <ListBox Height="100" Margin="60,0,200,-88.96" VerticalAlignment="Bottom" x:Name="lstSearch" PreviewKeyDown="lstSearch_PreviewKeyDown" MouseDoubleClick="lstSearch_MouseDoubleClick" />
+        <Button Content="Button" HorizontalAlignment="Right" Margin="0,36,72,0" Template="{DynamicResource CompareButtonControlTemplate}" ToolTip="Compare ..." x:Name="btnCompare" Click="btnCompare_Click"/>
+        <TextBlock HorizontalAlignment="Right" Margin="0,37,96,29" TextWrapping="NoWrap" Text="123456" Width="88.38" Foreground="#FFFF5656" x:Name="txtCommit1"/>
+        <TextBlock HorizontalAlignment="Right" Height="24" Margin="0,0,96,7.211" TextWrapping="NoWrap" Text="123456" VerticalAlignment="Bottom" Width="88.38" Foreground="#FFFF5656" x:Name="txtCommit2"/>
+        <Label Content="Selected Commits &#xd;&#xa;to compare" Height="48" HorizontalAlignment="Right" Margin="0,1,88.483,0" VerticalAlignment="Top" FontSize="10" Width="99.897" x:Name="lblSelectedCommits"/>
+        <!--<Button Content="0" HorizontalAlignment="Right" Margin="0,8,100,0" x:Name="btnCommitCount" VerticalAlignment="Top" Template="{DynamicResource CommitCountControlTemplate}" RenderTransformOrigin="-1.125,0.438" Click="btnCommitCount_Click" ToolTip="Click to clear selection" />-->
      </Grid>
 </UserControl>

@@ -104,6 +104,6 @@
 		<TextBlock x:Name="txtDate" FontSize="10"  HorizontalAlignment="Right" Margin="0,0,12,6" VerticalAlignment="Bottom" TextAlignment="Right" 
 				   Text="{Binding Date}" Foreground="#D1000000" />
 		<Button HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12,0,0,8" Template="{DynamicResource ButtonControlTemplate1}"
-				CommandParameter="{Binding Id}" />
+                ToolTip="Select commit to compare" Click="Button_Click"/>
 	</Grid>
 </UserControl>

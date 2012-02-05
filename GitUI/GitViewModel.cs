@@ -15,6 +15,7 @@ namespace GitUI
         public static readonly RoutedUICommand CloseCommitDetails = new RoutedUICommand("CloseCommitDetails", "CloseCommitDetails", typeof(MainWindow));
         public static readonly RoutedUICommand OpenCommitDetails = new RoutedUICommand("OpenCommitDetails", "OpenCommitDetails", typeof(MainWindow));
         public static readonly RoutedUICommand SelectCommit = new RoutedUICommand("SelectCommit", "SelectCommit", typeof(MainWindow));
+        public static readonly RoutedUICommand CompareCommits = new RoutedUICommand("CompareCommits", "CompareCommits", typeof(MainWindow));
         public static readonly RoutedUICommand ExportGraph = new RoutedUICommand("ExportGraph", "ExportGraph", typeof(MainWindow));
         public static readonly RoutedUICommand RefreshGraph = new RoutedUICommand("RefreshGraph", "RefreshGraph", typeof(MainWindow));
         public static readonly RoutedUICommand ScrollToCommit = new RoutedUICommand("ScrollToCommit", "ScrollToCommit", typeof(MainWindow));
@@ -39,7 +40,7 @@ namespace GitUI
         private GitFileStatusTracker tracker;
         private string workingDirectory;
 
-        public GitFileStatusTracker Tacker { get { return tracker; } }
+        public GitFileStatusTracker Tracker { get { return tracker; } }
         public string WorkingDirectory { get { return workingDirectory; } }
 
         DispatcherTimer timer;
@@ -104,9 +105,9 @@ namespace GitUI
         private string GitRun(string cmd)
         {
             if (!GitBash.Exists) throw new Exception("git.exe is not found.");
-            if (this.Tacker == null) throw new Exception("Git repository is not found.");
+            if (this.Tracker == null) throw new Exception("Git repository is not found.");
 
-            var ret = GitBash.Run(cmd, this.Tacker.GitWorkingDirectory);
+            var ret = GitBash.Run(cmd, this.Tracker.GitWorkingDirectory);
             Refresh();
 
             return ret;

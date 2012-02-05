@@ -19,6 +19,8 @@ namespace GitScc.DataServices
 
         public override string ToString()
         {
-            return string.Format("[{0}] {1}", Id.Substring(0, 7), Message.Replace("\r", ""));
-        }    }
+            return string.Format("[{0}] {1}", ShortId, Message.Replace("\r", ""));
+        }
+
+        public string ShortId { get { return Id.Substring(0, 7); } }    }
 }

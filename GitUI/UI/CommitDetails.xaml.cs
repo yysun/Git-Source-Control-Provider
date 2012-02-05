@@ -138,11 +138,11 @@ namespace GitScc.UI
                     .Where(r => r.Id.StartsWith(commitId2))
                     .Select(r => r.Name);
 
-                var name1 = names1.Count() == 0 ? commitId1 : string.Join(", ", names1.ToArray());
-                var name2 = names2.Count() == 0 ? commitId2 : string.Join(", ", names2.ToArray());
+                var name1 = names1.Count() == 0 ? commitId1 : string.Join(", ", names1.ToArray()) + " " + commitId1.Substring(0, 7);
+                var name2 = names2.Count() == 0 ? commitId2 : string.Join(", ", names2.ToArray()) + " " + commitId2.Substring(0, 7);
 
-                this.lblCommit.Content = string.Format("[{1}] {0}", msg1, name1);
-                this.lblMessage.Content = string.Format("[{1}] {0}", msg2, name2);
+                this.lblCommit.Content = string.Format("[{1}] {0}", msg2, name2);
+                this.lblMessage.Content = string.Format("[{1}] {0}", msg1, name1);
                 this.lblAuthor.Content = "";
 
                 this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId1, commitId2);
@@ -234,7 +234,10 @@ namespace GitScc.UI
 
         private void btnSwitch_Click(object sender, RoutedEventArgs e)
         {
+            var selected = patchList.SelectedValue;
             this.Show(this.tracker, this.commitId2, this.commitId1);
+            if (selected != null)
+                patchList.SelectedValue = selected;
         }
 
         private void menuSaveFile_Click(object sender, RoutedEventArgs e)

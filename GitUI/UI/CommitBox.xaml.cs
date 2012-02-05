@@ -127,5 +127,10 @@ namespace GitScc.UI
                 MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            HistoryViewCommands.SelectCommit.Execute(this.txtId.Text, this);
+        }
     }
 }

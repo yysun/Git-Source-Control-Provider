@@ -41,21 +41,21 @@ namespace GitUI
 			this.gitViewModel =
 			this.bottomToolBar.GitViewModel = GitViewModel.Current;
 
-			if (gitViewModel.Tacker.HasGitRepository)
-				this.Title = gitViewModel.Tacker.GitWorkingDirectory;
+			if (gitViewModel.Tracker.HasGitRepository)
+				this.Title = gitViewModel.Tracker.GitWorkingDirectory;
 
 			this.gitViewModel.GraphChanged += (o, _) =>
 			{
 				Action act = () => 
 				{
-					if (gitViewModel.Tacker.HasGitRepository) 
-						this.Title = gitViewModel.Tacker.GitWorkingDirectory;
-					this.graph.Show(gitViewModel.Tacker, false);
+					if (gitViewModel.Tracker.HasGitRepository) 
+						this.Title = gitViewModel.Tracker.GitWorkingDirectory;
+					this.graph.Show(gitViewModel.Tracker, false);
 				};
 				this.Dispatcher.BeginInvoke(act);
 			};
 
-			this.graph.Show(gitViewModel.Tacker, true);
+			this.graph.Show(gitViewModel.Tracker, true);
 		}
 
 		private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -87,18 +87,18 @@ namespace GitUI
 			}
 			else
 			{
-				HideTopToolBar();
+				//HideTopToolBar();
 				HideBottomToolBar();
 			}
 		}
 
 		private void Grid_PreviewMouseMove(object sender, MouseEventArgs e)
 		{
-			var y = e.GetPosition(rootGrid).Y;
-			if (y < 60)
-			{
-				ShowTopToolBar();
-			}
+			//var y = e.GetPosition(rootGrid).Y;
+			//if (y < 60)
+			//{
+			//    ShowTopToolBar();
+			//}
 			//else if (y > this.ActualHeight - 60)
 			//{
 			//    ShowBottomToolBarBar();
@@ -158,7 +158,7 @@ namespace GitUI
 		} 
 		#endregion
 
-		#region commands
+		#region show commit details
 
 		private void ShowCommitDetails(string id)
 		{
@@ -172,7 +172,7 @@ namespace GitUI
 				loading.Visibility = Visibility.Visible;
 				animation.Completed += (_, e) =>
 				{
-					this.details.Show(this.gitViewModel.Tacker, id);
+					this.details.Show(this.gitViewModel.Tracker, id);
 					loading.Visibility = Visibility.Collapsed;
 				};
 				this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
@@ -234,8 +234,8 @@ namespace GitUI
 
 			this.loading.Visibility = Visibility.Collapsed;
 			this.topToolBar.GitViewModel = gitViewModel;
-			this.Title = gitViewModel.Tacker.HasGitRepository ?
-				string.Format("{0} ({1})", gitViewModel.Tacker.GitWorkingDirectory, gitViewModel.Tacker.CurrentBranch) :
+			this.Title = gitViewModel.Tracker.HasGitRepository ?
+				string.Format("{0} ({1})", gitViewModel.Tracker.GitWorkingDirectory, gitViewModel.Tracker.CurrentBranch) :
 				string.Format("{0} (No Repository)", gitViewModel.WorkingDirectory);
 		}
 
@@ -243,33 +243,19 @@ namespace GitUI
 		{
 			this.loading.Visibility = Visibility.Visible;
 			gitViewModel.Refresh();
-			this.graph.Show(gitViewModel.Tacker, true);
+			this.graph.Show(gitViewModel.Tracker, true);
 		}
 		
 		#endregion
 
-		#region select commit command
-/*
+		#region select and comapre commits
+		
 		private void SelectCommit_Executed(object sender, ExecutedRoutedEventArgs e)
 		{
-			try
-			{
-				var commit = e.Parameter as string;
-				if (this.selectedCommits.Contains(commit))
-					selectedCommits.Remove(commit);
-				else
-					this.selectedCommits.Add(commit);
-
-				SetSelectedCommitCount();
-			}
-			catch (Exception ex)
-			{
-				ShowStatusMessage(ex.Message);
-				Log.WriteLine("History Tool Window - SelectCommit_Executed: {0}", ex.ToString());
-			}
+			this.topToolBar.SelectCommit(e.Parameter as string, null);
 		}
 
-		private void btnCompare_Click(object sender, RoutedEventArgs e)
+		private void CompareCommits_Executed(object sender, ExecutedRoutedEventArgs e)
 		{
 			try
 			{
@@ -278,31 +264,23 @@ namespace GitUI
 				var animationDuration = TimeSpan.FromSeconds(.5);
 				var animation = new DoubleAnimation(0, new Duration(animationDuration));
 				animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
-				this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
 
-				this.details.Show(this.tracker, this.selectedCommits[0], this.selectedCommits[1]);
+				loading.Visibility = Visibility.Visible;
+				animation.Completed += (_, x) =>
+				{
+					var ids = e.Parameter as string[];
+					this.details.Show(this.gitViewModel.Tracker, ids[0], ids[1]);
+					loading.Visibility = Visibility.Collapsed;
+				};
+
+				this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
 			}
 			catch (Exception ex)
 			{
-				ShowStatusMessage(ex.Message);
-				Log.WriteLine("History Tool Window - btnCompare_Click: {0}", ex.ToString());
+				Log.WriteLine("MainWindow.CompareCommits_Executed {0}", ex.ToString());
 			}
 		}
 
-		private void SetSelectedCommitCount()
-		{
-			this.btnCompare.IsEnabled = this.selectedCommits.Count() == 2;
-			this.btnCommitCount.Visibility = this.selectedCommits.Count() > 0 ?
-				Visibility.Visible : Visibility.Collapsed;
-			this.btnCommitCount.Content = this.selectedCommits.Count().ToString();
-		}
-
-		private void btnCommitCount_Click(object sender, RoutedEventArgs e)
-		{
-			//selectedCommits.Clear();
-			//SetSelectedCommitCount();
-		}
-*/
 		#endregion    
 	
 	}

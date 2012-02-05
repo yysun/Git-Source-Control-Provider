@@ -29,7 +29,7 @@ namespace GitUI.UI
             set
             {
                 gitViewModel = value;
-                tracker = gitViewModel.Tacker;
+                tracker = gitViewModel.Tracker;
 
                 if (tracker.HasGitRepository)
                 {
@@ -52,6 +52,9 @@ namespace GitUI.UI
         public MainToolBar()
         {
             InitializeComponent();
+            txtCommit1.Text = txtCommit2.Text = "";
+            lblSelectedCommits.Visibility = btnCompare.Visibility =
+            lstSearch.Visibility = Visibility.Collapsed;
         }
 
         private void checkBox1_Click(object sender, RoutedEventArgs e)
@@ -72,7 +75,11 @@ namespace GitUI.UI
                             .Where(r => (r.Type == RefTypes.Branch || r.Type == RefTypes.HEAD) && r.Name == name)
                             .Select(r => r.Id)
                             .FirstOrDefault();
-            if (id != null) HistoryViewCommands.ScrollToCommit.Execute(id, this);
+            if (id != null)
+            {
+                SelectCommit(id, name);
+                HistoryViewCommands.ScrollToCommit.Execute(id, this);
+            }
         }
 
         private void tagList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -82,7 +89,11 @@ namespace GitUI.UI
                             .Where(r => r.Type == RefTypes.Tag && r.Name == name)
                             .Select(r => r.Id)
                             .FirstOrDefault();
-            if (id != null) HistoryViewCommands.ScrollToCommit.Execute(id, this);
+            if (id != null)
+            {
+                SelectCommit(id, name);
+                HistoryViewCommands.ScrollToCommit.Execute(id, this);
+            }
         }
 
         private void btnRefresh_Click(object sender, RoutedEventArgs e)
@@ -155,16 +166,63 @@ namespace GitUI.UI
                 e.Handled = true;
                 lstSearch.Visibility = Visibility.Collapsed;
                 txtSearch.Focus();
-
-                var commit = lstSearch.SelectedItem as Commit;
-                if (commit != null)
-                {
-                    txtSearch.TextChanged -= new TextChangedEventHandler(txtSearch_TextChanged);
-                    txtSearch.Text = commit.Message;
-                    txtSearch.TextChanged += new TextChangedEventHandler(txtSearch_TextChanged);
-                    HistoryViewCommands.ScrollToCommit.Execute(commit.Id, this);
-                }
+                PickCommit();
             }
+        }
+
+        private void lstSearch_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            PickCommit();
+        }
+
+        private void PickCommit()
+        {
+            var commit = lstSearch.SelectedItem as Commit;
+            if (commit != null)
+            {
+                txtSearch.TextChanged -= new TextChangedEventHandler(txtSearch_TextChanged);
+                txtSearch.Text = commit.Message;
+                txtSearch.TextChanged += new TextChangedEventHandler(txtSearch_TextChanged);
+                HistoryViewCommands.ScrollToCommit.Execute(commit.Id, this);
+                SelectCommit(commit.ShortId, null);
+            }
+        }
+
+        #endregion
+
+        #region compare
+        string id1, id2;
+
+        internal void SelectCommit(string id, string name)
+        {
+            HideSearchList();
+            lblSelectedCommits.Visibility = Visibility.Visible;
+            if (id1 == null)
+            {
+                id1 = id;
+                txtCommit1.Text = name ?? id;
+                btnCompare.Visibility = Visibility.Collapsed;
+            }
+            else if (id2 == null)
+            {
+                id2 = id;
+                txtCommit2.Text = name ?? id;
+                btnCompare.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                id1 = id2;
+                txtCommit1.Text = txtCommit2.Text;
+                id2 = id;
+                txtCommit2.Text = name ?? id;
+                btnCompare.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void btnCompare_Click(object sender, RoutedEventArgs e)
+        {
+            HideSearchList();
+            HistoryViewCommands.CompareCommits.Execute(new string[] { id1, id2 }, this);
         }
 
         #endregion

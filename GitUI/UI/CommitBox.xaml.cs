@@ -132,5 +132,21 @@ namespace GitScc.UI
         {
             HistoryViewCommands.SelectCommit.Execute(this.txtId.Text, this);
         }
+
+        private void Export_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.DefaultExt = ".zip";
+            dlg.Filter = "Archive (.zip)|*.zip";
+            dlg.FileName = this.txtId.Text + ".zip";
+            if (dlg.ShowDialog() == true)
+            {
+                var ret = GitViewModel.Current.Archive(this.txtId.Text, dlg.FileName);
+                if (!string.IsNullOrWhiteSpace(ret))
+                {
+                    MessageBox.Show(ret, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
     }
 }

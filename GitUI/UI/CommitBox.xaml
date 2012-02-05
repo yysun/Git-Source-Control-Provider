@@ -37,7 +37,8 @@
 		<ContextMenu>
 			<MenuItem Header="new tag" Click="NewTag_Click" />
 			<MenuItem Header="new branch" Click="NewBranch_Click" />
-			<MenuItem Header="view details" Command="cmd:HistoryViewCommands.OpenCommitDetails" CommandParameter="{Binding Id}" />
+			<!--<MenuItem Header="view details" Command="cmd:HistoryViewCommands.OpenCommitDetails" CommandParameter="{Binding Id}" />-->
+            <MenuItem Header="archive" Click="Export_Click" />
 		</ContextMenu>
 	</UserControl.ContextMenu>    
 	<Grid x:Name="root" Height="120" Width="200" RenderTransformOrigin="0.5,0.5" MouseEnter="root_MouseEnter" MouseLeave="root_MouseLeave" MouseLeftButtonUp="root_MouseLeftButtonUp">
@@ -104,6 +105,6 @@
 		<TextBlock x:Name="txtDate" FontSize="10"  HorizontalAlignment="Right" Margin="0,0,12,6" VerticalAlignment="Bottom" TextAlignment="Right" 
 				   Text="{Binding Date}" Foreground="#D1000000" />
 		<Button HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12,0,0,8" Template="{DynamicResource ButtonControlTemplate1}"
-                ToolTip="Select commit to compare" Click="Button_Click"/>
+				ToolTip="Select commit to compare" Click="Button_Click"/>
 	</Grid>
 </UserControl>

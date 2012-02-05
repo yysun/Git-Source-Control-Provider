@@ -148,5 +148,9 @@ namespace GitUI
             return GitRun("checkout " + name);
         }
 
+        internal string Archive(string id, string fileName)
+        {
+            return GitRun(string.Format("archive {0} --format=zip --output \"{1}\"", id, fileName));
+        }
     }
 }

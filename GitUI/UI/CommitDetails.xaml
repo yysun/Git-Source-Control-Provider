@@ -77,7 +77,7 @@
 			<Label Content="Author"  HorizontalAlignment="Right" Margin="0,0,6,0" Name="lblAuthor" VerticalAlignment="Bottom" FontSize="10"/>
 			<Button Content="back to graphic view" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,6,10,0" Padding="10,0"
 					Command="cmd:HistoryViewCommands.CloseCommitDetails"  Template="{DynamicResource BackButtonControlTemplate}" ToolTip="Back to graphic view" />
-			<Button HorizontalAlignment="Right" Margin="0,6,40,0" Name="btnSwitch" VerticalAlignment="Top" Click="btnSwitch_Click" Template="{DynamicResource btnSwitchControlTemplate}" RenderTransformOrigin="-1.5,0.542" ToolTip="Reverse the comparison order" />
+			<Button HorizontalAlignment="Right" Margin="0,6,40,0" Name="btnSwitch" VerticalAlignment="Top" Click="btnSwitch_Click" Template="{DynamicResource btnSwitchControlTemplate}" RenderTransformOrigin="-1.5,0.542" ToolTip="Reverse the comparison order" Visibility="Collapsed"  />
 			<Grid.Background>
 				<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
 					<GradientStop Color="#FFF2F2F2" Offset="0" />

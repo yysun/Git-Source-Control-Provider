@@ -89,5 +89,84 @@ namespace GitUI.UI
         {
             HistoryViewCommands.RefreshGraph.Execute(null, this);
         }
+
+        #region Search commits
+        private void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var text = txtSearch.Text.ToLower();
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                lstSearch.ItemsSource = tracker.RepositoryGraph.Commits;
+            }
+            else
+            {
+                lstSearch.ItemsSource = tracker.RepositoryGraph.Commits
+                    .Where(c => c.Message.ToLower().Contains(text) ||
+                           c.Id.StartsWith(text) ||
+                           c.CommitterName.ToLower().StartsWith(text) ||
+                           c.CommitterEmail.ToLower().StartsWith(text) ||
+                           c.CommitDateRelative.StartsWith(text));
+            }
+            lstSearch.Visibility = Visibility.Visible;
+        }
+
+        private void ShowSearchList()
+        {
+            lstSearch.Visibility = Visibility.Visible;
+            lstSearch.Focus();
+        }
+
+        private void HideSearchList()
+        {
+            lstSearch.Visibility = Visibility.Collapsed;
+            txtSearch.Focus();
+        }
+
+        private void Grid_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                HideSearchList();
+            }
+        }
+
+        private void txtSearch_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Down || e.Key == Key.Up)
+            {
+                ShowSearchList();
+            }
+        }
+
+        private void txtSearch_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            HideSearchList();
+            if (txtSearch.SelectedText == "")
+            {
+                txtSearch.SelectAll();
+                e.Handled = true;
+            }
+        }
+
+        private void lstSearch_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                e.Handled = true;
+                lstSearch.Visibility = Visibility.Collapsed;
+                txtSearch.Focus();
+
+                var commit = lstSearch.SelectedItem as Commit;
+                if (commit != null)
+                {
+                    txtSearch.TextChanged -= new TextChangedEventHandler(txtSearch_TextChanged);
+                    txtSearch.Text = commit.Message;
+                    txtSearch.TextChanged += new TextChangedEventHandler(txtSearch_TextChanged);
+                    HistoryViewCommands.ScrollToCommit.Execute(commit.Id, this);
+                }
+            }
+        }
+
+        #endregion
     }
 }

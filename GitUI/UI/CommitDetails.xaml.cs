@@ -79,7 +79,7 @@ namespace GitScc.UI
                     this.radioShowFileTree.IsEnabled = true;
 
                     //this.lblCommit.Content = commit.Id;
-                    this.lblMessage.Content = string.Format("[{0}] {1}", commit.Id.Substring(0, 7), commit.Message.Replace("\r", ""));
+                    this.lblMessage.Content = commit.ToString();
                     this.lblAuthor.Content = commit.CommitterName + " " + commit.CommitDateRelative;
                     //this.fileTree.ItemsSource = repositoryGraph.GetTree(commitId).Children;
                     this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId);

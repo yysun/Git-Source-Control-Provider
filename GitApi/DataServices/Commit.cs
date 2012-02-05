@@ -16,5 +16,9 @@ namespace GitScc.DataServices
         public DateTime CommitDate { get; set; }
         public string CommitDateRelative { get; set; }
         internal bool deleted { get; set; }
-    }
+
+        public override string ToString()
+        {
+            return string.Format("[{0}] {1}", Id.Substring(0, 7), Message.Replace("\r", ""));
+        }    }
 }

@@ -83,7 +83,7 @@
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>Git Bash ...</ButtonText>
+          <ButtonText>Git Bash</ButtonText>
         </Strings>
       </Button>
       
@@ -159,7 +159,7 @@
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>Git - New Repository</ButtonText>
+          <ButtonText>New Repository</ButtonText>
         </Strings>
       </Button>
 
@@ -193,7 +193,7 @@
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>Git - Pending Changes ...</ButtonText>
+          <ButtonText>Pending Changes</ButtonText>
         </Strings>
       </Button>
 
@@ -203,7 +203,7 @@
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>Git - History ...</ButtonText>
+          <ButtonText>View History</ButtonText>
         </Strings>
       </Button>
 
@@ -213,7 +213,7 @@
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>Git - About ...</ButtonText>
+          <ButtonText>About</ButtonText>
         </Strings>
       </Button>
       
@@ -333,6 +333,9 @@
       <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
     </CommandPlacement>
     <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandGitTortoise" priority="0x0011">
+      <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
+    </CommandPlacement>
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandAbout" priority="0x0020">
       <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
     </CommandPlacement>
     

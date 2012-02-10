@@ -30,7 +30,7 @@ namespace GitScc.UI
         }
 
         #region zoom upon mouse wheel
-
+/*
         private bool isDragging = false;
         private Point offset;
         
@@ -66,10 +66,10 @@ namespace GitScc.UI
         private void AdjustCanvasSize(double scale)
         {
             this.canvasContainer.Width = (PADDING * 2 + maxX * GRID_WIDTH);
-            this.canvasRoot.Width = this.canvasContainer.Width * scale;
+            //this.canvasRoot.Width = this.canvasContainer.Width * scale;
 
             this.canvasContainer.Height = (PADDING * 2 + (maxY + 1) * GRID_HEIGHT);
-            this.canvasRoot.Height = this.canvasContainer.Height * scale;
+            //this.canvasRoot.Height = this.canvasContainer.Height * scale;
 
         }
 
@@ -89,7 +89,7 @@ namespace GitScc.UI
             this.Scaler.ScaleY = newScale;
             AdjustCanvasSize(newScale);
         }
-
+*/
         #endregion
 
         const int MAX_COMMITS = 200;
@@ -129,7 +129,7 @@ namespace GitScc.UI
                         canvasContainer.Children.Clear();
                         maxX = maxY = 0;
 
-                        if (changed && commits != null && commits.Count > 0)
+                        if (changed && commits != null && commits.Any())
                         {
                             maxX = commits.Count();
                             maxY = commits.Max(c => c.X);
@@ -313,18 +313,19 @@ namespace GitScc.UI
                             #endregion
                         }
 
-                        AdjustCanvasSize(this.Scaler.ScaleX);
+                        this.canvasContainer.Width = Math.Max(this.ActualWidth * 2, (PADDING * 2 + maxX * GRID_WIDTH));
+                        this.canvasContainer.Height = Math.Max(this.ActualHeight * 2, (PADDING * 2 + (maxY + 1) * GRID_HEIGHT));
                     }
 
 
                     if (scroll)
                     {
-                        this.Scaler.ScaleX = this.Scaler.ScaleY = 1;
-                        AdjustCanvasSize(1);
+                        //this.Scaler.ScaleX = this.Scaler.ScaleY = 1;
+                        //AdjustCanvasSize();
 
+                        this.zoomAndPanControl.ContentScale = 1;
                         this.canvasContainer.SetValue(Canvas.LeftProperty, 0.0);
                         this.canvasContainer.SetValue(Canvas.TopProperty, 0.0);
-
                         this.scrollRoot.ScrollToRightEnd();
                     }
                 }
@@ -419,8 +420,10 @@ namespace GitScc.UI
                     box.Selected = box.txtId.Text == id;
                     if (box.Selected)
                     {
-                        this.Scaler.ScaleX = this.Scaler.ScaleY = 1;
-                        AdjustCanvasSize(1);
+                        //this.Scaler.ScaleX = this.Scaler.ScaleY = 1;
+                        zoomAndPanControl.ContentScale = 1;
+
+                        //AdjustCanvasSize();
                         this.canvasContainer.SetValue(Canvas.LeftProperty, 0.0);
                         this.canvasContainer.SetValue(Canvas.TopProperty, 0.0);
 
@@ -431,7 +434,143 @@ namespace GitScc.UI
                         this.scrollRoot.ScrollToVerticalOffset(top);
                     }
                 }
-            }            
+            }
         }
+
+        #region Zoom and Pan
+        /// <summary>
+        /// Specifies the current state of the mouse handling logic.
+        /// </summary>
+        private MouseHandlingMode mouseHandlingMode = MouseHandlingMode.None;
+
+        /// <summary>
+        /// The point that was clicked relative to the ZoomAndPanControl.
+        /// </summary>
+        private Point origZoomAndPanControlMouseDownPoint;
+
+        /// <summary>
+        /// The point that was clicked relative to the content that is contained within the ZoomAndPanControl.
+        /// </summary>
+        private Point origContentMouseDownPoint;
+
+        /// <summary>
+        /// Records which mouse button clicked during mouse dragging.
+        /// </summary>
+        private MouseButton mouseButtonDown;
+
+        /// <summary>
+        /// Event raised on mouse down in the ZoomAndPanControl.
+        /// </summary>
+        private void zoomAndPanControl_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            canvasContainer.Focus();
+            Keyboard.Focus(canvasContainer);
+
+            mouseButtonDown = e.ChangedButton;
+            origZoomAndPanControlMouseDownPoint = e.GetPosition(zoomAndPanControl);
+            origContentMouseDownPoint = e.GetPosition(canvasContainer);
+
+            if ((Keyboard.Modifiers & ModifierKeys.Shift) != 0 &&
+                (e.ChangedButton == MouseButton.Left ||
+                 e.ChangedButton == MouseButton.Right))
+            {
+                // Shift + left- or right-down initiates zooming mode.
+                mouseHandlingMode = MouseHandlingMode.Zooming;
+            }
+            else if (mouseButtonDown == MouseButton.Left)
+            {
+                // Just a plain old left-down initiates panning mode.
+                mouseHandlingMode = MouseHandlingMode.Panning;
+            }
+
+            if (mouseHandlingMode != MouseHandlingMode.None)
+            {
+                // Capture the mouse so that we eventually receive the mouse up event.
+                zoomAndPanControl.CaptureMouse();
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// Event raised on mouse up in the ZoomAndPanControl.
+        /// </summary>
+        private void zoomAndPanControl_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (mouseHandlingMode != MouseHandlingMode.None)
+            {
+                if (mouseHandlingMode == MouseHandlingMode.Zooming)
+                {
+                    if (mouseButtonDown == MouseButton.Left)
+                    {
+                        // Shift + left-click zooms in on the content.
+                        ZoomIn();
+                    }
+                    else if (mouseButtonDown == MouseButton.Right)
+                    {
+                        // Shift + left-click zooms out from the content.
+                        ZoomOut();
+                    }
+                }
+
+                zoomAndPanControl.ReleaseMouseCapture();
+                mouseHandlingMode = MouseHandlingMode.None;
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// Event raised on mouse move in the ZoomAndPanControl.
+        /// </summary>
+        private void zoomAndPanControl_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (mouseHandlingMode == MouseHandlingMode.Panning)
+            {
+                //
+                // The user is left-dragging the mouse.
+                // Pan the viewport by the appropriate amount.
+                //
+                Point curContentMousePoint = e.GetPosition(canvasContainer);
+                Vector dragOffset = curContentMousePoint - origContentMouseDownPoint;
+
+                zoomAndPanControl.ContentOffsetX -= dragOffset.X;
+                zoomAndPanControl.ContentOffsetY -= dragOffset.Y;
+
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// Event raised by rotating the mouse wheel
+        /// </summary>
+        private void zoomAndPanControl_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            e.Handled = true;
+
+            if (e.Delta > 0)
+            {
+                ZoomIn();
+            }
+            else if (e.Delta < 0)
+            {
+                ZoomOut();
+            }
+        }
+
+        /// <summary>
+        /// Zoom the viewport out by a small increment.
+        /// </summary>
+        private void ZoomOut()
+        {
+            zoomAndPanControl.ContentScale -= 0.1;
+        }
+
+        /// <summary>
+        /// Zoom the viewport in by a small increment.
+        /// </summary>
+        private void ZoomIn()
+        {
+            zoomAndPanControl.ContentScale += 0.1;
+        }
+        #endregion
     }
 }

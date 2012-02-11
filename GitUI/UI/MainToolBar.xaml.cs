@@ -41,6 +41,8 @@ namespace GitUI.UI
                         .Where(r => r.Type == RefTypes.Tag && isLoaded(r))
                         .Select(r => r.Name);
                 }
+
+                btnGitBash.IsEnabled = GitBash.Exists;
             }
         }
 
@@ -226,6 +228,11 @@ namespace GitUI.UI
         }
 
         #endregion
+
+        private void btnGitBash_Click(object sender, RoutedEventArgs e)
+        {
+            GitBash.OpenGitBash(this.tracker.GitWorkingDirectory);
+        }
 
     }
 }

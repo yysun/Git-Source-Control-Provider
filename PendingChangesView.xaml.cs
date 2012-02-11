@@ -110,11 +110,7 @@ namespace GitScc
         {
             GetSelectedFileFullName((fileName) =>
             {
-                fileName = System.IO.Path.Combine(this.tracker.GitWorkingDirectory, fileName);
-                if (!File.Exists(fileName)) return;
-
-                var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
-                dte.ItemOperations.OpenFile(fileName);
+                OpenFile(fileName);
             });
 
         }
@@ -481,11 +477,37 @@ Note: if the file is included project, you need to delete the file from project 
             } 
             GetSelectedFileFullName((fileName) =>
             {
+                OpenFile(fileName);
                 var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
-                dte.ItemOperations.OpenFile(fileName);
                 var selection = dte.ActiveDocument.Selection as EnvDTE.TextSelection;
                 selection.MoveToLineAndOffset(start, column);
             });
+        }
+
+        private void OpenFile(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName)) return;
+
+            fileName = fileName.Replace("/", "\\");
+            var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
+            bool opened = false;
+            Array projects = (Array)dte.ActiveSolutionProjects;
+            foreach (dynamic project in projects)
+            {
+                foreach (dynamic item in project.ProjectItems)
+                {
+                    if (string.Compare(item.FileNames[0], fileName, true) == 0)
+                    {
+                        dynamic  wnd = item.Open(EnvDTE.Constants.vsViewKindPrimary);
+                        wnd.Activate();
+                        opened = true;
+                        break;
+                    }
+                }
+                if (opened) break;
+            }
+
+            if (!opened) dte.ItemOperations.OpenFile(fileName);
         }
     }
 

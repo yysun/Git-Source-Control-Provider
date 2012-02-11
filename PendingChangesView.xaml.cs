@@ -183,10 +183,15 @@ namespace GitScc
                 stopwatch.Start();
 
                 var selectedFile = GetSelectedFileName();
+                var selectedFiles = this.dataGrid1.Items.Cast<GitFile>()
+                    .Where(i => i.IsSelected)
+                    .Select(i => i.FileName).ToList();
+
                 this.dataGrid1.BeginInit();
 
                 try
                 {
+                    
                     this.dataGrid1.ItemsSource = tracker.ChangedFiles;
 
                     ICollectionView view = CollectionViewSource.GetDefaultView(this.dataGrid1.ItemsSource);
@@ -198,6 +203,13 @@ namespace GitScc
                     }
 
                     this.dataGrid1.SelectedValue = selectedFile;
+                    selectedFiles.ForEach(fn=>{
+                        var item = this.dataGrid1.Items.Cast<GitFile>()
+                            .Where(i => i.FileName == fn)
+                            .FirstOrDefault();
+                        if (item != null) item.IsSelected = true;
+                    });
+
                     ShowStatusMessage("");
                 }
                 catch (Exception ex)

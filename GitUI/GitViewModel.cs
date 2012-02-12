@@ -30,10 +30,20 @@ namespace GitUI
 		{
 			get
 			{
-				if (current == null) current = new GitViewModel();
+				if (current == null)
+				{
+					var args = Environment.GetCommandLineArgs();
+					current = new GitViewModel();
+
+					var directory = args.Length > 1 ? args[1] :
+						Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+					current.Open(directory);
+				}
+
 				return current;
 			}
-		} 
+		}
+
 		#endregion
 
 		public event EventHandler GraphChanged = delegate { };
@@ -48,31 +58,32 @@ namespace GitUI
 
 		private GitViewModel()
 		{
-			var args = Environment.GetCommandLineArgs();
-			workingDirectory = args.Length > 1 ? args[1] :
-				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+			timer = new DispatcherTimer();
+			timer.Interval = TimeSpan.FromMilliseconds(100);
+			timer.Tick += new EventHandler(timer_Tick);
+			timer.Start();
+		}
 
-			tracker = new GitFileStatusTracker(workingDirectory);
-			if (tracker.HasGitRepository) workingDirectory = tracker.GitWorkingDirectory;
+		internal void Open(string directory)
+		{
+			workingDirectory = directory;
 			if (Directory.Exists(workingDirectory))
 			{
 				fileSystemWatcher = new FileSystemWatcher(workingDirectory);
 
-				//fileSystemWatcher.Created += (_, e) => Refresh();
-				//fileSystemWatcher.Changed += (_, e) => Refresh();
-				//fileSystemWatcher.Deleted += (_, e) => Refresh();
-				//fileSystemWatcher.Renamed += (_, e) => Refresh();
-
-				fileSystemWatcher.Changed +=new FileSystemEventHandler(fileSystemWatcher_Changed);
+				fileSystemWatcher.Created += new FileSystemEventHandler(fileSystemWatcher_Changed);
+				fileSystemWatcher.Deleted += new FileSystemEventHandler(fileSystemWatcher_Changed);
+				//fileSystemWatcher.Renamed += new FileSystemEventHandler(fileSystemWatcher_Changed);
+				fileSystemWatcher.Changed += new FileSystemEventHandler(fileSystemWatcher_Changed);
 				fileSystemWatcher.EnableRaisingEvents = true;
-
-				timer = new DispatcherTimer();
-				timer.Interval = TimeSpan.FromMilliseconds(100);
-				timer.Tick+=new EventHandler(timer_Tick);
-				timer.Start();
 			}
+            tracker = new GitFileStatusTracker(directory);
 		}
 
+        internal static void OpenGitBash()
+        {
+            GitBash.OpenGitBash(Current.WorkingDirectory);
+        }
 		#region Refresh
 
 		internal DateTime lastTimeRefresh = DateTime.Now.AddDays(-1);
@@ -206,5 +217,6 @@ namespace GitUI
 		}
 
 		#endregion    
+	
 	}
 }

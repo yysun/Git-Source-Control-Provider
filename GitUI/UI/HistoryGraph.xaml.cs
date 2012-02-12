@@ -313,10 +313,9 @@ namespace GitScc.UI
                             #endregion
                         }
 
-                        this.canvasContainer.Width = Math.Max(this.ActualWidth * 2, (PADDING * 2 + maxX * GRID_WIDTH));
+                        this.canvasContainer.Width = Math.Max(this.ActualWidth, (PADDING * 2 + maxX * GRID_WIDTH));
                         this.canvasContainer.Height = Math.Max(this.ActualHeight * 2, (PADDING * 2 + (maxY + 1) * GRID_HEIGHT));
                     }
-
 
                     if (scroll)
                     {

@@ -286,6 +286,24 @@ namespace GitUI
 		}
 
 		#endregion    
-	
+
+		private void Window_Drop(object sender, DragEventArgs e)
+		{
+			if (e.Data.GetDataPresent(DataFormats.FileDrop))
+			{
+				this.Activate();
+
+				var dropped = ((string[])e.Data.GetData(DataFormats.FileDrop, true))[0];
+
+				if (!Directory.Exists(dropped)) dropped = Path.GetDirectoryName(dropped);
+				if (Directory.Exists(dropped) && GitFileStatusTracker.GetRepositoryDirectory(dropped) != null &&
+					MessageBox.Show("Do you want to open Git repository from " + dropped,
+					"Git repository found", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+				{
+					this.gitViewModel.Open(dropped);
+					this.graph.Show(gitViewModel.Tracker, true);
+				}
+			}
+		}	
 	}
 }

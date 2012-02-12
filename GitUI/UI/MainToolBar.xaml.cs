@@ -231,7 +231,7 @@ namespace GitUI.UI
 
         private void btnGitBash_Click(object sender, RoutedEventArgs e)
         {
-            GitBash.OpenGitBash(this.tracker.GitWorkingDirectory);
+            GitViewModel.OpenGitBash();
         }
 
     }

@@ -14,28 +14,37 @@
         <CommandBinding Command="cmd:HistoryViewCommands.GraphLoaded"  Executed="GraphLoaded_Executed" />
     </Window.CommandBindings>
     <Grid x:Name="rootGrid" MouseRightButtonUp="rootGrid_MouseRightButtonUp">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="200"/>
+            <RowDefinition Height="4"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
         <GitScc_UI:HistoryGraph HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="graph" Margin="0,90,0,0" />
 
         <my:MainToolBar x:Name="topToolBar" Height="90"
                         HorizontalAlignment="Stretch" VerticalAlignment="Top">
-            <!--<my:MainToolBar.RenderTransform>
-                <TranslateTransform Y="-690" />
-            </my:MainToolBar.RenderTransform>-->
         </my:MainToolBar>
 
-        <my:BottomToolBar x:Name="bottomToolBar" Height="60" Visibility="Collapsed"
+        <!--<my:BottomToolBar x:Name="bottomToolBar" Height="60" Visibility="Collapsed"
                         HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
             <my:BottomToolBar.RenderTransform>
                 <TranslateTransform Y="60" />
             </my:BottomToolBar.RenderTransform>
-        </my:BottomToolBar>
-
+        </my:BottomToolBar>-->
+        
         <GitScc_UI:CommitDetails x:Name="details" Visibility="Collapsed" Background="White">
             <GitScc_UI:CommitDetails.RenderTransform>
                 <TranslateTransform/>
             </GitScc_UI:CommitDetails.RenderTransform>
         </GitScc_UI:CommitDetails>
 
+        <GridSplitter VerticalAlignment="Top" HorizontalAlignment="Stretch" Grid.Row="1"
+                      Height="4" Background="#FFAAAAAA"/>
+        
+        <my:GitConsole x:Name="gitConsole" VerticalAlignment="Stretch" Grid.Row="2"/>
+
+        
         <GitScc_UI:Loading x:Name="loading"  HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" />
     </Grid>
 </Window>

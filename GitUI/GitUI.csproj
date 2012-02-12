@@ -83,6 +83,9 @@
     <Compile Include="UI\CommitTag.xaml.cs">
       <DependentUpon>CommitTag.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\GitConsole.xaml.cs">
+      <DependentUpon>GitConsole.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\HistoryGraph.xaml.cs">
       <DependentUpon>HistoryGraph.xaml</DependentUpon>
     </Compile>
@@ -125,6 +128,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\CommitTag.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\GitConsole.xaml">
+      <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\HistoryGraph.xaml">

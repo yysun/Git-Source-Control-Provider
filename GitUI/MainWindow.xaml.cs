@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using GitScc;
+using System.Windows.Threading;
 
 namespace GitUI
 {
@@ -31,6 +32,7 @@ namespace GitUI
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
+
 			GitBash.GitExePath = GitSccOptions.Current.GitBashPath;
 
 			if (!GitBash.Exists) GitBash.GitExePath = TryFindFile(new string[] {
@@ -38,24 +40,38 @@ namespace GitUI
 					@"C:\Program Files (x86)\Git\bin\sh.exe",
 			});
 
-			this.gitViewModel =
-			this.bottomToolBar.GitViewModel = GitViewModel.Current;
+			this.gitConsole.GitExePath = GitBash.GitExePath;
+			this.rootGrid.RowDefinitions[0].Height = new GridLength(this.ActualHeight * 0.8);
+
+			this.gitViewModel = GitViewModel.Current;
+			//this.bottomToolBar.GitViewModel = GitViewModel.Current;
 
 			if (gitViewModel.Tracker.HasGitRepository)
 				this.Title = gitViewModel.Tracker.GitWorkingDirectory;
 
-			this.gitViewModel.GraphChanged += (o, _) =>
+			this.gitViewModel.GraphChanged += (o, reload) =>
 			{
+				// show loading sign immediately
+				Action a = () => loading.Visibility = Visibility.Visible;
+				this.Dispatcher.BeginInvoke(a, DispatcherPriority.Render);
+
 				Action act = () => 
 				{
-					if (gitViewModel.Tracker.HasGitRepository) 
+					loading.Visibility = Visibility.Visible;
+
+					if (gitViewModel.Tracker.HasGitRepository)
 						this.Title = gitViewModel.Tracker.GitWorkingDirectory;
-					this.graph.Show(gitViewModel.Tracker, false);
+					this.graph.Show(gitViewModel.Tracker, reload != null);
+
+					this.gitConsole.WorkingDirectory = gitViewModel.Tracker.HasGitRepository ?
+						gitViewModel.Tracker.GitWorkingDirectory :
+						gitViewModel.WorkingDirectory;
 				};
-				this.Dispatcher.BeginInvoke(act);
+				this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
 			};
 
-			this.graph.Show(gitViewModel.Tracker, true);
+			loading.Visibility = Visibility.Visible;
+			this.gitViewModel.Refresh(true);
 		}
 
 		private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -147,14 +163,14 @@ namespace GitUI
 
 		private void HideBottomToolBar()
 		{
-			if (this.bottomToolBar.Visibility == Visibility.Visible)
-			{
-				var animationDuration = TimeSpan.FromSeconds(1.0);
-				var animation = new DoubleAnimation(60.0, new Duration(animationDuration));
-				animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
-				animation.Completed += (o, _) => this.bottomToolBar.Visibility = Visibility.Collapsed;
-				this.bottomToolBar.RenderTransform.BeginAnimation(TranslateTransform.YProperty, animation);
-			}
+			//if (this.bottomToolBar.Visibility == Visibility.Visible)
+			//{
+			//    var animationDuration = TimeSpan.FromSeconds(1.0);
+			//    var animation = new DoubleAnimation(60.0, new Duration(animationDuration));
+			//    animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
+			//    animation.Completed += (o, _) => this.bottomToolBar.Visibility = Visibility.Collapsed;
+			//    this.bottomToolBar.RenderTransform.BeginAnimation(TranslateTransform.YProperty, animation);
+			//}
 		} 
 		#endregion
 
@@ -176,7 +192,6 @@ namespace GitUI
 					loading.Visibility = Visibility.Collapsed;
 				};
 				this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
-				//this.details.Show(this.gitViewModel.Tacker, id);
 			}
 		}
 
@@ -245,9 +260,7 @@ namespace GitUI
 
 		private void RefreshGraph_Executed(object sender, ExecutedRoutedEventArgs e)
 		{
-			this.loading.Visibility = Visibility.Visible;
 			gitViewModel.Refresh(true);
-			this.graph.Show(gitViewModel.Tracker, true);
 		}
 		
 		#endregion
@@ -296,12 +309,13 @@ namespace GitUI
 				var dropped = ((string[])e.Data.GetData(DataFormats.FileDrop, true))[0];
 
 				if (!Directory.Exists(dropped)) dropped = Path.GetDirectoryName(dropped);
-				if (Directory.Exists(dropped) && GitFileStatusTracker.GetRepositoryDirectory(dropped) != null &&
-					MessageBox.Show("Do you want to open Git repository from " + dropped,
+				var gitWorkingFolder = GitFileStatusTracker.GetRepositoryDirectory(dropped);
+				if (Directory.Exists(dropped) && gitWorkingFolder != null &&
+					MessageBox.Show("Do you want to open Git repository from " + gitWorkingFolder,
 					"Git repository found", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
 				{
 					this.gitViewModel.Open(dropped);
-					this.graph.Show(gitViewModel.Tracker, true);
+					this.gitViewModel.Refresh(true);
 				}
 			}
 		}	

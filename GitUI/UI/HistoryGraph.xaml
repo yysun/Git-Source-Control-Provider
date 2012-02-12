@@ -9,27 +9,17 @@
    
 	<Grid>
 		<ScrollViewer x:Name="scrollRoot" CanContentScroll="True"
-				  VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" 
-				  >
-			<!--<Canvas x:Name="canvasRoot" Background="White">-->
-			
+					  VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible">
 			<ZoomAndPan:ZoomAndPanControl
 				x:Name="zoomAndPanControl"
 				Background="White"
 				MouseDown="zoomAndPanControl_MouseDown"
 				MouseUp="zoomAndPanControl_MouseUp"
 				MouseMove="zoomAndPanControl_MouseMove"
-				MouseWheel="zoomAndPanControl_MouseWheel"
-				
-				>
-				<Canvas x:Name="canvasContainer" Background="White">
-				</Canvas>
-  
-		<!--</Canvas>-->
-	
-	</ZoomAndPan:ZoomAndPanControl>
-	
-	</ScrollViewer>
-		<my:Loading x:Name="loading"  HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" />
+				MouseWheel="zoomAndPanControl_MouseWheel">
+				<Canvas x:Name="canvasContainer" Background="White"/>
+			</ZoomAndPan:ZoomAndPanControl>
+		</ScrollViewer>
+		<!--<my:Loading x:Name="loading"  HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" />-->
 	</Grid>
 </UserControl>

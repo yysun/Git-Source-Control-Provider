@@ -13,6 +13,7 @@ namespace GitScc
         private static string gitExePath;
         public static string GitExePath
         {
+            get { return gitExePath; }
             set
             {
                 try

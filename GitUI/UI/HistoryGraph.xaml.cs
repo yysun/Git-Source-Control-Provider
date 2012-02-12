@@ -105,7 +105,7 @@ namespace GitScc.UI
         {
             this.tracker = tracker;
 
-            loading.Visibility = Visibility.Visible;
+            //loading.Visibility = Visibility.Visible;
 
             Action action = () =>
             {
@@ -333,12 +333,12 @@ namespace GitScc.UI
                     Log.WriteLine("History Graph Show: {0}", ex.ToString());
                 }
 
-                loading.Visibility = Visibility.Collapsed;
+                //loading.Visibility = Visibility.Collapsed;
 
                 HistoryViewCommands.GraphLoaded.Execute(null, this);
             };
 
-            this.Dispatcher.BeginInvoke(action);
+            this.Dispatcher.BeginInvoke(action, DispatcherPriority.DataBind);
         }
 
         private string GetHashCode(IList<GraphNode> commits)

@@ -77,13 +77,14 @@ namespace GitUI
 				fileSystemWatcher.Changed += new FileSystemEventHandler(fileSystemWatcher_Changed);
 				fileSystemWatcher.EnableRaisingEvents = true;
 			}
-            tracker = new GitFileStatusTracker(directory);
+			tracker = new GitFileStatusTracker(directory);
 		}
 
-        internal static void OpenGitBash()
-        {
-            GitBash.OpenGitBash(Current.WorkingDirectory);
-        }
+		internal static void OpenGitBash()
+		{
+			GitBash.OpenGitBash(Current.WorkingDirectory);
+		}
+
 		#region Refresh
 
 		internal DateTime lastTimeRefresh = DateTime.Now.AddDays(-1);
@@ -125,8 +126,8 @@ namespace GitUI
 
 		internal void Refresh(bool reload)
 		{
-			if (reload) tracker.Refresh();
-			GraphChanged(this, null);
+			if (reload)	tracker.Refresh();
+			GraphChanged(this, reload ? new EventArgs() : null); // use non-null to force reload
 		}
 
 		internal void EnableAutoRefresh()

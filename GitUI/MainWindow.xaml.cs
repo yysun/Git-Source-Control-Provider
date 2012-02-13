@@ -70,7 +70,6 @@ namespace GitUI
 				this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
 			};
 
-			loading.Visibility = Visibility.Visible;
 			this.gitViewModel.Refresh(true);
 		}
 
@@ -318,6 +317,6 @@ namespace GitUI
 					this.gitViewModel.Refresh(true);
 				}
 			}
-		}	
+		}
 	}
 }

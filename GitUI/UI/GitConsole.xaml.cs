@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -12,6 +15,11 @@ namespace GitUI.UI
     /// </summary>
     public partial class GitConsole : UserControl
     {
+        string prompt = ">";
+        
+        List<string> commandHistory = new List<string>();
+        int commandIdx = -1;
+
         public GitConsole()
         {
             InitializeComponent();
@@ -28,6 +36,7 @@ namespace GitUI.UI
                 if (string.Compare(workingDirectory, value) != 0)
                 { 
                     workingDirectory = value;
+                    prompt = workingDirectory + ">";
                     this.richTextBox1.Document.Blocks.Clear();
                     WritePrompt(); 
                 }
@@ -43,12 +52,61 @@ namespace GitUI.UI
         {
             if (e.Key == Key.Enter)
             {
-                var rtb = this.richTextBox1;
-                var command = new TextRange(rtb.CaretPosition.GetLineStartPosition(0),
-                    rtb.CaretPosition.GetLineStartPosition(1) ?? rtb.CaretPosition.DocumentEnd).Text;
+                var command = new TextRange(richTextBox1.CaretPosition.GetLineStartPosition(0),
+                    richTextBox1.CaretPosition.GetLineStartPosition(1) ?? richTextBox1.CaretPosition.DocumentEnd).Text;
                 command = command.Replace("\r", "").Replace("\n", "");
                 RunCommand(command);
+                e.Handled = true;
             }
+            else if (e.Key == Key.Up)
+            {
+                GetCommand(--commandIdx);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Down)
+            {
+                GetCommand(++commandIdx);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Escape)
+            {
+                ChangePrompt("");
+            }
+            else if (e.Key == Key.Back)
+            {
+                var text = new TextRange(richTextBox1.CaretPosition.GetLineStartPosition(0),
+                    richTextBox1.CaretPosition).Text;
+                if (text.EndsWith(">")) e.Handled = true;
+            }
+            else
+            {
+                var text = new TextRange(richTextBox1.CaretPosition, richTextBox1.CaretPosition.DocumentEnd).Text;
+                if (text.Contains(">")) e.Handled = true;
+            }
+        }
+
+        private void GetCommand(int idx)
+        {
+            if (commandHistory.Count > 0)
+            {
+                if (idx < 0) idx = 0;
+                else if (idx > commandHistory.Count - 1) idx = commandHistory.Count - 1;
+                var command = commandHistory[idx];
+                commandIdx = idx;
+                ChangePrompt(command);
+            }
+        }
+
+        private void ChangePrompt(string command)
+        {
+            this.richTextBox1.CaretPosition = this.richTextBox1.CaretPosition.DocumentEnd;
+            var range = this.richTextBox1.Selection;
+            range.Select(
+                richTextBox1.CaretPosition.GetLineStartPosition(0).GetPositionAtOffset(prompt.Length + 1, LogicalDirection.Forward),
+                richTextBox1.CaretPosition.GetLineStartPosition(1) ?? this.richTextBox1.CaretPosition.DocumentEnd);
+            range.Text = command;
+            this.richTextBox1.ScrollToEnd();
+            this.richTextBox1.CaretPosition = this.richTextBox1.CaretPosition.DocumentEnd;
         }
         
         private void richTextBox1_GotFocus(object sender, RoutedEventArgs e)
@@ -60,9 +118,21 @@ namespace GitUI.UI
         {
             var isGit = true;
             command = command.Substring(command.IndexOf(">") + 1).Trim();
+
+            if (!string.IsNullOrWhiteSpace(command) && 
+               (commandHistory.Count==0 || commandHistory.Last()!=command))
+            {
+                commandHistory.Add(command);
+                commandIdx = commandHistory.Count;
+            }
+
             if (!ProcessInternalCommand(command))
             {
-                if (command.StartsWith("git "))
+                if (command == "git")
+                {
+                    command = "/C \"\"" + GitExePath + "\"";
+                }
+                else if (command.StartsWith("git "))
                 {
                     command = command.Substring(4);
                     command = "/C \"\"" + GitExePath + "\" " + command + "\"";
@@ -102,7 +172,6 @@ namespace GitUI.UI
 
         private void WritePrompt()
         {
-            var prompt =  this.WorkingDirectory + ">";
             Paragraph para = new Paragraph();
             para.Margin = new Thickness(0);
             para.FontFamily = new FontFamily("Lucida Console");

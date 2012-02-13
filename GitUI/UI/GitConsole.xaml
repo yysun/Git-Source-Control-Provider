@@ -4,12 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300" Loaded="UserControl_Loaded">
+             d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <RichTextBox HorizontalAlignment="Stretch" Name="richTextBox1" VerticalAlignment="Stretch" 
                      PreviewKeyDown="richTextBox1_PreviewKeyDown" AcceptsReturn="False" AcceptsTab="False"
-                     HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible" GotFocus="richTextBox1_GotFocus">
+                     HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible">
             <FlowDocument></FlowDocument>
         </RichTextBox>
+        <ListBox Height="100" HorizontalAlignment="Left" Name="lstOptions" VerticalAlignment="Top" Width="120" Visibility="Collapsed" 
+                 MouseDoubleClick="lstOptions_MouseDoubleClick" PreviewKeyDown="lstOptions_PreviewKeyDown" />
     </Grid>
 </UserControl>

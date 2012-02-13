@@ -67,17 +67,20 @@ namespace GitUI
 		internal void Open(string directory)
 		{
 			workingDirectory = directory;
-			if (Directory.Exists(workingDirectory))
-			{
-				fileSystemWatcher = new FileSystemWatcher(workingDirectory);
 
-				fileSystemWatcher.Created += new FileSystemEventHandler(fileSystemWatcher_Changed);
-				fileSystemWatcher.Deleted += new FileSystemEventHandler(fileSystemWatcher_Changed);
+			tracker = new GitFileStatusTracker(directory);
+			if (tracker.HasGitRepository) directory = tracker.GitWorkingDirectory;
+
+			if (Directory.Exists(directory))
+			{
+				fileSystemWatcher = new FileSystemWatcher(directory);
+				fileSystemWatcher.IncludeSubdirectories = true;
+				//fileSystemWatcher.Created += new FileSystemEventHandler(fileSystemWatcher_Changed);
+				//fileSystemWatcher.Deleted += new FileSystemEventHandler(fileSystemWatcher_Changed);
 				//fileSystemWatcher.Renamed += new FileSystemEventHandler(fileSystemWatcher_Changed);
 				fileSystemWatcher.Changed += new FileSystemEventHandler(fileSystemWatcher_Changed);
 				fileSystemWatcher.EnableRaisingEvents = true;
 			}
-			tracker = new GitFileStatusTracker(directory);
 		}
 
 		internal static void OpenGitBash()

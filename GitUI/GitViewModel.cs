@@ -119,7 +119,7 @@ namespace GitUI
 				{
 					System.Diagnostics.Debug.WriteLine("$$$$ Refresh");
 					DisableAutoRefresh();
-					Refresh(true);
+					Refresh(false);
 					NoRefresh = false;
 					NeedRefresh = false;
 					nextTimeRefresh = DateTime.Now;
@@ -129,7 +129,7 @@ namespace GitUI
 
 		internal void Refresh(bool reload)
 		{
-			if (reload)	tracker.Refresh();
+			tracker.Refresh();
 			GraphChanged(this, reload ? new EventArgs() : null); // use non-null to force reload
 		}
 
@@ -152,22 +152,37 @@ namespace GitUI
 		#endregion
 
 		#region Git commands
-		
+
+		internal GitUI.UI.GitConsole console = null;
+
 		private string GitRun(string cmd)
 		{
 			if (!GitBash.Exists) throw new Exception("git.exe is not found.");
 			if (this.Tracker == null) throw new Exception("Git repository is not found.");
 
-			var ret = GitBash.Run(cmd, this.Tracker.GitWorkingDirectory);
-			return ret;
+			if (console != null)
+			{
+				return console.Run("git " + cmd);
+			}
+			else
+			{
+				var ret = GitBash.Run(cmd, this.Tracker.GitWorkingDirectory);
+				return ret;
+			}
 		}
 
 		private void GitRunCmd(string cmd)
 		{
 			if (!GitBash.Exists) throw new Exception("git.exe is not found.");
 			if (this.Tracker == null) throw new Exception("Git repository is not found.");
-
-			GitBash.RunCmd(cmd, this.Tracker.GitWorkingDirectory);
+			if (console != null)
+			{
+				console.Run("git " + cmd);
+			}
+			else
+			{
+				GitBash.RunCmd(cmd, this.Tracker.GitWorkingDirectory);
+			}
 		}
 
 		internal string AddTag(string name, string id)

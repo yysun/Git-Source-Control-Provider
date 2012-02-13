@@ -55,7 +55,10 @@ namespace GitScc.UI
                 "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 var ret = GitViewModel.Current.DeleteBranch(BranchName);
-                if (!string.IsNullOrWhiteSpace(ret)) MessageBox.Show(ret, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (ret.StartsWith("error"))
+                    MessageBox.Show(ret, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                else
+                    MessageBox.Show(ret, "Branch Deleted", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
     }

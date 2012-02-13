@@ -37,8 +37,12 @@ namespace GitUI.UI
                 if (string.Compare(workingDirectory, value) != 0)
                 { 
                     workingDirectory = value;
-                    prompt = string.Format("{0} ({1})\r\n>", workingDirectory,
+                    //prompt = string.Format("{0} ({1})\r\n>", workingDirectory,
+                    //    GitViewModel.Current.Tracker.CurrentBranch);
+
+                    prompt = string.Format("({1})>", workingDirectory,
                         GitViewModel.Current.Tracker.CurrentBranch);
+
                     this.richTextBox1.Document.Blocks.Clear();
                     WritePrompt(); 
                 }
@@ -89,7 +93,7 @@ namespace GitUI.UI
             }
             else if (e.Key == Key.Escape)
             {
-                ChangePrompt("");
+                ChangePrompt("",  new SolidColorBrush(Colors.Black));
             }
             else if (e.Key == Key.Back)
             {
@@ -116,7 +120,7 @@ namespace GitUI.UI
                 else if (idx > commandHistory.Count - 1) idx = commandHistory.Count - 1;
                 var command = commandHistory[idx];
                 commandIdx = idx;
-                ChangePrompt(command);
+                ChangePrompt(command,  new SolidColorBrush(Colors.Black));
             }
         }
 
@@ -157,8 +161,8 @@ namespace GitUI.UI
                 startInfo.CreateNoWindow = true;
                 startInfo.WorkingDirectory = WorkingDirectory;
                 Process p = Process.Start(startInfo);
-                string output = p.StandardOutput.ReadToEnd();
-                string error = p.StandardError.ReadToEnd();
+                output = p.StandardOutput.ReadToEnd();
+                error = p.StandardError.ReadToEnd();
 
                 p.WaitForExit();
                 if (output.Length != 0)
@@ -170,20 +174,21 @@ namespace GitUI.UI
                 }
                 else if (error.Length != 0)
                 {
-                    WriteText(error, new SolidColorBrush(Colors.DarkRed));
+                    WriteText(error, new SolidColorBrush(Colors.Crimson));
                 }
                 WritePrompt();
             }
         }
 
-        private void ChangePrompt(string command)
+        private void ChangePrompt(string command, Brush brush)
         {
             this.richTextBox1.CaretPosition = this.richTextBox1.CaretPosition.DocumentEnd;
             var range = this.richTextBox1.Selection;
             range.Select(
-                richTextBox1.CaretPosition.GetLineStartPosition(0).GetPositionAtOffset(1, LogicalDirection.Forward),
+                richTextBox1.CaretPosition.GetLineStartPosition(0).GetPositionAtOffset(prompt.Length + 1, LogicalDirection.Forward),
                 richTextBox1.CaretPosition.GetLineStartPosition(1) ?? this.richTextBox1.CaretPosition.DocumentEnd);
             range.Text = command;
+            range.ApplyPropertyValue(ForegroundProperty, brush);
             this.richTextBox1.ScrollToEnd();
             this.richTextBox1.CaretPosition = this.richTextBox1.CaretPosition.DocumentEnd;
         }
@@ -318,5 +323,20 @@ namespace GitUI.UI
             return new string[] { };
         }
         #endregion
+
+        string output, error;
+
+        internal string Run(string command)
+        {
+            ChangePrompt(command, new SolidColorBrush(Colors.Green));
+            RunCommand(command);
+
+            return output + error;
+        }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            GitViewModel.Current.console = this;
+        }
     }
 }

@@ -162,7 +162,8 @@ namespace GitUI
 
 			if (console != null)
 			{
-				return console.Run("git " + cmd);
+				console.Run("git " + cmd);
+				return "";
 			}
 			else
 			{

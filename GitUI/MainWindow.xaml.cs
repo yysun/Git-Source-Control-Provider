@@ -41,7 +41,7 @@ namespace GitUI
 			});
 
 			this.gitConsole.GitExePath = GitBash.GitExePath;
-			this.rootGrid.RowDefinitions[0].Height = new GridLength(this.ActualHeight * 0.8);
+			this.rootGrid.RowDefinitions[0].Height = new GridLength(this.ActualHeight * 0.75);
 
 			this.gitViewModel = GitViewModel.Current;
 			//this.bottomToolBar.GitViewModel = GitViewModel.Current;

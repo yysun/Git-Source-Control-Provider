@@ -46,7 +46,7 @@ namespace GitUI.UI
                         GitViewModel.Current.Tracker.CurrentBranch);
 
                     this.richTextBox1.Document.Blocks.Clear();
-                    WritePrompt(); 
+                    ShowWaring();
                 }
             }
         }
@@ -54,6 +54,18 @@ namespace GitUI.UI
         #region keydown event
         private void richTextBox1_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if (lstOptions.Visibility == Visibility.Visible)
+            {
+                lstOptions.Focus();
+                return;
+            }
+
+            if (!IsCaretPositionValid())
+            {
+                this.richTextBox1.CaretPosition = this.richTextBox1.CaretPosition.DocumentEnd;
+                return;
+            }
+
             if (e.Key == Key.Space)
             {
                 var command = new TextRange(richTextBox1.CaretPosition.GetLineStartPosition(0),
@@ -62,33 +74,11 @@ namespace GitUI.UI
                 ShowOptions(command);
                 return;
             }
-            else if (e.Key == Key.Tab || e.Key == Key.Down)
-            {
-                if (lstOptions.Visibility == Visibility.Visible)
-                {
-                    lstOptions.Focus();
-                    return;
-                }
-            }
-            else
-            {
-                lstOptions.Visibility = Visibility.Collapsed;
-            }
 
             if (e.Key == Key.Enter)
             {
-                if (IsCaretPositionValid())
-                {
-                    var command = new TextRange(
-                        richTextBox1.CaretPosition.GetLineStartPosition(0).GetPositionAtOffset(prompt.Length + 1, LogicalDirection.Forward),
-                        richTextBox1.CaretPosition.GetLineStartPosition(1) ?? this.richTextBox1.CaretPosition.DocumentEnd).Text;
-                    command = command.Trim();
-                    //if(!string.IsNullOrWhiteSpace(command)) 
-                    RunCommand(command);
-                }
-                else
-                    this.richTextBox1.CaretPosition = this.richTextBox1.CaretPosition.DocumentEnd;
-
+                var command = GetCommand();
+                RunCommand(command);
                 e.Handled = true;
             }
             else if (e.Key == Key.Up)
@@ -104,6 +94,7 @@ namespace GitUI.UI
             else if (e.Key == Key.Escape)
             {
                 ChangePrompt("", new SolidColorBrush(Colors.Black));
+                lstOptions.Visibility = Visibility.Collapsed;
             }
             else if (e.Key == Key.Back)
             {
@@ -111,17 +102,48 @@ namespace GitUI.UI
                     richTextBox1.CaretPosition).Text;
                 if (text.EndsWith(">")) e.Handled = true;
             }
-            else
-            {
-                if (!IsCaretPositionValid()) //e.Handled = true;
-                    this.richTextBox1.CaretPosition = this.richTextBox1.CaretPosition.DocumentEnd;
-            }
+        }
+
+        private string GetCommand()
+        {
+            var command = new TextRange(
+                richTextBox1.CaretPosition.GetLineStartPosition(0)
+                .GetPositionAtOffset(prompt.Length + 1, LogicalDirection.Forward) ??
+                richTextBox1.CaretPosition.GetLineStartPosition(0),
+                richTextBox1.CaretPosition.GetLineStartPosition(1) ?? this.richTextBox1.CaretPosition.DocumentEnd).Text;
+            command = command.Trim();
+            return command;
         }
 
         private bool IsCaretPositionValid()
         {
             var text = new TextRange(richTextBox1.CaretPosition, richTextBox1.CaretPosition.DocumentEnd).Text;
             return !text.Contains(">");
+        }
+
+        private void ShowWaring()
+        {
+            WriteText(@"Welcome to Dragon console.", new SolidColorBrush(Colors.Black));
+            WriteHelp();
+            WriteText(@"WARNING: Git commands that require interactive inputs are not working in this console. E.g. git mergetool, git push/pull with http(s) that need to enter password are not supported. Please use Git Bash instead.
+
+USE AT YOUR OWN RISK.
+", new SolidColorBrush(Colors.Crimson));
+
+            WritePrompt();
+        }
+
+        private void WriteHelp()
+        {
+            WriteText(@"Dragon console commands:
+
+    cls:     clear the screen
+    clear:   clear the screen
+    dir:     windows shell command dir 
+    git:     launch git bash
+    git xxx: launch supported git command xxx
+", new SolidColorBrush(Colors.Black));
+            
         }
 
         #endregion
@@ -162,7 +184,9 @@ namespace GitUI.UI
             {
                 if (command == "git")
                 {
-                    command = "/C \"\"" + GitExePath + "\"";
+                    //command = "/C \"\"" + GitExePath + "\"";
+                    GitViewModel.OpenGitBash();
+                    return;
                 }
                 else if (command.StartsWith("git "))
                 {
@@ -347,7 +371,18 @@ namespace GitUI.UI
         private bool ProcessInternalCommand(string command)
         {
             command = command.ToLower();
-            if (command == "clear" || command == "cls")
+            if (string.IsNullOrWhiteSpace(command))
+            {
+                WritePrompt();
+                return true;
+            }
+            else if (command == "help")
+            {
+                WriteHelp();
+                WritePrompt();
+                return true;
+            }
+            else if (command == "clear" || command == "cls")
             {
                 this.richTextBox1.Document.Blocks.Clear();
                 WritePrompt();

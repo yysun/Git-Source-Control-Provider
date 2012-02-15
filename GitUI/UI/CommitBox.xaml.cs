@@ -83,8 +83,8 @@ namespace GitScc.UI
                 else
                 {
                     var ret = GitViewModel.Current.AddTag(tag, commit.ShortId);
-                    if(!string.IsNullOrWhiteSpace(ret)) 
-                        MessageBox.Show(ret, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    //if(!string.IsNullOrWhiteSpace(ret)) 
+                    //    MessageBox.Show(ret, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)
@@ -113,13 +113,13 @@ namespace GitScc.UI
 
                 if (!string.IsNullOrWhiteSpace(branchId))
                 {
-                    MessageBox.Show("Tag already exists for " + branchId, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Branch already exists for " + branchId, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 else
                 {
                     var ret = GitViewModel.Current.AddBranch(branch, commit.ShortId);
-                    if (!string.IsNullOrWhiteSpace(ret))
-                        MessageBox.Show(ret, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    //if (!string.IsNullOrWhiteSpace(ret))
+                    //    MessageBox.Show(ret, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)
@@ -142,10 +142,10 @@ namespace GitScc.UI
             if (dlg.ShowDialog() == true)
             {
                 var ret = GitViewModel.Current.Archive(this.txtId.Text, dlg.FileName);
-                if (!string.IsNullOrWhiteSpace(ret))
-                {
-                    MessageBox.Show(ret, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                //if (!string.IsNullOrWhiteSpace(ret))
+                //{
+                //    MessageBox.Show(ret, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                //}
             }
         }
     }

@@ -30,6 +30,8 @@ namespace GitScc
         private Dictionary<string, GitFileStatus> cache;
         private IEnumerable<GitFile> changedFiles;
         private IList<IgnoreRule> ignoreRules;
+        private IEnumerable<string> remotes;
+        private IDictionary<string, string> configs;
 
         public GitFileStatusTracker(string workingFolder)
         {
@@ -69,7 +71,8 @@ namespace GitScc
             this.dirCache = null;
             this.head = null;
             this.ignoreRules = null;
-
+            this.remotes = null;
+            this.configs = null;
             if (!string.IsNullOrEmpty(initFolder))
             {
                 try
@@ -1086,6 +1089,43 @@ namespace GitScc
                 {
                     UnStageFile(fileName);
                 }
+            }
+        }
+
+        public IEnumerable<string> Remotes
+        {
+            get
+            {
+                if (remotes == null && GitBash.Exists)
+                {
+                    remotes = GitBash.Run("remote", this.GitWorkingDirectory)
+                        .Split('\n').Where(s=>!string.IsNullOrWhiteSpace(s));
+                }
+                return remotes;
+            }
+        }
+
+        public IDictionary<string, string> Configs
+        {
+            get
+            {
+                if (configs == null && GitBash.Exists)
+                {
+                    var lines = GitBash.Run("config -l", this.GitWorkingDirectory)
+                        .Split('\n').Where(s => !string.IsNullOrWhiteSpace(s) && s.IndexOf("=") > 0)
+                        .OrderBy(s=>s);
+
+                    configs = new Dictionary<string, string>();
+                    foreach (var s in lines)
+                    {
+                        var pos = s.IndexOf("=");
+                        var key = s.Substring(0, pos);
+                        if(!configs.Keys.Contains(key))
+                            configs.Add(key, s.Substring(pos+1));
+                    }
+                        
+                }
+                return configs ?? new Dictionary<string, string>();
             }
         }
     }

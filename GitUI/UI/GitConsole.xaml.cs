@@ -39,12 +39,8 @@ namespace GitUI.UI
                 if (string.Compare(workingDirectory, value) != 0)
                 { 
                     workingDirectory = value;
-                    //prompt = string.Format("{0} ({1})\r\n>", workingDirectory,
-                    //    GitViewModel.Current.Tracker.CurrentBranch);
-
-                    prompt = string.Format("({1})>", workingDirectory,
-                        GitViewModel.Current.Tracker.CurrentBranch);
-
+                    prompt = string.Format("[{1}]>", workingDirectory,
+                        GitIntellisenseHelper.GetPrompt());
                     this.richTextBox1.Document.Blocks.Clear();
                     ShowWaring();
                 }
@@ -329,7 +325,7 @@ USE AT YOUR OWN RISK.
             this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
         }
 
-        private void ChangePrompt(string command, Brush brush)
+        void ChangePrompt(string command, Brush brush)
         {
             this.richTextBox1.CaretPosition = this.richTextBox1.CaretPosition.DocumentEnd;
             var range = this.richTextBox1.Selection;
@@ -340,6 +336,23 @@ USE AT YOUR OWN RISK.
             range.ApplyPropertyValue(ForegroundProperty, brush);
             this.richTextBox1.ScrollToEnd();
             this.richTextBox1.CaretPosition = this.richTextBox1.CaretPosition.DocumentEnd;
+        }
+
+        void ReplacePrompt(object sender, EventArgs e)
+        {
+            var newprompt = string.Format("[{1}]>", workingDirectory,
+                GitIntellisenseHelper.GetPrompt());
+
+            if (prompt != newprompt)
+            {
+                var command = GetCommand();
+                var last = this.richTextBox1.Document.Blocks.Last();
+                this.richTextBox1.Document.Blocks.Remove(last);
+                prompt = newprompt;
+                WritePrompt();
+                ChangePrompt(command, new SolidColorBrush(Colors.Black));
+                lstOptions.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void WritePrompt()
@@ -451,52 +464,15 @@ USE AT YOUR OWN RISK.
         #region git command intellisense
         private IEnumerable<string> GetOptions(string command)
         {
-            switch (command)
-            {
-                case "git":
-                    return new string[] { 
-                        "add", "bisect", "branch", "checkout", "clone",
-                        "commit", "diff", "fetch", "grep", "init",  
-                        "log", "merge", "mv", "pull", "push", "rebase",
-                        "reset", "rm", "show", "status", "tag"
-                    };
-
-                case "git checkout":
-                    if (GitViewModel.Current.Tracker.HasGitRepository)
-                    {
-                        return GitViewModel.Current.Tracker.RepositoryGraph.Refs
-                            .Where(r => r.Type == RefTypes.Branch)
-                            .Select(r => r.Name);
-                    }
-                    break;
-
-                case "git branch -D":
-                case "git branch -d":
-                    if (GitViewModel.Current.Tracker.HasGitRepository)
-                    {
-                        return GitViewModel.Current.Tracker.RepositoryGraph.Refs
-                            .Where(r => r.Type == RefTypes.Branch)
-                            .Select(r => r.Name);
-                    }
-                    break;
-
-                case "git tag -d":
-                    if (GitViewModel.Current.Tracker.HasGitRepository)
-                    {
-                        return GitViewModel.Current.Tracker.RepositoryGraph.Refs
-                            .Where(r => r.Type == RefTypes.Tag)
-                            .Select(r => r.Name);
-                    }
-                    break;
-            }
-            return new string[] { };
+            return GitIntellisenseHelper.GetOptions(command);
         }
         #endregion
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            GitViewModel.Current.console = this;
             this.richTextBox1.Focus();
+            GitViewModel.Current.console = this;
+            GitViewModel.Current.GraphChanged += new EventHandler(ReplacePrompt);
         }
     }
 }

@@ -12,6 +12,7 @@
             <FlowDocument></FlowDocument>
         </RichTextBox>
         <ListBox Height="100" HorizontalAlignment="Left" Name="lstOptions" VerticalAlignment="Top" Width="120" Visibility="Collapsed" 
-                 MouseDoubleClick="lstOptions_MouseDoubleClick" PreviewKeyDown="lstOptions_PreviewKeyDown" />
+                 MouseDoubleClick="lstOptions_MouseDoubleClick" PreviewKeyDown="lstOptions_PreviewKeyDown"
+                 IsTextSearchEnabled="True" TextSearch.TextPath="."/>
     </Grid>
 </UserControl>

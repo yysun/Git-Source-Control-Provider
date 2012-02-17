@@ -145,6 +145,11 @@ namespace GitUI.UI
             {
                 ShowSearchList();
             }
+            else if(e.Key == Key.Enter)
+            {
+                FindCommitAndSelect();
+                e.Handled = true;
+            }
         }
 
         private void txtSearch_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -181,6 +186,21 @@ namespace GitUI.UI
                 txtSearch.TextChanged -= new TextChangedEventHandler(txtSearch_TextChanged);
                 txtSearch.Text = commit.Message;
                 txtSearch.TextChanged += new TextChangedEventHandler(txtSearch_TextChanged);
+                HistoryViewCommands.ScrollToCommit.Execute(commit.Id, this);
+                SelectCommit(commit.ShortId, null);
+            }
+        }
+
+        private void FindCommitAndSelect()
+        {
+            if (string.IsNullOrWhiteSpace(this.txtSearch.Text)) return;
+
+            var commit = lstSearch.Items.Cast<Commit>()
+                .Where(c => c.ToString().Contains(this.txtSearch.Text))
+                .FirstOrDefault();
+
+            if (commit != null)
+            {
                 HistoryViewCommands.ScrollToCommit.Execute(commit.Id, this);
                 SelectCommit(commit.ShortId, null);
             }

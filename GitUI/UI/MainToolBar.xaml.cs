@@ -61,13 +61,9 @@ namespace GitUI.UI
 
         private void checkBox1_Click(object sender, RoutedEventArgs e)
         {
-            if (tracker.HasGitRepository)
-            {
-                bool isSimplied = tracker.RepositoryGraph.IsSimplified;
-                tracker.RepositoryGraph.IsSimplified = !isSimplied;
-                this.lableView.Content = !isSimplied ? "Simplified view: ON" : "Simplified view: OFF";
-                gitViewModel.Refresh(false);
-            }
+            gitViewModel.ShowSimplifiedView = this.checkBox1.IsChecked == true;
+            this.lableView.Content = this.checkBox1.IsChecked == true ? 
+                "Simplified view: ON" : "Simplified view: OFF";
         }
 
         private void branchList_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)

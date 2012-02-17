@@ -49,9 +49,19 @@ namespace GitUI
 		public event EventHandler GraphChanged = delegate { };
 		private GitFileStatusTracker tracker;
 		private string workingDirectory;
+		private bool showSimplifiedView;
 
 		public GitFileStatusTracker Tracker { get { return tracker; } }
 		public string WorkingDirectory { get { return workingDirectory; } }
+		public bool ShowSimplifiedView
+		{
+			get { return showSimplifiedView; }
+			set
+			{
+				showSimplifiedView = value;
+				Refresh(true);
+			}
+		}
 
 		DispatcherTimer timer;
 		FileSystemWatcher fileSystemWatcher;
@@ -130,6 +140,8 @@ namespace GitUI
 		internal void Refresh(bool reload)
 		{
 			tracker.Refresh();
+			if (tracker.HasGitRepository)
+				tracker.RepositoryGraph.IsSimplified = showSimplifiedView;
 			GraphChanged(this, reload ? new EventArgs() : null); // use non-null to force reload
 		}
 

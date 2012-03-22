@@ -288,10 +288,6 @@ namespace GitScc
                 {
                     return GitFileStatus.Added;
                 }
-                if (treeEntry != null && !treeEntry.GetId().Equals(indexEntry.GetObjectId()))
-                {
-                    return GitFileStatus.Staged;
-                }
                 if (!File.Exists(fileName))
                 {
                     return GitFileStatus.Deleted;
@@ -299,6 +295,10 @@ namespace GitScc
                 if (File.Exists(fileName) && indexEntry.IsModified(repository.WorkTree, true))
                 {
                     return GitFileStatus.Modified;
+                }
+                if (treeEntry != null && !treeEntry.GetId().Equals(indexEntry.GetObjectId()))
+                {
+                    return GitFileStatus.Staged;
                 }
                 if (indexEntry.GetStage() != 0)
                 {
@@ -1024,7 +1024,8 @@ namespace GitScc
                         else if (y == 'D') gitFile.Status = GitFileStatus.Deleted;
                         break;
                     case 'M':
-                        gitFile.Status = GitFileStatus.Staged;
+                        if (y == 'M') gitFile.Status = GitFileStatus.Modified;
+                        else gitFile.Status = GitFileStatus.Staged;
                         break;
                     case 'A':
                         gitFile.Status = GitFileStatus.Added;

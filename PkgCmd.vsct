@@ -193,7 +193,7 @@
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>Pending Changes</ButtonText>
+          <ButtonText>Git Pending Changes</ButtonText>
         </Strings>
       </Button>
 
@@ -279,14 +279,9 @@
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
     </CommandPlacement>
 
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandPendingChanges" priority="0x0003">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>
-    </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandPendingChanges" priority="0x0003">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_SCC"/>
-    </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandPendingChanges" priority="0x0003">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandPendingChanges" priority="0x0250">
+      <!-- View -> Other Windows where other similar commands are located -->
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1"/>
     </CommandPlacement>
 
     <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandHistory" priority="0x0004">

@@ -27,7 +27,6 @@ namespace GitScc
 
         public const int icmdPendingChangesRefresh = 0x114;
         public const int icmdHistoryViewRefresh = 0x115;
-        public const int icmdSccCommandAbout = 0x116;
 
 
         // Define the list of menus (these include toolbars)

@@ -136,10 +136,6 @@ namespace GitScc
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesCommitToBranch);
                 menu = new MenuCommand(new EventHandler(OnSwitchBranchCommand), cmd);
                 mcs.AddCommand(menu);
-
-                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandAbout);
-                menu = new MenuCommand(new EventHandler(OnAbout), cmd);
-                mcs.AddCommand(menu);
             }
 
 
@@ -250,7 +246,6 @@ namespace GitScc
                     if (sccService.IsSolutionGitControlled) cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
 
-                case CommandId.icmdSccCommandAbout:
                 case CommandId.icmdSccCommandRefresh:
                     //if (sccService.IsSolutionGitControlled)
                         cmdf |= OLECMDF.OLECMDF_ENABLED;
@@ -399,13 +394,6 @@ namespace GitScc
                 var gitExtensionPath = GitSccOptions.Current.GitExtensionPath;
                 RunDetatched(gitExtensionPath, GitToolCommands.GitExtCommands[idx].Command);
             }
-        }
-        
-        private void OnAbout(object sender, EventArgs e)
-        {
-            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            path = Path.Combine(path, "Readme.htm");
-            Process.Start(path);
         }
         
         private void ShowPendingChangesWindow(object sender, EventArgs e)

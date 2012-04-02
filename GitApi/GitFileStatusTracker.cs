@@ -318,7 +318,8 @@ namespace GitScc
                 
                 if (File.Exists(fileName))
                 {
-                    if (ignoreRules != null && ignoreRules.Any(rule => rule.IsMatch(fileName, false)))
+                    string target = fileNameRel.Replace('\\', '/');
+                    if (ignoreRules != null && ignoreRules.Any(rule => rule.IsMatch(target, false)))
                     {
                         return GitFileStatus.Ignored;
                     }

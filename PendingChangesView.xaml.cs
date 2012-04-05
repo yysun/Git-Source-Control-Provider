@@ -24,14 +24,12 @@ namespace GitScc
     {
         private SccProviderService service;
         private GitFileStatusTracker tracker;
-        private ToolWindowWithEditor toolWindow;
-        private IVsTextView textView;
+
         private string[] diffLines;
 
-        public PendingChangesView(ToolWindowWithEditor toolWindow)
+        public PendingChangesView()
         {
             InitializeComponent();
-            this.toolWindow = toolWindow;
             this.service = BasicSccProvider.GetServiceEx<SccProviderService>();
         }
 
@@ -67,7 +65,7 @@ namespace GitScc
             var fileName = GetSelectedFileName();
             if (fileName == null)
             {
-                this.toolWindow.ClearEditor();
+                this.ClearEditor();
                 diffLines = new string[0];
                 return;
             }
@@ -86,13 +84,8 @@ namespace GitScc
                     var tmpFileName = tracker.DiffFile(fileName);
                     if (!string.IsNullOrWhiteSpace(tmpFileName) && File.Exists(tmpFileName))
                     {
-                        var tuple = this.toolWindow.SetDisplayedFile(tmpFileName);
-                        if (tuple != null)
-                        {
-                            this.DiffEditor.Content = tuple.Item1;
-                            this.textView = tuple.Item2;
-                            diffLines = File.ReadAllLines(tmpFileName);
-                        }
+                        diffLines = File.ReadAllLines(tmpFileName);
+                        this.ShowFile(tmpFileName);
                     }
                 }
                 catch (Exception ex)
@@ -113,6 +106,26 @@ namespace GitScc
                 OpenFile(fileName);
             });
 
+        }
+
+        private void ClearEditor()
+        {
+            this.DiffEditor.Text = "";
+        }
+
+        private void ShowFile(string fileName)
+        {
+            try
+            {
+                this.DiffEditor.SyntaxHighlighting = ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance.GetDefinitionByExtension(
+                    Path.GetExtension(fileName));
+                this.DiffEditor.ShowLineNumbers = true;
+                this.DiffEditor.Load(fileName);
+            }
+            finally
+            {
+                File.Delete(fileName);
+            }
         }
 
         #endregion
@@ -238,7 +251,7 @@ namespace GitScc
         {
             this.dataGrid1.ItemsSource = null;
             this.textBoxComments.Document.Blocks.Clear();
-            this.toolWindow.ClearEditor();
+            this.ClearEditor();
             var chk = this.dataGrid1.FindVisualChild<CheckBox>("checkBoxAllStaged");
             if (chk != null) chk.IsChecked = false;
         }
@@ -451,13 +464,14 @@ Note: if the file is included project, you need to delete the file from project 
 
         private void DiffEditor_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            
             int start = 1, column = 1;
             try
             {
-                if (this.textView != null && diffLines != null && diffLines.Length > 0)
+                if (diffLines != null && diffLines.Length > 0)
                 {
-                    int line;
-                    textView.GetCaretPos(out line, out column);
+                    int line = this.DiffEditor.TextArea.Caret.Line;
+                    column = this.DiffEditor.TextArea.Caret.Column;
 
                     string text = diffLines[line];
                     while (line >=0)
@@ -492,7 +506,7 @@ Note: if the file is included project, you need to delete the file from project 
                 OpenFile(fileName);
                 var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
                 var selection = dte.ActiveDocument.Selection as EnvDTE.TextSelection;
-                selection.MoveToLineAndOffset(start, column);
+                selection.MoveToLineAndOffset(start-1, column);
             });
         }
 

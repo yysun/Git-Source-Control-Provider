@@ -94,10 +94,6 @@
       <Project>{ADECE07A-5D80-4950-9DA5-A681CE2F5106}</Project>
       <Name>BasicSccProvider</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DiffClassifier\DiffClassifier.csproj">
-      <Project>{57D5E6BB-DC11-49CF-9F49-7C3F3EC11F09}</Project>
-      <Name>DiffClassifier</Name>
-    </ProjectReference>
     <ProjectReference Include="..\GitApi\GitApi.csproj">
       <Project>{161E81E2-25E5-4134-8D2D-595419B1265B}</Project>
       <Name>GitApi</Name>

@@ -61,9 +61,9 @@ namespace GitScc.DataServices
                             Id = c.Id.Name,
                             ParentIds = c.Parents.Select(p => p.Id.Name).ToList(),
                             CommitDateRelative = RelativeDateFormatter.Format(c.GetAuthorIdent().GetWhen()),
-                            CommitterName = c.GetCommitterIdent().GetName(),
-                            CommitterEmail = c.GetCommitterIdent().GetEmailAddress(),
-                            CommitDate = c.GetCommitterIdent().GetWhen(),
+                            CommitterName = c.GetAuthorIdent().GetName(),
+                            CommitterEmail = c.GetAuthorIdent().GetEmailAddress(),
+                            CommitDate = c.GetAuthorIdent().GetWhen(),
                             Message = c.GetShortMessage(),
                         }).ToList();
 

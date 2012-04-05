@@ -4,8 +4,8 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using GitScc;
 using System.Windows.Threading;
+using GitScc;
 
 namespace GitUI
 {
@@ -32,7 +32,6 @@ namespace GitUI
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
-
 			GitBash.GitExePath = GitSccOptions.Current.GitBashPath;
 
 			if (!GitBash.Exists) GitBash.GitExePath = TryFindFile(new string[] {
@@ -40,8 +39,8 @@ namespace GitUI
 					@"C:\Program Files (x86)\Git\bin\sh.exe",
 			});
 
-			this.gitConsole.GitExePath = GitBash.GitExePath;
-			this.rootGrid.RowDefinitions[0].Height = new GridLength(this.ActualHeight * 0.75);
+			//this.gitConsole.GitExePath = GitBash.GitExePath;
+			//this.rootGrid.RowDefinitions[0].Height = new GridLength(this.ActualHeight - 60);
 
 			this.gitViewModel = GitViewModel.Current;
 			//this.bottomToolBar.GitViewModel = GitViewModel.Current;
@@ -63,14 +62,17 @@ namespace GitUI
 						this.Title = gitViewModel.Tracker.GitWorkingDirectory;
 					this.graph.Show(gitViewModel.Tracker, reload != null);
 
-					this.gitConsole.WorkingDirectory = gitViewModel.Tracker.HasGitRepository ?
-						gitViewModel.Tracker.GitWorkingDirectory :
-						gitViewModel.WorkingDirectory;
+					//this.gitConsole.WorkingDirectory = gitViewModel.Tracker.HasGitRepository ?
+					//    gitViewModel.Tracker.GitWorkingDirectory :
+					//    gitViewModel.WorkingDirectory;
 				};
 				this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
 			};
 
 			this.gitViewModel.Refresh(true);
+
+			Action a1 = () => this.WindowState = WindowState.Maximized;
+			this.Dispatcher.BeginInvoke(a1, DispatcherPriority.ApplicationIdle);
 		}
 
 		private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -91,87 +93,6 @@ namespace GitUI
 				this.graph.SaveToFile(dlg.FileName);
 			}
 		}
-
-		#region toolbars
-		private void rootGrid_MouseRightButtonUp(object sender, MouseButtonEventArgs e)        
-		{
-			if (this.topToolBar.Visibility == Visibility.Collapsed)
-			{
-				ShowTopToolBar();
-				//ShowBottomToolBarBar();
-			}
-			else
-			{
-				//HideTopToolBar();
-				HideBottomToolBar();
-			}
-		}
-
-		private void Grid_PreviewMouseMove(object sender, MouseEventArgs e)
-		{
-			//var y = e.GetPosition(rootGrid).Y;
-			//if (y < 60)
-			//{
-			//    ShowTopToolBar();
-			//}
-			//else if (y > this.ActualHeight - 60)
-			//{
-			//    ShowBottomToolBarBar();
-			//}
-		}
-
-		private void ShowTopToolBar()
-		{
-			if (this.topToolBar.Visibility == Visibility.Collapsed)
-			{
-				this.topToolBar.Visibility = Visibility.Visible;
-				this.topToolBar.RenderTransform.SetValue(TranslateTransform.YProperty, -60.0);
-				this.topToolBar.Visibility = Visibility.Visible;
-				var animationDuration = TimeSpan.FromSeconds(1.0);
-				var animation = new DoubleAnimation(0, new Duration(animationDuration));
-				animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
-				this.topToolBar.RenderTransform.BeginAnimation(TranslateTransform.YProperty, animation);
-			}
-		}
-
-		private void HideTopToolBar()
-		{
-			if (this.topToolBar.Visibility == Visibility.Visible)
-			{
-				var animationDuration = TimeSpan.FromSeconds(1.0);
-				var animation = new DoubleAnimation(-60.0, new Duration(animationDuration));
-				animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
-				animation.Completed += (o, _) => this.topToolBar.Visibility = Visibility.Collapsed;
-				this.topToolBar.RenderTransform.BeginAnimation(TranslateTransform.YProperty, animation);
-			}
-		}
-
-		private void ShowBottomToolBarBar()
-		{
-			//if (this.bottomToolBar.Visibility == Visibility.Collapsed)
-			//{
-			//    this.bottomToolBar.Visibility = Visibility.Visible;
-			//    this.bottomToolBar.RenderTransform.SetValue(TranslateTransform.YProperty, 60.0);
-			//    this.bottomToolBar.Visibility = Visibility.Visible;
-			//    var animationDuration = TimeSpan.FromSeconds(1.0);
-			//    var animation = new DoubleAnimation(0, new Duration(animationDuration));
-			//    animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
-			//    this.bottomToolBar.RenderTransform.BeginAnimation(TranslateTransform.YProperty, animation);
-			//}
-		}
-
-		private void HideBottomToolBar()
-		{
-			//if (this.bottomToolBar.Visibility == Visibility.Visible)
-			//{
-			//    var animationDuration = TimeSpan.FromSeconds(1.0);
-			//    var animation = new DoubleAnimation(60.0, new Duration(animationDuration));
-			//    animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
-			//    animation.Completed += (o, _) => this.bottomToolBar.Visibility = Visibility.Collapsed;
-			//    this.bottomToolBar.RenderTransform.BeginAnimation(TranslateTransform.YProperty, animation);
-			//}
-		} 
-		#endregion
 
 		#region show commit details
 
@@ -322,7 +243,7 @@ namespace GitUI
 				animation.Completed += (_, x) => loading.Visibility = Visibility.Collapsed;
 
 				this.pendingChanges.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
-                this.pendingChanges.Refresh();
+				this.pendingChanges.Refresh();
 			}
 			catch (Exception ex)
 			{

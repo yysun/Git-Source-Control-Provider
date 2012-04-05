@@ -188,7 +188,7 @@ namespace GitUI.UI
             if (commit != null)
             {
                 txtSearch.TextChanged -= new TextChangedEventHandler(txtSearch_TextChanged);
-                txtSearch.Text = commit.Message;
+                txtSearch.Text = commit.ToString();
                 txtSearch.TextChanged += new TextChangedEventHandler(txtSearch_TextChanged);
                 HistoryViewCommands.ScrollToCommit.Execute(commit.Id, this);
                 SelectCommit(commit.ShortId, null);

@@ -337,7 +337,7 @@ namespace GitScc.UI
                 HistoryViewCommands.GraphLoaded.Execute(null, this);
             };
 
-            this.Dispatcher.BeginInvoke(action, DispatcherPriority.DataBind);
+            this.Dispatcher.BeginInvoke(action, DispatcherPriority.Background);
         }
 
         private string GetHashCode(IList<GraphNode> commits)

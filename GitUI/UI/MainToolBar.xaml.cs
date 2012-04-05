@@ -43,6 +43,8 @@ namespace GitUI.UI
                 }
 
                 btnGitBash.IsEnabled = GitBash.Exists;
+                btnPendingChanges.IsEnabled = tracker.ChangedFiles.Count() > 0;
+                btnPendingChanges.ToolTip = btnPendingChanges.IsEnabled ? "Pending Changes" : "(No Changes)";
             }
         }
 
@@ -55,7 +57,9 @@ namespace GitUI.UI
         {
             InitializeComponent();
             txtCommit1.Text = txtCommit2.Text = "";
-            lblSelectedCommits.Visibility = btnCompare.Visibility =
+            btnCompare.IsEnabled = btnPendingChanges.IsEnabled = false;
+
+            lblSelectedCommits.Visibility = 
             lstSearch.Visibility = Visibility.Collapsed;
         }
 
@@ -219,13 +223,13 @@ namespace GitUI.UI
             {
                 id1 = id;
                 txtCommit1.Text = name ?? id;
-                btnCompare.Visibility = Visibility.Collapsed;
+                btnCompare.IsEnabled = false;
             }
             else if (id2 == null)
             {
                 id2 = id;
                 txtCommit2.Text = name ?? id;
-                btnCompare.Visibility = Visibility.Visible;
+                btnCompare.IsEnabled = true;
             }
             else
             {
@@ -233,7 +237,7 @@ namespace GitUI.UI
                 txtCommit1.Text = txtCommit2.Text;
                 id2 = id;
                 txtCommit2.Text = name ?? id;
-                btnCompare.Visibility = Visibility.Visible;
+                btnCompare.IsEnabled = true;
             }
         }
 
@@ -249,6 +253,5 @@ namespace GitUI.UI
         {
             GitViewModel.OpenGitBash();
         }
-
     }
 }

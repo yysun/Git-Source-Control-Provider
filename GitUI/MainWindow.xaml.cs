@@ -210,11 +210,22 @@ namespace GitUI
 		{
 			try
 			{
-				var animationDuration = TimeSpan.FromSeconds(.2);
-				var animation = new DoubleAnimation(this.ActualWidth + 200, new Duration(animationDuration));
-				animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseIn };
-				animation.Completed += (o, _) => this.details.Visibility = Visibility.Collapsed;
-				this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+				if (e.Parameter == null)
+				{
+					var animationDuration = TimeSpan.FromSeconds(.2);
+					var animation = new DoubleAnimation(this.ActualWidth + 200, new Duration(animationDuration));
+					animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseIn };
+					animation.Completed += (o, _) => this.details.Visibility = Visibility.Collapsed;
+					this.details.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+				}
+				else
+				{
+					var animationDuration = TimeSpan.FromSeconds(.2);
+					var animation = new DoubleAnimation(-this.ActualWidth, new Duration(animationDuration));
+					animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseIn };
+					animation.Completed += (o, _) => this.pendingChanges.Visibility = Visibility.Collapsed;
+					this.pendingChanges.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+				}
 			}
 			catch (Exception ex)
 			{
@@ -297,6 +308,27 @@ namespace GitUI
 			}
 		}
 
+		private void PendingChanges_Executed(object sender, ExecutedRoutedEventArgs e)
+		{
+			try
+			{
+				this.pendingChanges.RenderTransform.SetValue(TranslateTransform.XProperty, -this.ActualWidth);
+				this.pendingChanges.Visibility = Visibility.Visible;
+				var animationDuration = TimeSpan.FromSeconds(.5);
+				var animation = new DoubleAnimation(0, new Duration(animationDuration));
+				animation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
+
+				loading.Visibility = Visibility.Visible;
+				animation.Completed += (_, x) => loading.Visibility = Visibility.Collapsed;
+
+				this.pendingChanges.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+                this.pendingChanges.Refresh();
+			}
+			catch (Exception ex)
+			{
+				Log.WriteLine("MainWindow.PendingChanges_Executed {0}", ex.ToString());
+			}
+		}
 		#endregion    
 
 		private void Window_Drop(object sender, DragEventArgs e)

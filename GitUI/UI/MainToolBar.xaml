@@ -45,6 +45,7 @@
         <TextBlock HorizontalAlignment="Right" Height="24" Margin="0,0,96,7.211" TextWrapping="NoWrap" Text="123456" VerticalAlignment="Bottom" Width="88.38" Foreground="#FFFF5656" x:Name="txtCommit2" FontSize="10" />
         <Label Content="Selected Commits &#xd;&#xa;to compare" Height="46" HorizontalAlignment="Right" Margin="0,1,88.483,0" VerticalAlignment="Top" FontSize="10" Width="99.897" x:Name="lblSelectedCommits"/>
         <Button Content="Button" HorizontalAlignment="Right" Margin="0,36,13,0" Template="{DynamicResource ButtonGitBashTemplate}" ToolTip="Git Bash" x:Name="btnGitBash" Click="btnGitBash_Click"/>
+        <Button Content="Button" HorizontalAlignment="Right" Margin="0,36,43,0" Template="{DynamicResource CommitButtonControlTemplate1}" x:Name="btnPendingChanges" Command="cmd:HistoryViewCommands.PendingChanges" ToolTip="Pending Changes"  />
         <!--<Button Content="0" HorizontalAlignment="Right" Margin="0,8,100,0" x:Name="btnCommitCount" VerticalAlignment="Top" Template="{DynamicResource CommitCountControlTemplate}" RenderTransformOrigin="-1.125,0.438" Click="btnCommitCount_Click" ToolTip="Click to clear selection" />-->
      </Grid>
 </UserControl>

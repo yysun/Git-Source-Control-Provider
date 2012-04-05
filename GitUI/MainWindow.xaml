@@ -12,7 +12,9 @@
         <CommandBinding Command="cmd:HistoryViewCommands.RefreshGraph"  Executed="RefreshGraph_Executed" />
         <CommandBinding Command="cmd:HistoryViewCommands.ScrollToCommit"  Executed="ScrollToCommit_Executed" />
         <CommandBinding Command="cmd:HistoryViewCommands.GraphLoaded"  Executed="GraphLoaded_Executed" />
+        <CommandBinding Command="cmd:HistoryViewCommands.PendingChanges"  Executed="PendingChanges_Executed" />
     </Window.CommandBindings>
+    
     <Grid x:Name="rootGrid" MouseRightButtonUp="rootGrid_MouseRightButtonUp">
         <Grid.RowDefinitions>
             <RowDefinition Height="200"/>
@@ -39,6 +41,12 @@
             </GitScc_UI:CommitDetails.RenderTransform>
         </GitScc_UI:CommitDetails>
 
+        <my:PendingChanges x:Name="pendingChanges" Visibility="Collapsed" Background="White">
+            <my:PendingChanges.RenderTransform>
+                <TranslateTransform/>
+            </my:PendingChanges.RenderTransform>
+        </my:PendingChanges>
+        
         <GridSplitter VerticalAlignment="Top" HorizontalAlignment="Stretch" Grid.Row="1"
                       Height="4" Background="#FFAAAAAA"/>
         

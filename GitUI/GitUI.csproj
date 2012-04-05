@@ -97,6 +97,9 @@
       <DependentUpon>MainToolBar.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\MouseHandlingMode.cs" />
+    <Compile Include="UI\PendingChanges.xaml.cs">
+      <DependentUpon>PendingChanges.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -142,6 +145,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\MainToolBar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\PendingChanges.xaml">
+      <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\ResourceDictionary.xaml">

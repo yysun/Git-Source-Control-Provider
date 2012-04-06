@@ -444,6 +444,26 @@ Note: if the file is included project, you need to delete the file from project 
         }
 
         #endregion
+
+        private void menuIgnore_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void menuIgnoreFile_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void menuIgnoreFilePath_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void menuIgnoreFileExt_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 
     public static class ExtHelper

@@ -27,7 +27,7 @@
 						<VisualState x:Name="Disabled"/>
 					</VisualStateGroup>
 				</VisualStateManager.VisualStateGroups>
-				<Ellipse x:Name="ellipse" Fill="#FFF4F4F5" HorizontalAlignment="Stretch" Stroke="#FF99B6D1" Width="Auto" StrokeThickness="2"/>
+				<Ellipse x:Name="ellipse" Fill="White" HorizontalAlignment="Stretch" Stroke="#FF99B6D1" Width="Auto" StrokeThickness="2"/>
 				<TextBlock x:Name="textBlock" Margin="0,1,0,0" TextWrapping="Wrap" d:LayoutOverrides="Width, Height" Foreground="#FF99B6D1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"><Span FontFamily="Wingdings 2" Language="en-us"><Run Text="Ó"/></Span></TextBlock>
 			</Grid>
 		</ControlTemplate>
@@ -58,7 +58,7 @@
 						<VisualState x:Name="Disabled"/>
 					</VisualStateGroup>
 				</VisualStateManager.VisualStateGroups>
-				<Ellipse x:Name="ellipse" Fill="#FFF4F4F5" Stroke="#FF99B6D1" StrokeThickness="2"/>
+				<Ellipse x:Name="ellipse" Fill="White" Stroke="#FF99B6D1" StrokeThickness="2"/>
 				<TextBlock x:Name="textBlock" Margin="0" TextWrapping="Wrap" d:LayoutOverrides="Width, Height" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#FF99B6D1" FontWeight="Bold"><Span FontSize="17.3333333333333" FontFamily="Wingdings 3" Language="en-us"><Run Text="F"/></Span></TextBlock>
 			</Grid>
 		</ControlTemplate>
@@ -81,7 +81,7 @@
 						<VisualState x:Name="Disabled"/>
 					</VisualStateGroup>
 				</VisualStateManager.VisualStateGroups>
-				<Ellipse x:Name="ellipse" Fill="#FFF4F4F5" Stroke="#FF99B6D1" StrokeThickness="2"/>
+				<Ellipse x:Name="ellipse" Fill="White" Stroke="#FF99B6D1" StrokeThickness="2"/>
 				<TextBlock x:Name="textBlock" Margin="0" TextWrapping="Wrap" d:LayoutOverrides="Width, Height" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#FF99B6D1" FontWeight="Bold"><Run FontWeight="Normal" FontSize="16" FontFamily="Webdings" Text="Í"/></TextBlock>
 			</Grid>
 		</ControlTemplate>
@@ -95,13 +95,13 @@
 		</Grid.RowDefinitions>
 
 		<Grid>
-			<Label Content="Commit" HorizontalAlignment="Left" Margin="8,24.04,0,10" Name="lblCommit" d:LayoutOverrides="Height" />
-			<Label Content="Message" HorizontalAlignment="Left" Margin="8,1.38,0,0" Name="lblMessage" VerticalAlignment="Top" FontSize="14" FontWeight="Bold" d:LayoutOverrides="VerticalAlignment" />
-			<Label Content="Author"  HorizontalAlignment="Right" Margin="0,0,6,0" Name="lblAuthor" VerticalAlignment="Bottom" FontSize="10"/>
-			<Button Content="back to graphic view" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,6,10,0" Padding="10,0"
+			<Label Content="Commit" HorizontalAlignment="Left" Margin="12,28.04,0,6" Name="lblCommit" d:LayoutOverrides="Height" />
+			<Label Content="Message" HorizontalAlignment="Left" Margin="12,5.38,0,0" Name="lblMessage" VerticalAlignment="Top" FontSize="14" FontWeight="Bold" />
+			<Label Content="Author"  HorizontalAlignment="Right" Margin="0,0,16,0" Name="lblAuthor" VerticalAlignment="Bottom" FontSize="10"/>
+			<Button Content="back to graphic view" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,15,20,0" Padding="10,0"
 					Command="cmd:HistoryViewCommands.CloseCommitDetails"  Template="{DynamicResource BackButtonControlTemplate}" ToolTip="Back to graphic view" />
-			<Button HorizontalAlignment="Right" Margin="0,6,69,0" x:Name="btnSwitch" Click="btnSwitch_Click" Template="{DynamicResource btnSwitchControlTemplate}" RenderTransformOrigin="-1.5,0.542" ToolTip="Reverse the comparison order" VerticalAlignment="Top"  />
-			<Button HorizontalAlignment="Right" Margin="0,6,39,0" x:Name="btnSave" VerticalAlignment="Top" Click="btnSave_Click" Template="{DynamicResource PatchButtonTemplate}" RenderTransformOrigin="-1.5,0.542" ToolTip="Save patch ..."  />
+			<Button HorizontalAlignment="Right" Margin="0,15,79,0" x:Name="btnSwitch" Click="btnSwitch_Click" Template="{DynamicResource btnSwitchControlTemplate}" RenderTransformOrigin="-1.5,0.542" ToolTip="Reverse the comparison order" VerticalAlignment="Top"  />
+			<Button HorizontalAlignment="Right" Margin="0,15,49,0" x:Name="btnSave" VerticalAlignment="Top" Click="btnSave_Click" Template="{DynamicResource PatchButtonTemplate}" RenderTransformOrigin="-1.5,0.542" ToolTip="Save patch ..."  />
 			<Grid.Background>
 				<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
 					<GradientStop Color="#FFF2F2F2" Offset="0" />

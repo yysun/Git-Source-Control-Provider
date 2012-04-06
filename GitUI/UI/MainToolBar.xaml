@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:shell="http://schemas.microsoft.com/winfx/2006/xaml/presentation/shell"
              mc:Ignorable="d" 
              d:DesignHeight="90" d:DesignWidth="500">
     <UserControl.Resources>
@@ -10,6 +11,29 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="ResourceDictionary.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+        	<ControlTemplate x:Key="BackButtonControlTemplate2" TargetType="{x:Type Button}">
+        		<Grid Width="24" Height="24">
+        			<VisualStateManager.VisualStateGroups>
+        				<VisualStateGroup x:Name="CommonStates">
+        					<VisualState x:Name="Normal"/>
+        					<VisualState x:Name="MouseOver">
+        						<Storyboard>
+        							<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="ellipse">
+        								<EasingColorKeyFrame KeyTime="0" Value="#FF99B6D1"/>
+        							</ColorAnimationUsingKeyFrames>
+        							<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)" Storyboard.TargetName="textBlock">
+        								<EasingColorKeyFrame KeyTime="0" Value="White"/>
+        							</ColorAnimationUsingKeyFrames>
+        						</Storyboard>
+        					</VisualState>
+        					<VisualState x:Name="Pressed"/>
+        					<VisualState x:Name="Disabled"/>
+        				</VisualStateGroup>
+        			</VisualStateManager.VisualStateGroups>
+        			<Ellipse x:Name="ellipse" Fill="White" HorizontalAlignment="Stretch" Stroke="#FF99B6D1" Width="Auto" StrokeThickness="2"/>
+        			<TextBlock x:Name="textBlock" Margin="0,1,0,0" TextWrapping="Wrap" d:LayoutOverrides="Width, Height" Foreground="#FF99B6D1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"><Span FontFamily="Wingdings 2" Language="en-us"><Run Text="Ó"/></Span></TextBlock>
+        		</Grid>
+        	</ControlTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid PreviewKeyDown="Grid_PreviewKeyDown">
@@ -21,31 +45,37 @@
             </LinearGradientBrush>
         </Grid.Background>
 
-        <Label Content="Branches" Height="28" HorizontalAlignment="Left" Margin="6,2,0,0" x:Name="label1" VerticalAlignment="Top" FontSize="10" />
-        <Label Content="Tags" Height="28" HorizontalAlignment="Left" Margin="6,26,0,0" x:Name="label2" VerticalAlignment="Top" FontSize="10" />
-        <ListBox x:Name="branchList" Margin="60,3,200,67" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" ItemTemplate="{DynamicResource DataTemplate1}" 
+        <Label Content="Branches" Height="28" HorizontalAlignment="Left" Margin="10,9,0,0" x:Name="label1" VerticalAlignment="Top" FontSize="10" />
+        <Label Content="Tags" Height="28" HorizontalAlignment="Left" Margin="10,33,0,0" x:Name="label2" VerticalAlignment="Top" FontSize="10" />
+        <ListBox x:Name="branchList" Margin="60,10,250,0" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" ItemTemplate="{DynamicResource DataTemplate1}" 
                      Background="#00000000" BorderBrush="{x:Null}" Height="26" ItemContainerStyle="{DynamicResource ListBoxItemStyle1}"
                      ScrollViewer.HorizontalScrollBarVisibility="hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" MouseLeftButtonUp="branchList_MouseLeftButtonUp" VerticalAlignment="Top" />
 
-        <ListBox x:Name="tagList" Margin="60,27,200,43" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" ItemTemplate="{DynamicResource DataTemplate1}" 
+        <ListBox x:Name="tagList" Margin="60,34,250,0" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" ItemTemplate="{DynamicResource DataTemplate1}" 
                      Background="#00000000" BorderBrush="{x:Null}" Height="26" ItemContainerStyle="{DynamicResource ListBoxItemStyle1}"
                      ScrollViewer.HorizontalScrollBarVisibility="hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" MouseLeftButtonUp="tagList_MouseLeftButtonUp" VerticalAlignment="Top" />
-        <CheckBox Content="Show simplified graph" HorizontalAlignment="Right" Margin="0,8,43,0" Name="checkBox1" Template="{DynamicResource ShowSimpleGraphCheckBoxControlTemplate}" 
+        <CheckBox Content="Show simplified graph" HorizontalAlignment="Right" Margin="0,15,79,0" Name="checkBox1" Template="{DynamicResource ShowSimpleGraphCheckBoxControlTemplate}" 
                   VerticalAlignment="Top" ToolTip="Toggle View"  Click="checkBox1_Click"/>
         
-        <Label Content="Simplified view: off" HorizontalAlignment="Right" Margin="0,28,12,39.586" Name="lableView" FontSize="9.333" d:LayoutOverrides="Height" />
+        <Label Content="Simplified view: off" HorizontalAlignment="Right" Margin="0,34.369,48,33.217" Name="lableView" FontSize="9.333" d:LayoutOverrides="Height" />
 
-        <Button Content="Button" HorizontalAlignment="Right" Margin="0,8,72,28" Template="{DynamicResource SaveButtonControlTemplate}" Command="cmd:HistoryViewCommands.ExportGraph" ToolTip="Export graph ..." VerticalAlignment="Top" />
-        <Button Content="Button" HorizontalAlignment="Right" Margin="0,8.001,13,27.999" Template="{DynamicResource ButtonRefreshTemplate}" Command="cmd:HistoryViewCommands.RefreshGraph" ToolTip="Refresh" VerticalAlignment="Top" />
-        <Label Content="Commits" Height="28" HorizontalAlignment="Left" Margin="8,54,0,0" VerticalAlignment="Top" FontSize="10" />
-        <TextBox VerticalAlignment="Bottom" Margin="60,0,200,12.04" x:Name="txtSearch" TextChanged="txtSearch_TextChanged" PreviewKeyDown="txtSearch_PreviewKeyDown" PreviewMouseDown="txtSearch_PreviewMouseDown" />
-        <ListBox Height="100" Margin="60,0,200,-88.96" VerticalAlignment="Bottom" x:Name="lstSearch" PreviewKeyDown="lstSearch_PreviewKeyDown" MouseDoubleClick="lstSearch_MouseDoubleClick" />
-        <Button Content="Button" HorizontalAlignment="Right" Margin="0,36,72,0" Template="{DynamicResource CompareButtonControlTemplate}" ToolTip="Compare ..." x:Name="btnCompare" Click="btnCompare_Click"/>
-        <TextBlock HorizontalAlignment="Right" Margin="0,43,96,23" TextWrapping="NoWrap" Text="123456" Width="88.38" Foreground="#FFFF5656" x:Name="txtCommit1" FontSize="10" />
-        <TextBlock HorizontalAlignment="Right" Height="24" Margin="0,0,96,7.211" TextWrapping="NoWrap" Text="123456" VerticalAlignment="Bottom" Width="88.38" Foreground="#FFFF5656" x:Name="txtCommit2" FontSize="10" />
-        <Label Content="Selected Commits &#xd;&#xa;to compare" Height="46" HorizontalAlignment="Right" Margin="0,1,88.483,0" VerticalAlignment="Top" FontSize="10" Width="99.897" x:Name="lblSelectedCommits"/>
-        <Button Content="Button" HorizontalAlignment="Right" Margin="0,36,13,0" Template="{DynamicResource ButtonGitBashTemplate}" ToolTip="Git Bash" x:Name="btnGitBash" Click="btnGitBash_Click"/>
-        <Button Content="Button" HorizontalAlignment="Right" Margin="0,36,43,0" Template="{DynamicResource CommitButtonControlTemplate1}" x:Name="btnPendingChanges" Command="cmd:HistoryViewCommands.PendingChanges" ToolTip="Pending Changes"  />
+        <Button Content="Export" HorizontalAlignment="Right" Margin="0,15,108,0" Template="{DynamicResource SaveButtonControlTemplate}" Command="cmd:HistoryViewCommands.ExportGraph" ToolTip="Export graph ..." VerticalAlignment="Top" />
+        <Button Content="Refresh" HorizontalAlignment="Right" Margin="0,15,49,0" Template="{DynamicResource ButtonRefreshTemplate}" Command="cmd:HistoryViewCommands.RefreshGraph" ToolTip="Refresh" VerticalAlignment="Top" />
+        <Label Content="Commits" Height="28" HorizontalAlignment="Left" Margin="10,61,0,0" VerticalAlignment="Top" FontSize="10" />
+        <TextBox VerticalAlignment="Bottom" Margin="60,0,250,5.04" x:Name="txtSearch" TextChanged="txtSearch_TextChanged" PreviewKeyDown="txtSearch_PreviewKeyDown" PreviewMouseDown="txtSearch_PreviewMouseDown" />
+        <ListBox Height="100" Margin="60,0,250,-95.96" VerticalAlignment="Bottom" x:Name="lstSearch" PreviewKeyDown="lstSearch_PreviewKeyDown" MouseDoubleClick="lstSearch_MouseDoubleClick" />
+        <Button Content="Compare" HorizontalAlignment="Right" Margin="0,46,108,0" Template="{DynamicResource CompareButtonControlTemplate}" ToolTip="Compare ..." x:Name="btnCompare" Click="btnCompare_Click" RenderTransformOrigin="1.917,0.512"/>
+        <TextBlock HorizontalAlignment="Right" Margin="0,0,132,16.631" TextWrapping="NoWrap" Text="123456" Width="88.38" Foreground="#FFFF5656" x:Name="txtCommit1" FontSize="10" Height="24" VerticalAlignment="Bottom" />
+        <TextBlock HorizontalAlignment="Right" Height="24" Margin="0,0,132,0.842" TextWrapping="NoWrap" Text="123456" VerticalAlignment="Bottom" Width="88.38" Foreground="#FFFF5656" x:Name="txtCommit2" FontSize="10" />
+        <Label Content="Selected Commits &#xd;&#xa;to compare" Height="46" HorizontalAlignment="Right" Margin="0,9,132,0" VerticalAlignment="Top" FontSize="10" Width="99.897" x:Name="lblSelectedCommits"/>
+        <Button Content="gitbash" HorizontalAlignment="Right" Margin="0,46,20,0" Template="{DynamicResource ButtonGitBashTemplate}" ToolTip="Git Bash" x:Name="btnGitBash" Click="btnGitBash_Click"/>
+        <Button Content="Exit" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,15,20,0" Padding="10,0"
+        	Command="{x:Static shell:SystemCommands.CloseWindowCommand}"
+        	Template="{DynamicResource BackButtonControlTemplate2}" ToolTip="Exit" RenderTransformOrigin="11.042,1.083" />
+        <Button Content="Pending Changes" HorizontalAlignment="Right" Margin="0,46,79,0" Padding="10,0"
+        	x:Name="btnPendingChanges" ToolTip="Pending Changes" Click="btnPendingChanges_Click"
+        	Template="{DynamicResource PendingChangesButtonControlTemplate}" RenderTransformOrigin="11.042,1.083"/>
+        <Button Content="Repositories" HorizontalAlignment="Right" Margin="0,46,49,0" Template="{DynamicResource OpenRepositoriesButtonControlTemplate}" ToolTip="Repositories" x:Name="btnOpen" Click="btnGitBash_Click"/>
         <!--<Button Content="0" HorizontalAlignment="Right" Margin="0,8,100,0" x:Name="btnCommitCount" VerticalAlignment="Top" Template="{DynamicResource CommitCountControlTemplate}" RenderTransformOrigin="-1.125,0.438" Click="btnCommitCount_Click" ToolTip="Click to clear selection" />-->
      </Grid>
 </UserControl>

@@ -34,17 +34,17 @@ namespace GitUI.UI
                 if (tracker.HasGitRepository)
                 {
                     this.branchList.ItemsSource = tracker.RepositoryGraph.Refs
-                         .Where(r => (r.Type == RefTypes.Branch || r.Type == RefTypes.HEAD) && isLoaded(r))
-                         .Select(r => r.Name);
+                            .Where(r => (r.Type == RefTypes.Branch || r.Type == RefTypes.HEAD) && isLoaded(r))
+                            .Select(r => r.Name);
 
                     this.tagList.ItemsSource = tracker.RepositoryGraph.Refs
                         .Where(r => r.Type == RefTypes.Tag && isLoaded(r))
                         .Select(r => r.Name);
                 }
+                btnPendingChanges.IsEnabled = tracker.ChangedFiles.Count() > 0;
 
                 btnGitBash.IsEnabled = GitBash.Exists;
-                btnPendingChanges.IsEnabled = tracker.ChangedFiles.Count() > 0;
-                btnPendingChanges.ToolTip = btnPendingChanges.IsEnabled ? "Pending Changes" : "(No Changes)";
+
             }
         }
 
@@ -58,7 +58,6 @@ namespace GitUI.UI
             InitializeComponent();
             txtCommit1.Text = txtCommit2.Text = "";
             btnCompare.IsEnabled = btnPendingChanges.IsEnabled = false;
-
             lblSelectedCommits.Visibility = 
             lstSearch.Visibility = Visibility.Collapsed;
         }
@@ -72,6 +71,7 @@ namespace GitUI.UI
 
         private void branchList_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+            if (tracker == null || !tracker.HasGitRepository) return;
             var name = branchList.SelectedValue as string;
             var id = tracker.RepositoryGraph.Refs
                             .Where(r => (r.Type == RefTypes.Branch || r.Type == RefTypes.HEAD) && r.Name == name)
@@ -86,6 +86,7 @@ namespace GitUI.UI
 
         private void tagList_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+            if (tracker == null || !tracker.HasGitRepository) return;
             var name = tagList.SelectedValue as string;
             var id = tracker.RepositoryGraph.Refs
                             .Where(r => r.Type == RefTypes.Tag && r.Name == name)
@@ -101,6 +102,11 @@ namespace GitUI.UI
         private void btnRefresh_Click(object sender, RoutedEventArgs e)
         {
             HistoryViewCommands.RefreshGraph.Execute(null, this);
+        }
+
+        private void btnPendingChanges_Click(object sender, RoutedEventArgs e)
+        {
+            HistoryViewCommands.PendingChanges.Execute(null, this);
         }
 
         #region Search commits

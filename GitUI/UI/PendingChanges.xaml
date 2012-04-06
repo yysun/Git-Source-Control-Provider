@@ -26,7 +26,7 @@
 						<VisualState x:Name="Disabled"/>
 					</VisualStateGroup>
 				</VisualStateManager.VisualStateGroups>
-				<Ellipse x:Name="ellipse" Fill="#FFF4F4F5" HorizontalAlignment="Stretch" Stroke="#FF99B6D1" Width="Auto" StrokeThickness="2"/>
+				<Ellipse x:Name="ellipse" Fill="White" HorizontalAlignment="Stretch" Stroke="#FF99B6D1" Width="Auto" StrokeThickness="2"/>
 				<TextBlock x:Name="textBlock" Margin="0,1,0,0" TextWrapping="Wrap" d:LayoutOverrides="Width, Height" Foreground="#FF99B6D1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"><Span FontFamily="Wingdings 2" Language="en-us"><Run Text="Ó"/></Span></TextBlock>
 			</Grid>
 		</ControlTemplate>
@@ -40,10 +40,9 @@
 		<Grid>
 			<Label Content="Commit" HorizontalAlignment="Left" Margin="8,24.04,0,10" Name="lblCommit" d:LayoutOverrides="Height" />
 			<Label Content="Message" HorizontalAlignment="Left" Margin="8,1.38,0,0" Name="lblMessage" VerticalAlignment="Top" FontSize="14" FontWeight="Bold" d:LayoutOverrides="VerticalAlignment" />
-			<Label Content="Author"  HorizontalAlignment="Right" Margin="0,0,6,0" Name="lblAuthor" VerticalAlignment="Bottom" FontSize="10"/>
-			<Button Content="close" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,6,10,0" Padding="10,0"
+			<Button Content="close" HorizontalAlignment="Right" Margin="0,15,20,21" Padding="10,0"
 					Command="cmd:HistoryViewCommands.CloseCommitDetails" CommandParameter="PendingChanges"
-					Template="{DynamicResource BackButtonControlTemplate}" ToolTip="Back to graphic view" />
+					Template="{DynamicResource BackButtonControlTemplate}" ToolTip="Back to graphic view" d:LayoutOverrides="Height" />
 		   <Grid.Background>
 				<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
 					<GradientStop Color="#FFF2F2F2" Offset="0" />
@@ -65,7 +64,7 @@
 			</Grid.RowDefinitions>
 			<Grid.Background>
 				<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-					<GradientStop Color="#FFC5E8F8" Offset="1" />
+					<GradientStop Color="#FFE4E4E4" Offset="1" />
 					<GradientStop Color="White" Offset="0" />
 				</LinearGradientBrush>
 			</Grid.Background>
@@ -128,11 +127,11 @@
 							<MenuItem Header="Compare ..." Name="menuCompare" Click="menuCompare_Click" />
 							<MenuItem Header="Undo File Changes" Name="menuUndo" Click="menuUndo_Click"/>
 							<MenuItem Header="Delete File" Name="menuDeleteFile" Click="menuDeleteFile_Click"/>
-							<!--<MenuItem Header="Open .gitignore file" Name="menuOpenIgnoreFile" Click="menuOpenIgnoreFile_Click" >
-									<MenuItem Header="Add File to .gitignore" Name="menuIgnoreFile" Click="menuIgnoreFile_Click"/>
-									<MenuItem Header="Add File Path to .gitignore" Name="menuIgnoreFilePath" Click="menuIgnoreFilePath_Click"/>
-									<MenuItem Header="Add File Extensions to .gitignore" Name="menuIgnoreFileExt" Click="menuIgnoreFileExt_Click"/>
-								</MenuItem>-->
+							<MenuItem Header="Ignore File" Name="menuIgnore" Click="menuIgnore_Click" >
+								<MenuItem Header="Add File to .gitignore" Name="menuIgnoreFile" Click="menuIgnoreFile_Click"/>
+								<MenuItem Header="Add File Path to .gitignore" Name="menuIgnoreFilePath" Click="menuIgnoreFilePath_Click"/>
+								<MenuItem Header="Add File Extensions to .gitignore" Name="menuIgnoreFileExt" Click="menuIgnoreFileExt_Click"/>
+							</MenuItem>
 						</ContextMenu>
 					</DataGrid.ContextMenu>
 				</DataGrid>

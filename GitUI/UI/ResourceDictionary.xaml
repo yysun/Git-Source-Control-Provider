@@ -291,9 +291,10 @@
 			<TextBlock x:Name="textBlock" Margin="2.278,2.343,3.261,3.923" TextWrapping="Wrap" d:LayoutOverrides="Width, Height" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontWeight="Bold" FontSize="13.333" Foreground="#FF99B6D6"><Span FontFamily="Segoe UI" Language="en-us"><Run Text="Git"/></Span></TextBlock>
 		</Grid>
 	</ControlTemplate>
-	<ControlTemplate x:Key="CommitButtonControlTemplate1" TargetType="{x:Type Button}">
+	
+	<ControlTemplate x:Key="PendingChangesButtonControlTemplate" TargetType="{x:Type Button}">
 		<Grid Width="24" Height="24">
-						<VisualStateManager.VisualStateGroups>
+			<VisualStateManager.VisualStateGroups>
 				<VisualStateGroup x:Name="CommonStates">
 					<VisualState x:Name="Normal"/>
 					<VisualState x:Name="MouseOver">
@@ -307,16 +308,52 @@
 						</Storyboard>
 					</VisualState>
 					<VisualState x:Name="Pressed"/>
-					<VisualState x:Name="Disabled"/>
-				</VisualStateGroup>
-				<VisualStateGroup x:Name="ValidationStates">
-					<VisualState x:Name="Valid"/>
-					<VisualState x:Name="InvalidFocused"/>
-					<VisualState x:Name="InvalidUnfocused"/>
+					<VisualState x:Name="Disabled">
+                        <Storyboard>
+                            <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Stroke).(SolidColorBrush.Color)" Storyboard.TargetName="ellipse">
+                                <EasingColorKeyFrame KeyTime="0" Value="#FFD0D0D0"/>
+                            </ColorAnimationUsingKeyFrames>
+                            <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)" Storyboard.TargetName="textBlock">
+                                <EasingColorKeyFrame KeyTime="0" Value="#FFB8B8B8"/>
+                            </ColorAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </VisualState>
 				</VisualStateGroup>
 			</VisualStateManager.VisualStateGroups>
-            <Ellipse x:Name="ellipse" Height="Auto" Stroke="#FF99B6D1" StrokeThickness="2" VerticalAlignment="Stretch" Fill="White"/>
-			<TextBlock x:Name="textBlock" Margin="5.026,3.841,5.009,0.921" TextWrapping="Wrap" d:LayoutOverrides="Width, Height" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontWeight="Bold" FontSize="13.333" Foreground="#FF99B6D6"><Span FontSize="17.3333333333333" FontFamily="Wingdings" Language="en-us"><Run Text="ü"/></Span></TextBlock>
+			<Ellipse x:Name="ellipse" Fill="White" HorizontalAlignment="Stretch" Stroke="#FF99B6D1" Width="Auto" StrokeThickness="2"/>
+            <TextBlock x:Name="textBlock" Margin="4.666,3.641,4.666,-0.359" TextWrapping="Wrap" d:LayoutOverrides="Width, Height" Foreground="#FF99B6D1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontSize="18.667"><Span FontFamily="Wingdings" Language="en-us"><Run Text="ü"/></Span></TextBlock>
+		</Grid>
+	</ControlTemplate>
+	<ControlTemplate x:Key="OpenRepositoriesButtonControlTemplate" TargetType="{x:Type Button}">
+		<Grid Width="24" Height="24">
+			<VisualStateManager.VisualStateGroups>
+				<VisualStateGroup x:Name="CommonStates">
+					<VisualState x:Name="Normal"/>
+					<VisualState x:Name="MouseOver">
+						<Storyboard>
+							<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="ellipse">
+								<EasingColorKeyFrame KeyTime="0" Value="#FF99B6D1"/>
+							</ColorAnimationUsingKeyFrames>
+							<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)" Storyboard.TargetName="textBlock">
+								<EasingColorKeyFrame KeyTime="0" Value="White"/>
+							</ColorAnimationUsingKeyFrames>
+						</Storyboard>
+					</VisualState>
+					<VisualState x:Name="Pressed"/>
+					<VisualState x:Name="Disabled">
+						<Storyboard>
+							<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Stroke).(SolidColorBrush.Color)" Storyboard.TargetName="ellipse">
+								<EasingColorKeyFrame KeyTime="0" Value="#FFD0D0D0"/>
+							</ColorAnimationUsingKeyFrames>
+							<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)" Storyboard.TargetName="textBlock">
+								<EasingColorKeyFrame KeyTime="0" Value="#FFB8B8B8"/>
+							</ColorAnimationUsingKeyFrames>
+						</Storyboard>
+					</VisualState>
+				</VisualStateGroup>
+			</VisualStateManager.VisualStateGroups>
+			<Ellipse x:Name="ellipse" Height="Auto" Stroke="#FF99B6D1" StrokeThickness="2" VerticalAlignment="Stretch" Fill="White"/>
+			<TextBlock x:Name="textBlock" Margin="4,5,-4,-5" TextWrapping="Wrap" d:LayoutOverrides="Width, Height" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontWeight="Bold" FontSize="13.333" Foreground="#FF99B6D6"><Span FontFamily="Wingdings" Language="en-us"><Run Text="1"/></Span></TextBlock>
 		</Grid>
 	</ControlTemplate>
 	

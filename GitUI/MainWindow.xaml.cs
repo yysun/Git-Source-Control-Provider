@@ -60,8 +60,11 @@ namespace GitUI
 				loading.Visibility = Visibility.Visible;
 				Action act = () => 
 				{
-					if (gitViewModel.Tracker.HasGitRepository)
-						this.Title = gitViewModel.Tracker.GitWorkingDirectory;
+                    if (gitViewModel.Tracker.HasGitRepository)
+                    {
+                        this.txtRepo.Text = gitViewModel.Tracker.GitWorkingDirectory;
+                        this.txtPrompt.Text = GitIntellisenseHelper.GetPrompt();
+                    }
 					this.graph.Show(gitViewModel.Tracker, reload != null);
 				};
 				this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);

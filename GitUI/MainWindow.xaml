@@ -99,6 +99,8 @@
         <my:GitConsole x:Name="gitConsole" VerticalAlignment="Stretch" Grid.Row="2"/>-->
 
         <GitScc_UI:Loading x:Name="loading"  HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" />
-        
+        <TextBlock HorizontalAlignment="Left" Margin="15,0,0,20" x:Name="txtSettings" Text="v" VerticalAlignment="Bottom" Foreground="#FFEEEEEE" FontFamily="Wingdings" FontSize="18" />
+        <TextBlock HorizontalAlignment="Right" Margin="0,0,25,25" x:Name="txtRepo" Text="(No Repo)" VerticalAlignment="Bottom" Foreground="#FF999999" />
+        <TextBlock HorizontalAlignment="Right" Margin="0,0,25,45" x:Name="txtPrompt" Text="(0 0 0 0)" VerticalAlignment="Bottom" Foreground="#FF999999"  />
     </Grid>
 </Window>

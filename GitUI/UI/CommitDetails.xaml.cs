@@ -1,14 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using GitScc.DataServices;
-using NGit.Diff;
-using System.Diagnostics;
 using GitUI;
+using NGit.Diff;
 
 namespace GitScc.UI
 {
@@ -261,11 +261,12 @@ namespace GitScc.UI
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            var dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.DefaultExt = ".patch";
-            dlg.Filter = "Patch (.patch)|*.patch";
             if (btnSwitch.Visibility == Visibility.Collapsed)
             {
+                var dlg = new Microsoft.Win32.SaveFileDialog();
+                dlg.DefaultExt = ".patch";
+                dlg.Filter = "Patch (.patch)|*.patch";
+
                 var id = this.commitId2.Substring(0, 7);
                 dlg.FileName = id + ".patch";
                 if (dlg.ShowDialog() == true)
@@ -282,15 +283,19 @@ namespace GitScc.UI
             }
             else
             {
+                var dlg = new System.Windows.Forms.FolderBrowserDialog();
+                dlg.ShowNewFolderButton = true;
+                
                 var id1 = this.commitId1.Substring(0, 7);
                 var id2 = this.commitId2.Substring(0, 7);
-                dlg.FileName = id1 + "-" + id2 + ".patch";
-                
-                if (dlg.ShowDialog() == true)
+
+                dlg.Description = string.Format("Select a folder to save patches from {0} to {1}", id1, id2);
+
+                if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     try
                     {
-                        GitViewModel.Current.Patch(this.commitId1, this.commitId2, dlg.FileName);
+                        GitViewModel.Current.Patch(this.commitId1, this.commitId2, dlg.SelectedPath);
                     }
                     catch(Exception ex)
                     {

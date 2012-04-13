@@ -1,0 +1,18 @@
+﻿<UserControl x:Class="GitScc.UI.Settings"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="600">
+    <Grid>
+        <Label Content="Set path to Git Bash (sh.exe)" Height="28" HorizontalAlignment="Left" Margin="7,12,0,0" Name="label1" VerticalAlignment="Top" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="12,38,0,0" Name="txtGitExePath" VerticalAlignment="Top" Width="380" />
+        <Label Content="User Name" Height="28" HorizontalAlignment="Left" Margin="7,81,0,0" Name="label2" VerticalAlignment="Top" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="12,104,0,0" Name="txtUserName" VerticalAlignment="Top" Width="220" />
+        <Button Content="Browse ..." Height="23" HorizontalAlignment="Left" Margin="407,37,0,0" Name="btnBrowse" VerticalAlignment="Top" Width="75" />
+        <Label Content="User Email " Height="28" HorizontalAlignment="Left" Margin="7,133,0,0" Name="label3" VerticalAlignment="Top" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="12,156,0,0" Name="txtUserEmail" VerticalAlignment="Top" Width="220" />
+        <Button Content="Save" Height="23" HorizontalAlignment="Left" Margin="12,227,0,0" Name="btnSave" VerticalAlignment="Top" Width="75" />
+    </Grid>
+</UserControl>

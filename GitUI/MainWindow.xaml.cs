@@ -60,11 +60,11 @@ namespace GitUI
 				loading.Visibility = Visibility.Visible;
 				Action act = () => 
 				{
-                    if (gitViewModel.Tracker.HasGitRepository)
-                    {
-                        this.txtRepo.Text = gitViewModel.Tracker.GitWorkingDirectory;
-                        this.txtPrompt.Text = GitIntellisenseHelper.GetPrompt();
-                    }
+					if (gitViewModel.Tracker.HasGitRepository)
+					{
+						this.txtRepo.Text = gitViewModel.Tracker.GitWorkingDirectory;
+						this.txtPrompt.Text = GitIntellisenseHelper.GetPrompt();
+					}
 					this.graph.Show(gitViewModel.Tracker, reload != null);
 				};
 				this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
@@ -174,7 +174,7 @@ namespace GitUI
 			gitViewModel.DisableAutoRefresh();
 
 			this.loading.Visibility = Visibility.Collapsed;
-            this.topToolBar.GitViewModel = gitViewModel;
+			this.topToolBar.GitViewModel = gitViewModel;
 
 			this.Title = gitViewModel.Tracker.HasGitRepository ?
 				string.Format("{0} ({1})", gitViewModel.Tracker.GitWorkingDirectory, gitViewModel.Tracker.CurrentBranch) :

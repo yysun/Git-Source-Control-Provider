@@ -178,6 +178,14 @@ namespace GitScc
         {
             this.tracker = tracker;
 
+            if (!GitBash.Exists)
+            {
+                Settings.Show();
+                return;
+            }
+            else
+                Settings.Hide();
+
             if (tracker == null)
             {
                 service.NoRefresh = true;
@@ -535,6 +543,7 @@ Note: if the file is included project, you need to delete the file from project 
 
             if (!opened) dte.ItemOperations.OpenFile(fileName);
         }
+
     }
 
     public static class ExtHelper

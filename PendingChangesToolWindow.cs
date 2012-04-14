@@ -40,19 +40,19 @@ namespace GitScc
             // the object returned by the Content property.
             base.Content = control;
 
-            OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
+            //OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
 
-            var cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesCommit);
-            var menu = new MenuCommand(new EventHandler(OnCommitCommand), cmd);
-            mcs.AddCommand(menu);
+            //var cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesCommit);
+            //var menu = new MenuCommand(new EventHandler(OnCommitCommand), cmd);
+            //mcs.AddCommand(menu);
 
-            cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesAmend);
-            menu = new MenuCommand(new EventHandler(OnAmendCommitCommand), cmd);
-            mcs.AddCommand(menu);
+            //cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesAmend);
+            //menu = new MenuCommand(new EventHandler(OnAmendCommitCommand), cmd);
+            //mcs.AddCommand(menu);
 
-            cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesRefresh);
-            menu = new MenuCommand(new EventHandler(OnRefreshCommand), cmd);
-            mcs.AddCommand(menu);
+            //cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesRefresh);
+            //menu = new MenuCommand(new EventHandler(OnRefreshCommand), cmd);
+            //mcs.AddCommand(menu);
 
             sccProviderService = BasicSccProvider.GetServiceEx<SccProviderService>();
 

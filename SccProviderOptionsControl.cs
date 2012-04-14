@@ -115,9 +115,9 @@ namespace GitScc
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(3, 10);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(124, 13);
+            this.label1.Size = new System.Drawing.Size(159, 13);
             this.label1.TabIndex = 11;
-            this.label1.Text = "Path to Git Bash (sh.exe)";
+            this.label1.Text = "Path to Git for Windows (git.exe)";
             // 
             // textBox1
             // 
@@ -321,7 +321,7 @@ namespace GitScc
 
         private void button1_Click(object sender, EventArgs e)
         {
-            OpenFile("sh.exe", textBox1);
+            OpenFile("git.exe", textBox1);
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -350,6 +350,7 @@ namespace GitScc
 
         internal void Save()
         {
+            GitBash.GitExePath = 
             GitSccOptions.Current.GitBashPath      = this.textBox1.Text; 
             GitSccOptions.Current.GitExtensionPath = this.textBox2.Text;
             GitSccOptions.Current.DifftoolPath     = this.textBox3.Text;

@@ -137,6 +137,15 @@ namespace GitScc
                 menu = new MenuCommand(new EventHandler(OnSwitchBranchCommand), cmd);
                 mcs.AddCommand(menu);
 
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesCommit);
+                menu = new MenuCommand(new EventHandler(OnCommitCommand), cmd);
+                mcs.AddCommand(menu);
+
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesAmend);
+                menu = new MenuCommand(new EventHandler(OnAmendCommitCommand), cmd);
+                mcs.AddCommand(menu);
+
+            
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdSccCommandAbout);
                 menu = new MenuCommand(new EventHandler(OnAbout), cmd);
                 mcs.AddCommand(menu);
@@ -209,8 +218,7 @@ namespace GitScc
                     break;
 
                 case CommandId.icmdSccCommandGitBash:
-                    var gitBashPath = GitSccOptions.Current.GitBashPath;
-                    if (!string.IsNullOrEmpty(gitBashPath) && File.Exists(gitBashPath))
+                    if (GitBash.Exists)
                     {
                         cmdf |= OLECMDF.OLECMDF_ENABLED;
                     }
@@ -238,16 +246,19 @@ namespace GitScc
 
                 case CommandId.icmdSccCommandUndo:
                 case CommandId.icmdSccCommandCompare:
-                    if (sccService.CanCompareSelectedFile) cmdf |= OLECMDF.OLECMDF_ENABLED;
+                    if (GitBash.Exists && sccService.CanCompareSelectedFile) cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
 
                 case CommandId.icmdSccCommandEditIgnore:
+                    if (sccService.IsSolutionGitControlled) cmdf |= OLECMDF.OLECMDF_ENABLED;
+                    break;
+
                 case CommandId.icmdSccCommandHistory:
                 case CommandId.icmdSccCommandPendingChanges:
                 case CommandId.icmdPendingChangesAmend:
                 case CommandId.icmdPendingChangesCommit:
                 case CommandId.icmdPendingChangesCommitToBranch:
-                    if (sccService.IsSolutionGitControlled) cmdf |= OLECMDF.OLECMDF_ENABLED;
+                    if (GitBash.Exists && sccService.IsSolutionGitControlled) cmdf |= OLECMDF.OLECMDF_ENABLED;
                     break;
 
                 case CommandId.icmdSccCommandAbout:
@@ -329,6 +340,7 @@ namespace GitScc
         private void OnGitBashCommand(object sender, EventArgs e)
         {
             var gitBashPath = GitSccOptions.Current.GitBashPath;
+            gitBashPath = gitBashPath.Replace("git.exe", "sh.exe");
             RunDetatched("cmd.exe", string.Format("/c \"{0}\" --login -i", gitBashPath));
         }
 
@@ -423,7 +435,7 @@ namespace GitScc
             {
                 File.Copy(path, tmpPath, true);
             }
-            catch(Exception ex) // try copy file silently
+            catch // try copy file silently
             {
             }
 
@@ -455,6 +467,16 @@ namespace GitScc
                 sccService.CurrentTracker.Repository,
                 sccService.CurrentTracker.RepositoryGraph.Refs);
             branchPicker.Show();
+        }
+
+        private void OnCommitCommand(object sender, EventArgs e)
+        {
+            GetToolWindowPane<PendingChangesToolWindow>().OnCommitCommand();
+        }
+
+        private void OnAmendCommitCommand(object sender, EventArgs e)
+        {
+            GetToolWindowPane<PendingChangesToolWindow>().OnAmendCommitCommand();
         }
 
         #endregion
@@ -538,9 +560,9 @@ namespace GitScc
         //    }
         //}
 
-        //private T GetToolWindowPane<T>() where T : ToolWindowPane
-        //{
-        //    return (T)this.FindToolWindow(typeof(T), 0, true);
-        //}
+        private T GetToolWindowPane<T>() where T : ToolWindowPane
+        {
+            return (T)this.FindToolWindow(typeof(T), 0, true);
+        }
     }
 }

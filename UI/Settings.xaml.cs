@@ -41,7 +41,7 @@ namespace GitScc.UI
         private void CheckGitBash()
         {
             GitBash.GitExePath = txtGitExePath.Text;
-
+            txtGitExePath.Text = GitBash.GitExePath;
             try
             {
                 txtMessage.Content = GitBash.Run("version", "");
@@ -51,16 +51,26 @@ namespace GitScc.UI
                 txtMessage.Content = ex.Message;
             }
 
-            if (GitBash.Exists)
+            if (GitBash.Exists && txtMessage.Content.ToString().StartsWith("git version"))
             {
-                GitSccOptions.Current.GitBashPath = GitBash.GitExePath;
-                GitSccOptions.Current.SaveConfig();
-                BasicSccProvider.GetServiceEx<SccProviderService>().Refresh();
+                btnGo.Visibility = Visibility.Visible;
             }
+        }
+
+
+        private void btnGo_Click(object sender, RoutedEventArgs e)
+        {
+            GitSccOptions.Current.GitBashPath = GitBash.GitExePath;
+            GitSccOptions.Current.SaveConfig();
+            var sccService = BasicSccProvider.GetServiceEx<SccProviderService>();
+            sccService.NoRefresh = false;
+            sccService.Refresh();
         }
 
         private void Grid_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            btnGo.Visibility = Visibility.Collapsed;
+            txtMessage.Content = "";
             if (e.Key == Key.Enter)
             {
                 CheckGitBash();
@@ -71,6 +81,8 @@ namespace GitScc.UI
         {
             this.Visibility = Visibility.Visible;
             txtGitExePath.Text = GitBash.GitExePath;
+            btnGo.Visibility = Visibility.Collapsed;
+            txtGitExePath.Text = GitSccOptions.Current.GitBashPath;
             txtMessage.Content = "";
         }
 
@@ -78,5 +90,6 @@ namespace GitScc.UI
         {
             this.Visibility = Visibility.Hidden;
         }
+
     }
 }

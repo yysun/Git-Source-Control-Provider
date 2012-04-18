@@ -286,6 +286,9 @@ namespace GitScc
             {
                 if (treeEntry == null)
                 {
+                    if (indexEntry.IsModified(repository.WorkTree, true))
+                        return GitFileStatus.Modified;
+
                     return GitFileStatus.Added;
                 }
                 if (!File.Exists(fileName))

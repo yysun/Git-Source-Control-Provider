@@ -49,10 +49,16 @@
 			<Label Content="Changed Files" Height="28" HorizontalAlignment="Left" Name="label3" VerticalAlignment="Center" 
 			   Margin="12,0,0,0" Foreground="#FF333333" Grid.Row="2" Width="86" ToolTip="select file to commit, or right click to stage/unstage file" />
 
-			<RichTextBox HorizontalAlignment="Stretch" Name="textBoxComments" VerticalAlignment="Stretch" Margin="10,0,10,10" 
-					 AcceptsReturn="True" VerticalScrollBarVisibility="Visible" SpellCheck.IsEnabled="True" />
+            <RichTextBox HorizontalAlignment="Stretch" Name="textBoxComments" VerticalAlignment="Stretch" Margin="10,0,10,10" 
+					 AcceptsReturn="True" VerticalScrollBarVisibility="Visible" SpellCheck.IsEnabled="True">
+                <RichTextBox.Resources>
+                    <Style TargetType="{x:Type Paragraph}">
+                        <Setter Property="Margin" Value="0"/>
+                    </Style>
+                </RichTextBox.Resources>
+            </RichTextBox>
 
-			<DataGrid AutoGenerateColumns="False" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="dataGrid1" VerticalAlignment="Stretch"
+            <DataGrid AutoGenerateColumns="False" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="dataGrid1" VerticalAlignment="Stretch"
 					  GridLinesVisibility="None"  Foreground="#FF333333" Sorting="dataGrid1_Sorting" IsReadOnly="True" SelectedValuePath="FileName"
 					  SelectionMode="Single" SelectionChanged="dataGrid1_SelectionChanged" MouseDoubleClick="dataGrid1_MouseDoubleClick" ContextMenuOpening="dataGrid1_ContextMenuOpening"
 					  CanUserResizeRows="False" CanUserDeleteRows="False" CanUserAddRows="False" CanUserReorderColumns="False" RowHeaderWidth="0">
@@ -98,7 +104,7 @@
 			<avalonEdit:TextEditor x:Name="DiffEditor" FontFamily="Consolas" FontSize="10pt" MouseDoubleClick="DiffEditor_MouseDoubleClick"/>
 		</Grid>
 
-        <my:Settings HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="Settings" Grid.ColumnSpan="3" Grid.RowSpan="3" />
+        <my:Settings HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="Settings" Grid.ColumnSpan="3" Grid.RowSpan="3" Visibility="Collapsed" />
         
     </Grid>
 </UserControl>

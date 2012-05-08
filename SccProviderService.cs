@@ -745,7 +745,7 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
                 }
                 
                 if (MessageBox.Show("Are you sure you want to undo changes for " + Path.GetFileName(fileName) +
-                    " and store it from last commit? " + deleteMsg,
+                    " and restore a version from the last commit? " + deleteMsg,
                     "Undo Changes", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     //SaveFileFromRepository(fileName, fileName);

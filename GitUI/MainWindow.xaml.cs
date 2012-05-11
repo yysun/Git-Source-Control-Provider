@@ -187,7 +187,24 @@ namespace GitUI
 		{
 			gitViewModel.Refresh(true);
 		}
-		
+
+		private void ShowMessage_Executed(object sender, ExecutedRoutedEventArgs e)
+		{
+			dynamic msg = e.Parameter;
+			txtMessage.Text = msg.Message;
+			txtMessage.Foreground = new SolidColorBrush(
+				msg.Error ? Colors.Red : Colors.Navy);
+			txtMessage.Visibility = Visibility.Visible;
+			txtMessage.Opacity = 1.0;
+			DoubleAnimation doubleAnimation = new DoubleAnimation
+			{
+				Duration = new Duration(TimeSpan.FromMilliseconds(10000)),
+				From = 1.0, To = 0.0
+			};
+			doubleAnimation.Completed += (o, _) => txtMessage.Visibility = Visibility.Collapsed;
+			txtMessage.BeginAnimation(UIElement.OpacityProperty, doubleAnimation);
+		}
+
 		#endregion
 
 		#region select and comapre commits

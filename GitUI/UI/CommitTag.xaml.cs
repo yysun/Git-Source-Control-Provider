@@ -33,7 +33,12 @@ namespace GitScc.UI
                 "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 var ret = GitViewModel.Current.DeleteTag(tag.Name);
+
+                if (!string.IsNullOrWhiteSpace(ret))
+                    HistoryViewCommands.ShowMessage.Execute(new { Message = ret, Error = true }, this);
+
                 //if(!string.IsNullOrWhiteSpace(ret)) MessageBox.Show(ret);
+
             }
         }
     }

@@ -83,6 +83,9 @@ namespace GitScc.UI
                 else
                 {
                     var ret = GitViewModel.Current.AddTag(tag, commit.ShortId);
+                    if (!string.IsNullOrWhiteSpace(ret))
+                        HistoryViewCommands.ShowMessage.Execute(new { Message = ret, Error = true }, this);
+
                     //if(!string.IsNullOrWhiteSpace(ret)) 
                     //    MessageBox.Show(ret, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
@@ -118,6 +121,9 @@ namespace GitScc.UI
                 else
                 {
                     var ret = GitViewModel.Current.AddBranch(branch, commit.ShortId);
+                    if (!string.IsNullOrWhiteSpace(ret))
+                        HistoryViewCommands.ShowMessage.Execute(new { Message = ret, Error = true }, this);
+
                     //if (!string.IsNullOrWhiteSpace(ret))
                     //    MessageBox.Show(ret, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
@@ -142,6 +148,9 @@ namespace GitScc.UI
             if (dlg.ShowDialog() == true)
             {
                 var ret = GitViewModel.Current.Archive(this.txtId.Text, dlg.FileName);
+                if (!string.IsNullOrWhiteSpace(ret))
+                    HistoryViewCommands.ShowMessage.Execute(new { Message = ret, Error = true }, this);
+
                 //if (!string.IsNullOrWhiteSpace(ret))
                 //{
                 //    MessageBox.Show(ret, "Error", MessageBoxButton.OK, MessageBoxImage.Error);

@@ -51,6 +51,7 @@ namespace GitScc
         private CheckBox checkBox3;
         private CheckBox checkBox4;
         private CheckBox checkBox5;
+        private CheckBox checkBox6;
         // The parent page, use to persist data
         private SccProviderOptions _customPage;
 
@@ -104,6 +105,7 @@ namespace GitScc
             this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.checkBox4 = new System.Windows.Forms.CheckBox();
             this.checkBox5 = new System.Windows.Forms.CheckBox();
+            this.checkBox6 = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // openFileDialog1
@@ -260,18 +262,30 @@ namespace GitScc
             // 
             this.checkBox5.AutoSize = true;
             this.checkBox5.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.checkBox5.Location = new System.Drawing.Point(6, 296);
+            this.checkBox5.Location = new System.Drawing.Point(6, 289);
             this.checkBox5.Name = "checkBox5";
             this.checkBox5.Size = new System.Drawing.Size(303, 17);
             this.checkBox5.TabIndex = 27;
             this.checkBox5.Text = "Disable auto switch to this plug-in for Git controlled projects";
             this.checkBox5.UseVisualStyleBackColor = true;
             // 
+            // checkBox6
+            // 
+            this.checkBox6.AutoSize = true;
+            this.checkBox6.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.checkBox6.Location = new System.Drawing.Point(6, 313);
+            this.checkBox6.Name = "checkBox6";
+            this.checkBox6.Size = new System.Drawing.Size(229, 17);
+            this.checkBox6.TabIndex = 28;
+            this.checkBox6.Text = "Use UTF-8 file names (requires Git 1.7.10+)";
+            this.checkBox6.UseVisualStyleBackColor = true;
+            // 
             // SccProviderOptionsControl
             // 
             this.AllowDrop = true;
             this.AutoScroll = true;
             this.AutoSize = true;
+            this.Controls.Add(this.checkBox6);
             this.Controls.Add(this.checkBox5);
             this.Controls.Add(this.checkBox4);
             this.Controls.Add(this.checkBox3);
@@ -317,6 +331,7 @@ namespace GitScc
             this.checkBox3.Checked = GitSccOptions.Current.UseTGitIconSet;
             this.checkBox4.Checked = GitSccOptions.Current.DisableAutoRefresh;
             this.checkBox5.Checked = GitSccOptions.Current.DisableAutoLoad;
+            this.checkBox6.Checked = GitSccOptions.Current.UseUTF8FileNames;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -360,6 +375,8 @@ namespace GitScc
             GitSccOptions.Current.UseTGitIconSet = this.checkBox3.Checked;
             GitSccOptions.Current.DisableAutoRefresh = this.checkBox4.Checked;
             GitSccOptions.Current.DisableAutoLoad = this.checkBox5.Checked;
+            GitBash.UseUTF8FileNames = 
+            GitSccOptions.Current.UseUTF8FileNames = this.checkBox6.Checked;
             GitSccOptions.Current.SaveConfig();
 
             SccProviderService sccProviderService = (SccProviderService)GetService(typeof(SccProviderService));

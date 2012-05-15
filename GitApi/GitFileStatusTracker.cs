@@ -661,7 +661,14 @@ namespace GitScc
             if (GitBash.Exists)
             {
                 var msgFile = Path.Combine(this.repository.Directory, "COMMITMESSAGE");
+                
                 File.WriteAllText(msgFile, message);
+
+                //using (var textWriter = new StreamWriter(msgFile, false, GetCommentEncoding()))
+                //{
+                //    textWriter.Write(message);
+                //}
+
                 msg = GitBash.Run(string.Format("commit -F \"{0}\"", msgFile), this.GitWorkingDirectory);
                 if (msg.IndexOf('\n') > 0) msg = msg.Split('\n')[0];
                 File.Delete(msgFile);

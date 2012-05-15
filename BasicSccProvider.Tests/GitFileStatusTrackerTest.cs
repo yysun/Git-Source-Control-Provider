@@ -115,7 +115,7 @@ namespace BasicSccProvider.Tests
             tracker.Refresh();
             Assert.AreEqual(GitFileStatus.Added, tracker.GetFileStatus(tempFile));
 
-            tracker.Commit("test commit");
+            tracker.Commit("中文 1čtestč");
             Assert.AreEqual(GitFileStatus.Tracked, tracker.GetFileStatus(tempFile));
 
             File.WriteAllText(tempFile, "changed text");
@@ -151,7 +151,7 @@ namespace BasicSccProvider.Tests
 
             GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
             tracker.StageFile(tempFile);
-            tracker.Commit("test");
+            tracker.Commit("中文 1čtestč");
 
             var fileContent = tracker.GetFileContent(tempFile);
 
@@ -184,7 +184,7 @@ namespace BasicSccProvider.Tests
             fileContent = tracker.GetFileContent(tempFile + ".bad");
             Assert.IsNull(fileContent);
 
-            tracker.Commit("test");
+            tracker.Commit("中文 1čtestč");
 
             fileContent = tracker.GetFileContent(tempFile + ".bad");
             Assert.IsNull(fileContent);
@@ -203,7 +203,7 @@ namespace BasicSccProvider.Tests
             tracker.StageFile(tempFile);
             Assert.AreEqual(GitFileStatus.Added, tracker.ChangedFiles.ToList()[0].Status);
 
-            tracker.Commit("test");
+            tracker.Commit("中文 1čtestč");
             
             Assert.AreEqual(0, tracker.ChangedFiles.Count());
 
@@ -223,9 +223,9 @@ namespace BasicSccProvider.Tests
 
             GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
             tracker.StageFile(tempFile);
-            
-            tracker.Commit("test message");
-            Assert.IsTrue(tracker.LastCommitMessage.StartsWith("test message"));
+
+            tracker.Commit("中文 1čtestč");
+            Assert.IsTrue(tracker.LastCommitMessage.StartsWith("中文 1čtestč"));
         }
 
         [TestMethod]
@@ -237,8 +237,8 @@ namespace BasicSccProvider.Tests
             GitFileStatusTracker tracker = new GitFileStatusTracker(tempFolder);
             tracker.StageFile(tempFile);
 
-            tracker.Commit("test message");
-            Assert.IsTrue(tracker.LastCommitMessage.StartsWith("test message"));
+            tracker.Commit("中文 1čtestč");
+            Assert.IsTrue(tracker.LastCommitMessage.StartsWith("中文 1čtestč"));
 
             File.WriteAllText(tempFile, "changed text");
             tracker.StageFile(tempFile);
@@ -352,6 +352,19 @@ namespace BasicSccProvider.Tests
     }
 
     [TestClass()]
+    public class GitFileStatusTrackerTest_NonAsciiFile_GitBash : GitFileStatusTrackerTest
+    {
+        public GitFileStatusTrackerTest_NonAsciiFile_GitBash()
+        {
+            GitBash.GitExePath = @"C:\Program Files (x86)\Git\bin\sh.exe";
+            GitBash.UseUTF8FileNames = true;
+            tempFolder = Environment.CurrentDirectory + "\\" + Guid.NewGuid().ToString();
+            Directory.CreateDirectory(tempFolder);
+            tempFile = Path.Combine(tempFolder, "中文 1čtestč");
+        }
+    }
+
+    [TestClass()]
     public class GitFileStatusTrackerTest_WithSubFolder : GitFileStatusTrackerTest
     {
         public GitFileStatusTrackerTest_WithSubFolder()
@@ -380,9 +393,10 @@ namespace BasicSccProvider.Tests
         public GitFileStatusTrackerTest_WithSubFolder_UsingGitBash()
         {
             GitBash.GitExePath = @"C:\Program Files (x86)\Git\bin\sh.exe";
+            GitBash.UseUTF8FileNames = true;
             tempFolder = Environment.CurrentDirectory + "\\" + Guid.NewGuid().ToString();
-            Directory.CreateDirectory(Path.Combine(tempFolder, "folder 2"));
-            tempFile = Path.Combine(tempFolder, "folder 2\\t e s t");
+            Directory.CreateDirectory(Path.Combine(tempFolder, "folder 1\\中文 1čtestč"));
+            tempFile = Path.Combine(tempFolder, "folder 1\\中文 1čtestč\\中文 1čtestč");
         }
     }
 }

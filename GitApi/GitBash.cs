@@ -10,6 +10,8 @@ namespace GitScc
 {
     public abstract class GitBash
     {
+        public static bool UseUTF8FileNames { get; set; }
+
         private static string gitExePath;
         public static string GitExePath
         {
@@ -43,6 +45,12 @@ namespace GitScc
                 UseShellExecute = false,
                 WorkingDirectory = workingDirectory,
             };
+
+            if (UseUTF8FileNames)
+            {
+                pinfo.StandardOutputEncoding = Encoding.UTF8;
+                pinfo.StandardErrorEncoding = Encoding.UTF8;
+            }
 
             using (var process = Process.Start(pinfo))
             {
@@ -78,7 +86,10 @@ namespace GitScc
                 UseShellExecute = false,
                 WorkingDirectory = workingDirectory,
             };
-
+            if (UseUTF8FileNames)
+            {
+                pinfo.StandardErrorEncoding = Encoding.UTF8;
+            }
             using (var process = Process.Start(pinfo))
             {
                 string error = process.StandardError.ReadToEnd();

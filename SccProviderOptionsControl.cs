@@ -275,9 +275,9 @@ namespace GitScc
             this.checkBox6.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.checkBox6.Location = new System.Drawing.Point(6, 313);
             this.checkBox6.Name = "checkBox6";
-            this.checkBox6.Size = new System.Drawing.Size(229, 17);
+            this.checkBox6.Size = new System.Drawing.Size(205, 17);
             this.checkBox6.TabIndex = 28;
-            this.checkBox6.Text = "Use UTF-8 file names (requires Git 1.7.10+)";
+            this.checkBox6.Text = "Disable UTF-8 file names (Git 1.7.10+)";
             this.checkBox6.UseVisualStyleBackColor = true;
             // 
             // SccProviderOptionsControl
@@ -331,7 +331,7 @@ namespace GitScc
             this.checkBox3.Checked = GitSccOptions.Current.UseTGitIconSet;
             this.checkBox4.Checked = GitSccOptions.Current.DisableAutoRefresh;
             this.checkBox5.Checked = GitSccOptions.Current.DisableAutoLoad;
-            this.checkBox6.Checked = GitSccOptions.Current.UseUTF8FileNames;
+            this.checkBox6.Checked = GitSccOptions.Current.NotUseUTF8FileNames;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -375,8 +375,9 @@ namespace GitScc
             GitSccOptions.Current.UseTGitIconSet = this.checkBox3.Checked;
             GitSccOptions.Current.DisableAutoRefresh = this.checkBox4.Checked;
             GitSccOptions.Current.DisableAutoLoad = this.checkBox5.Checked;
-            GitBash.UseUTF8FileNames = 
-            GitSccOptions.Current.UseUTF8FileNames = this.checkBox6.Checked;
+            GitSccOptions.Current.NotUseUTF8FileNames = this.checkBox6.Checked;
+
+            GitBash.UseUTF8FileNames = !GitSccOptions.Current.NotUseUTF8FileNames;
             GitSccOptions.Current.SaveConfig();
 
             SccProviderService sccProviderService = (SccProviderService)GetService(typeof(SccProviderService));

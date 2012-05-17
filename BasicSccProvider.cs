@@ -59,7 +59,7 @@ namespace GitScc
             _SccProvider = this;
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Entering constructor for: {0}", this.ToString()));
             GitBash.GitExePath = GitSccOptions.Current.GitBashPath;
-            GitBash.UseUTF8FileNames = GitSccOptions.Current.UseUTF8FileNames;
+            GitBash.UseUTF8FileNames = !GitSccOptions.Current.NotUseUTF8FileNames;
         }
 
         /////////////////////////////////////////////////////////////////////////////

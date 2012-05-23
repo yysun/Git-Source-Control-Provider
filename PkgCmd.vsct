@@ -203,7 +203,7 @@
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>Git View History</ButtonText>
+          <ButtonText>Git History</ButtonText>
         </Strings>
       </Button>
 

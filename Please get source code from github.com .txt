@@ -1,2 +1,0 @@
-http://github.com/yysun/Git-Source-Control-Provider.git 
-git://github.com/yysun/Git-Source-Control-Provider.git

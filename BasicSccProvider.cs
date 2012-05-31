@@ -432,12 +432,23 @@ namespace GitScc
             path = Path.Combine(path, "Dragon.pkg");
             var tmpPath = Path.Combine(Path.GetTempPath(), "Dragon.exe");
 
-            try
+            var needCopy = !File.Exists(tmpPath);
+            if(!needCopy)
             {
-                File.Copy(path, tmpPath, true);
+                var date1 = File.GetLastWriteTimeUtc(path);
+                var date2 = File.GetLastWriteTimeUtc(tmpPath);
+                needCopy = (date1>date2);
             }
-            catch // try copy file silently
+
+            if (needCopy)
             {
+                try
+                {
+                    File.Copy(path, tmpPath, true);
+                }
+                catch // try copy file silently
+                {
+                }
             }
 
             if (File.Exists(tmpPath))

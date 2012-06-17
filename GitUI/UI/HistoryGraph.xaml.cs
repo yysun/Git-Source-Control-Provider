@@ -574,7 +574,7 @@ namespace GitScc.UI
         #region Adjust Size
         private void AdjustCanvasSize()
         {
-            this.canvasContainer.Width = Math.Max(this.ActualWidth, (PADDING * 2 + maxX * GRID_WIDTH));
+            this.canvasContainer.Width = Math.Max(this.ActualWidth - PADDING, (PADDING * 2 + maxX * GRID_WIDTH));
             this.canvasContainer.Height = Math.Max(this.ActualHeight * 2, (PADDING * 2 + (maxY + 1) * GRID_HEIGHT));
         }
 

@@ -440,6 +440,8 @@ Note: if the file is included project, you need to delete the file from project 
 
             try
             {
+                service.NoRefresh = true;
+
                 if (chkNewBranch.IsChecked == true)
                 {
                     if (string.IsNullOrWhiteSpace(txtNewBranch.Text))
@@ -452,7 +454,6 @@ Note: if the file is included project, you need to delete the file from project 
                     tracker.CheckOutBranch(txtNewBranch.Text, true);
                 }
 
-                service.NoRefresh = true;
                 if (HasComments() && StageSelectedFiles())
                 {
 
@@ -465,6 +466,7 @@ Note: if the file is included project, you need to delete the file from project 
                 service.NoRefresh = false;
 
                 HistoryViewCommands.CloseCommitDetails.Execute(this, null);
+                HistoryViewCommands.RefreshGraph.Execute(this, null);
             }
             catch (Exception ex)
             {

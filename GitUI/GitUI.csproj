@@ -64,6 +64,7 @@
     <Compile Include="GitIntellisenseHelper.cs" />
     <Compile Include="GitSccOptions.cs" />
     <Compile Include="GitViewModel.cs" />
+    <Compile Include="Options.cs" />
     <Compile Include="UI\BottomToolBar.xaml.cs">
       <DependentUpon>BottomToolBar.xaml</DependentUpon>
     </Compile>

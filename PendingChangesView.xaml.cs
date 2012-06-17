@@ -332,7 +332,7 @@ namespace GitScc
                     try
                     {
                         ShowStatusMessage("Amending last Commit ...");
-                        var id = tracker.AmendCommit(Comments);
+                        var id = tracker.Commit(Comments, true);
                         ShowStatusMessage("Amend last commit successfully. Commit Hash: " + id);
                         ClearUI();
                     }

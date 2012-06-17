@@ -54,28 +54,28 @@
         <ListBox x:Name="tagList" Margin="60,34,250,0" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" ItemTemplate="{DynamicResource DataTemplate1}" 
                      Background="#00000000" BorderBrush="{x:Null}" Height="26" ItemContainerStyle="{DynamicResource ListBoxItemStyle1}"
                      ScrollViewer.HorizontalScrollBarVisibility="hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" MouseLeftButtonUp="tagList_MouseLeftButtonUp" VerticalAlignment="Top" />
-        <CheckBox Content="Show simplified graph" HorizontalAlignment="Right" Margin="0,15,58,0" Name="checkBox1" Template="{DynamicResource ShowSimpleGraphCheckBoxControlTemplate}" 
+        <CheckBox Content="Show simplified graph" HorizontalAlignment="Right" Margin="0,15,48,0" Name="checkBox1" Template="{DynamicResource ShowSimpleGraphCheckBoxControlTemplate}" 
                   VerticalAlignment="Top" ToolTip="Toggle View"  Click="checkBox1_Click"/>
         
-        <Label Content="Simplified view: off" HorizontalAlignment="Right" Margin="0,34.369,27,33.217" Name="lableView" FontSize="9.333" d:LayoutOverrides="Height" />
+        <Label Content="Simplified view: off" HorizontalAlignment="Right" Margin="0,34.369,17,33.217" Name="lableView" FontSize="9.333" d:LayoutOverrides="Height" />
 
-        <Button Content="Export" HorizontalAlignment="Right" Margin="0,15,87,0" Template="{DynamicResource SaveButtonControlTemplate}" Command="cmd:HistoryViewCommands.ExportGraph" ToolTip="Export graph ..." VerticalAlignment="Top" />
-        <Button Content="Refresh" HorizontalAlignment="Right" Margin="0,15,28,0" Template="{DynamicResource ButtonRefreshTemplate}" Command="cmd:HistoryViewCommands.RefreshGraph" ToolTip="Refresh" VerticalAlignment="Top" />
+        <Button Content="Export" HorizontalAlignment="Right" Margin="0,15,77,0" Template="{DynamicResource SaveButtonControlTemplate}" Command="cmd:HistoryViewCommands.ExportGraph" ToolTip="Export graph ..." VerticalAlignment="Top" />
+        <Button Content="Refresh" HorizontalAlignment="Right" Margin="0,15,18,0" Template="{DynamicResource ButtonRefreshTemplate}" Command="cmd:HistoryViewCommands.RefreshGraph" ToolTip="Refresh" VerticalAlignment="Top" />
         <Label Content="Commits" Height="28" HorizontalAlignment="Left" Margin="10,61,0,0" VerticalAlignment="Top" FontSize="10" />
         <TextBox VerticalAlignment="Bottom" Margin="60,0,250,5.04" x:Name="txtSearch" TextChanged="txtSearch_TextChanged" PreviewKeyDown="txtSearch_PreviewKeyDown" PreviewMouseDown="txtSearch_PreviewMouseDown" />
         <ListBox Height="100" Margin="60,0,250,-95.96" VerticalAlignment="Bottom" x:Name="lstSearch" PreviewKeyDown="lstSearch_PreviewKeyDown" MouseDoubleClick="lstSearch_MouseDoubleClick" />
-        <Button Content="Compare" HorizontalAlignment="Right" Margin="0,46,87,0" Template="{DynamicResource CompareButtonControlTemplate}" ToolTip="Compare ..." x:Name="btnCompare" Click="btnCompare_Click" RenderTransformOrigin="1.917,0.512"/>
-        <TextBlock HorizontalAlignment="Right" Margin="0,0,132,16.631" TextWrapping="NoWrap" Text="123456" Width="88.38" Foreground="#FFFF5656" x:Name="txtCommit1" FontSize="10" Height="24" VerticalAlignment="Bottom" />
-        <TextBlock HorizontalAlignment="Right" Height="24" Margin="0,0,132,0.842" TextWrapping="NoWrap" Text="123456" VerticalAlignment="Bottom" Width="88.38" Foreground="#FFFF5656" x:Name="txtCommit2" FontSize="10" />
-        <Label Content="Selected Commits &#xd;&#xa;to compare" Height="46" HorizontalAlignment="Right" Margin="0,9,132,0" VerticalAlignment="Top" FontSize="10" Width="99.897" x:Name="lblSelectedCommits"/>
-        <Button Content="gitbash" HorizontalAlignment="Right" Margin="0,46,58,0" Template="{DynamicResource ButtonGitBashTemplate}" ToolTip="Git Bash" x:Name="btnGitBash" Click="btnGitBash_Click"/>
-        <Button Content="Exit" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,56,28,0" Padding="10,0"
+        <Button Content="Compare" HorizontalAlignment="Right" Margin="0,46,107,0" Template="{DynamicResource CompareButtonControlTemplate}" ToolTip="Compare ..." x:Name="btnCompare" Click="btnCompare_Click" RenderTransformOrigin="1.917,0.512"/>
+        <TextBlock HorizontalAlignment="Right" Margin="0,0,144,14" TextWrapping="NoWrap" Text="123456" Width="88.38" Foreground="#FFFF5656" x:Name="txtCommit1" FontSize="10" Height="24" VerticalAlignment="Bottom" />
+        <TextBlock HorizontalAlignment="Right" Height="24" Margin="0,0,144,0" TextWrapping="NoWrap" Text="123456" VerticalAlignment="Bottom" Width="88.38" Foreground="#FFFF5656" x:Name="txtCommit2" FontSize="10" />
+        <Label Content="Selected Commits &#xd;&#xa;to compare" Height="46" HorizontalAlignment="Right" Margin="0,11,137,0" VerticalAlignment="Top" FontSize="10" Width="99.897" x:Name="lblSelectedCommits"/>
+        <Button Content="gitbash" HorizontalAlignment="Right" Margin="0,46,48,0" Template="{DynamicResource ButtonGitBashTemplate}" ToolTip="Git Bash" x:Name="btnGitBash" Click="btnGitBash_Click"/>
+        <Button Content="Exit" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,56,18,0" Padding="10,0"
         	Command="{x:Static shell:SystemCommands.CloseWindowCommand}"
         	Template="{DynamicResource BackButtonControlTemplate2}" ToolTip="Exit" RenderTransformOrigin="11.042,1.083" />
-        <Button Content="Pending Changes" HorizontalAlignment="Right" Margin="0,46,79,0" Padding="10,0"
-        	x:Name="btnPendingChanges" ToolTip="Pending Changes" Click="btnPendingChanges_Click" Visibility="Hidden"
-        	Template="{DynamicResource PendingChangesButtonControlTemplate}" RenderTransformOrigin="11.042,1.083"/>
-        <Button Content="Repositories" HorizontalAlignment="Right" Margin="0,46,49,0" Template="{DynamicResource OpenRepositoriesButtonControlTemplate}" ToolTip="Open Repository ..." Visibility="Hidden"/>
+        <Button Content="Commit" HorizontalAlignment="Right" Margin="0,46,77,0" Padding="10,0"
+        	x:Name="btnPendingChanges" ToolTip="Pending Changes" Click="btnPendingChanges_Click"
+        	Template="{DynamicResource PendingChangesButtonControlTemplate}" RenderTransformOrigin="11.042,1.083" />
+        <Button Content="Repositories" HorizontalAlignment="Right" Margin="0,5,107,41" Template="{DynamicResource OpenRepositoriesButtonControlTemplate}" ToolTip="Repositories"  Visibility="Hidden"/>
         <!--<Button Content="0" HorizontalAlignment="Right" Margin="0,8,100,0" x:Name="btnCommitCount" VerticalAlignment="Top" Template="{DynamicResource CommitCountControlTemplate}" RenderTransformOrigin="-1.125,0.438" Click="btnCommitCount_Click" ToolTip="Click to clear selection" />-->
      </Grid>
 </UserControl>

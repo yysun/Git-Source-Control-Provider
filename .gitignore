@@ -29,4 +29,5 @@ _ReSharper*/
 [Tt]est[Rr]esult*
 Publish*/
 GitUI/Resources/*.dll
+GitUI/Resources/*.xml
 *.pkg

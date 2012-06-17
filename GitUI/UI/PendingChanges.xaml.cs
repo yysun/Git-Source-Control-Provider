@@ -27,7 +27,6 @@ namespace GitUI.UI
         {
             InitializeComponent();
             this.service = GitViewModel.Current;
-            this.tracker = GitViewModel.Current.Tracker;
         }
 
         #region Events
@@ -162,8 +161,13 @@ namespace GitUI.UI
         #region Git functions
 
         DateTime lastTimeRefresh = DateTime.Now.AddDays(-1);
-        internal void Refresh()
+        internal void Refresh(GitFileStatusTracker tracker)
         {
+            this.tracker = tracker;
+            this.chkAmend.IsChecked = false;
+            this.chkSignOff.IsChecked = false;
+            this.chkNewBranch.IsChecked = false;
+
             if (tracker == null)
             {
                 //service.NoRefresh = true;
@@ -174,7 +178,7 @@ namespace GitUI.UI
 
             Action act = () =>
             {
-
+                lblMessage.Content = "Commit to: " + tracker.CurrentBranch;
                 service.NoRefresh = true;
                 ShowStatusMessage("Getting changed files ...");
 
@@ -190,7 +194,7 @@ namespace GitUI.UI
 
                 try
                 {
-                    
+
                     this.dataGrid1.ItemsSource = tracker.ChangedFiles;
 
                     ICollectionView view = CollectionViewSource.GetDefaultView(this.dataGrid1.ItemsSource);
@@ -202,7 +206,8 @@ namespace GitUI.UI
                     }
 
                     this.dataGrid1.SelectedValue = selectedFile;
-                    selectedFiles.ForEach(fn=>{
+                    selectedFiles.ForEach(fn =>
+                    {
                         var item = this.dataGrid1.Items.Cast<GitFile>()
                             .Where(i => i.FileName == fn)
                             .FirstOrDefault();
@@ -270,60 +275,6 @@ namespace GitUI.UI
             }
             else
                 return true;
-        }
-
-        internal void Commit()
-        {
-            service.NoRefresh = true;
-            if (HasComments() && StageSelectedFiles())
-            {
-                try
-                {
-                    ShowStatusMessage("Committing ...");
-                    var id = tracker.Commit(Comments);
-                    ShowStatusMessage("Commit successfully. Commit Hash: " + id);
-                    ClearUI();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                    ShowStatusMessage(ex.Message);
-                }
-            }
-            service.NoRefresh = false;
-            //service.lastTimeRefresh = DateTime.Now;
-            //service.NodesGlyphsDirty = true; // force refresh
-        }
-
-        internal void AmendCommit()
-        {
-            if (string.IsNullOrWhiteSpace(Comments))
-            {
-                Comments = tracker.LastCommitMessage;
-                return;
-            }
-            else
-            {
-                service.NoRefresh = true;
-                if (StageSelectedFiles())
-                {
-                    try
-                    {
-                        ShowStatusMessage("Amending last Commit ...");
-                        var id = tracker.AmendCommit(Comments);
-                        ShowStatusMessage("Amend last commit successfully. Commit Hash: " + id);
-                        ClearUI();
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                        ShowStatusMessage(ex.Message);
-                    }
-                }
-                service.NoRefresh = false;
-                //service.lastTimeRefresh = DateTime.Now;
-                //service.NodesGlyphsDirty = true; // force refresh
-            }
         }
 
         private bool StageSelectedFiles()
@@ -463,6 +414,63 @@ Note: if the file is included project, you need to delete the file from project 
         private void menuIgnoreFileExt_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void chkNewBranch_Checked(object sender, RoutedEventArgs e)
+        {
+            txtNewBranch.Focus();
+        }
+
+        private void txtNewBranch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            chkNewBranch.IsChecked = txtNewBranch.Text.Length > 0;
+        }
+
+        private void chkAmend_Checked(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(Comments))
+            {
+                Comments = tracker.LastCommitMessage;
+            }
+        }
+
+        private void btnPendingChanges_Click(object sender, RoutedEventArgs e)
+        {
+            if (tracker == null) return;
+
+            try
+            {
+                if (chkNewBranch.IsChecked == true)
+                {
+                    if (string.IsNullOrWhiteSpace(txtNewBranch.Text))
+                    {
+                        MessageBox.Show("Please enter new branch name.", "Commit",
+                            MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                        txtNewBranch.Focus();
+                        return;
+                    }
+                    tracker.CheckOutBranch(txtNewBranch.Text, true);
+                }
+
+                service.NoRefresh = true;
+                if (HasComments() && StageSelectedFiles())
+                {
+
+                    ShowStatusMessage("Committing ...");
+                    var id = tracker.Commit(Comments, chkAmend.IsChecked == true, chkSignOff.IsChecked == true);
+                    ShowStatusMessage("Commit successfully. Commit Hash: " + id);
+                    ClearUI();
+
+                }
+                service.NoRefresh = false;
+
+                HistoryViewCommands.CloseCommitDetails.Execute(this, null);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                ShowStatusMessage(ex.Message);
+            }
         }
     }
 

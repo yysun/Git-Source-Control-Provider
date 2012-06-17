@@ -242,7 +242,7 @@ namespace BasicSccProvider.Tests
 
             File.WriteAllText(tempFile, "changed text");
             tracker.StageFile(tempFile);
-            tracker.AmendCommit("new message");
+            tracker.Commit("new message", true);
             Assert.IsTrue(tracker.LastCommitMessage.StartsWith("new message"));
         }
 

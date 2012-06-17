@@ -7,6 +7,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using GitScc;
 using Microsoft.Windows.Shell;
+using Mono.Options;
 
 namespace GitUI
 {
@@ -36,7 +37,7 @@ namespace GitUI
 			this.Style = (Style)Resources["GradientStyle"];
 
 			GitBash.GitExePath = GitSccOptions.Current.GitBashPath;
-            GitBash.UseUTF8FileNames = GitSccOptions.Current.UseUTF8FileNames;
+			GitBash.UseUTF8FileNames = GitSccOptions.Current.UseUTF8FileNames;
 
 			if (!GitBash.Exists) GitBash.GitExePath = TryFindFile(new string[] {
 					@"C:\Program Files\Git\bin\sh.exe",
@@ -67,6 +68,7 @@ namespace GitUI
 						this.txtPrompt.Text = GitIntellisenseHelper.GetPrompt();
 					}
 					this.graph.Show(gitViewModel.Tracker, reload != null);
+					this.pendingChanges.Refresh(gitViewModel.Tracker);
 				};
 				this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
 			};
@@ -75,6 +77,19 @@ namespace GitUI
 
 			Action a1 = () => this.WindowState = WindowState.Maximized;
 			this.Dispatcher.BeginInvoke(a1, DispatcherPriority.ApplicationIdle);
+
+			var optionSet = new OptionSet()
+			{
+				{"c|commit", "show commit UI", v => {
+					if (!string.IsNullOrWhiteSpace(v))
+					{
+						Action act = () => HistoryViewCommands.PendingChanges.Execute(null, this);
+						this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+					}
+				} },
+			};
+
+			optionSet.Parse(Environment.GetCommandLineArgs());
 		}
 
 		private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -254,7 +269,7 @@ namespace GitUI
 				loading.Visibility = Visibility.Visible;
 				animation.Completed += (_, x) =>
 				{
-					this.pendingChanges.Refresh();
+					this.pendingChanges.Refresh(gitViewModel.Tracker);
 					loading.Visibility = Visibility.Collapsed;
 				};
 				this.pendingChanges.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);

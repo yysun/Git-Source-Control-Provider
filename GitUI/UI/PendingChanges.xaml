@@ -7,29 +7,12 @@
 			 mc:Ignorable="d" 
 			 d:DesignHeight="300" d:DesignWidth="800">
 	<UserControl.Resources>
-		<ControlTemplate x:Key="BackButtonControlTemplate" TargetType="{x:Type Button}">
-			<Grid Width="24" Height="24">
-				<VisualStateManager.VisualStateGroups>
-					<VisualStateGroup x:Name="CommonStates">
-						<VisualState x:Name="Normal"/>
-						<VisualState x:Name="MouseOver">
-							<Storyboard>
-								<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="ellipse">
-									<EasingColorKeyFrame KeyTime="0" Value="#FF99B6D1"/>
-								</ColorAnimationUsingKeyFrames>
-								<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)" Storyboard.TargetName="textBlock">
-									<EasingColorKeyFrame KeyTime="0" Value="White"/>
-								</ColorAnimationUsingKeyFrames>
-							</Storyboard>
-						</VisualState>
-						<VisualState x:Name="Pressed"/>
-						<VisualState x:Name="Disabled"/>
-					</VisualStateGroup>
-				</VisualStateManager.VisualStateGroups>
-				<Ellipse x:Name="ellipse" Fill="White" HorizontalAlignment="Stretch" Stroke="#FF99B6D1" Width="Auto" StrokeThickness="2"/>
-				<TextBlock x:Name="textBlock" Margin="0,1,0,0" TextWrapping="Wrap" d:LayoutOverrides="Width, Height" Foreground="#FF99B6D1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"><Span FontFamily="Wingdings 2" Language="en-us"><Run Text="Ó"/></Span></TextBlock>
-			</Grid>
-		</ControlTemplate>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="ResourceDictionary.xaml"/>
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+		
 	</UserControl.Resources>
 	<Grid>
 		<Grid.RowDefinitions>
@@ -38,12 +21,17 @@
 		</Grid.RowDefinitions>
 
 		<Grid>
-			<Label Content="Commit" HorizontalAlignment="Left" Margin="8,24.04,0,10" Name="lblCommit" d:LayoutOverrides="Height" />
-			<Label Content="Message" HorizontalAlignment="Left" Margin="8,1.38,0,0" Name="lblMessage" VerticalAlignment="Top" FontSize="14" FontWeight="Bold" d:LayoutOverrides="VerticalAlignment" />
-			<Button Content="close" HorizontalAlignment="Right" Margin="0,15,20,21" Padding="10,0"
+			<Label Content="Commit" HorizontalAlignment="Left" Margin="8,28,0,6" Name="lblCommit" d:LayoutOverrides="Height"  Visibility="Hidden" />
+			<Label Content="Message" HorizontalAlignment="Left" Margin="8,5,0,0" Name="lblMessage" VerticalAlignment="Top" FontSize="14" FontWeight="Bold" />
+			<Button Content="close" HorizontalAlignment="Right" Margin="0,19,20,17" Padding="10,0"
 					Command="cmd:HistoryViewCommands.CloseCommitDetails" CommandParameter="PendingChanges"
-					Template="{DynamicResource BackButtonControlTemplate}" ToolTip="Back to graphic view" d:LayoutOverrides="Height" />
-		   <Grid.Background>
+					Template="{DynamicResource CloseButtonControlTemplate}" ToolTip="Back to graphic view" d:LayoutOverrides="Height" />
+			<Button Content="Pending Changes" HorizontalAlignment="Right" Margin="0,9,46,7" Name="btnPendingChanges" Padding="10,0" RenderTransformOrigin="11.042,1.083" Template="{DynamicResource PendingChangesButtonControlTemplate}" ToolTip="Pending Changes" Click="btnPendingChanges_Click" />
+			<CheckBox Content="Amend last commit" Height="16" HorizontalAlignment="Left" Margin="292,34,0,0" Name="chkAmend" VerticalAlignment="Top" Checked="chkAmend_Checked" />
+			<CheckBox Content="Commit to new branch" Height="16" HorizontalAlignment="Left" Margin="12,34,0,0" Name="chkNewBranch" VerticalAlignment="Top" Checked="chkNewBranch_Checked" />
+			<TextBox Height="23" HorizontalAlignment="Left" Margin="156,31,0,0" Name="txtNewBranch" VerticalAlignment="Top" Width="120" TextChanged="txtNewBranch_TextChanged" />
+			<CheckBox Content="Sign off" Height="16" HorizontalAlignment="Left" Margin="428,34,0,0" Name="chkSignOff" VerticalAlignment="Top" />
+			<Grid.Background>
 				<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
 					<GradientStop Color="#FFF2F2F2" Offset="0" />
 					<GradientStop Color="#FFDBDBDB" Offset="1" />
@@ -81,7 +69,7 @@
 			<Grid Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="grid1">
 
 				<Grid.RowDefinitions>
-					<RowDefinition Height="50" />
+					<RowDefinition Height="150" />
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="*" />
@@ -94,7 +82,13 @@
 			   Margin="12,0,0,0" Foreground="#FF333333" Grid.Row="2" Width="86" ToolTip="select file to commit, or right click to stage/unstage file" />
 
 				<RichTextBox HorizontalAlignment="Stretch" Name="textBoxComments" VerticalAlignment="Stretch" Margin="10,0,10,10" 
-					 AcceptsReturn="True" VerticalScrollBarVisibility="Visible" SpellCheck.IsEnabled="True" />
+					 AcceptsReturn="True" VerticalScrollBarVisibility="Visible" SpellCheck.IsEnabled="True">
+					<RichTextBox.Resources>
+						<Style TargetType="{x:Type Paragraph}">
+							<Setter Property="Margin" Value="0"/>
+						</Style>
+					</RichTextBox.Resources>
+				</RichTextBox>
 
 				<DataGrid AutoGenerateColumns="False" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="dataGrid1" VerticalAlignment="Stretch"
 					  GridLinesVisibility="None"  Foreground="#FF333333" Sorting="dataGrid1_Sorting" IsReadOnly="True" SelectedValuePath="FileName"

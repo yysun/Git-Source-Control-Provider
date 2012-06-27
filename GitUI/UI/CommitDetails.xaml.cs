@@ -124,12 +124,12 @@ namespace GitScc.UI
 
                 var msg1 = repositoryGraph.Commits
                     .Where(r => r.Id.StartsWith(commitId1))
-                    .Select(r => string.Format("{0} ({1}, {2})", r.Message, r.CommitDateRelative, r.CommitterName))
+                    .Select(r => string.Format("{0} ({1}, {2})", r.Subject, r.CommitDateRelative, r.CommitterName))
                     .First().Replace("\r", "");
 
                 var msg2 = repositoryGraph.Commits
                     .Where(r => r.Id.StartsWith(commitId2))
-                    .Select(r => string.Format("{0} ({1}, {2})", r.Message, r.CommitDateRelative, r.CommitterName))
+                    .Select(r => string.Format("{0} ({1}, {2})", r.Subject, r.CommitDateRelative, r.CommitterName))
                     .First().Replace("\r", "");
 
                 var names1 = repositoryGraph.Refs

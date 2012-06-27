@@ -7,7 +7,8 @@ namespace GitScc.DataServices
 {
     public class RepositoryGraph
     {
-        private const string LogFormat = "--pretty=format:%H%n%P%n%cr%n%cn%n%ce%n%ci%n%T%n%s";
+        private const int CommitsToLoad = 200; 
+        private const string LogFormat = "--pretty=format:%H%n%P%n%cr%n%cn%n%ce%n%ci%n%T%n%s%n%b";
 
         private string workingDirectory;
 
@@ -28,8 +29,8 @@ namespace GitScc.DataServices
             {
                 if (commits == null)
                 {
-                    var output = GitBash.Run(string.Format("log -n {0} --date-order --all --boundary -z {1} HEAD", 
-                        100, LogFormat), 
+                    var output = GitBash.Run(string.Format("log -n {0} --date-order --all --boundary -z {1} HEAD",
+                        CommitsToLoad, LogFormat), 
                         this.workingDirectory);
 
                     if (string.IsNullOrEmpty(output) || output.StartsWith("fatal:"))
@@ -61,7 +62,8 @@ namespace GitScc.DataServices
                 CommitterEmail = ss[4],
                 CommitDate = DateTime.Parse(ss[5]),
                 TreeId = ss[6],
-                Message = ss[7]
+                Subject = ss[7],
+                Message = ss[7] + (ss.Length <= 8 ? "" : "\n\n" + string.Join("\n", ss, 8, ss.Length - 8))
             };
         }
 
@@ -162,6 +164,7 @@ namespace GitScc.DataServices
                     X = lane,
                     Y = i++,
                     Id = id,
+                    Subject = commit.Subject,
                     Message = commit.Message,
                     CommitterName = commit.CommitterName,
                     CommitDateRelative = commit.CommitDateRelative,

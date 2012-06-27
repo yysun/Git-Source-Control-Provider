@@ -10,6 +10,7 @@ namespace GitScc.DataServices
         public string Id { get; set; }
         public IList<string> ParentIds { get; set; }
         public IList<string> ChildIds { get; set; }
+        public string Subject { get; set; }
         public string Message { get; set; }
         public string TreeId { get; set; }
         public string CommitterName { get; set; }
@@ -20,7 +21,7 @@ namespace GitScc.DataServices
 
         public override string ToString()
         {
-            return string.Format("[{0}] {1}", ShortId, Message.Replace("\r", ""));
+            return string.Format("[{0}] {1}", ShortId, Subject.Replace("\r", ""));
         }
 
         public string ShortId { get { return Id.Substring(0, 7); } }    }

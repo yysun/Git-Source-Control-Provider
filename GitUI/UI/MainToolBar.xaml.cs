@@ -120,7 +120,7 @@ namespace GitUI.UI
             else
             {
                 lstSearch.ItemsSource = tracker.RepositoryGraph.Commits
-                    .Where(c => c.Message.ToLower().Contains(text) ||
+                    .Where(c => c.Subject.ToLower().Contains(text) ||
                            c.Id.StartsWith(text) ||
                            c.CommitterName.ToLower().StartsWith(text) ||
                            c.CommitterEmail.ToLower().StartsWith(text) ||

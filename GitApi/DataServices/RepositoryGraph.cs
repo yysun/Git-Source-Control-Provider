@@ -1,106 +1,91 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using NGit;
-using NGit.Api;
-using NGit.Revplot;
-using NGit.Revwalk;
-using NGit.Treewalk;
-using NGit.Treewalk.Filter;
-using NGit.Util;
-using NGit.Storage.File;
 
 namespace GitScc.DataServices
 {
     public class RepositoryGraph
     {
-        //private string workingDirectory;
-        Repository repository;
+        private const string LogFormat = "--pretty=format:%H%n%P%n%cr%n%cn%n%ce%n%ci%n%T%n%s";
 
-        private List<Commit> commits;
-        private List<Ref> refs;
-        private List<GraphNode> nodes;
-        private List<GraphLink> links;
+        private string workingDirectory;
+
+        private IList<Commit> commits;
+        private IList<Ref> refs;
+        private IList<GraphNode> nodes;
+        private IList<GraphLink> links;
         private bool isSimplified;
 
-        public RepositoryGraph(Repository repository)
+        public RepositoryGraph(string repository)
         {
-            //this.workingDirectory = repoFolder;
-            this.repository = repository;
+            this.workingDirectory = repository;
         }
 
-        public List<Commit> Commits
+        public IEnumerable<Commit> Commits
         {
             get
             {
                 if (commits == null)
                 {
-                    PlotWalk plotWalk = null;
-                    try
+                    var output = GitBash.Run(string.Format("log -n {0} --date-order --all --boundary -z {1} HEAD", 
+                        100, LogFormat), 
+                        this.workingDirectory);
+
+                    if (string.IsNullOrEmpty(output) || output.StartsWith("fatal:"))
                     {
-                        plotWalk = new PlotWalk(repository);
-
-                        var heads = repository.GetAllRefs().Values.Select(r =>
-                           plotWalk.LookupCommit(repository.Resolve(r.GetObjectId().Name)));
-                        
-                        foreach (var h in heads)
-                        {
-                            try
-                            {
-                                plotWalk.MarkStart(h);
-                            }
-                            catch { } // better than crash
-                        }
-                        
-                        PlotCommitList<PlotLane> pcl = new PlotCommitList<PlotLane>();
-                        pcl.Source(plotWalk);
-                        pcl.FillTo(100);
-
-                        commits = pcl.Select(c => new Commit
-                        {
-                            Id = c.Id.Name,
-                            ParentIds = c.Parents.Select(p => p.Id.Name).ToList(),
-                            CommitDateRelative = RelativeDateFormatter.Format(c.GetAuthorIdent().GetWhen()),
-                            CommitterName = c.GetAuthorIdent().GetName(),
-                            CommitterEmail = c.GetAuthorIdent().GetEmailAddress(),
-                            CommitDate = c.GetAuthorIdent().GetWhen(),
-                            Message = c.GetShortMessage(),
-                        }).ToList();
-
-                        commits.ForEach(commit => commit.ChildIds =
-                            commits.Where(c => c.ParentIds.Contains(commit.Id))
-                                   .Select(c => c.Id).ToList());
+                        return null;
                     }
-                    finally
-                    {
-                        if (plotWalk != null) plotWalk.Dispose();
-                    }
-                    
+
+                    var logs = output.Split('\0');
+                    commits = logs.Select(log => ParseCommit(log)).ToList();
+                    commits.ToList().ForEach(
+                        commit => commit.ChildIds =
+                                  commits.Where(c => c.ParentIds.Contains(commit.Id))
+                                         .Select(c => c.Id).ToList());
                 }
+
                 return commits;
             }
         }
 
-        public List<Ref> Refs
+        private Commit ParseCommit(string log)
+        {
+            string[] ss = log.Split('\n');
+            return new Commit
+            {
+                Id = ss[0],
+                ParentIds = ss[1].Split(' '),
+                CommitDateRelative = ss[2],
+                CommitterName = ss[3],
+                CommitterEmail = ss[4],
+                CommitDate = DateTime.Parse(ss[5]),
+                TreeId = ss[6],
+                Message = ss[7]
+            };
+        }
+
+        public IList<Ref> Refs
         {
             get
             {
-                if (refs == null && repository != null)
+                if (refs == null)
                 {
-                    refs = (from r in repository.GetAllRefs()
+                    var output = GitBash.Run("show-ref --head --dereference", this.workingDirectory);
+                    refs = (from t in output.Split('\n')
+                            where !string.IsNullOrWhiteSpace(t)
                             select new Ref
                             {
-                                Id = r.Value.GetPeeledObjectId() != null ?
-                                     r.Value.GetPeeledObjectId().Name:
-                                     r.Value.GetTarget().GetObjectId().Name,
-                                RefName = r.Key,
+                                Id = t.Substring(0, 40),
+                                RefName = t.Substring(41)
                             }).ToList();
+
                 }
                 return refs;
             }
         }
 
-        public List<GraphNode> Nodes
+        public IList<GraphNode> Nodes
         {
             get
             {
@@ -109,7 +94,7 @@ namespace GitScc.DataServices
             }
         }
 
-        public List<GraphLink> Links
+        public IEnumerable<GraphLink> Links
         {
             get
             {
@@ -127,7 +112,7 @@ namespace GitScc.DataServices
             }
         }
 
-        private void GenerateGraph(IList<Commit> commits)
+        private void GenerateGraph(IEnumerable<Commit> commits)
         {
             nodes = new List<GraphNode>();
             links = new List<GraphLink>();
@@ -207,7 +192,7 @@ namespace GitScc.DataServices
             }
         }
 
-        private List<Commit> GetSimplifiedCommits()
+        private IEnumerable<Commit> GetSimplifiedCommits()
         {
             foreach (var commit in Commits)
             {
@@ -237,7 +222,7 @@ namespace GitScc.DataServices
                 }
             }
 
-            return commits.Where(c => !c.deleted).ToList();
+            return commits.Where(c => !c.deleted);
         }
 
         private int GetLane(string id)
@@ -250,182 +235,141 @@ namespace GitScc.DataServices
             set { isSimplified = value; commits = null; nodes = null; links = null; }
         }
 
-        private ObjectId GetTreeIdFromCommitId(Repository repository, string commitId)
-        {
-            var id = repository.Resolve(commitId);
-            if (id == null) return null;
-
-            RevWalk walk = new RevWalk(repository);
-            RevCommit commit = walk.ParseCommit(id);
-            walk.Dispose();
-            return commit == null || commit.Tree == null ? null :
-                commit.Tree.Id;
-        }
-
         public Commit GetCommit(string commitId)
         {
-            //commitId = repository.Resolve(commitId).Name;
-            //return Commits.Where(c => c.Id.StartsWith(commitId)).FirstOrDefault();
-            var id = repository.Resolve(commitId);
-            if (id == null) return null;
+            try
+            {
+                var output = GitBash.Run(string.Format("log -1 {0} {1}", LogFormat, commitId), 
+                    this.workingDirectory);
 
-            RevWalk walk = new RevWalk(repository);
-            RevCommit commit = walk.ParseCommit(id);
-            walk.Dispose();
-            return commit == null || commit.Tree == null ? null : new Commit
-                {
-                    Id = commit.Id.Name,
-                    ParentIds = commit.Parents.Select(p => p.Id.Name).ToList(),
-                    CommitDateRelative = RelativeDateFormatter.Format(commit.GetAuthorIdent().GetWhen()),
-                    CommitterName = commit.GetCommitterIdent().GetName(),
-                    CommitterEmail = commit.GetCommitterIdent().GetEmailAddress(),
-                    CommitDate = commit.GetCommitterIdent().GetWhen(),
-                    Message = commit.GetShortMessage(),
-                };
+                return ParseCommit(output);
+            }
+            catch (Exception ex)
+            {
+                Log.WriteLine("Repository.GetCommit: {0} \r\n{1}", commitId, ex.ToString());
+            }
+            return null;
         }
 
         public GitTreeObject GetTree(string commitId)
         {
-            if (repository == null) return null;
+            var commit = GetCommit(commitId);
+            if (commit == null) return null;
 
-            var treeId = GetTreeIdFromCommitId(repository, commitId);
-            var tree = new GitTreeObject 
+            return new GitTreeObject 
             { 
-                Id = treeId.Name, Name = "", IsTree=true, IsExpanded= true,
-                repository = this.repository 
+                Id = commitId, Name = "", Type="tree", IsExpanded= true,
+                Repository = this.workingDirectory 
             };
-
-            //expand first level
-            //foreach (var t in tree.Children) t.IsExpanded = true; 
-            return tree;
         }
 
-        public Change[] GetChanges(string fromCommitId, string toCommitId)
+        public IEnumerable<Change> GetChanges(string commitId)
         {
-            if (repository == null) return null;
-
-            var id1 = GetTreeIdFromCommitId(repository, fromCommitId);
-            var id2 = GetTreeIdFromCommitId(repository, toCommitId);
-            if (id1 == null || id2 == null) return null;
-            else
-                return GetChanges(repository, id2, id1);
+            return GetChanges(commitId + "~1", commitId);
         }
 
-        public Change[] GetChanges(string commitId)
+        public IEnumerable<Change> GetChanges(string fromCommitId, string toCommitId)
         {
-            if (repository == null) return null;
-            RevWalk walk = null;
+            var changes = new List<Change>();
+
             try
             {
-                var id = repository.Resolve(commitId);
-                walk = new RevWalk(repository);
-                RevCommit commit = walk.ParseCommit(id);
-                if (commit == null || commit.ParentCount == 0) return null;
+                var output = GitBash.Run(string.Format("diff -M -C --name-status -z {0} {1}", fromCommitId, toCommitId), this.workingDirectory);
 
-                var pid = commit.Parents[0].Id;
-                var pcommit = walk.ParseCommit(pid);
-                return GetChanges(repository, commit.Tree.Id, pcommit.Tree.Id);
+                if (!string.IsNullOrWhiteSpace(output))
+                {
+                    //from gitextensions GitCommandHelper.cs
+                    var nl = new char[] { '\n', '\r' };
+                    string trimmedStatus = output.Trim(nl);
+                    int lastNewLinePos = trimmedStatus.LastIndexOfAny(nl);
+                    if (lastNewLinePos > 0)
+                    {
+                        int ind = trimmedStatus.LastIndexOf('\0');
+                        if (ind < lastNewLinePos) //Warning at end
+                        {
+                            lastNewLinePos = trimmedStatus.IndexOfAny(nl, ind >= 0 ? ind : 0);
+                            trimmedStatus = trimmedStatus.Substring(0, lastNewLinePos).Trim(nl);
+                        }
+                        else                                              //Warning at beginning
+                            trimmedStatus = trimmedStatus.Substring(lastNewLinePos).Trim(nl);
+                    }
+
+                    var files = trimmedStatus.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+                    for (int n = 0; n < files.Length; n++)
+                    {
+                        if (string.IsNullOrEmpty(files[n]))
+                            continue;
+
+                        int splitIndex = files[n].IndexOfAny(new char[] { '\0', '\t', ' ' }, 1);
+
+                        string status = string.Empty;
+                        string fileName = string.Empty;
+
+                        if (splitIndex < 0)
+                        {
+                            status = files[n];
+                            fileName = files[n + 1];
+                            n++;
+                        }
+                        else
+                        {
+                            status = files[n].Substring(0, splitIndex);
+                            fileName = files[n].Substring(splitIndex);
+                        }
+
+                        changes.Add(new Change
+                        {
+                            ChangeType = ParseStaus(status),
+                            Name = fileName.Trim()
+                        });
+                    }
+                }
             }
-            finally
+            catch (Exception ex)
             {
-                if (walk != null) walk.Dispose();
+                Log.WriteLine("Repository.GetChanges: {0} - {1}\r\n{2}", fromCommitId, toCommitId , ex.ToString());
             }
+
+            return changes;
         }
 
-        #region get changes
-
-        // Modified version of GitSharp's Commit class
-        private Change[] GetChanges(Repository repository, ObjectId id1, ObjectId id2)
+        private ChangeType ParseStaus(string status)
         {
-            var list = new List<Change>();
-            TreeWalk walk = new TreeWalk(repository);
-            walk.Reset(id1, id2);
-            walk.Recursive = true;
-            walk.Filter = TreeFilter.ANY_DIFF;
-            while (walk.Next())
+            char x = status[0];
+            switch (x)
             {
-                int m0 = walk.GetRawMode(0);
-                if (walk.TreeCount == 2)
-                {
-                    int m1 = walk.GetRawMode(1);
-                    var change = new Change
-                    {
-                        Name = walk.PathString,
-                    };
-                    if (m0 != 0 && m1 == 0)
-                    {
-                        change.ChangeType = ChangeType.Added;
-                    }
-                    else if (m0 == 0 && m1 != 0)
-                    {
-                        change.ChangeType = ChangeType.Deleted;
-                    }
-                    else if (m0 != m1 && walk.IdEqual(0, 1))
-                    {
-                        change.ChangeType = ChangeType.TypeChanged;
-                    }
-                    else
-                    {
-                        change.ChangeType = ChangeType.Modified;
-                    }
-                    list.Add(change);
-                }
-                else
-                {
-                    var raw_modes = new int[walk.TreeCount - 1];
-                    for (int i = 0; i < walk.TreeCount - 1; i++)
-                        raw_modes[i] = walk.GetRawMode(i + 1);
-                    var change = new Change
-                    {
-                        Name = walk.PathString,
-                    };
-                    if (m0 != 0 && raw_modes.All(m1 => m1 == 0))
-                    {
-                        change.ChangeType = ChangeType.Added;
-                        list.Add(change);
-                    }
-                    else if (m0 == 0 && raw_modes.Any(m1 => m1 != 0))
-                    {
-                        change.ChangeType = ChangeType.Deleted;
-                        list.Add(change);
-                    }
-                    else if (raw_modes.Select((m1, i) => new { Mode = m1, Index = i + 1 }).All(x => !walk.IdEqual(0, x.Index))) // TODO: not sure if this condition suffices in some special cases.
-                    {
-                        change.ChangeType = ChangeType.Modified;
-                        list.Add(change);
-                    }
-                    else if (raw_modes.Select((m1, i) => new { Mode = m1, Index = i + 1 }).Any(x => m0 != x.Mode && walk.IdEqual(0, x.Index)))
-                    {
-                        change.ChangeType = ChangeType.TypeChanged;
-                        list.Add(change);
-                    }
-                }
+                case 'A':
+                    return ChangeType.Added;
+                case 'C':
+                    return ChangeType.Copied;
+                case 'D':
+                    return ChangeType.Deleted;
+                case 'M':
+                    return ChangeType.Modified;
+                case 'R':
+                    return ChangeType.Renamed;
+                case 'T':
+                    return ChangeType.TypeChanged;
             }
-            return list.ToArray();
+            return ChangeType.Unknown;
         }
-        #endregion
 
         public byte[] GetFileContent(string commitId, string fileName)
         {
-            if (repository == null) return null;
-            RevWalk walk = null;
             try
             {
-                var head = repository.Resolve(commitId);
-                RevTree revTree = head == null ? null : new RevWalk(repository).ParseTree(head);
-
-                var entry = TreeWalk.ForPath(repository, fileName, revTree);
-                if (entry != null && !entry.IsSubtree)
-                {
-                    var blob = repository.Open(entry.GetObjectId(0));
-                    if (blob != null) return blob.GetCachedBytes();
-                }
+                var tmpFileName = Path.GetTempFileName();
+                GitBash.RunCmd(string.Format("cat-file blob {0}:{1} > {2}", commitId, fileName, tmpFileName), 
+                    this.workingDirectory);
+                var content = File.ReadAllBytes(tmpFileName);
+                if (File.Exists(tmpFileName)) File.Delete(tmpFileName);
+                return content;
             }
-            catch { }
-            finally
+            catch (Exception ex)
             {
-                if (walk != null) walk.Dispose();
+                Log.WriteLine("Repository.GetFileContent: {0} - {1}\r\n{2}", commitId, fileName, ex.ToString());
             }
+
             return null;
         }
     }

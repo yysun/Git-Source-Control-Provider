@@ -11,6 +11,7 @@ namespace GitScc.DataServices
         public IList<string> ParentIds { get; set; }
         public IList<string> ChildIds { get; set; }
         public string Message { get; set; }
+        public string TreeId { get; set; }
         public string CommitterName { get; set; }
         public string CommitterEmail { get; set; }
         public DateTime CommitDate { get; set; }

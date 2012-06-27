@@ -2,11 +2,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using NGit.Api;
 
 namespace BasicSccProvider.Tests
 {
-    
     
     /// <summary>
     ///This is a test class for RepositoryGraphTest and is intended
@@ -15,7 +13,7 @@ namespace BasicSccProvider.Tests
     [TestClass()]
     public class RepositoryGraphTest
     {
-
+        private const string repodir = @"D:\Users\Public\My Projects Tryout\gitsharp\";
 
         private TestContext testContextInstance;
 
@@ -68,8 +66,7 @@ namespace BasicSccProvider.Tests
         //[TestMethod()]
         //public void TreeTest()
         //{
-        //    var git = Git.Open(@"D:\Users\Public\My Projects Tryout\gitsharp\").GetRepository();
-        //    RepositoryGraph repo = new RepositoryGraph(git);
+        //    RepositoryGraph repo = new RepositoryGraph(repodir);
         //    var tree = repo.GetTree("master");
         //    foreach (var t in tree.Trees)
         //    {
@@ -84,8 +81,7 @@ namespace BasicSccProvider.Tests
         [TestMethod()]
         public void TreeDiffTest()
         {
-            var git = Git.Open(@"D:\Users\Public\My Projects Tryout\gitsharp\").GetRepository();
-            RepositoryGraph repo = new RepositoryGraph(git);
+            RepositoryGraph repo = new RepositoryGraph(repodir);
             var changes = repo.GetChanges("master", "HEAD");
             foreach (var change in changes)
             {
@@ -96,8 +92,7 @@ namespace BasicSccProvider.Tests
         [TestMethod()]
         public void TreeDiffTest1()
         {
-            var git = Git.Open(@"D:\Users\Public\My Projects Tryout\gitsharp\").GetRepository();
-            RepositoryGraph repo = new RepositoryGraph(git);
+            RepositoryGraph repo = new RepositoryGraph(repodir);
             var changes = repo.GetChanges("master");
             foreach (var change in changes)
             {

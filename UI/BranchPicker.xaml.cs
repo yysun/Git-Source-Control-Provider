@@ -24,12 +24,12 @@ namespace GitScc.UI
     {
         private Window window;
         private Repository repository;
-        private List<DataServices.Ref> list;
+        private IList<DataServices.Ref> list;
 
         public string BranchName { get; set; }
         public bool CreateNew { get; set; }
 
-        public BranchPicker(Repository repository, List<DataServices.Ref> list)
+        public BranchPicker(Repository repository, IList<DataServices.Ref> list)
         {
             InitializeComponent();
             this.repository = repository;

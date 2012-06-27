@@ -107,7 +107,10 @@ namespace GitScc
                                                   .Select(line => new IgnoreRule(line)).ToList();
                             }
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            Log.WriteLine("ReadIgnoreFile: {0}\r\n{1}", this.initFolder, ex.ToString());
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -665,49 +668,22 @@ namespace GitScc
                 File.WriteAllText(msgFile, message);
 
                 string opt = "";
-                if (amend) opt += "--amend";
-                if (signoff) opt += "--signoff";
-                msg = GitBash.Run(string.Format("commit -F {1} \"{0}\"", msgFile, opt), this.GitWorkingDirectory);
+                if (amend) opt += "--amend ";
+                if (signoff) opt += "--signoff ";
+                msg = GitBash.Run(string.Format("commit -F \"{0}\" {1}", msgFile, opt), this.GitWorkingDirectory);
                 if (msg.IndexOf('\n') > 0) msg = msg.Split('\n')[0];
                 File.Delete(msgFile);
             }
             else
             {
                 var git = new Git(this.repository);
-                var rev = git.Commit().SetMessage(message).Call();
+                var rev = git.Commit().SetMessage(message).SetAmend(amend).Call();
                 msg = rev.Name;
             }
             Refresh();
 
             return msg;
         }
-
-        //public string AmendCommit(string message)
-        //{
-        //    if (!HasGitRepository) return null;
-
-        //    if (string.IsNullOrEmpty(message))
-        //        throw new ArgumentException("Commit message must not be null or empty!", "message");
-
-        //    string msg = "";
-        //    if (GitBash.Exists)
-        //    {
-        //        var msgFile = Path.Combine(this.repository.Directory, "COMMITMESSAGE");
-        //        File.WriteAllText(msgFile, message);
-        //        msg = GitBash.Run(string.Format("commit --amend -F \"{0}\"", msgFile), this.GitWorkingDirectory);
-        //        if (msg.IndexOf('\n') > 0) msg = msg.Split('\n')[0];
-        //        File.Delete(msgFile);
-        //    }
-        //    else
-        //    {
-        //        var git = new Git(this.repository);
-        //        var rev = git.Commit().SetAmend(true).SetMessage(message).Call();
-        //        msg = rev.Name;
-        //    }
-        //    Refresh();
-
-        //    return msg;
-        //}
 
         public string LastCommitMessage
         {
@@ -962,7 +938,7 @@ namespace GitScc
             {
                 if (repositoryGraph == null)
                 {
-                    repositoryGraph = HasGitRepository ? new RepositoryGraph(this.repository) : null;
+                    repositoryGraph = HasGitRepository ? new RepositoryGraph(this.GitWorkingDirectory) : null;
                 }
                 return repositoryGraph;
             }

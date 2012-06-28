@@ -1,14 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Threading;
 using GitScc.DataServices;
 using GitUI;
-using NGit.Diff;
 
 namespace GitScc.UI
 {
@@ -56,6 +55,24 @@ namespace GitScc.UI
         }
         #endregion
 
+        private string Comments
+        {
+            get
+            {
+                TextRange textRange = new TextRange(
+                    this.txtComments.Document.ContentStart,
+                    this.txtComments.Document.ContentEnd);
+                return textRange.Text;
+            }
+            set
+            {
+                TextRange textRange = new TextRange(
+                    this.txtComments.Document.ContentStart,
+                    this.txtComments.Document.ContentEnd);
+                textRange.Text = value;
+            }
+        }
+
         internal void Show(GitFileStatusTracker tracker, string commitId)
         {
             try
@@ -91,6 +108,7 @@ namespace GitScc.UI
                     this.commitId2 = commit.Id;
                     this.btnSwitch.Visibility = Visibility.Collapsed;
                     this.txtFileName.Text = "";
+                    this.Comments = commit.Message;
 
                     this.radioShowChanges.IsChecked = true;
                     this.fileTree.Visibility = Visibility.Collapsed;
@@ -147,6 +165,25 @@ namespace GitScc.UI
                 this.lblMessage.Content = string.Format("[{1}] {0}", msg1, name1);
                 this.lblAuthor.Content = "";
 
+                var comment1 = repositoryGraph.Commits
+                    .Where(r => r.Id.StartsWith(commitId1))
+                    .Select(r => r.Message)
+                    .FirstOrDefault();
+
+                var comment2 = repositoryGraph.Commits
+                    .Where(r => r.Id.StartsWith(commitId2))
+                    .Select(r => r.Message)
+                    .FirstOrDefault();
+
+                this.Comments = string.Format(@"{0}:
+----------
+{1}
+
+{2}:
+----------
+{3}",
+                    commitId1, comment1, commitId2, comment2);
+
                 this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId1, commitId2);
                 this.radioShowChanges.IsChecked = true;
                 this.radioShowFileTree.IsEnabled = false;
@@ -155,6 +192,8 @@ namespace GitScc.UI
                 this.commitId2 = commitId2;
                 this.btnSwitch.Visibility = Visibility.Visible;
                 this.txtFileName.Text = "";
+
+                if (this.patchList.Items.Count > 0) this.patchList.SelectedIndex = 0;
             }
             catch (Exception ex)
             {

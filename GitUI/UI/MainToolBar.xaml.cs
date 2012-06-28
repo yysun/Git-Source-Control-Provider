@@ -223,6 +223,7 @@ namespace GitUI.UI
 
         internal void SelectCommit(string id, string name)
         {
+            id = id.Substring(0, 7);
             HideSearchList();
             lblSelectedCommits.Visibility = Visibility.Visible;
             if (id1 == null)

@@ -7,7 +7,7 @@ namespace GitScc.DataServices
 {
     public class RepositoryGraph
     {
-        private const int CommitsToLoad = 200; 
+        private const int CommitsToLoad = 100; 
         private const string LogFormat = "--pretty=format:%H%n%P%n%cr%n%cn%n%ce%n%ci%n%T%n%s%n%b";
 
         private string workingDirectory;

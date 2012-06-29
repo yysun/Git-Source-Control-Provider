@@ -1119,6 +1119,20 @@ namespace GitScc
                 return configs ?? new Dictionary<string, string>();
             }
         }
+
+        public string Blame(string fileName)
+        {
+            if (!this.HasGitRepository) return "";
+
+            var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), ".blame");
+
+            if (GitBash.Exists)
+            {
+                var fileNameRel = GetRelativeFileName(fileName);
+                GitBash.RunCmd(string.Format("blame -M -w -- \"{0}\" > \"{1}\"", fileNameRel, tmpFileName), this.GitWorkingDirectory);
+            }
+            return tmpFileName;
+        }
     }
 
     public abstract class Log

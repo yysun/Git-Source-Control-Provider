@@ -230,23 +230,27 @@ namespace GitScc.UI
             var selection = this.fileTree.SelectedValue as GitTreeObject;
             if (selection != null)
             {
-                txtFileName.Text = "Content: " + selection.Name;
-                var dispatcher = Dispatcher.CurrentDispatcher;
-                Action act = () =>
+                if (this.chkBlame.IsChecked == true) ShowBlame(selection.Name);
+                else
                 {
-                    try
+                    txtFileName.Text = "Content: " + selection.Name;
+                    var dispatcher = Dispatcher.CurrentDispatcher;
+                    Action act = () =>
                     {
-                        var content = selection.Content;
-                        if (content != null)
+                        try
                         {
-                            var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), Path.GetExtension(selection.Name));
-                            File.WriteAllBytes(tmpFileName, content);
-                            ShowFile(tmpFileName);
+                            var content = selection.Content;
+                            if (content != null)
+                            {
+                                var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), Path.GetExtension(selection.Name));
+                                File.WriteAllBytes(tmpFileName, content);
+                                ShowFile(tmpFileName);
+                            }
                         }
-                    }
-                    catch { }
-                };
-                dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+                        catch { }
+                    };
+                    dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+                }
             }
         }
 
@@ -257,22 +261,42 @@ namespace GitScc.UI
             var selection = (this.patchList.SelectedItem) as Change;
             if (selection != null)
             {
-                txtFileName.Text = "Diff: " + selection.Name;
-                var dispatcher = Dispatcher.CurrentDispatcher;
-                Action act = () =>
+                if (this.chkBlame.IsChecked == true) ShowBlame(selection.Name);
+                else
                 {
-                    try
+                    txtFileName.Text = "Diff: " + selection.Name;
+                    var dispatcher = Dispatcher.CurrentDispatcher;
+                    Action act = () =>
                     {
-                        var tmpFileName = this.tracker.DiffFile(selection.Name, commitId1, commitId2);
-                        ShowFile(tmpFileName);
-                    }
-                    catch { }
-                };
+                        try
+                        {
+                            var tmpFileName = this.tracker.DiffFile(selection.Name, commitId1, commitId2);
+                            ShowFile(tmpFileName);
+                        }
+                        catch { }
+                    };
 
-                dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+                    dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+                }
             }
         }
 
+        private void ShowBlame(string fileName)
+        {
+            txtFileName.Text = "Blame: " + fileName;
+            var dispatcher = Dispatcher.CurrentDispatcher;
+            Action act = () =>
+            {
+                try
+                {
+                    var tmpFileName = this.tracker.Blame(fileName);
+                    ShowFile(tmpFileName);
+                }
+                catch { }
+            };
+            dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+
+        }
         private void btnSwitch_Click(object sender, RoutedEventArgs e)
         {
             var selected = patchList.SelectedValue;
@@ -342,6 +366,12 @@ namespace GitScc.UI
                     }
                 }
             }
+        }
+
+        private void chkBlame_Click(object sender, RoutedEventArgs e)
+        {
+            fileTree_SelectedItemChanged(this, null);
+            patchList_SelectionChanged(this, null);
         }
     }
 }

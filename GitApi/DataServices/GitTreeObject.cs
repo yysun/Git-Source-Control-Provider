@@ -11,6 +11,7 @@ namespace GitScc.DataServices
     {
         public string Id { get; internal set; }
         public string Name { get; internal set; }
+        public string FullName { get; internal set; }
         public string Type { get; set; }
         public string Mode { get; set; }
         public string Repository { get; internal set; }
@@ -66,14 +67,17 @@ namespace GitScc.DataServices
                 return null;
 
             var guidStart = itemsString.IndexOf(' ', 7);
+            var name = itemsString.Substring(guidStart + 42).Trim();
+            var fullName = this.FullName.Length == 0 ? name : this.FullName + "/" + name;
 
             return new GitTreeObject
             {
                 Mode = itemsString.Substring(0, 6),
                 Type = itemsString.Substring(7, guidStart - 7).ToLower(),
                 Id = itemsString.Substring(guidStart + 1, 40),
-                Name = itemsString.Substring(guidStart + 42).Trim(),
-                Repository = this.Repository
+                Name = name,
+                FullName = fullName,
+                Repository = this.Repository,
             };
         }
 

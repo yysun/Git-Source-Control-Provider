@@ -261,8 +261,9 @@ namespace GitScc.DataServices
 
             return new GitTreeObject 
             { 
-                Id = commitId, Name = "", Type="tree", IsExpanded= true,
-                Repository = this.workingDirectory 
+                Id = commitId, Name = "", FullName = "",
+                Type="tree", IsExpanded= true,
+                Repository = this.workingDirectory,
             };
         }
 

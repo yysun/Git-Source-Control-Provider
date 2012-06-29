@@ -1133,6 +1133,15 @@ namespace GitScc
             }
             return tmpFileName;
         }
+
+        public IEnumerable<string> GetCommitsForFile(string fileName)
+        {
+            if (!this.HasGitRepository || !GitBash.Exists) return new string[0];
+            var fileNameRel = GetRelativeFileName(fileName);
+
+            var output = GitBash.Run(string.Format("log -z --ignore-space-change --pretty=format:%H -- \"{0}\"", fileNameRel), this.GitWorkingDirectory);
+            return output.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+        }
     }
 
     public abstract class Log

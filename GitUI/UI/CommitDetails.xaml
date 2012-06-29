@@ -113,14 +113,24 @@
 
 		<Grid x:Name="detailsGrid" Grid.Row="1">
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="250" MaxWidth="1000" MinWidth="20"/>
+				<ColumnDefinition Width="300" MaxWidth="1000" MinWidth="20"/>
 				<ColumnDefinition Width="4"/>
-				<ColumnDefinition Width="2*"/>
+				<ColumnDefinition Width="3*"/>
 				<ColumnDefinition Width="4"/>
 				<ColumnDefinition Width="1*" MinWidth="20"/>                
 			</Grid.ColumnDefinitions>
 
-			<Grid Height="36" HorizontalAlignment="Stretch" VerticalAlignment="Top" >
+			<Grid>
+
+				<Grid.RowDefinitions>
+					<RowDefinition Height="36" />
+					<RowDefinition Height="*" />
+					<RowDefinition Height="4" />
+					<!--<RowDefinition Height="36" />-->
+					<RowDefinition Height="2*" />
+				</Grid.RowDefinitions>
+
+				<Grid Height="36" HorizontalAlignment="Stretch" VerticalAlignment="Top" >
 				<Grid.Background>
 					<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
 						<GradientStop Color="#FFCBCBCB" Offset="0" />
@@ -130,11 +140,8 @@
 				<RadioButton Content="Show Files" Height="16" HorizontalAlignment="Left" Margin="12,8,0,0" Name="radioShowFileTree" VerticalAlignment="Top" Checked="radioShowFileTree_Checked" />
 				<RadioButton Content="Show Changes" Height="16" HorizontalAlignment="Left" Margin="120,8,0,0" Name="radioShowChanges" VerticalAlignment="Top" Checked="radioShowChanges_Checked" />
 			</Grid>
-			
-			<GridSplitter Grid.Column="1"
-					  VerticalAlignment="Stretch" HorizontalAlignment="Center" Width="4" ResizeDirection="Columns" />
-			
-			<TreeView x:Name="fileTree" Margin="10,38,0,10" BorderBrush="{x:Null}" VerticalContentAlignment="Stretch" 
+						
+				<TreeView Grid.Row="1" x:Name="fileTree" Margin="10,0,0,0" BorderBrush="{x:Null}" VerticalContentAlignment="Stretch" 
 					  HorizontalAlignment="Stretch" SelectedItemChanged="fileTree_SelectedItemChanged">
 				<TreeView.ItemTemplate>
 					<HierarchicalDataTemplate ItemsSource="{Binding Children}"
@@ -161,9 +168,9 @@
 				</TreeView.ContextMenu>
 			</TreeView>
 
-			<DataGrid x:Name="patchList" Margin="10,38,0,10" AutoGenerateColumns="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+				<DataGrid Grid.Row="1" x:Name="patchList" Margin="10,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
 					  GridLinesVisibility="None"  Foreground="#FF333333" Sorting="dataGrid1_Sorting" IsReadOnly="True" SelectedValuePath="Name"
-					  SelectionMode="Single" Visibility="Collapsed" SelectionChanged="patchList_SelectionChanged"
+					  SelectionMode="Single" Visibility="Collapsed" SelectionChanged="patchList_SelectionChanged" AutoGenerateColumns="False" 
 					  CanUserResizeRows="False" CanUserDeleteRows="False" CanUserAddRows="False" CanUserReorderColumns="False" RowHeaderWidth="0">
 
 				<DataGrid.Columns>
@@ -173,6 +180,26 @@
 
 			</DataGrid>
 
+				<GridSplitter Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Stretch" Height="4" ResizeDirection="Rows" />
+
+				<Grid Grid.Row="3" Height="36" HorizontalAlignment="Stretch" VerticalAlignment="Top" >
+					<Grid.Background>
+						<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+							<GradientStop Color="#FFCBCBCB" Offset="0" />
+							<GradientStop Color="White" Offset="1" />
+						</LinearGradientBrush>
+					</Grid.Background>
+					<TextBlock Text="Commits of selected file" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="15,0,0,0" />
+				</Grid>
+
+				<ListBox Grid.Row="3" Margin="10,38,0,10" x:Name="lstFileCommits"
+						 VerticalAlignment="Stretch" HorizontalAlignment="Stretch" SelectionChanged="lstFileCommits_SelectionChanged" />
+
+			</Grid>
+			
+			<GridSplitter Grid.Column="1"
+					  VerticalAlignment="Stretch" HorizontalAlignment="Center" Width="4" ResizeDirection="Columns" />
+			
 			<Grid Grid.Column="2" Height="36" HorizontalAlignment="Stretch" VerticalAlignment="Top" >
 				<Grid.Background>
 					<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
@@ -189,30 +216,38 @@
 				<avalonEdit:TextEditor Name="editor" FontFamily="Consolas" FontSize="10pt"/>
 			</Grid>
 
-			<Grid Grid.Column="4" Height="36" HorizontalAlignment="Stretch" VerticalAlignment="Top" >
-				<Grid.Background>
-					<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-						<GradientStop Color="#FFCBCBCB" Offset="0" />
-						<GradientStop Color="White" Offset="1" />
-					</LinearGradientBrush>
-				</Grid.Background>
-				<TextBlock Text="Comments" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" />
-			</Grid>
-			
-			<RichTextBox Grid.Column="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,38,10,10" 
-						 Name="txtComments" IsReadOnly="True" 
-						 VerticalScrollBarVisibility="Visible">
-				<RichTextBox.Resources>
-					<Style TargetType="{x:Type Paragraph}">
-						<Setter Property="Margin" Value="0"/>
-					</Style>
-				</RichTextBox.Resources>
-			</RichTextBox>
-
 			<GridSplitter Grid.Column="3"
 						  VerticalAlignment="Stretch" HorizontalAlignment="Center" Width="4" 
 						  ResizeDirection="Columns" />
 
+			<Grid Grid.Column="4">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="36" />
+					<RowDefinition Height="*" />
+				</Grid.RowDefinitions>
+
+				<Grid Height="36" HorizontalAlignment="Stretch" VerticalAlignment="Top" >
+					<Grid.Background>
+						<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+							<GradientStop Color="#FFCBCBCB" Offset="0" />
+							<GradientStop Color="White" Offset="1" />
+						</LinearGradientBrush>
+					</Grid.Background>
+					<TextBlock Text="Message" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" />
+				</Grid>
+			
+				<RichTextBox Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,0,10,0" 
+						 Name="txtComments" IsReadOnly="True" 
+						 VerticalScrollBarVisibility="Visible">
+					<RichTextBox.Resources>
+						<Style TargetType="{x:Type Paragraph}">
+							<Setter Property="Margin" Value="0"/>
+						</Style>
+					</RichTextBox.Resources>
+				</RichTextBox>
+
+			</Grid>
+			
 		</Grid>
 	</Grid>
 

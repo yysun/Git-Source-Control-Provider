@@ -230,10 +230,10 @@ namespace GitScc.UI
             var selection = this.fileTree.SelectedValue as GitTreeObject;
             if (selection != null)
             {
-                if (this.chkBlame.IsChecked == true) ShowBlame(selection.Name);
+                if (this.chkBlame.IsChecked == true) ShowBlame(selection.FullName);
                 else
                 {
-                    txtFileName.Text = "Content: " + selection.Name;
+                    txtFileName.Text = selection.FullName;
                     var dispatcher = Dispatcher.CurrentDispatcher;
                     Action act = () =>
                     {
@@ -251,6 +251,7 @@ namespace GitScc.UI
                     };
                     dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
                 }
+                ShowCommitsForFile(selection.FullName);
             }
         }
 
@@ -264,7 +265,7 @@ namespace GitScc.UI
                 if (this.chkBlame.IsChecked == true) ShowBlame(selection.Name);
                 else
                 {
-                    txtFileName.Text = "Diff: " + selection.Name;
+                    txtFileName.Text = selection.Name;
                     var dispatcher = Dispatcher.CurrentDispatcher;
                     Action act = () =>
                     {
@@ -278,12 +279,12 @@ namespace GitScc.UI
 
                     dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
                 }
+                ShowCommitsForFile(selection.Name);
             }
         }
 
         private void ShowBlame(string fileName)
         {
-            txtFileName.Text = "Blame: " + fileName;
             var dispatcher = Dispatcher.CurrentDispatcher;
             Action act = () =>
             {
@@ -295,8 +296,17 @@ namespace GitScc.UI
                 catch { }
             };
             dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
-
         }
+
+        private void ShowCommitsForFile(string fileName)
+        {
+            var commits = this.tracker.GetCommitsForFile(fileName);
+            this.lstFileCommits.ItemsSource = from c in commits
+                                              join commit in tracker.RepositoryGraph.Commits
+                                              on c equals commit.Id
+                                              select commit;
+        }
+
         private void btnSwitch_Click(object sender, RoutedEventArgs e)
         {
             var selected = patchList.SelectedValue;
@@ -372,6 +382,46 @@ namespace GitScc.UI
         {
             fileTree_SelectedItemChanged(this, null);
             patchList_SelectionChanged(this, null);
+        }
+
+        private void lstFileCommits_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selection = (this.lstFileCommits.SelectedItem) as Commit;
+            if (selection != null)
+            {
+                var dispatcher = Dispatcher.CurrentDispatcher;
+                Action act = null;
+                if (this.radioShowChanges.IsChecked == true)
+                {
+                    act = () =>
+                    {
+                        try
+                        {
+                            var fileName = ((Change) this.patchList.SelectedItem).Name;
+                            var tmpFileName = this.tracker.DiffFile(fileName, selection.Id, this.commitId2);
+                            ShowFile(tmpFileName);
+                        }
+                        catch { }
+                    };
+                }
+                else if (this.radioShowFileTree.IsChecked == true)
+                {
+                    act = () =>
+                    {
+                        try
+                        {
+                            var fileName = ((GitTreeObject) this.fileTree.SelectedValue).FullName;
+                            var tmpFileName = this.tracker.RepositoryGraph.GetFile(selection.Id, fileName);
+                            ShowFile(tmpFileName);
+                        }
+                        catch { }
+                    };
+                }
+
+                if (act != null)
+                    dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+
+            }
         }
     }
 }

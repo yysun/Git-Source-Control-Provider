@@ -7,7 +7,7 @@ namespace GitScc.DataServices
 {
     public class RepositoryGraph
     {
-        private const int CommitsToLoad = 100; 
+        private const int CommitsToLoad = 200; 
         private const string LogFormat = "--pretty=format:%H%n%P%n%cr%n%cn%n%ce%n%ci%n%T%n%s%n%b";
 
         private string workingDirectory;
@@ -362,9 +362,7 @@ namespace GitScc.DataServices
         {
             try
             {
-                var tmpFileName = Path.GetTempFileName();
-                GitBash.RunCmd(string.Format("cat-file blob {0}:{1} > {2}", commitId, fileName, tmpFileName), 
-                    this.workingDirectory);
+                var tmpFileName = GetFile(commitId, fileName);
                 var content = File.ReadAllBytes(tmpFileName);
                 if (File.Exists(tmpFileName)) File.Delete(tmpFileName);
                 return content;
@@ -375,6 +373,22 @@ namespace GitScc.DataServices
             }
 
             return null;
+        }
+
+        public string GetFile(string commitId, string fileName)
+        {
+            var tmpFileName = Path.GetTempFileName();
+            tmpFileName = Path.ChangeExtension(tmpFileName, Path.GetExtension(fileName));
+            try
+            {
+                GitBash.RunCmd(string.Format("cat-file blob {0}:{1} > {2}", commitId, fileName, tmpFileName),
+                    this.workingDirectory);
+            }
+            catch (Exception ex)
+            {
+                Log.WriteLine("Repository.GetFile: {0} - {1}\r\n{2}", commitId, fileName, ex.ToString());
+            }
+            return tmpFileName;
         }
     }
 }

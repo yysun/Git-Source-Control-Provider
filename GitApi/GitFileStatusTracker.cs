@@ -728,6 +728,28 @@ namespace GitScc
         #endregion
 
         #region Diff file
+
+        private bool IsBinaryFile(string fileName)
+        {
+            FileStream fs = File.OpenRead(fileName);
+            try
+            {
+                int len = Convert.ToInt32(fs.Length);
+                if (len > 1000) len = 1000;
+                byte[] bytes = new byte[len];
+                fs.Read(bytes, 0, len);
+                for (int i = 0; i < len - 1; i++)
+                {
+                    if (bytes[i] == 0) return true;
+                }
+                return false;
+            }
+            finally
+            {
+                fs.Close();
+            }
+        }
+
         /// <summary>
         /// Diff working file with last commit
         /// </summary>
@@ -735,17 +757,27 @@ namespace GitScc
         /// <returns>diff file in temp folder</returns>
         public string DiffFile(string fileName)
         {
+            var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), ".diff");
+
             try
             {
                 if (!this.HasGitRepository) return "";
 
-                var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), ".diff");
                 var status = GetFileStatus(fileName);
                 if (head == null || status == GitFileStatus.New || status == GitFileStatus.Added)
                 {
-                    tmpFileName = Path.ChangeExtension(tmpFileName, Path.GetExtension(fileName));
-                    File.Copy(GetFullPath(fileName), tmpFileName);
-                    return tmpFileName;
+
+                    if(IsBinaryFile(GetFullPath(fileName)))
+                    {
+                        File.WriteAllText(tmpFileName, "Binary file: " + fileName);
+                        return tmpFileName;
+                    }
+                    else
+                    {
+                        tmpFileName = Path.ChangeExtension(tmpFileName, Path.GetExtension(fileName));
+                        File.Copy(GetFullPath(fileName), tmpFileName);
+                        return tmpFileName;
+                    }
                 }
 
                 if (GitBash.Exists)
@@ -773,27 +805,14 @@ namespace GitScc
                         df.Format(list, a, b);
                         df.Flush();
                     }
-
-                    //using (Stream mstream = new MemoryStream(),
-                    //              stream = new BufferedStream(mstream))
-                    //{
-                    //    DiffFormatter df = new DiffFormatter(stream);
-                    //    df.Format(list, a, b);
-                    //    df.Flush();
-                    //    stream.Seek(0, SeekOrigin.Begin);
-                    //    var ret = new StreamReader(stream).ReadToEnd();
-                    //    File.WriteAllText(tmpFileName, ret);
-                    //}
                 }
-
-                return tmpFileName;
             }
             catch (Exception ex)
             {
-                Log.WriteLine("Refresh: {0}\r\n{1}", this.initFolder, ex.ToString());
-
-                return "";
+                Log.WriteLine("DiffFile: {0}\r\n{1}", this.initFolder, ex.ToString());
+                File.WriteAllText(tmpFileName, ex.ToString());
             }
+            return tmpFileName;
         }
 
         public string DiffFile(string fileName, string commitId1, string commitId2)

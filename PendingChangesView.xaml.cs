@@ -84,8 +84,15 @@ namespace GitScc
                     var tmpFileName = tracker.DiffFile(fileName);
                     if (!string.IsNullOrWhiteSpace(tmpFileName) && File.Exists(tmpFileName))
                     {
-                        diffLines = File.ReadAllLines(tmpFileName);
-                        this.ShowFile(tmpFileName);
+                        if (new FileInfo(tmpFileName).Length > 2 * 1024 * 1024)
+                        {
+                            this.DiffEditor.Text = "File is too big to display: " + fileName;
+                        }
+                        else
+                        {
+                            diffLines = File.ReadAllLines(tmpFileName);
+                            this.ShowFile(tmpFileName);
+                        }
                     }
                 }
                 catch (Exception ex)

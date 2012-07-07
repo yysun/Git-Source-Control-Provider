@@ -10,7 +10,7 @@
 	<Grid x:Name="Main" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 		
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="520" />
+			<ColumnDefinition Width="520" MinWidth="20" MaxWidth="1000" />
 			<ColumnDefinition Width="2" />
 			<ColumnDefinition Width="*" />
 		</Grid.ColumnDefinitions>
@@ -29,6 +29,7 @@
 
 		<Label Content="Comments:" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Center" 
 			   Margin="12,0,0,0" Foreground="#FF333333" />
+		<CheckBox Content="Sign off" Height="16" HorizontalAlignment="Right" Margin="0,5,20,0" Name="chkSignOff" VerticalAlignment="Top" />
 
 		<Label Content="Diff (double click to open file):" Height="28" HorizontalAlignment="Left" Name="label2" VerticalAlignment="Center" 
 			   Margin="12,0,0,0" Foreground="#FF333333"
@@ -49,16 +50,16 @@
 			<Label Content="Changed Files" Height="28" HorizontalAlignment="Left" Name="label3" VerticalAlignment="Center" 
 			   Margin="12,0,0,0" Foreground="#FF333333" Grid.Row="2" Width="86" ToolTip="select file to commit, or right click to stage/unstage file" />
 
-            <RichTextBox HorizontalAlignment="Stretch" Name="textBoxComments" VerticalAlignment="Stretch" Margin="10,0,10,10" 
+			<RichTextBox HorizontalAlignment="Stretch" Name="textBoxComments" VerticalAlignment="Stretch" Margin="10,0,10,10" 
 					 AcceptsReturn="True" VerticalScrollBarVisibility="Visible" SpellCheck.IsEnabled="True">
-                <RichTextBox.Resources>
-                    <Style TargetType="{x:Type Paragraph}">
-                        <Setter Property="Margin" Value="0"/>
-                    </Style>
-                </RichTextBox.Resources>
-            </RichTextBox>
+				<RichTextBox.Resources>
+					<Style TargetType="{x:Type Paragraph}">
+						<Setter Property="Margin" Value="0"/>
+					</Style>
+				</RichTextBox.Resources>
+			</RichTextBox>
 
-            <DataGrid AutoGenerateColumns="False" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="dataGrid1" VerticalAlignment="Stretch"
+			<DataGrid AutoGenerateColumns="False" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="dataGrid1" VerticalAlignment="Stretch"
 					  GridLinesVisibility="None"  Foreground="#FF333333" Sorting="dataGrid1_Sorting" IsReadOnly="True" SelectedValuePath="FileName"
 					  SelectionMode="Single" SelectionChanged="dataGrid1_SelectionChanged" MouseDoubleClick="dataGrid1_MouseDoubleClick" ContextMenuOpening="dataGrid1_ContextMenuOpening"
 					  CanUserResizeRows="False" CanUserDeleteRows="False" CanUserAddRows="False" CanUserReorderColumns="False" RowHeaderWidth="0">
@@ -98,13 +99,13 @@
 				</DataGrid.ContextMenu>
 			</DataGrid>
 			<Label Content="(If refreshing is slow, try turn off auto-refresh in Tools | Options)" Foreground="#FF333333" Height="28" HorizontalAlignment="Right" Margin="0,0,20,0" Name="label4" VerticalAlignment="Center" Grid.Row="2" Visibility="Collapsed" />
-        </Grid>
+		</Grid>
 
 		<Grid Grid.Column="2" Grid.Row="1" Background="White">
 			<avalonEdit:TextEditor x:Name="DiffEditor" FontFamily="Consolas" FontSize="10pt" MouseDoubleClick="DiffEditor_MouseDoubleClick"/>
 		</Grid>
 
-        <my:Settings HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="Settings" Grid.ColumnSpan="3" Grid.RowSpan="3" Visibility="Collapsed" />
-        
-    </Grid>
+		<my:Settings HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="Settings" Grid.ColumnSpan="3" Grid.RowSpan="3" Visibility="Collapsed" />
+		
+	</Grid>
 </UserControl>

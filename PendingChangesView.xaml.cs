@@ -309,7 +309,7 @@ namespace GitScc
                 try
                 {
                     ShowStatusMessage("Committing ...");
-                    var id = tracker.Commit(Comments);
+                    var id = tracker.Commit(Comments, false, chkSignOff.IsChecked == true);
                     ShowStatusMessage("Commit successfully. Commit Hash: " + id);
                     ClearUI();
                 }
@@ -339,7 +339,7 @@ namespace GitScc
                     try
                     {
                         ShowStatusMessage("Amending last Commit ...");
-                        var id = tracker.Commit(Comments, true);
+                        var id = tracker.Commit(Comments, true, chkSignOff.IsChecked == true);
                         ShowStatusMessage("Amend last commit successfully. Commit Hash: " + id);
                         ClearUI();
                     }

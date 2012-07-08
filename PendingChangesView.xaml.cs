@@ -45,10 +45,14 @@ namespace GitScc
 
         }
 
+
         private void checkBoxSelected_Click(object sender, RoutedEventArgs e)
         {
             var checkBox = sender as CheckBox;
-            ((GitFile)this.dataGrid1.SelectedItem).IsSelected = checkBox.IsChecked == true;
+            foreach (var item in this.dataGrid1.SelectedItems)
+            {
+                ((GitFile)item).IsSelected = checkBox.IsChecked == true;
+            }
         }
 
         private void checkBoxAllStaged_Click(object sender, RoutedEventArgs e)

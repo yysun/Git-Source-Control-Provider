@@ -61,7 +61,7 @@
 
 			<DataGrid AutoGenerateColumns="False" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="dataGrid1" VerticalAlignment="Stretch"
 					  GridLinesVisibility="None"  Foreground="#FF333333" Sorting="dataGrid1_Sorting" IsReadOnly="True" SelectedValuePath="FileName"
-					  SelectionMode="Single" SelectionChanged="dataGrid1_SelectionChanged" MouseDoubleClick="dataGrid1_MouseDoubleClick" ContextMenuOpening="dataGrid1_ContextMenuOpening"
+					  SelectionMode="Extended" SelectionChanged="dataGrid1_SelectionChanged" MouseDoubleClick="dataGrid1_MouseDoubleClick" ContextMenuOpening="dataGrid1_ContextMenuOpening"
 					  CanUserResizeRows="False" CanUserDeleteRows="False" CanUserAddRows="False" CanUserReorderColumns="False" RowHeaderWidth="0">
  
 				<DataGrid.Columns>

@@ -1,15 +1,16 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using GitScc;
-using System.Diagnostics;
 
 namespace GitUI.UI
 {
@@ -38,7 +39,17 @@ namespace GitUI.UI
             sortMemberPath = e.Column.SortMemberPath;
             sortDirection = e.Column.SortDirection != ListSortDirection.Ascending ?
                 ListSortDirection.Ascending : ListSortDirection.Descending;
+        }
 
+        private void dataGrid1_KeyDown(object sender, KeyEventArgs e)
+        {
+            var selectedItem = this.dataGrid1.SelectedItem as GitFile;
+            if (selectedItem == null || e.Key != Key.Space) return;
+            var selected = !selectedItem.IsSelected;
+            foreach (var item in this.dataGrid1.SelectedItems)
+            {
+                ((GitFile)item).IsSelected = selected;
+            }
         }
 
         private void checkBoxSelected_Click(object sender, RoutedEventArgs e)

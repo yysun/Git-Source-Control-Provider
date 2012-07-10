@@ -37,7 +37,7 @@ namespace GitUI
 			this.Style = (Style)Resources["GradientStyle"];
 
 			GitBash.GitExePath = GitSccOptions.Current.GitBashPath;
-			GitBash.UseUTF8FileNames = GitSccOptions.Current.UseUTF8FileNames;
+            GitBash.UseUTF8FileNames = !GitSccOptions.Current.NotUseUTF8FileNames;
 
 			if (!GitBash.Exists) GitBash.GitExePath = TryFindFile(new string[] {
 					@"C:\Program Files\Git\bin\sh.exe",

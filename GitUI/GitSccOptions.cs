@@ -23,7 +23,7 @@ namespace GitScc
         public bool UseTGitIconSet { get; set; }
         public bool DisableAutoRefresh { get; set; }
         public bool DisableAutoLoad { get; set; }
-        public bool UseUTF8FileNames { get; set; }
+        public bool NotUseUTF8FileNames { get; set; }
 
         private static GitSccOptions gitSccOptions;
 

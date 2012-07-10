@@ -1161,6 +1161,27 @@ namespace GitScc
             var output = GitBash.Run(string.Format("log -z --ignore-space-change --pretty=format:%H -- \"{0}\"", fileNameRel), this.GitWorkingDirectory);
             return output.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
         }
+
+        public void AddIgnoreItem(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName) || !this.HasGitRepository) return;
+            var ignoreFile = GetFullPath(Path.Combine(this.GitWorkingDirectory, ".gitignore"));
+            if (!File.Exists(ignoreFile))
+            {
+                using (StreamWriter sw = File.CreateText(ignoreFile))
+                {
+                    sw.WriteLine(fileName);
+                }
+            }
+            else
+            {
+                using (StreamWriter sw = File.AppendText(ignoreFile))
+                {
+                    sw.WriteLine();
+                    sw.WriteLine(fileName);
+                }
+            }
+        }
     }
 
     public abstract class Log

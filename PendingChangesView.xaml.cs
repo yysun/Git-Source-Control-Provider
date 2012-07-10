@@ -488,6 +488,37 @@ Note: if the file is included project, you need to delete the file from project 
 
         #endregion
 
+        #region Ignore files
+        private void menuIgnore_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void menuIgnoreFile_Click(object sender, RoutedEventArgs e)
+        {
+            GetSelectedFileName((fileName) =>
+            {
+                tracker.AddIgnoreItem(fileName);
+            });
+        }
+
+        private void menuIgnoreFilePath_Click(object sender, RoutedEventArgs e)
+        {
+            GetSelectedFileName((fileName) =>
+            {
+                tracker.AddIgnoreItem(Path.GetDirectoryName(fileName));
+            });
+        }
+
+        private void menuIgnoreFileExt_Click(object sender, RoutedEventArgs e)
+        {
+            GetSelectedFileName((fileName) =>
+            {
+                tracker.AddIgnoreItem("*" + Path.GetExtension(fileName));
+            });
+        }
+        #endregion
+
         private void DiffEditor_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             

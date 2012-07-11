@@ -164,14 +164,17 @@ namespace GitUI.UI
 
         private void GetSelectedFileFullName(Action<string> action, bool fileMustExists = true)
         {
-            var fileName = GetSelectedFileName();
-            if (fileName == null) return;
-            fileName = System.IO.Path.Combine(this.tracker.GitWorkingDirectory, fileName);
-
-            if (fileMustExists && !File.Exists(fileName)) return;
             try
             {
-                action(fileName);
+                var files = this.dataGrid1.SelectedItems.Cast<GitFile>()
+                    .Select(item=>System.IO.Path.Combine(this.tracker.GitWorkingDirectory, item.FileName))
+                    .ToList();
+
+                foreach (var fileName in files)
+                {
+                    if (fileMustExists && !File.Exists(fileName)) return;
+                    action(fileName);
+                }
             }
             catch (Exception ex)
             {
@@ -405,7 +408,6 @@ namespace GitUI.UI
             }, false); // file must exists check flag is false
         }
 
-
         private void menuStage_Click(object sender, RoutedEventArgs e)
         {
             GetSelectedFileFullName(fileName =>
@@ -426,13 +428,9 @@ namespace GitUI.UI
 
         private void menuDeleteFile_Click(object sender, RoutedEventArgs e)
         {
-            const string deleteMsg = @"
-
-Note: if the file is included project, you need to delete the file from project in solution explorer.";
-
             GetSelectedFileFullName(fileName =>
             {
-                if (MessageBox.Show("Are you sure you want to delete file: " + Path.GetFileName(fileName) + deleteMsg,
+                if (MessageBox.Show("Are you sure you want to delete file: " + Path.GetFileName(fileName),
                                    "Delete File",
                                    MessageBoxButton.YesNo,
                                    MessageBoxImage.Question) == MessageBoxResult.Yes)
@@ -472,7 +470,13 @@ Note: if the file is included project, you need to delete the file from project 
             {
                 tracker.AddIgnoreItem("*" + Path.GetExtension(fileName));
             });
+        }
+
+        private void menuRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            HistoryViewCommands.RefreshGraph.Execute(null, this);
         } 
+
         #endregion
 
         private void chkNewBranch_Checked(object sender, RoutedEventArgs e)

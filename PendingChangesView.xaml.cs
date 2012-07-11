@@ -173,20 +173,24 @@ namespace GitScc
 
         private void GetSelectedFileFullName(Action<string> action, bool fileMustExists = true)
         {
-            var fileName = GetSelectedFileName();
-            if (fileName == null) return;
-            fileName = System.IO.Path.Combine(this.tracker.GitWorkingDirectory, fileName);
-
-            if (fileMustExists && !File.Exists(fileName)) return;
             try
             {
-                action(fileName);
+                var files = this.dataGrid1.SelectedItems.Cast<GitFile>()
+                    .Select(item => System.IO.Path.Combine(this.tracker.GitWorkingDirectory, item.FileName))
+                    .ToList();
+
+                foreach (var fileName in files)
+                {
+                    if (fileMustExists && !File.Exists(fileName)) return;
+                    action(fileName);
+                }
             }
             catch (Exception ex)
             {
                 ShowStatusMessage(ex.Message);
             }
         }
+
         #endregion
 
         #region Git functions
@@ -403,32 +407,45 @@ namespace GitScc
         private void dataGrid1_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             if (this.dataGrid1.SelectedCells.Count == 0) return;
-            var selectedItem = this.dataGrid1.SelectedCells[0].Item as GitFile;
-            if (selectedItem == null) return;
 
-            switch (selectedItem.Status)
+            if (this.dataGrid1.SelectedItems.Count == 1)
             {
-                case GitFileStatus.Added:
-                case GitFileStatus.New:
-                    menuCompare.IsEnabled = menuUndo.IsEnabled = false;
-                    break;
+                var selectedItem = this.dataGrid1.SelectedCells[0].Item as GitFile;
+                if (selectedItem == null) return;
 
-                case GitFileStatus.Modified:
-                case GitFileStatus.Staged:
-                    menuCompare.IsEnabled = menuUndo.IsEnabled = true;
-                    break;
+                switch (selectedItem.Status)
+                {
+                    case GitFileStatus.Added:
+                    case GitFileStatus.New:
+                        menuCompare.IsEnabled = menuUndo.IsEnabled = false;
+                        break;
 
-                case GitFileStatus.Removed:
-                case GitFileStatus.Deleted:
-                    menuCompare.IsEnabled = false;
-                    menuUndo.IsEnabled = true;
-                    break;
+                    case GitFileStatus.Modified:
+                    case GitFileStatus.Staged:
+                        menuCompare.IsEnabled = menuUndo.IsEnabled = true;
+                        break;
+
+                    case GitFileStatus.Removed:
+                    case GitFileStatus.Deleted:
+                        menuCompare.IsEnabled = false;
+                        menuUndo.IsEnabled = true;
+                        break;
+                }
+
+                menuStage.Visibility = selectedItem.IsStaged ? Visibility.Collapsed : Visibility.Visible;
+                menuUnstage.Visibility = !selectedItem.IsStaged ? Visibility.Collapsed : Visibility.Visible;
+                menuDeleteFile.Visibility = (selectedItem.Status == GitFileStatus.New || selectedItem.Status == GitFileStatus.Modified) ?
+                    Visibility.Visible : Visibility.Collapsed;
             }
-
-            menuStage.Visibility = selectedItem.IsStaged ? Visibility.Collapsed : Visibility.Visible;
-            menuUnstage.Visibility = !selectedItem.IsStaged ? Visibility.Collapsed : Visibility.Visible;
-            menuDeleteFile.Visibility = (selectedItem.Status == GitFileStatus.New || selectedItem.Status == GitFileStatus.Modified) ?
-                Visibility.Visible : Visibility.Collapsed;
+            else
+            {
+                menuStage.Visibility =
+                menuUnstage.Visibility =
+                menuDeleteFile.Visibility = Visibility.Visible;
+                menuUndo.IsEnabled = true;
+                menuIgnore.IsEnabled = false;
+                menuCompare.IsEnabled = false;
+            }
         }
 
         private void menuCompare_Click(object sender, RoutedEventArgs e)

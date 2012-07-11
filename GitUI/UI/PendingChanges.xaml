@@ -109,7 +109,7 @@
 					  SelectionMode="Extended" SelectionChanged="dataGrid1_SelectionChanged" ContextMenuOpening="dataGrid1_ContextMenuOpening"
 					  CanUserResizeRows="False" CanUserDeleteRows="False" CanUserAddRows="False" CanUserReorderColumns="False" RowHeaderWidth="0" KeyDown="dataGrid1_KeyDown">
 
-                    <DataGrid.Columns>
+					<DataGrid.Columns>
 						<DataGridTemplateColumn Header="Staged" CanUserResize="False">
 							<DataGridTemplateColumn.HeaderTemplate>
 								<DataTemplate>
@@ -140,6 +140,7 @@
 								<MenuItem Header="Add File Path to .gitignore" Name="menuIgnoreFilePath" Click="menuIgnoreFilePath_Click"/>
 								<MenuItem Header="Add File Extensions to .gitignore" Name="menuIgnoreFileExt" Click="menuIgnoreFileExt_Click"/>
 							</MenuItem>
+							<MenuItem Header="Refresh" Name="menuRefresh" Click="menuRefresh_Click"/>
 						</ContextMenu>
 					</DataGrid.ContextMenu>
 				</DataGrid>

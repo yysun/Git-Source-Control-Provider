@@ -33,9 +33,9 @@ namespace GitScc.DataServices
                         CommitsToLoad, LogFormat), 
                         this.workingDirectory);
 
-                    if (string.IsNullOrEmpty(output) || output.StartsWith("fatal:"))
+                    if (string.IsNullOrEmpty(output) || output.Contains("fatal:"))
                     {
-                        return null;
+                        return new List<Commit>();
                     }
 
                     var logs = output.Split('\0');

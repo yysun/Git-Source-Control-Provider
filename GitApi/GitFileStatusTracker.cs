@@ -766,18 +766,15 @@ namespace GitScc
                 var status = GetFileStatus(fileName);
                 if (head == null || status == GitFileStatus.New || status == GitFileStatus.Added)
                 {
+                    tmpFileName = Path.ChangeExtension(tmpFileName, Path.GetExtension(fileName));
+                    File.Copy(GetFullPath(fileName), tmpFileName);
 
-                    if(IsBinaryFile(GetFullPath(fileName)))
+                    if(IsBinaryFile(tmpFileName))
                     {
+                        File.Delete(tmpFileName);
                         File.WriteAllText(tmpFileName, "Binary file: " + fileName);
-                        return tmpFileName;
                     }
-                    else
-                    {
-                        tmpFileName = Path.ChangeExtension(tmpFileName, Path.GetExtension(fileName));
-                        File.Copy(GetFullPath(fileName), tmpFileName);
-                        return tmpFileName;
-                    }
+                    return tmpFileName;
                 }
 
                 if (GitBash.Exists)
@@ -810,7 +807,7 @@ namespace GitScc
             catch (Exception ex)
             {
                 Log.WriteLine("DiffFile: {0}\r\n{1}", this.initFolder, ex.ToString());
-                File.WriteAllText(tmpFileName, ex.ToString());
+                //File.WriteAllText(tmpFileName, ex.ToString());
             }
             return tmpFileName;
         }

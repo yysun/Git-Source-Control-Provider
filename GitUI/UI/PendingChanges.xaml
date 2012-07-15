@@ -124,7 +124,7 @@
 								</DataTemplate>
 							</DataGridTemplateColumn.CellTemplate>
 						</DataGridTemplateColumn>
-						<DataGridTextColumn Header="Status" Binding="{Binding Status}" CanUserResize="False" Width="100" />
+						<DataGridTextColumn Header="Status" Binding="{Binding Status}" CanUserResize="True" Width="70" />
 						<DataGridTextColumn Header="File" Binding="{Binding FileName}" Width="*" />
 					</DataGrid.Columns>
 

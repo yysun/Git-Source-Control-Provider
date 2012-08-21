@@ -25,12 +25,16 @@
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    <Grid Background="White" PreviewKeyDown="Grid_PreviewKeyDown">
-        <Label Content="Browse or type the path to Git for Windows (git.exe) and press enter to verify" Height="28" HorizontalAlignment="Left" Margin="7,12,0,0" Name="label1" VerticalAlignment="Top" />
+    <Grid Background="White">
+        <Label Content="Browse or type the path to Git for Windows (git.exe) and verify" Height="28" HorizontalAlignment="Left" Margin="7,12,0,0" Name="label1" VerticalAlignment="Top" />
         <TextBox Height="23" HorizontalAlignment="Stretch" Margin="12,38,120,0" Name="txtGitExePath" VerticalAlignment="Top" />
         <Button Content="Browse ..." Height="23" HorizontalAlignment="Right" Margin="0,37,25,0" Name="btnBrowse" VerticalAlignment="Top" Width="75" Click="btnBrowse_Click" />
-        <Label Content="." Height="28" HorizontalAlignment="Left" Margin="7,58,0,0" Name="txtMessage" VerticalAlignment="Top" />
-        <Button Style="{StaticResource LinkButton}" Content="Use this version of Git for Windows" Name="btnGo" Visibility="Collapsed"
-                Width="300" Height="26" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="12,92,0,0" Click="btnGo_Click" />
+        <Label Content="." Height="28" HorizontalAlignment="Left" Margin="105,66,0,0" Name="txtMessage" VerticalAlignment="Top" />
+        <Label Content="Git User Name" Height="28" HorizontalAlignment="Left" Margin="12,100,0,0" Name="label2" VerticalAlignment="Top" />
+        <TextBox Height="23" HorizontalAlignment="Stretch" Margin="105,105,120,0" Name="txtUserName" VerticalAlignment="Top" />
+        <Label Content="Git User Email" Height="28" HorizontalAlignment="Left" Margin="12,129,0,0" Name="label3" VerticalAlignment="Top" />
+        <TextBox Height="23" HorizontalAlignment="Stretch" Margin="105,134,120,0" Name="txtUserEmail" VerticalAlignment="Top" />
+        <Button Content="Verify" Height="23" HorizontalAlignment="Left" Margin="12,67,0,0" Name="btnVerify" VerticalAlignment="Top" Width="75" Click="btnVerify_Click" />
+        <Button Content="OK" Height="23" HorizontalAlignment="Left" Margin="12,172,0,0" Name="btnOK" VerticalAlignment="Top" Width="75" Click="btnOK_Click" />
     </Grid>
 </UserControl>

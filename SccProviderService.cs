@@ -1124,8 +1124,11 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
 obj/
 [Rr]elease*/
 _ReSharper*/
-[Tt]est[Rr]esult*"
+[Tt]est[Rr]esult*
+*.vssscc
+$tf*/"
             );
+            File.WriteAllText(Path.Combine(solutionPath, ".tfignore"), @"\.git");
         } 
         #endregion
 

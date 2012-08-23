@@ -109,7 +109,7 @@
         </Strings>
       </Button>
 
-      <!--<Button guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0101" type="Button">
+      <Button guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0101" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
         <Icon guid="guidSccProviderImages" id="iconCompare" />
         <CommandFlag>DynamicVisibility</CommandFlag>
@@ -129,7 +129,7 @@
         <Strings>
           <ButtonText>Undo File Changes</ButtonText>
         </Strings>
-      </Button>-->
+      </Button>
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandEditIgnore" priority="0x0103" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>

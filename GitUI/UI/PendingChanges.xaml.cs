@@ -312,7 +312,7 @@ namespace GitUI.UI
                 return true;
         }
 
-        private bool StageSelectedFiles()
+        private bool StageSelectedFiles(bool showWarning)
         {
             var unstaged = this.dataGrid1.Items.Cast<GitFile>()
                                .Where(item => item.IsSelected && !item.IsStaged)
@@ -329,7 +329,7 @@ namespace GitUI.UI
             bool hasStaged = tracker == null ? false :
                              tracker.ChangedFiles.Any(f => f.IsStaged);
 
-            if (!hasStaged)
+            if (!hasStaged && showWarning)
             {
                 MessageBox.Show("No file has been staged for commit.", "Commit",
                     MessageBoxButton.OK, MessageBoxImage.Exclamation);
@@ -527,14 +527,14 @@ namespace GitUI.UI
                     tracker.CheckOutBranch(txtNewBranch.Text, true);
                 }
 
-                if (HasComments() && StageSelectedFiles())
+                var isAmend = chkAmend.IsChecked == true;
+                if (HasComments() && StageSelectedFiles(!isAmend))
                 {
 
                     ShowStatusMessage("Committing ...");
-                    var id = tracker.Commit(Comments, chkAmend.IsChecked == true, chkSignOff.IsChecked == true);
+                    var id = tracker.Commit(Comments, isAmend, chkSignOff.IsChecked == true);
                     ShowStatusMessage("Commit successfully. Commit Hash: " + id);
                     ClearUI();
-
                 }
                 service.NoRefresh = false;
 

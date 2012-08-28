@@ -329,7 +329,7 @@ namespace GitScc
         internal void Commit()
         {
             service.NoRefresh = true;
-            if (HasComments() && StageSelectedFiles())
+            if (HasComments() && StageSelectedFiles(true))
             {
                 try
                 {
@@ -359,8 +359,8 @@ namespace GitScc
             else
             {
                 service.NoRefresh = true;
-                if (StageSelectedFiles())
-                {
+                StageSelectedFiles(false);
+
                     try
                     {
                         ShowStatusMessage("Amending last Commit ...");
@@ -373,14 +373,14 @@ namespace GitScc
                         MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                         ShowStatusMessage(ex.Message);
                     }
-                }
+
                 service.NoRefresh = false;
                 //service.lastTimeRefresh = DateTime.Now;
                 service.NodesGlyphsDirty = true; // force refresh
             }
         }
 
-        private bool StageSelectedFiles()
+        private bool StageSelectedFiles(bool showWarning)
         {
             var unstaged = this.dataGrid1.Items.Cast<GitFile>()
                                .Where(item => item.IsSelected && !item.IsStaged)
@@ -397,7 +397,7 @@ namespace GitScc
             bool hasStaged = tracker == null ? false :
                              tracker.ChangedFiles.Any(f => f.IsStaged);
 
-            if (!hasStaged)
+            if (!hasStaged && showWarning)
             {
                 MessageBox.Show("No file has been staged for commit.", "Commit",
                     MessageBoxButton.OK, MessageBoxImage.Exclamation);

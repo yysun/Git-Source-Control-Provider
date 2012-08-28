@@ -148,12 +148,13 @@ namespace GitUI.UI
             return selectedItem.FileName;
         }
 
-        private void GetSelectedFileName(Action<string> action)
+        private void GetSelectedFileName(Action<string> action, bool changeToGitPathSeparator = false)
         {
             var fileName = GetSelectedFileName();
             if (fileName == null) return;
             try
             {
+                if (changeToGitPathSeparator) fileName.Replace("\\", "/");
                 action(fileName);
             }
             catch (Exception ex)
@@ -188,6 +189,8 @@ namespace GitUI.UI
         DateTime lastTimeRefresh = DateTime.Now.AddDays(-1);
         internal void Refresh(GitFileStatusTracker tracker)
         {
+            this.label3.Content = "Changed files";
+
             this.tracker = tracker;
             this.chkAmend.IsChecked = false;
             this.chkSignOff.IsChecked = false;
@@ -240,6 +243,13 @@ namespace GitUI.UI
                     });
 
                     ShowStatusMessage("");
+
+                    var changed = tracker.ChangedFiles;
+                    this.label3.Content = string.Format("Changed files: ({0}) +{1} ~{2} -{3} !{4}", tracker.CurrentBranch,
+                        changed.Where(f => f.Status == GitFileStatus.New || f.Status == GitFileStatus.Added).Count(),
+                        changed.Where(f => f.Status == GitFileStatus.Modified || f.Status == GitFileStatus.Staged).Count(),
+                        changed.Where(f => f.Status == GitFileStatus.Deleted || f.Status == GitFileStatus.Removed).Count(),
+                        changed.Where(f => f.Status == GitFileStatus.Conflict).Count());
                 }
                 catch (Exception ex)
                 {
@@ -450,18 +460,18 @@ namespace GitUI.UI
 
         private void menuIgnoreFile_Click(object sender, RoutedEventArgs e)
         {
-            GetSelectedFileName((fileName) => 
+            GetSelectedFileName((fileName) =>
             {
                 tracker.AddIgnoreItem(fileName);
-            });
+            }, true);
         }
 
         private void menuIgnoreFilePath_Click(object sender, RoutedEventArgs e)
         {
             GetSelectedFileName((fileName) =>
             {
-                tracker.AddIgnoreItem(Path.GetDirectoryName(fileName));
-            });
+                tracker.AddIgnoreItem(Path.GetDirectoryName(fileName) + "*/");
+            }, true);
         }
 
         private void menuIgnoreFileExt_Click(object sender, RoutedEventArgs e)
@@ -469,7 +479,7 @@ namespace GitUI.UI
             GetSelectedFileName((fileName) =>
             {
                 tracker.AddIgnoreItem("*" + Path.GetExtension(fileName));
-            });
+            }, true);
         }
 
         private void menuRefresh_Click(object sender, RoutedEventArgs e)

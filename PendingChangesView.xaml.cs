@@ -157,12 +157,13 @@ namespace GitScc
             return selectedItem.FileName;
         }
 
-        private void GetSelectedFileName(Action<string> action)
+        private void GetSelectedFileName(Action<string> action, bool changeToGitPathSeparator = false)
         {
             var fileName = GetSelectedFileName();
             if (fileName == null) return;
             try
             {
+                if (changeToGitPathSeparator) fileName.Replace("\\", "/");
                 action(fileName);
             }
             catch (Exception ex)
@@ -198,6 +199,8 @@ namespace GitScc
         DateTime lastTimeRefresh = DateTime.Now.AddDays(-1);
         internal void Refresh(GitFileStatusTracker tracker)
         {
+            this.label3.Content = "Changed files";
+
             this.tracker = tracker;
 
             if (!GitBash.Exists)
@@ -254,6 +257,13 @@ namespace GitScc
                     });
 
                     ShowStatusMessage("");
+
+                    var changed = tracker.ChangedFiles;
+                    this.label3.Content = string.Format("Changed files: ({0}) +{1} ~{2} -{3} !{4}", tracker.CurrentBranch,
+                        changed.Where(f => f.Status == GitFileStatus.New || f.Status == GitFileStatus.Added).Count(),
+                        changed.Where(f => f.Status == GitFileStatus.Modified || f.Status == GitFileStatus.Staged).Count(),
+                        changed.Where(f => f.Status == GitFileStatus.Deleted || f.Status == GitFileStatus.Removed).Count(),
+                        changed.Where(f => f.Status == GitFileStatus.Conflict).Count());
                 }
                 catch (Exception ex)
                 {
@@ -516,15 +526,15 @@ Note: if the file is included project, you need to delete the file from project 
             GetSelectedFileName((fileName) =>
             {
                 tracker.AddIgnoreItem(fileName);
-            });
+            }, true);
         }
 
         private void menuIgnoreFilePath_Click(object sender, RoutedEventArgs e)
         {
             GetSelectedFileName((fileName) =>
             {
-                tracker.AddIgnoreItem(Path.GetDirectoryName(fileName));
-            });
+                tracker.AddIgnoreItem(Path.GetDirectoryName(fileName) + "*/");
+            }, true);
         }
 
         private void menuIgnoreFileExt_Click(object sender, RoutedEventArgs e)
@@ -532,7 +542,7 @@ Note: if the file is included project, you need to delete the file from project 
             GetSelectedFileName((fileName) =>
             {
                 tracker.AddIgnoreItem("*" + Path.GetExtension(fileName));
-            });
+            }, true);
         }
         #endregion
 

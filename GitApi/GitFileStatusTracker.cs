@@ -1175,7 +1175,7 @@ namespace GitScc
                 using (StreamWriter sw = File.AppendText(ignoreFile))
                 {
                     sw.WriteLine();
-                    sw.WriteLine(fileName);
+                    sw.Write(fileName);
                 }
             }
         }

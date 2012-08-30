@@ -1189,11 +1189,11 @@ namespace GitScc
 
         public static void WriteLine(string format, params object[] objects)
         {
-#if(DEBUG)
+//#if(DEBUG)
             var msg = string.Format(format, objects);
             msg = string.Format("{0} {1}\r\n\r\n", DateTime.UtcNow.ToString(), msg);
             File.AppendAllText(logFileName, msg);
-#endif
+//#endif
         }
     }
 }

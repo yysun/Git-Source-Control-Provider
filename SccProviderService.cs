@@ -137,54 +137,51 @@ namespace GitScc
         /// <returns>The method returns S_OK if at least one of the files is controlled, S_FALSE if none of them are</returns>
         public int GetSccGlyph([InAttribute] int cFiles, [InAttribute] string[] rgpszFullPaths, [OutAttribute] VsStateIcon[] rgsiGlyphs, [OutAttribute] uint[] rgdwSccStatus)
         {
-            Debug.Assert(cFiles == 1, "Only getting one file icon at a time is supported");
-            // Return the icons and the status. While the status is a combination a flags, we'll return just values 
-            // with one bit set, to make life easier for GetSccGlyphsFromStatus
+            //Debug.Assert(cFiles == 1, "Only getting one file icon at a time is supported");
 
-            if (rgpszFullPaths[0] == null) return 0;
-
-            GitFileStatus status = _active ? GetFileStatus(rgpszFullPaths[0]) : GitFileStatus.NotControlled;
-
-            //Debug.WriteLine("==== GetSccGlyph {0} : {1}", rgpszFullPaths[0], status);
-
-            if (rgdwSccStatus != null) rgdwSccStatus[0] = (uint)__SccStatus.SCC_STATUS_CONTROLLED;
-
-            switch (status)
+            for (int i = 0; i < cFiles; i++)
             {
-                case GitFileStatus.Tracked:
-                    rgsiGlyphs[0] = GitSccOptions.Current.UseTGitIconSet ?
-                                    (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Tracked) :
-                                    VsStateIcon.STATEICON_CHECKEDIN;
-                    break;
 
-                case GitFileStatus.Modified:
-                    rgsiGlyphs[0] = GitSccOptions.Current.UseTGitIconSet ?
-                                    (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Modified):
-                                    VsStateIcon.STATEICON_CHECKEDOUT;
-                    break;
+                GitFileStatus status = _active ? GetFileStatus(rgpszFullPaths[i]) : GitFileStatus.NotControlled;
 
-                case GitFileStatus.New:
-                    rgsiGlyphs[0] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Untracked);
-                    break;
+                if (rgdwSccStatus != null) rgdwSccStatus[i] = (uint)__SccStatus.SCC_STATUS_CONTROLLED;
 
-                case GitFileStatus.Added:
-                case GitFileStatus.Staged:
-                    rgsiGlyphs[0] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Staged);
-                    break;
+                switch (status)
+                {
+                    case GitFileStatus.Tracked:
+                        rgsiGlyphs[i] = GitSccOptions.Current.UseTGitIconSet ?
+                                        (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Tracked) :
+                                        VsStateIcon.STATEICON_CHECKEDIN;
+                        break;
 
-                case GitFileStatus.NotControlled:
-                    rgsiGlyphs[0] = VsStateIcon.STATEICON_BLANK;
-                    break;
+                    case GitFileStatus.Modified:
+                        rgsiGlyphs[i] = GitSccOptions.Current.UseTGitIconSet ?
+                                        (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Modified) :
+                                        VsStateIcon.STATEICON_CHECKEDOUT;
+                        break;
 
-                case GitFileStatus.Ignored:
-                    rgsiGlyphs[0] = VsStateIcon.STATEICON_EXCLUDEDFROMSCC;
-                    break;
+                    case GitFileStatus.New:
+                        rgsiGlyphs[i] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Untracked);
+                        break;
 
-                case GitFileStatus.Conflict:
-                    rgsiGlyphs[0] = VsStateIcon.STATEICON_DISABLED;
-                    break;
+                    case GitFileStatus.Added:
+                    case GitFileStatus.Staged:
+                        rgsiGlyphs[i] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Staged);
+                        break;
+
+                    case GitFileStatus.NotControlled:
+                        rgsiGlyphs[i] = VsStateIcon.STATEICON_BLANK;
+                        break;
+
+                    case GitFileStatus.Ignored:
+                        rgsiGlyphs[i] = VsStateIcon.STATEICON_EXCLUDEDFROMSCC;
+                        break;
+
+                    case GitFileStatus.Conflict:
+                        rgsiGlyphs[i] = VsStateIcon.STATEICON_DISABLED;
+                        break;
+                }
             }
-
             return VSConstants.S_OK;
         }
 

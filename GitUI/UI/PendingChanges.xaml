@@ -132,7 +132,7 @@
 						<ContextMenu>
 							<MenuItem Header="Stage File" Name="menuStage" Click="menuStage_Click" />
 							<MenuItem Header="Un-Stage File" Name="menuUnstage" Click="menuUnstage_Click" />
-							<MenuItem Header="Compare ..." Name="menuCompare" Click="menuCompare_Click" Visibility="Collapsed" />
+							<MenuItem Header="Compare..." Name="menuCompare" Click="menuCompare_Click" Visibility="Collapsed" />
 							<MenuItem Header="Undo File Changes" Name="menuUndo" Click="menuUndo_Click"/>
 							<MenuItem Header="Delete File" Name="menuDeleteFile" Click="menuDeleteFile_Click"/>
 							<MenuItem Header="Ignore File" Name="menuIgnore" Click="menuIgnore_Click" >

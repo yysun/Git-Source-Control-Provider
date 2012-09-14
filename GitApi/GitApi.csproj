@@ -46,6 +46,8 @@
     <Compile Include="DataServices\Ref.cs" />
     <Compile Include="DataServices\RepositoryGraph.cs" />
     <Compile Include="GitBash.cs" />
+    <Compile Include="GitBashResult.cs" />
+    <Compile Include="GitCommitResult.cs" />
     <Compile Include="GitFileStatus.cs" />
     <Compile Include="GitFileStatusTracker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

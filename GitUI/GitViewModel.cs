@@ -181,8 +181,8 @@ namespace GitUI
 			}
 			else
 			{
-				var ret = GitBash.Run(cmd, this.Tracker.GitWorkingDirectory);
-				return ret;
+				var result = GitBash.Run(cmd, this.Tracker.GitWorkingDirectory);
+				return result.Output;
 			}
 		}
 

@@ -7,7 +7,7 @@ namespace GitScc.DataServices
 {
     public class RepositoryGraph
     {
-        private const int CommitsToLoad = 200; 
+        private const int CommitsToLoad = 200;
         private const string LogFormat = "--pretty=format:%H%n%P%n%cr%n%cn%n%ce%n%ci%n%T%n%s%n%b";
 
         private string workingDirectory;
@@ -29,16 +29,16 @@ namespace GitScc.DataServices
             {
                 if (commits == null)
                 {
-                    var output = GitBash.Run(string.Format("log -n {0} --date-order --all --boundary -z {1} HEAD",
-                        CommitsToLoad, LogFormat), 
+                    var result = GitBash.Run(string.Format("log -n {0} --date-order --all --boundary -z {1} HEAD",
+                        CommitsToLoad, LogFormat),
                         this.workingDirectory);
 
-                    if (string.IsNullOrEmpty(output) || output.Contains("fatal:"))
+                    if (result.HasError || string.IsNullOrEmpty(result.Output) || result.Output.Contains("fatal:"))
                     {
                         return new List<Commit>();
                     }
 
-                    var logs = output.Split('\0');
+                    var logs = result.Output.Split('\0');
                     commits = logs.Select(log => ParseCommit(log)).ToList();
                     commits.ToList().ForEach(
                         commit => commit.ChildIds =
@@ -73,14 +73,15 @@ namespace GitScc.DataServices
             {
                 if (refs == null)
                 {
-                    var output = GitBash.Run("show-ref --head --dereference", this.workingDirectory);
-                    refs = (from t in output.Split('\n')
-                            where !string.IsNullOrWhiteSpace(t)
-                            select new Ref
-                            {
-                                Id = t.Substring(0, 40),
-                                RefName = t.Substring(41)
-                            }).ToList();
+                    var result = GitBash.Run("show-ref --head --dereference", this.workingDirectory);
+                    if (!result.HasError)
+                        refs = (from t in result.Output.Split('\n')
+                                where !string.IsNullOrWhiteSpace(t)
+                                select new Ref
+                                {
+                                    Id = t.Substring(0, 40),
+                                    RefName = t.Substring(41)
+                                }).ToList();
 
                 }
                 return refs;
@@ -132,12 +133,12 @@ namespace GitScc.DataServices
                            select r;
 
                 var children = (from c in commits
-                               where c.ParentIds.Contains(id)
-                               select c).ToList();
+                                where c.ParentIds.Contains(id)
+                                select c).ToList();
 
                 var parents = (from c in commits
-                              where c.ChildIds.Contains(id)
-                              select c).ToList();
+                               where c.ChildIds.Contains(id)
+                               select c).ToList();
                 var lane = lanes.IndexOf(id);
 
                 if (lane < 0)
@@ -147,7 +148,7 @@ namespace GitScc.DataServices
                 }
 
                 int m = parents.Count() - 1;
-                for (int n = m; n>=0; n--)
+                for (int n = m; n >= 0; n--)
                 {
                     if (lanes.IndexOf(parents[n].Id) <= 0)
                     {
@@ -199,8 +200,8 @@ namespace GitScc.DataServices
         {
             foreach (var commit in Commits)
             {
-                if (commit.ParentIds.Count() == 1 && commit.ChildIds.Count() == 1 && !this.Refs.Any(r=>r.Id==commit.Id))
-                {                   
+                if (commit.ParentIds.Count() == 1 && commit.ChildIds.Count() == 1 && !this.Refs.Any(r => r.Id == commit.Id))
+                {
                     var cid = commit.ChildIds[0];
                     var pid = commit.ParentIds[0];
 
@@ -230,10 +231,11 @@ namespace GitScc.DataServices
 
         private int GetLane(string id)
         {
-            return Nodes.Where(n=>n.Id == id).Select(n=>n.X).FirstOrDefault(); 
+            return Nodes.Where(n => n.Id == id).Select(n => n.X).FirstOrDefault();
         }
 
-        public bool IsSimplified {
+        public bool IsSimplified
+        {
             get { return isSimplified; }
             set { isSimplified = value; commits = null; nodes = null; links = null; }
         }
@@ -242,10 +244,10 @@ namespace GitScc.DataServices
         {
             try
             {
-                var output = GitBash.Run(string.Format("log -1 {0} {1}", LogFormat, commitId), 
+                var result = GitBash.Run(string.Format("log -1 {0} {1}", LogFormat, commitId),
                     this.workingDirectory);
 
-                return ParseCommit(output);
+                return ParseCommit(result.Output);
             }
             catch (Exception ex)
             {
@@ -259,10 +261,13 @@ namespace GitScc.DataServices
             var commit = GetCommit(commitId);
             if (commit == null) return null;
 
-            return new GitTreeObject 
-            { 
-                Id = commitId, Name = "", FullName = "",
-                Type="tree", IsExpanded= true,
+            return new GitTreeObject
+            {
+                Id = commitId,
+                Name = "",
+                FullName = "",
+                Type = "tree",
+                IsExpanded = true,
                 Repository = this.workingDirectory,
             };
         }
@@ -278,13 +283,13 @@ namespace GitScc.DataServices
 
             try
             {
-                var output = GitBash.Run(string.Format("diff -M -C --name-status -z {0} {1}", fromCommitId, toCommitId), this.workingDirectory);
+                var result = GitBash.Run(string.Format("diff -M -C --name-status -z {0} {1}", fromCommitId, toCommitId), this.workingDirectory);
 
-                if (!string.IsNullOrWhiteSpace(output))
+                if (!string.IsNullOrWhiteSpace(result.Output))
                 {
                     //from gitextensions GitCommandHelper.cs
                     var nl = new char[] { '\n', '\r' };
-                    string trimmedStatus = output.Trim(nl);
+                    string trimmedStatus = result.Output.Trim(nl);
                     int lastNewLinePos = trimmedStatus.LastIndexOfAny(nl);
                     if (lastNewLinePos > 0)
                     {
@@ -331,7 +336,7 @@ namespace GitScc.DataServices
             }
             catch (Exception ex)
             {
-                Log.WriteLine("Repository.GetChanges: {0} - {1}\r\n{2}", fromCommitId, toCommitId , ex.ToString());
+                Log.WriteLine("Repository.GetChanges: {0} - {1}\r\n{2}", fromCommitId, toCommitId, ex.ToString());
             }
 
             return changes;

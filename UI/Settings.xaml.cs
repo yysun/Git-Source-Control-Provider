@@ -44,9 +44,12 @@ namespace GitScc.UI
             txtGitExePath.Text = GitBash.GitExePath;
             try
             {
-                txtMessage.Content = GitBash.Run("version", "");
-                txtUserName.Text = GitBash.Run("config --global user.name", "");
-                txtUserEmail.Text = GitBash.Run("config --global user.email", "");
+                var result = GitBash.Run("version", "");
+                txtMessage.Content = result.Output;
+                result = GitBash.Run("config --global user.name", "");
+                txtUserName.Text = result.Output;
+                result = GitBash.Run("config --global user.email", "");
+                txtUserEmail.Text = result.Output;
             }
             catch (Exception ex)
             {
@@ -59,16 +62,15 @@ namespace GitScc.UI
             }
         }
 
-
         private void btnOK_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtUserName.Text)) 
+            if (string.IsNullOrWhiteSpace(txtUserName.Text))
             {
                 MessageBox.Show("Please enter user name", "Error", MessageBoxButton.OK);
                 return;
             }
-            
-            if (string.IsNullOrWhiteSpace(txtUserEmail.Text)) 
+
+            if (string.IsNullOrWhiteSpace(txtUserEmail.Text))
             {
                 MessageBox.Show("Please enter user email", "Error", MessageBoxButton.OK);
                 return;

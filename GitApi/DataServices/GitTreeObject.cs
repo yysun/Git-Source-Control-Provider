@@ -46,10 +46,11 @@ namespace GitScc.DataServices
 
                     try
                     {
-                        var tree = GitBash.Run("ls-tree -z \"" + Id + "\"", this.Repository);
-                        children = tree.Split(new char[] { '\0', '\n' })
-                                   .Select(t=>ParseString(t))
-                                   .OfType<GitTreeObject>();
+                        var result = GitBash.Run("ls-tree -z \"" + Id + "\"", this.Repository);
+                        if (!result.HasError)
+                            children = result.Output.Split(new char[] { '\0', '\n' })
+                                       .Select(t => ParseString(t))
+                                       .OfType<GitTreeObject>();
                     }
                     catch (Exception ex)
                     {

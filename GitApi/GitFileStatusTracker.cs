@@ -98,7 +98,7 @@ namespace GitScc
                         try
                         {
                             //load local .gitignore file
-                            var ignoreFile = Path.Combine(this.initFolder, 
+                            var ignoreFile = Path.Combine(this.initFolder,
                                 Constants.GITIGNORE_FILENAME);
                             if (File.Exists(ignoreFile))
                             {
@@ -282,7 +282,7 @@ namespace GitScc
             var fileNameRel = GetRelativeFileName(fileName);
 
             TreeEntry treeEntry = this.commitTree == null ? null : this.commitTree.FindBlobMember(fileNameRel);
-            GitIndex.Entry indexEntry = this.index==null? null : this.index.GetEntry(fileNameRel);
+            GitIndex.Entry indexEntry = this.index == null ? null : this.index.GetEntry(fileNameRel);
 
             //the order of 'if' below is important
             if (indexEntry != null)
@@ -318,7 +318,7 @@ namespace GitScc
                 {
                     return GitFileStatus.Removed;
                 }
-                
+
                 if (File.Exists(fileName))
                 {
                     string target = fileNameRel.Replace('\\', '/');
@@ -408,7 +408,7 @@ namespace GitScc
             relativePath.CopyTo(relativeParts, 0);
             string newPath = string.Join(Path.DirectorySeparatorChar.ToString(), relativeParts);
             return newPath;
-        } 
+        }
         #endregion
 
         #region File Content
@@ -439,7 +439,7 @@ namespace GitScc
             }
 
             return null;
-        } 
+        }
         #endregion
 
         #region repository status: branch, in the middle of xxx
@@ -505,7 +505,7 @@ namespace GitScc
                 return this.HasGitRepository ? FileExistsInRepo("rebase-*", "interactive") : false;
             }
         }
-        
+
         private bool FileExistsInRepo(string fileName)
         {
             return File.Exists(Path.Combine(this.repository.Directory, fileName));
@@ -530,8 +530,9 @@ namespace GitScc
             {
                 try
                 {
-                    var msg = GitBash.Run(string.Format("checkout {0} {1}", (createNew ? "-b" : ""), branch), this.GitWorkingDirectory);
-                    if (msg.Contains("fatal:")) throw new Exception(msg);
+                    var result = GitBash.Run(string.Format("checkout {0} {1}", (createNew ? "-b" : ""), branch), this.GitWorkingDirectory);
+                    if (result.HasError || result.Output.Contains("fatal:"))
+                        throw new Exception(result.Output);
                 }
                 catch (Exception ex)
                 {
@@ -647,42 +648,63 @@ namespace GitScc
                     //stage deleted
                     index.Remove(repository.WorkTree, fileName);
                 }
-                index.Write();            
+                index.Write();
             }
 
             this.cache.Remove(GetCacheKey(fileName));
             this.changedFiles = null;
         }
 
-        public string Commit(string message, bool amend = false, bool signoff = false)
+        public GitCommitResult Commit(string message, bool amend = false, bool signoff = false)
         {
             if (!this.HasGitRepository) return null;
 
             if (string.IsNullOrEmpty(message))
                 throw new ArgumentException("Commit message must not be null or empty!", "message");
 
-            string msg = "";
+            GitCommitResult result = new GitCommitResult();
+
             if (GitBash.Exists)
             {
-                var msgFile = Path.Combine(this.repository.Directory, "COMMITMESSAGE");               
+                var msgFile = Path.Combine(this.repository.Directory, "COMMITMESSAGE");
                 File.WriteAllText(msgFile, message);
+                try
+                {
+                    string opt = "";
+                    if (amend) opt += "--amend ";
+                    if (signoff) opt += "--signoff ";
 
-                string opt = "";
-                if (amend) opt += "--amend ";
-                if (signoff) opt += "--signoff ";
-                msg = GitBash.Run(string.Format("commit -F \"{0}\" {1}", msgFile, opt), this.GitWorkingDirectory);
-                if (msg.IndexOf('\n') > 0) msg = msg.Split('\n')[0];
-                File.Delete(msgFile);
+                    var bashResult = GitBash.Run(string.Format("commit -F \"{0}\" {1}", msgFile, opt), this.GitWorkingDirectory);
+                    if (bashResult.HasError)
+                        result.Message = bashResult.Error;
+                    else
+                    {
+                        result.Message = bashResult.Output;
+                        result.IsSha1 = true;
+                    }
+                }
+                finally
+                {
+                    File.Delete(msgFile);
+                }
             }
             else
             {
-                var git = new Git(this.repository);
-                var rev = git.Commit().SetMessage(message).SetAmend(amend).Call();
-                msg = rev.Name;
+                try
+                {
+                    var git = new Git(this.repository);
+                    var rev = git.Commit().SetMessage(message).SetAmend(amend).Call();
+                    result.Message = rev.Name;
+                    result.IsSha1 = true;
+                }
+                catch (Exception ex)
+                {
+                    result.Message = ex.Message;
+                }
             }
             Refresh();
 
-            return msg;
+            return result;
         }
 
         public string LastCommitMessage
@@ -693,7 +715,10 @@ namespace GitScc
 
                 if (GitBash.Exists)
                 {
-                    return GitBash.Run("log -1 --format=%s\r\n\r\n%b", this.GitWorkingDirectory);
+                    var result = GitBash.Run("log -1 --format=%s\r\n\r\n%b", this.GitWorkingDirectory);
+                    if (!result.HasError)
+                        return result.Output;
+                    return null;
                 }
                 else
                 {
@@ -724,7 +749,7 @@ namespace GitScc
                 var dir = Directory.CreateDirectory(gitFolder);
                 dir.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
             }
-        } 
+        }
         #endregion
 
         #region Diff file
@@ -769,7 +794,7 @@ namespace GitScc
                     tmpFileName = Path.ChangeExtension(tmpFileName, Path.GetExtension(fileName));
                     File.Copy(GetFullPath(fileName), tmpFileName);
 
-                    if(IsBinaryFile(tmpFileName))
+                    if (IsBinaryFile(tmpFileName))
                     {
                         File.Delete(tmpFileName);
                         File.WriteAllText(tmpFileName, "Binary file: " + fileName);
@@ -867,7 +892,7 @@ namespace GitScc
                 return "";
             }
         }
-        
+
         #endregion
 
         #region Changed Files
@@ -888,15 +913,17 @@ namespace GitScc
         {
             if (!HasGitRepository) return new List<GitFile>();
 
+            var list = new List<GitFile>();
+
             if (GitBash.Exists)
             {
-                var output = GitBash.Run("status --porcelain -z --untracked-files", this.GitWorkingDirectory);
-                return ParseGitStatus(output);
+                var result = GitBash.Run("status --porcelain -z --untracked-files", this.GitWorkingDirectory);
+                if (!result.HasError)
+                    return ParseGitStatus(result.Output);
+                return list;
             }
             else
             {
-                var list = new List<GitFile>();
-
                 var treeWalk = new TreeWalk(this.repository);
                 treeWalk.Recursive = true;
                 treeWalk.Filter = TreeFilter.ANY_DIFF;
@@ -934,7 +961,7 @@ namespace GitScc
                 }
                 return list;
             }
-        } 
+        }
         #endregion
 
         public override string ToString()
@@ -1051,7 +1078,7 @@ namespace GitScc
                         break;
                 }
                 list.Add(gitFile);
-                
+
                 this.cache[GetCacheKey(gitFile.FileName)] = gitFile.Status;
             }
             return list;
@@ -1081,9 +1108,9 @@ namespace GitScc
         public void CheckOutFile(string fileName)
         {
             if (!this.HasGitRepository || this.head == null) return;
-            
+
             string fileNameRel = GetRelativeFileName(fileName);
-            
+
             if (GitBash.Exists)
             {
                 GitBash.Run(string.Format("checkout -- \"{0}\"", fileNameRel), this.GitWorkingDirectory);
@@ -1105,8 +1132,9 @@ namespace GitScc
             {
                 if (remotes == null && GitBash.Exists)
                 {
-                    remotes = GitBash.Run("remote", this.GitWorkingDirectory)
-                        .Split('\n').Where(s=>!string.IsNullOrWhiteSpace(s));
+                    var result = GitBash.Run("remote", this.GitWorkingDirectory);
+                    if (!result.HasError)
+                        remotes = result.Output.Split('\n').Where(s => !string.IsNullOrWhiteSpace(s));
                 }
                 return remotes;
             }
@@ -1118,19 +1146,20 @@ namespace GitScc
             {
                 if (configs == null && GitBash.Exists)
                 {
-                    var lines = GitBash.Run("config -l", this.GitWorkingDirectory)
-                        .Split('\n').Where(s => !string.IsNullOrWhiteSpace(s) && s.IndexOf("=") > 0)
-                        .OrderBy(s=>s);
-
-                    configs = new Dictionary<string, string>();
-                    foreach (var s in lines)
+                    var result = GitBash.Run("config -l", this.GitWorkingDirectory);
+                    if (!result.HasError)
                     {
-                        var pos = s.IndexOf("=");
-                        var key = s.Substring(0, pos);
-                        if(!configs.Keys.Contains(key))
-                            configs.Add(key, s.Substring(pos+1));
+                        var lines = result.Output.Split('\n').Where(s => !string.IsNullOrWhiteSpace(s) && s.IndexOf("=") > 0).OrderBy(s => s);
+
+                        configs = new Dictionary<string, string>();
+                        foreach (var s in lines)
+                        {
+                            var pos = s.IndexOf("=");
+                            var key = s.Substring(0, pos);
+                            if (!configs.Keys.Contains(key))
+                                configs.Add(key, s.Substring(pos + 1));
+                        }
                     }
-                        
                 }
                 return configs ?? new Dictionary<string, string>();
             }
@@ -1155,8 +1184,10 @@ namespace GitScc
             if (!this.HasGitRepository || !GitBash.Exists) return new string[0];
             var fileNameRel = GetRelativeFileName(fileName);
 
-            var output = GitBash.Run(string.Format("log -z --ignore-space-change --pretty=format:%H -- \"{0}\"", fileNameRel), this.GitWorkingDirectory);
-            return output.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+            var result = GitBash.Run(string.Format("log -z --ignore-space-change --pretty=format:%H -- \"{0}\"", fileNameRel), this.GitWorkingDirectory);
+            if (!result.HasError)
+                return result.Output.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+            return new string[0];
         }
 
         public void AddIgnoreItem(string fileName)
@@ -1189,11 +1220,11 @@ namespace GitScc
 
         public static void WriteLine(string format, params object[] objects)
         {
-//#if(DEBUG)
+            //#if(DEBUG)
             var msg = string.Format(format, objects);
             msg = string.Format("{0} {1}\r\n\r\n", DateTime.UtcNow.ToString(), msg);
             File.AppendAllText(logFileName, msg);
-//#endif
+            //#endif
         }
     }
 }

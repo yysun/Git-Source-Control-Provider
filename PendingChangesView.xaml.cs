@@ -237,7 +237,7 @@ namespace GitScc
 
                 try
                 {
-                    
+
                     this.dataGrid1.ItemsSource = tracker.ChangedFiles;
 
                     ICollectionView view = CollectionViewSource.GetDefaultView(this.dataGrid1.ItemsSource);
@@ -249,7 +249,8 @@ namespace GitScc
                     }
 
                     this.dataGrid1.SelectedValue = selectedFile;
-                    selectedFiles.ForEach(fn=>{
+                    selectedFiles.ForEach(fn =>
+                    {
                         var item = this.dataGrid1.Items.Cast<GitFile>()
                             .Where(i => i.FileName == fn)
                             .FirstOrDefault();
@@ -331,18 +332,28 @@ namespace GitScc
             service.NoRefresh = true;
             if (HasComments() && StageSelectedFiles(true))
             {
+                string errorMessage = null;
                 try
                 {
                     ShowStatusMessage("Committing ...");
-                    var id = tracker.Commit(Comments, false, chkSignOff.IsChecked == true);
-                    ShowStatusMessage("Commit successfully. Commit Hash: " + id);
-                    ClearUI();
+                    var result = tracker.Commit(Comments, false, chkSignOff.IsChecked == true);
+                    if (result.IsSha1)
+                    {
+                        ShowStatusMessage("Commit successfully. Commit Hash: " + result.Message);
+                        ClearUI();
+                    }
+                    else
+                    {
+                        errorMessage = result.Message;
+                    }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                    ShowStatusMessage(ex.Message);
+                    errorMessage = ex.Message;
                 }
+                
+                if (!String.IsNullOrEmpty(errorMessage))
+                    MessageBox.Show(errorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
             service.NoRefresh = false;
             //service.lastTimeRefresh = DateTime.Now;
@@ -361,18 +372,18 @@ namespace GitScc
                 service.NoRefresh = true;
                 StageSelectedFiles(false);
 
-                    try
-                    {
-                        ShowStatusMessage("Amending last Commit ...");
-                        var id = tracker.Commit(Comments, true, chkSignOff.IsChecked == true);
-                        ShowStatusMessage("Amend last commit successfully. Commit Hash: " + id);
-                        ClearUI();
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                        ShowStatusMessage(ex.Message);
-                    }
+                try
+                {
+                    ShowStatusMessage("Amending last Commit ...");
+                    var id = tracker.Commit(Comments, true, chkSignOff.IsChecked == true);
+                    ShowStatusMessage("Amend last commit successfully. Commit Hash: " + id);
+                    ClearUI();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    ShowStatusMessage(ex.Message);
+                }
 
                 service.NoRefresh = false;
                 //service.lastTimeRefresh = DateTime.Now;
@@ -548,7 +559,7 @@ Note: if the file is included project, you need to delete the file from project 
 
         private void DiffEditor_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            
+
             int start = 1, column = 1;
             try
             {
@@ -558,7 +569,7 @@ Note: if the file is included project, you need to delete the file from project 
                     column = this.DiffEditor.TextArea.Caret.Column;
 
                     string text = diffLines[line];
-                    while (line >=0)
+                    while (line >= 0)
                     {
                         var match = Regex.Match(text, "^@@(.+)@@");
                         if (match.Success)
@@ -576,7 +587,7 @@ Note: if the file is included project, you need to delete the file from project 
 
                         start++;
                         --line;
-                        text = line>=0 ? diffLines[line] : "";
+                        text = line >= 0 ? diffLines[line] : "";
                     }
                 }
             }
@@ -584,13 +595,13 @@ Note: if the file is included project, you need to delete the file from project 
             {
                 ShowStatusMessage(ex.Message);
                 Log.WriteLine("Pending Changes View - DiffEditor_MouseDoubleClick: {0}", ex.ToString());
-            } 
+            }
             GetSelectedFileFullName((fileName) =>
             {
                 OpenFile(fileName);
                 var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
                 var selection = dte.ActiveDocument.Selection as EnvDTE.TextSelection;
-                selection.MoveToLineAndOffset(start-1, column);
+                selection.MoveToLineAndOffset(start - 1, column);
             });
         }
 
@@ -608,7 +619,7 @@ Note: if the file is included project, you need to delete the file from project 
                 {
                     if (string.Compare(item.FileNames[0], fileName, true) == 0)
                     {
-                        dynamic  wnd = item.Open(EnvDTE.Constants.vsViewKindPrimary);
+                        dynamic wnd = item.Open(EnvDTE.Constants.vsViewKindPrimary);
                         wnd.Activate();
                         opened = true;
                         break;
@@ -629,9 +640,9 @@ Note: if the file is included project, you need to delete the file from project 
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
             {
                 DependencyObject child = VisualTreeHelper.GetChild(obj, i);
-                if (child != null && child is TChild && (name ==null || ((Control) child).Name == name))
+                if (child != null && child is TChild && (name == null || ((Control)child).Name == name))
                 {
-                    return (TChild) child;
+                    return (TChild)child;
                 }
                 else
                 {

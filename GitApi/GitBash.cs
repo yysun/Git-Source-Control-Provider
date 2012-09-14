@@ -29,10 +29,12 @@ namespace GitScc
         public static bool Exists { get { return !string.IsNullOrWhiteSpace(gitExePath) &&
             File.Exists(gitExePath); } }
 
-        public static string Run(string args, string workingDirectory)
+        public static GitBashResult Run(string args, string workingDirectory)
         {
             if (string.IsNullOrWhiteSpace(gitExePath) || !File.Exists(gitExePath))
                 throw new Exception("Git Executable not found");
+
+            GitBashResult result = new GitBashResult();
 
             //Debug.WriteLine(string.Format("{2}>{0} {1}", gitExePath, args, workingDirectory));
 
@@ -60,14 +62,11 @@ namespace GitScc
 
                 //Debug.WriteLine(output);
 
-                if (!string.IsNullOrEmpty(error))
-                {
-                    //Debug.WriteLine("STDERR: " + error);
-                    //throw new Exception(error);
+                result.HasError = process.ExitCode != 0;
+                result.Output = output;
+                result.Error = error;
 
-                    output += Environment.NewLine + error;
-                }
-                return output;
+                return result;
             }
         }
 

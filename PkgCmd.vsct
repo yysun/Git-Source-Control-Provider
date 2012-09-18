@@ -71,6 +71,11 @@
       <Group guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowGitTor" priority="0x0000">
         <Parent guid="guidSccProviderCmdSet" id="imnuPendingChangesToolWindowGitTor"/>
       </Group>
+
+      <!-- Document TabWnd context menu -->
+      <Group guid="guidSccProviderCmdSet" id="igrpDocTabWnd" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_EZDOCWINTAB"/>
+      </Group>
       
     </Groups>
     
@@ -110,13 +115,12 @@
       </Button>
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0101" type="Button">
-        <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
         <Icon guid="guidSccProviderImages" id="iconCompare" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>Compare ...</ButtonText>
+          <ButtonText>Compare...</ButtonText>
         </Strings>
       </Button>
       
@@ -301,6 +305,16 @@
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
     </CommandPlacement>
 
+    <!-- Item context menu | Compare  -->
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0003">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>
+    </CommandPlacement>
+
+    <!-- Document Tab context menu | Compare  -->
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0600">
+      <Parent guid="guidSccProviderCmdSet" id="igrpDocTabWnd"/>
+    </CommandPlacement>
+
     <!--<CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandAbout" priority="0x0004">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>
     </CommandPlacement>
@@ -380,6 +394,7 @@
       
       <IDSymbol name="imnuGitSourceControlMenu" value="0x205"/>
       <IDSymbol name="igrpSourceControlCommands" value="0x301"/>
+      <IDSymbol name="igrpDocTabWnd" value="0x302"/>
 
       <IDSymbol name="imnuHistoryToolWindowToolbarMenu" value="0x200"/>
       <IDSymbol name="igrpHistoryToolWindowToolbarGroup" value="0x201"/>

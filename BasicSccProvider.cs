@@ -358,8 +358,16 @@ namespace GitScc
 
         internal void RunDiffCommand(string file1, string file2)
         {
-            var difftoolPath = GitSccOptions.Current.DifftoolPath;
-            RunCommand(difftoolPath, "\"" + file1 + "\" \"" + file2 + "\"");
+            var diffService = (IVsDifferenceService)GetService(typeof(SVsDifferenceService));
+            if (GitSccOptions.Current.UseVsDiff && diffService != null)
+            {
+                diffService.OpenComparisonWindow(file1, file2);
+            }
+            else
+            {
+                var difftoolPath = GitSccOptions.Current.DifftoolPath;
+                RunCommand(difftoolPath, "\"" + file1 + "\" \"" + file2 + "\"");
+            }            
         }
 
         private void OnInitCommand(object sender, EventArgs e)

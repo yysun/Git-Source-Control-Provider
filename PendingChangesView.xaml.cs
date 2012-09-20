@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using GitScc.UI;
+using System.Collections.Generic;
 
 namespace GitScc
 {
@@ -351,7 +352,7 @@ namespace GitScc
                 {
                     errorMessage = ex.Message;
                 }
-                
+
                 if (!String.IsNullOrEmpty(errorMessage))
                     MessageBox.Show(errorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
@@ -512,16 +513,20 @@ namespace GitScc
 
 Note: if the file is included project, you need to delete the file from project in solution explorer.";
 
-            GetSelectedFileFullName(fileName =>
+            var filesToDelete = new List<string>();
+
+            GetSelectedFileFullName(fileName => filesToDelete.Add(fileName));
+
+            string title = (filesToDelete.Count == 1) ? "Delete File" : "Delete Files";
+            string message = (filesToDelete.Count == 1) ?
+                "Are you sure you want to delete file: " + Path.GetFileName(filesToDelete.First()) + deleteMsg :
+                String.Format("Are you sure you want to delete {0} selected files", filesToDelete.Count) + deleteMsg;
+
+            if (MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
-                if (MessageBox.Show("Are you sure you want to delete file: " + Path.GetFileName(fileName) + deleteMsg,
-                                   "Delete File",
-                                   MessageBoxButton.YesNo,
-                                   MessageBoxImage.Question) == MessageBoxResult.Yes)
-                {
+                foreach (var fileName in filesToDelete)
                     File.Delete(fileName);
-                }
-            });
+            }
         }
 
         #endregion

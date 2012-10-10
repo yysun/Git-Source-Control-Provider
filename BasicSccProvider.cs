@@ -324,8 +324,7 @@ namespace GitScc
 
         private void OnRefreshCommand(object sender, EventArgs e)
         {
-            sccService.NoRefresh = false;
-            sccService.Refresh();
+            GetToolWindowPane<PendingChangesToolWindow>().Refresh(sccService.CurrentTracker, true);
         }
 
         private void OnCompareCommand(object sender, EventArgs e)

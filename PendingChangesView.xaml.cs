@@ -636,6 +636,13 @@ Note: if the file is included project, you need to delete the file from project 
             if (!opened) dte.ItemOperations.OpenFile(fileName);
         }
 
+        private void UserControl_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                this.Commit();
+            }
+        }
     }
 
     public static class ExtHelper

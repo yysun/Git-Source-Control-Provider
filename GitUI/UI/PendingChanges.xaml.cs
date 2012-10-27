@@ -530,21 +530,28 @@ namespace GitUI.UI
                 var isAmend = chkAmend.IsChecked == true;
                 if (HasComments() && StageSelectedFiles(!isAmend))
                 {
-
                     ShowStatusMessage("Committing ...");
                     var id = tracker.Commit(Comments, isAmend, chkSignOff.IsChecked == true);
                     ShowStatusMessage("Commit successfully. Commit Hash: " + id);
                     ClearUI();
+
+                    HistoryViewCommands.CloseCommitDetails.Execute(this, null);
+                    HistoryViewCommands.RefreshGraph.Execute(this, null);
                 }
                 service.NoRefresh = false;
-
-                HistoryViewCommands.CloseCommitDetails.Execute(this, null);
-                HistoryViewCommands.RefreshGraph.Execute(this, null);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 ShowStatusMessage(ex.Message);
+            }
+        }
+
+        private void UserControl_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                btnPendingChanges_Click(this, null);
             }
         }
     }

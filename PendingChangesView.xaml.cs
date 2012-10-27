@@ -330,6 +330,9 @@ namespace GitScc
 
         internal void Commit()
         {
+            var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
+            if (dte.ItemOperations.PromptToSave == EnvDTE.vsPromptResult.vsPromptResultCancelled) return;
+
             service.NoRefresh = true;
             if (HasComments() && StageSelectedFiles(true))
             {
@@ -370,6 +373,9 @@ namespace GitScc
             }
             else
             {
+                var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
+                if (dte.ItemOperations.PromptToSave == EnvDTE.vsPromptResult.vsPromptResultCancelled) return;
+
                 service.NoRefresh = true;
                 StageSelectedFiles(false);
 

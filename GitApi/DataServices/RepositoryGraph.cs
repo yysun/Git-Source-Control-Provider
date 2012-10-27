@@ -299,36 +299,36 @@ namespace GitScc.DataServices
                             lastNewLinePos = trimmedStatus.IndexOfAny(nl, ind >= 0 ? ind : 0);
                             trimmedStatus = trimmedStatus.Substring(0, lastNewLinePos).Trim(nl);
                         }
-                        else                                              //Warning at beginning
+                        else //Warning at beginning
                             trimmedStatus = trimmedStatus.Substring(lastNewLinePos).Trim(nl);
                     }
 
                     var files = trimmedStatus.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
                     for (int n = 0; n < files.Length; n++)
                     {
-                        if (string.IsNullOrEmpty(files[n]))
-                            continue;
+                        string status = files[n];
+                        var fileName = string.Empty;
+                        var change = ParseStaus(status);
 
-                        int splitIndex = files[n].IndexOfAny(new char[] { '\0', '\t', ' ' }, 1);
-
-                        string status = string.Empty;
-                        string fileName = string.Empty;
-
-                        if (splitIndex < 0)
+                        switch (change)
                         {
-                            status = files[n];
-                            fileName = files[n + 1];
-                            n++;
-                        }
-                        else
-                        {
-                            status = files[n].Substring(0, splitIndex);
-                            fileName = files[n].Substring(splitIndex);
+                            case ChangeType.Renamed:
+                            case ChangeType.Copied:
+                                fileName = files[n + 2];
+                                n++; n++;
+                                break;
+                            case ChangeType.Unknown: 
+                                continue;
+                            default: 
+                            
+                                fileName = files[n + 1];
+                                n++;
+                                break;
                         }
 
                         changes.Add(new Change
                         {
-                            ChangeType = ParseStaus(status),
+                            ChangeType = change,
                             Name = fileName.Trim()
                         });
                     }
@@ -344,6 +344,8 @@ namespace GitScc.DataServices
 
         private ChangeType ParseStaus(string status)
         {
+            if(string.IsNullOrEmpty(status)) return ChangeType.Unknown;
+
             char x = status[0];
             switch (x)
             {
@@ -359,6 +361,8 @@ namespace GitScc.DataServices
                     return ChangeType.Renamed;
                 case 'T':
                     return ChangeType.TypeChanged;
+                case 'U':
+                    return ChangeType.Unmerged;
             }
             return ChangeType.Unknown;
         }

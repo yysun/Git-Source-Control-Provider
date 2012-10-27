@@ -19,6 +19,7 @@ namespace GitScc.DataServices
         TypeChanged, 
         Renamed, 
         Copied,
+        Unmerged,
         Unknown
     }
 }

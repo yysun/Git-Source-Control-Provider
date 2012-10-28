@@ -197,21 +197,29 @@ namespace GitScc
 
         #region Git functions
 
+        private void VerifyGit()
+        {
+            var isValid = false;
+            if (!GitBash.Exists)
+            {
+                var name  = GitBash.Run("config --global user.name", "").Output;
+                var email = GitBash.Run("config --global user.email", "").Output;
+                isValid = !string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(email);
+            }
+
+            if(isValid)
+                Settings.Show();
+            else
+                Settings.Hide();
+        }
+
         DateTime lastTimeRefresh = DateTime.Now.AddDays(-1);
         internal void Refresh(GitFileStatusTracker tracker)
         {
+            VerifyGit();
+
             this.label3.Content = "Changed files";
-
             this.tracker = tracker;
-
-            if (!GitBash.Exists)
-            {
-                Settings.Show();
-                return;
-            }
-            else
-                Settings.Hide();
-
             if (tracker == null)
             {
                 service.NoRefresh = true;
@@ -331,7 +339,7 @@ namespace GitScc
         internal void Commit()
         {
             var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
-            if (dte.ItemOperations.PromptToSave == EnvDTE.vsPromptResult.vsPromptResultCancelled) return;
+            if (dte.ItemOperations.PromptToSave != EnvDTE.vsPromptResult.vsPromptResultNo) return;
 
             service.NoRefresh = true;
             if (HasComments() && StageSelectedFiles(true))

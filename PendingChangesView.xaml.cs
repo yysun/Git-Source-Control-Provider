@@ -200,14 +200,14 @@ namespace GitScc
         private void VerifyGit()
         {
             var isValid = false;
-            if (!GitBash.Exists)
+            if (GitBash.Exists)
             {
                 var name  = GitBash.Run("config --global user.name", "").Output;
                 var email = GitBash.Run("config --global user.email", "").Output;
                 isValid = !string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(email);
             }
 
-            if(isValid)
+            if(!isValid)
                 Settings.Show();
             else
                 Settings.Hide();
@@ -338,9 +338,6 @@ namespace GitScc
 
         internal void Commit()
         {
-            var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
-            if (dte.ItemOperations.PromptToSave != EnvDTE.vsPromptResult.vsPromptResultNo) return;
-
             service.NoRefresh = true;
             if (HasComments() && StageSelectedFiles(true))
             {

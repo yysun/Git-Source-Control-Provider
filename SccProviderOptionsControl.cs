@@ -288,9 +288,9 @@ namespace GitScc
             this.useVsDiffChk.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.useVsDiffChk.Location = new System.Drawing.Point(6, 189);
             this.useVsDiffChk.Name = "useVsDiffChk";
-            this.useVsDiffChk.Size = new System.Drawing.Size(173, 17);
+            this.useVsDiffChk.Size = new System.Drawing.Size(200, 17);
             this.useVsDiffChk.TabIndex = 29;
-            this.useVsDiffChk.Text = "Use Visual Studio Diff Window:";
+            this.useVsDiffChk.Text = "Use Visual Studio 2012 Diff Window:";
             this.useVsDiffChk.UseVisualStyleBackColor = true;
             this.useVsDiffChk.CheckedChanged += new System.EventHandler(this.useVsDiffChk_CheckedChanged);
             // 

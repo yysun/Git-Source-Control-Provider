@@ -120,7 +120,7 @@
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>Compare...</ButtonText>
+          <ButtonText>Compare with last commit...</ButtonText>
         </Strings>
       </Button>
       

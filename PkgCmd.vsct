@@ -115,23 +115,23 @@
       </Button>
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0101" type="Button">
-        <Icon guid="guidSccProviderImages" id="iconCompare" />
+        <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>Compare with last commit...</ButtonText>
+          <ButtonText>Git Compare with Last Commit...</ButtonText>
         </Strings>
       </Button>
       
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandUndo" priority="0x0102" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
-        <Icon guid="guidSccProviderImages" id="iconUncheckout" />
+        <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>Undo File Changes</ButtonText>
+          <ButtonText>Git Undo File Changes</ButtonText>
         </Strings>
       </Button>
 
@@ -148,7 +148,7 @@
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandRefresh" priority="0x0104" type="Button">
         <!--<Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>-->
-        <Icon guid="guidSccProviderImages" id="iconRefresh" />
+        <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
@@ -256,7 +256,7 @@
 
       <Button guid="guidSccProviderCmdSet" id="icmdPendingChangesRefresh" priority="0x0007" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
-        <Icon guid="guidSccProviderImages" id="iconRefresh" />
+        <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
@@ -268,7 +268,7 @@
     </Buttons>
     
     <Bitmaps>
-      <Bitmap guid="guidSccProviderImages" href="Resources\Images_32bit.bmp" 
+      <Bitmap guid="guidSccProviderImages" href="Resources\Images_32bit.png" 
               usedList="iconGitBash, iconGitExt, iconUncheckout, iconCompare, iconRefresh, iconOpenIgnoreFile, iconGitTor, iconGitInit"/>
     </Bitmaps>
   </Commands>
@@ -309,12 +309,21 @@
     <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0003">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>
     </CommandPlacement>
-
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0003">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_SCC"/>
+    </CommandPlacement>
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0003">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
+    </CommandPlacement>
+    
     <!-- Document Tab context menu | Compare  -->
     <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0600">
       <Parent guid="guidSccProviderCmdSet" id="igrpDocTabWnd"/>
     </CommandPlacement>
-
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandUndo" priority="0x0601">
+      <Parent guid="guidSccProviderCmdSet" id="igrpDocTabWnd"/>
+    </CommandPlacement>
+    
     <!--<CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandAbout" priority="0x0004">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>
     </CommandPlacement>

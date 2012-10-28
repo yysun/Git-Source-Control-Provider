@@ -63,20 +63,29 @@ namespace GitScc
         {
             sccProviderService = BasicSccProvider.GetServiceEx<SccProviderService>();
             Refresh(sccProviderService.CurrentTracker, true); // refresh when the tool window becomes visible
-        }    
+        }
+
+        internal bool hasFileSaved()
+        {
+            var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
+            return dte.ItemOperations.PromptToSave != EnvDTE.vsPromptResult.vsPromptResultCancelled;
+        }
 
         internal void OnCommitCommand()
         {
+            if (!hasFileSaved()) return;
             ((PendingChangesView)control).Commit();
         }
 
         internal void OnAmendCommitCommand()
         {
+            if (!hasFileSaved()) return;
             ((PendingChangesView)control).AmendCommit();
         }
 
         private void OnRefreshCommand(object sender, EventArgs e)
         {
+            hasFileSaved(); //just a reminder, refresh anyway
             sccProviderService.OpenTracker();
             sccProviderService.RefreshNodesGlyphs();
             Refresh(sccProviderService.CurrentTracker, true);

@@ -69,7 +69,7 @@ namespace BasicSccProvider.Tests
                 //Get the global service provider and the dte
                 IServiceProvider sp = VsIdeTestHostContext.ServiceProvider;
                 DTE dte = (DTE)sp.GetService(typeof(DTE));
-                dte.Solution.Open(@"C:\Users\Eric\Documents\Visual Studio 2010\Projects\Solution1 - Multiple Git\Solution1 - Multiple Git.sln");
+                dte.Solution.Open(@"E:\Users\Public\My Projects\GitScc\Publish\TestProjects\UTF8Test\UTF8Test.sln");
             });
         }
 

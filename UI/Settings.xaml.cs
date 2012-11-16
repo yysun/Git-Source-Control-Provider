@@ -98,7 +98,7 @@ namespace GitScc.UI
             this.Visibility = Visibility.Visible;
             txtGitExePath.Text = GitBash.GitExePath;
             btnOK.Visibility = Visibility.Collapsed;
-            CheckGitBash();
+            txtGitExePath.Text = GitSccOptions.Current.GitBashPath;
             txtMessage.Content = "";
         }
 

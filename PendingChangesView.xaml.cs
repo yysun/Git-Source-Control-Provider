@@ -216,7 +216,15 @@ namespace GitScc
         DateTime lastTimeRefresh = DateTime.Now.AddDays(-1);
         internal void Refresh(GitFileStatusTracker tracker)
         {
-            VerifyGit();
+            //VerifyGit();
+
+            if (!GitBash.Exists)
+            {
+                Settings.Show();
+                return;
+            }
+            else
+                Settings.Hide();
 
             this.label3.Content = "Changed files";
             this.tracker = tracker;

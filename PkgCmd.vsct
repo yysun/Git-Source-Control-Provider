@@ -305,6 +305,10 @@
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
     </CommandPlacement>
 
+    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandPendingChanges" priority="0x0003">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS0"/>
+    </CommandPlacement>
+    
     <!-- Item context menu | Compare  -->
     <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0003">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>

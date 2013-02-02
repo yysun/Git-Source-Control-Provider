@@ -115,6 +115,7 @@
       </Button>
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0101" type="Button">
+        <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
         <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
@@ -137,7 +138,7 @@
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandEditIgnore" priority="0x0103" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
-        <Icon guid="guidSccProviderImages" id="iconOpenIgnoreFile" />
+        <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
@@ -158,7 +159,7 @@
       </Button>
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandInit" priority="0x0000" type="Button">
-        <Icon guid="guidSccProviderImages" id="iconGitInit" />
+        <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
@@ -226,6 +227,7 @@
       <!-- buttons on pending changes tool window's tool bar -->
       <Button guid="guidSccProviderCmdSet" id="icmdPendingChangesCommit" priority="0x0000" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
+        <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
@@ -236,6 +238,7 @@
 
       <Button guid="guidSccProviderCmdSet" id="icmdPendingChangesAmend" priority="0x0001" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
+        <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
@@ -246,6 +249,7 @@
 
       <Button guid="guidSccProviderCmdSet" id="icmdPendingChangesCommitToBranch" priority="0x0006" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
+        <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
@@ -310,7 +314,7 @@
     </CommandPlacement>
     
     <!-- Item context menu | Compare  -->
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0003">
+    <!--<CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0003">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>
     </CommandPlacement>
     <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0003">
@@ -318,7 +322,7 @@
     </CommandPlacement>
     <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0003">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
-    </CommandPlacement>
+    </CommandPlacement>-->
     
     <!-- Document Tab context menu | Compare  -->
     <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0600">

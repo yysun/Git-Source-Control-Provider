@@ -4,10 +4,12 @@
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
 			 mc:Ignorable="d" 
 			 d:DesignHeight="300" d:DesignWidth="800" KeyDown="UserControl_KeyDown">
 
-	<Grid x:Name="Main" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+	<Grid x:Name="Main" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+          Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}">
 		
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="520" MinWidth="20" MaxWidth="1000" />
@@ -18,21 +20,23 @@
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
 		</Grid.RowDefinitions>
-		<Grid.Background>
+		<!--<Grid.Background>
 			<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
 				<GradientStop Color="#FFC5E8F8" Offset="1" />
 				<GradientStop Color="White" Offset="0" />
 			</LinearGradientBrush>
-		</Grid.Background>
+		</Grid.Background>-->
 		<GridSplitter Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
 					  VerticalAlignment="Stretch" HorizontalAlignment="Left" Name="gridSplitter1" Width="4" ResizeDirection="Columns" />
 
 		<Label Content="Comments:" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Center" 
-			   Margin="12,0,0,0" Foreground="#FF333333" />
-		<CheckBox Content="Sign off" Height="16" HorizontalAlignment="Right" Margin="0,5,20,0" Name="chkSignOff" VerticalAlignment="Top" />
+			   Margin="12,0,0,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" />
+        
+		<CheckBox Content="Sign off" Height="16" HorizontalAlignment="Right" Margin="0,5,20,0" Name="chkSignOff" VerticalAlignment="Top"
+                  Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"/>
 
 		<Label Content="Diff (double click to open file):" Height="28" HorizontalAlignment="Left" Name="label2" VerticalAlignment="Center" 
-			   Margin="12,0,0,0" Foreground="#FF333333"
+			   Margin="12,0,0,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
 			   Grid.Column="2" Grid.Row="0"/>
 
 		<Grid Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="grid1">
@@ -48,10 +52,13 @@
 					  VerticalAlignment="Top" HorizontalAlignment="Stretch" Name="gridSplitter2" Height="4" />
 
 			<Label Content="Changed Files" Height="28" HorizontalAlignment="Stretch" Name="label3" VerticalAlignment="Center" 
-			   Margin="12,0,12,0" Foreground="#FF333333" Grid.Row="2" ToolTip="select file to commit, or right click to stage/unstage file" />
+			       Margin="12,0,12,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
+                   Grid.Row="2" ToolTip="select file to commit, or right click to stage/unstage file" />
 
 			<RichTextBox HorizontalAlignment="Stretch" Name="textBoxComments" VerticalAlignment="Stretch" Margin="10,0,10,10" 
-					 AcceptsReturn="True" VerticalScrollBarVisibility="Visible" SpellCheck.IsEnabled="True">
+					     AcceptsReturn="True" VerticalScrollBarVisibility="Visible" SpellCheck.IsEnabled="True"
+                         Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" 
+                         Background="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}">
 				<RichTextBox.Resources>
 					<Style TargetType="{x:Type Paragraph}">
 						<Setter Property="Margin" Value="0"/>
@@ -60,9 +67,14 @@
 			</RichTextBox>
 
 			<DataGrid AutoGenerateColumns="False" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="dataGrid1" VerticalAlignment="Stretch"
-					  GridLinesVisibility="None"  Foreground="#FF333333" Sorting="dataGrid1_Sorting" IsReadOnly="True" SelectedValuePath="FileName"
+					  GridLinesVisibility="None" 
 					  SelectionUnit="FullRow" SelectionMode="Extended" SelectionChanged="dataGrid1_SelectionChanged" MouseDoubleClick="dataGrid1_MouseDoubleClick" ContextMenuOpening="dataGrid1_ContextMenuOpening"
-					  CanUserResizeRows="False" CanUserDeleteRows="False" CanUserAddRows="False" CanUserReorderColumns="False" RowHeaderWidth="0" KeyDown="dataGrid1_KeyDown">
+                      Background="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}"
+                      Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
+                      VerticalGridLinesBrush="{DynamicResource {x:Static vsfx:VsBrushes.TaskListGridLinesKey}}"
+                      HorizontalGridLinesBrush="{DynamicResource {x:Static vsfx:VsBrushes.TaskListGridLinesKey}}"
+                      Sorting="dataGrid1_Sorting" IsReadOnly="True" SelectedValuePath="FileName"
+					  CanUserResizeRows="False" CanUserDeleteRows="False" CanUserAddRows="False" CanUserReorderColumns="True" RowHeaderWidth="0" KeyDown="dataGrid1_KeyDown">
  
 				<DataGrid.CellStyle>
 					<Style TargetType="DataGridCell">
@@ -97,7 +109,7 @@
 						</DataGridTemplateColumn.CellTemplate>
 					</DataGridTemplateColumn>
 					<DataGridTextColumn Header="Status" Binding="{Binding Status}" CanUserResize="True" Width="70" />
-					<DataGridTextColumn Header="File" Binding="{Binding FileName}" Width="*" />
+                    <DataGridTextColumn Header="File" Binding="{Binding FileName}" CanUserResize="True" Width="800" />
 				</DataGrid.Columns>
 
 				<DataGrid.ContextMenu>

@@ -97,7 +97,13 @@ namespace GitScc
                     @"C:\Program Files (x86)\TortoiseGit\bin\TortoiseProc.exe",
                 });
             }
-
+            if (string.IsNullOrEmpty(TortoiseGitPath))
+            {
+                TortoiseGitPath = TryFindFile(new string[]{
+                    @"C:\Program Files\TortoiseGit\bin\TortoiseGitProc.exe",
+                    @"C:\Program Files (x86)\TortoiseGit\bin\TortoiseGitProc.exe",
+                });
+            }
             if (string.IsNullOrEmpty(DifftoolPath)) DifftoolPath = "diffmerge.exe";
 
             bool diffServiceAvailable = Package.GetGlobalService(typeof(SVsDifferenceService)) != null;

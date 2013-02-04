@@ -65,7 +65,7 @@
         /// <returns> An instance of GitDiffMargin or null </returns>
         public ITextViewMargin GetTextViewMargin(string marginName)
         {
-            return (marginName == DiffMargin.MarginName) ? (IWpfTextViewMargin)this : null;
+            return string.Equals(marginName, DiffMargin.MarginName, StringComparison.OrdinalIgnoreCase) ? this : null;
         }
 
         public void Dispose()

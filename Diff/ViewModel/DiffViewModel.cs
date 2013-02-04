@@ -274,7 +274,7 @@
 
         private bool RollbackCanExecute()
         {
-            return _hunkRangeInfo.IsModification || _hunkRangeInfo.IsDeletion;
+            return _hunkRangeInfo.IsAddition || _hunkRangeInfo.IsModification || _hunkRangeInfo.IsDeletion;
         }
 
         private void Rollback()
@@ -285,7 +285,13 @@
 
             using (ITextEdit edit = snapshot.TextBuffer.CreateEdit())
             {
-                if (_hunkRangeInfo.NewHunkRange.NumberOfLines == 1)
+                if (_hunkRangeInfo.IsAddition)
+                {
+                    ITextSnapshotLine startLine = snapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber);
+                    ITextSnapshotLine endLine = snapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber + _hunkRangeInfo.NewHunkRange.NumberOfLines - 1);
+                    edit.Delete(Span.FromBounds(startLine.Start.Position, endLine.EndIncludingLineBreak.Position));
+                }
+                else if (_hunkRangeInfo.NewHunkRange.NumberOfLines == 1)
                 {
                     var line = snapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber);
 

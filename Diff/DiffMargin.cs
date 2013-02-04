@@ -9,6 +9,7 @@
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
     using Microsoft.VisualStudio.Text.Editor;
+    using Microsoft.VisualStudio.Text.Editor.OptionsExtensionMethods;
 
     public class DiffMargin : Canvas, IWpfTextViewMargin
     {
@@ -40,6 +41,17 @@
             _editorFormatMap.FormatMappingChanged += HandleFormatMappingChanged;
             _textView.Closed += (sender, e) => _editorFormatMap.FormatMappingChanged -= HandleFormatMappingChanged;
             UpdateBrushes();
+
+            HandleOptionChanged(null, null);
+            _textView.Options.OptionChanged += HandleOptionChanged;
+
+            IsVisibleChanged += (sender, e) =>
+            {
+                if ((bool)e.NewValue)
+                    _textView.LayoutChanged += HandleLayoutChanged;
+                else
+                    _textView.LayoutChanged -= HandleLayoutChanged;
+            };
 
             _gitDiffBarControl = new DiffMarginControl();
             _gitDiffBarControl.DataContext = new DiffMarginViewModel(this, _textView, textDocumentFactoryService, new GitCommands());
@@ -124,6 +136,15 @@
             {
                 UpdateBrushes();
             }
+        }
+
+        private void HandleOptionChanged(object sender, EditorOptionChangedEventArgs e)
+        {
+        }
+
+        private void HandleLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
+        {
+            InvalidateVisual();
         }
 
         private void UpdateBrushes()

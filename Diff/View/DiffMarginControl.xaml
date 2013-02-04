@@ -73,7 +73,7 @@
             <Border Width="9"
                           BorderBrush="#E0FFE0"
                           BorderThickness="0,1,1,1">
-                <Rectangle Fill="{Binding DiffBrush}">
+                <Rectangle Width="{Binding Width, Mode=OneWay}" HorizontalAlignment="Left" Margin="{Binding Margin, Mode=OneWay}" Fill="{Binding DiffBrush}">
                     <Rectangle.ToolTip>
                         <ToolTip Content="{Binding Coordinates, Mode=OneWay}" />
                     </Rectangle.ToolTip>

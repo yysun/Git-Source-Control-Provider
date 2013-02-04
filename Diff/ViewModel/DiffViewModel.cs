@@ -173,6 +173,22 @@
             SetDisplayProperties();
         }
 
+        public Thickness Margin
+        {
+            get
+            {
+                return new Thickness(DiffMargin.ChangeLeft, 0, 0, 0);
+            }
+        }
+
+        public double Width
+        {
+            get
+            {
+                return DiffMargin.ChangeWidth;
+            }
+        }
+
         public double Height
         {
             get { return _height; }

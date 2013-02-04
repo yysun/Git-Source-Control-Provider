@@ -10,9 +10,14 @@
     internal class DiffMargin : Canvas, IWpfTextViewMargin
     {
         public const string MarginName = "GitDiffMargin";
-        private bool _isDisposed = false;
+
+        internal const double ChangeLeft = 2.5;
+        internal const double ChangeWidth = 5.0;
+        private const double MarginWidth = 10.0;
+
         private readonly IWpfTextView _textView;
         private readonly DiffMarginControl _gitDiffBarControl;
+        private bool _isDisposed;
 
         /// <summary>
         ///   Creates a <see cref="GitDiffMargin" /> for a given <see cref="IWpfTextView" /> .
@@ -20,7 +25,7 @@
         /// <param name="textView"> The <see cref="IWpfTextView" /> to attach the margin to. </param>
         public DiffMargin(IWpfTextView textView, ITextDocumentFactoryService textDocumentFactoryService)
         {
-            Width = 9;
+            Width = MarginWidth;
             _textView = textView;
 
             _gitDiffBarControl = new DiffMarginControl();
@@ -45,7 +50,7 @@
             get
             {
                 ThrowIfDisposed();
-                return this.ActualHeight;
+                return this.ActualWidth;
             }
         }
 

@@ -121,7 +121,7 @@ namespace GitScc.Diff.ViewModel
         {
             ActivityLog.LogInformation("GitDiffMargin", "CreateDiffViewModels: " + _document.FilePath);
 
-            var rangeInfos = _gitCommands.GetGitDiffFor(_document.FilePath);
+            var rangeInfos = _gitCommands.GetGitDiffFor(_document, _document.TextBuffer.CurrentSnapshot);
 
             DiffViewModels.Clear();
 

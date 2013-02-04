@@ -95,6 +95,10 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Diff\DiffFormatNames.cs" />
+    <Compile Include="Diff\DiffRemovedEditorFormatDefinition.cs" />
+    <Compile Include="Diff\DiffModificationEditorFormatDefinition.cs" />
+    <Compile Include="Diff\DiffAdditionEditorFormatDefinition.cs" />
     <Compile Include="Diff\DiffMargin.cs" />
     <Compile Include="Diff\DiffMarginFactory.cs" />
     <Compile Include="Diff\GitCommands.cs" />

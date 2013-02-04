@@ -21,6 +21,15 @@ namespace GitScc.Diff.ViewModel
 
         public DiffMarginViewModel(DiffMargin margin, IWpfTextView textView, ITextDocumentFactoryService textDocumentFactoryService, IGitCommands gitCommands)
         {
+            if (margin == null)
+                throw new ArgumentNullException("margin");
+            if (textView == null)
+                throw new ArgumentNullException("textView");
+            if (textDocumentFactoryService == null)
+                throw new ArgumentNullException("textDocumentFactoryService");
+            if (gitCommands == null)
+                throw new ArgumentNullException("gitCommands");
+
             _margin = margin;
             _textView = textView;
             _gitCommands = gitCommands;

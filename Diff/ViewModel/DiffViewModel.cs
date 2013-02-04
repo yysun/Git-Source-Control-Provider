@@ -13,8 +13,10 @@
 
     public class DiffViewModel : ViewModelBase
     {
+        private readonly DiffMargin _margin;
         private readonly HunkRangeInfo _hunkRangeInfo;
         private readonly IWpfTextView _textView;
+
         private bool _isDiffTextVisible;
         private bool _showPopup;
         private ICommand _copyOldTextCommand;
@@ -25,8 +27,9 @@
         private double _height;
         private double _top;
 
-        public DiffViewModel(HunkRangeInfo hunkRangeInfo, IWpfTextView textView)
+        public DiffViewModel(DiffMargin margin, HunkRangeInfo hunkRangeInfo, IWpfTextView textView)
         {
+            _margin = margin;
             _hunkRangeInfo = hunkRangeInfo;
             _textView = textView;
 
@@ -34,11 +37,22 @@
 
             SetDisplayProperties();
 
-            DiffBrush = GetDiffBrush();
-            
             DiffText = GetDiffText();
 
             IsDiffTextVisible = GetIsDiffTextVisible();
+        }
+
+        public Brush DiffBrush
+        {
+            get
+            {
+                if (_hunkRangeInfo.IsAddition)
+                    return _margin.AdditionBrush;
+                else if (_hunkRangeInfo.IsModification)
+                    return _margin.ModificationBrush;
+                else
+                    return _margin.RemovedBrush;
+            }
         }
 
         public int LineNumber { get { return (int)_hunkRangeInfo.NewHunkRange.StartingLineNumber; } }
@@ -127,17 +141,6 @@
             return topLine.VisibilityState == VisibilityState.FullyVisible && bottomLine.VisibilityState == VisibilityState.FullyVisible;
         }
 
-        private Brush GetDiffBrush()
-        {
-            var bc = new BrushConverter();
-            var diffBrush = _hunkRangeInfo.IsModification ? (Brush) bc.ConvertFrom("#0DC0FF") : (Brush) bc.ConvertFrom("#0DCE0E");
-            if (diffBrush != null)
-            {
-                diffBrush.Freeze();
-            }
-            return diffBrush;
-        }
-
         private double GetHeight()
         {
             var lineHeight = _textView.LineHeight;
@@ -208,8 +211,6 @@
                 RaisePropertyChanged(() => Top);
             }
         }
-
-        public Brush DiffBrush { get; private set; }
 
         public bool IsDeletion { get { return _hunkRangeInfo.IsDeletion;} }
 

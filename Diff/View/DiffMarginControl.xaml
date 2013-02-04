@@ -81,7 +81,7 @@
             </Border>
         </ControlTemplate>
         <ControlTemplate x:Key="DeletionTemplate" d:DataContext="{d:DesignInstance ViewModel:DiffViewModel}">
-            <Polygon Points="0,0 1,1 0,2 0,0" Fill="Gray" Width="9" Height="{Binding Height}" Stretch="Fill">
+            <Polygon Points="0,0 1,1 0,2 0,0" Fill="{Binding DiffBrush}" Width="9" Height="{Binding Height}" Stretch="Fill">
                 <Polygon.ToolTip>
                     <ToolTip Content="{Binding Coordinates, Mode=OneWay}" />
                 </Polygon.ToolTip>

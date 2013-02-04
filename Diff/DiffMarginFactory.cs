@@ -2,6 +2,7 @@
 {
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Text;
+    using Microsoft.VisualStudio.Text.Classification;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Utilities;
 
@@ -20,9 +21,16 @@
             set;
         }
 
+        [Import]
+        private IEditorFormatMapService EditorFormatMapService
+        {
+            get;
+            set;
+        }
+
         public IWpfTextViewMargin CreateMargin(IWpfTextViewHost textViewHost, IWpfTextViewMargin containerMargin)
         {
-            return new DiffMargin(textViewHost.TextView, TextDocumentFactoryService);
+            return new DiffMargin(textViewHost.TextView, TextDocumentFactoryService, EditorFormatMapService);
         }
     }
 }

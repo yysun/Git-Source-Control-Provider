@@ -11,16 +11,20 @@ namespace GitScc.Diff.ViewModel
 
     public class DiffMarginViewModel : ViewModelBase
     {
+        private readonly DiffMargin _margin;
         private readonly IWpfTextView _textView;
         private readonly IGitCommands _gitCommands;
+
         private ITextDocument _document;
         private RelayCommand<DiffViewModel> _previousChangeCommand;
         private RelayCommand<DiffViewModel> _nextChangeCommand;
 
-        public DiffMarginViewModel(IWpfTextView textView, ITextDocumentFactoryService textDocumentFactoryService, IGitCommands gitCommands)
+        public DiffMarginViewModel(DiffMargin margin, IWpfTextView textView, ITextDocumentFactoryService textDocumentFactoryService, IGitCommands gitCommands)
         {
+            _margin = margin;
             _textView = textView;
             _gitCommands = gitCommands;
+
             DiffViewModels = new ObservableCollection<DiffViewModel>();
 
             _textView.Closed += TextViewClosed;
@@ -125,7 +129,7 @@ namespace GitScc.Diff.ViewModel
 
             DiffViewModels.Clear();
 
-            foreach (var diffViewModel in rangeInfos.Select(hunkRangeInfo => new DiffViewModel(hunkRangeInfo, _textView)))
+            foreach (var diffViewModel in rangeInfos.Select(hunkRangeInfo => new DiffViewModel(_margin, hunkRangeInfo, _textView)))
             {
                 DiffViewModels.Add(diffViewModel);
             }

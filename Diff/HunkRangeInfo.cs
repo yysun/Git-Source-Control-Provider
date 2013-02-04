@@ -8,7 +8,7 @@ namespace GitScc.Diff
     {
         public HunkRangeInfo(Edit edit, RawText originalText, RawText workingText)
         {
-            OriginaleHunkRange = new HunkRange(edit.GetBeginA(), edit.GetLengthA());
+            OriginalHunkRange = new HunkRange(edit.GetBeginA(), edit.GetLengthA());
             NewHunkRange = new HunkRange(edit.GetBeginB(), edit.GetLengthB());
             OriginalText = originalText.GetString(edit.GetBeginA(), edit.GetEndA(), true).Split('\n').Select(i => i.TrimEnd('\r')).ToList();
 
@@ -32,7 +32,7 @@ namespace GitScc.Diff
             }
         }
 
-        public HunkRange OriginaleHunkRange { get; private set; }
+        public HunkRange OriginalHunkRange { get; private set; }
         public HunkRange NewHunkRange { get; private set; }
         public List<string> OriginalText { get; private set; }
 

@@ -83,8 +83,7 @@
         {
             get
             {
-                ThrowIfDisposed();
-                return true;
+                return _textView.Options.IsSelectionMarginEnabled();
             }
         }
 

@@ -4,6 +4,7 @@
     using System.Windows.Controls;
     using GitScc.Diff.View;
     using GitScc.Diff.ViewModel;
+    using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
 
     internal class DiffMargin : Canvas, IWpfTextViewMargin
@@ -17,16 +18,13 @@
         ///   Creates a <see cref="GitDiffMargin" /> for a given <see cref="IWpfTextView" /> .
         /// </summary>
         /// <param name="textView"> The <see cref="IWpfTextView" /> to attach the margin to. </param>
-        public DiffMargin(IWpfTextView textView)
+        public DiffMargin(IWpfTextView textView, ITextDocumentFactoryService textDocumentFactoryService)
         {
             Width = 9;
             _textView = textView;
 
-            _gitDiffBarControl = new DiffMarginControl
-            {
-                DataContext = new DiffMarginViewModel(_textView, new GitCommands())
-            };
-
+            _gitDiffBarControl = new DiffMarginControl();
+            _gitDiffBarControl.DataContext = new DiffMarginViewModel(_textView, textDocumentFactoryService, new GitCommands());
             Children.Add(_gitDiffBarControl);
         }
 

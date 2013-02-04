@@ -17,7 +17,7 @@ namespace GitScc.Diff.ViewModel
         private RelayCommand<DiffViewModel> _previousChangeCommand;
         private RelayCommand<DiffViewModel> _nextChangeCommand;
 
-        public DiffMarginViewModel(IWpfTextView textView, IGitCommands gitCommands)
+        public DiffMarginViewModel(IWpfTextView textView, ITextDocumentFactoryService textDocumentFactoryService, IGitCommands gitCommands)
         {
             _textView = textView;
             _gitCommands = gitCommands;
@@ -31,12 +31,12 @@ namespace GitScc.Diff.ViewModel
 
             // Delay the initial check until the view gets focus
             _textView.GotAggregateFocus += GotAggregateFocus;
-            
-            _textView.TextDataModel.DocumentBuffer.Properties.TryGetProperty(typeof (ITextDocument), out _document);
+
+            if (!textDocumentFactoryService.TryGetTextDocument(_textView.TextBuffer, out _document))
+                _document = null;
+
             if (_document != null)
-            {
                 _document.FileActionOccurred += FileActionOccurred;
-            }
         }
 
         private void OnViewportHeightChanged(object sender, EventArgs e)

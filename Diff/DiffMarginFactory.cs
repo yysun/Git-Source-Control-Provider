@@ -1,8 +1,9 @@
 ﻿namespace GitScc.Diff
 {
+    using System.ComponentModel.Composition;
+    using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Utilities;
-    using System.ComponentModel.Composition;
 
     [Export(typeof(IWpfTextViewMarginProvider))]
     [Name(DiffMargin.MarginName)]
@@ -12,9 +13,16 @@
     [TextViewRole(PredefinedTextViewRoles.Interactive)]
     internal sealed class DiffMarginFactory : IWpfTextViewMarginProvider
     {
+        [Import]
+        private ITextDocumentFactoryService TextDocumentFactoryService
+        {
+            get;
+            set;
+        }
+
         public IWpfTextViewMargin CreateMargin(IWpfTextViewHost textViewHost, IWpfTextViewMargin containerMargin)
         {
-            return new DiffMargin(textViewHost.TextView);
+            return new DiffMargin(textViewHost.TextView, TextDocumentFactoryService);
         }
     }
 }

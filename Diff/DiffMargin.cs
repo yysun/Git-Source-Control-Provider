@@ -35,8 +35,6 @@
         /// </summary>
         public System.Windows.FrameworkElement VisualElement
         {
-            // Since this margin implements Canvas, this is the object which renders
-            // the margin.
             get
             {
                 ThrowIfDisposed();
@@ -46,8 +44,6 @@
 
         public double MarginSize
         {
-            // Since this is a horizontal margin, its width will be bound to the width of the text view.
-            // Therefore, its size is its height.
             get
             {
                 ThrowIfDisposed();
@@ -57,7 +53,6 @@
 
         public bool Enabled
         {
-            // The margin should always be enabled
             get
             {
                 ThrowIfDisposed();

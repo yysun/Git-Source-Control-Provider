@@ -279,8 +279,7 @@
 
         private void Rollback()
         {
-            var snapshot = _textView.TextSnapshot;
-
+            var snapshot = _hunkRangeInfo.Snapshot;
             if (snapshot != snapshot.TextBuffer.CurrentSnapshot)
                 return;
 

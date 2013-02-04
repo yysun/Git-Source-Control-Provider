@@ -47,7 +47,7 @@
             RawText a = new RawText(previousContent);
             EditList edits = diff.Diff(RawTextComparator.DEFAULT, a, b);
             foreach (Edit edit in edits)
-                yield return new HunkRangeInfo(edit, a, b);
+                yield return new HunkRangeInfo(snapshot, edit, a, b);
         }
 
         private static byte[] GetPreviousRevision(GitFileStatusTracker tracker, string fileName)

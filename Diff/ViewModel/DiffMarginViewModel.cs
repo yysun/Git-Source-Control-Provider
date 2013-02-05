@@ -15,9 +15,8 @@ namespace GitScc.Diff.ViewModel
         private readonly IGitCommands _gitCommands;
         private readonly ObservableCollection<DiffViewModel> _diffViewModels;
         private readonly DiffUpdateBackgroundParser _parser;
-
-        private RelayCommand<DiffViewModel> _previousChangeCommand;
-        private RelayCommand<DiffViewModel> _nextChangeCommand;
+        private readonly RelayCommand<DiffViewModel> _previousChangeCommand;
+        private readonly RelayCommand<DiffViewModel> _nextChangeCommand;
 
         public DiffMarginViewModel(DiffMargin margin, IWpfTextView textView, ITextDocumentFactoryService textDocumentFactoryService, IGitCommands gitCommands)
         {
@@ -34,6 +33,8 @@ namespace GitScc.Diff.ViewModel
             _textView = textView;
             _gitCommands = gitCommands;
             _diffViewModels = new ObservableCollection<DiffViewModel>();
+            _previousChangeCommand = new RelayCommand<DiffViewModel>(PreviousChange, PreviousChangeCanExecute);
+            _nextChangeCommand = new RelayCommand<DiffViewModel>(NextChange, NextChangeCanExecute);
 
             _textView.LayoutChanged += OnLayoutChanged;
             _textView.ViewportHeightChanged += OnViewportHeightChanged;
@@ -63,12 +64,18 @@ namespace GitScc.Diff.ViewModel
 
         public RelayCommand<DiffViewModel> PreviousChangeCommand
         {
-            get { return _previousChangeCommand ?? (_previousChangeCommand = new RelayCommand<DiffViewModel>(PreviousChange, PreviousChangeCanExecute)); }
+            get
+            {
+                return _previousChangeCommand;
+            }
         }
 
         public RelayCommand<DiffViewModel> NextChangeCommand
         {
-            get { return _nextChangeCommand ?? (_nextChangeCommand = new RelayCommand<DiffViewModel>(NextChange, NextChangeCanExecute)); }
+            get
+            {
+                return _nextChangeCommand;
+            }
         }
 
         private bool PreviousChangeCanExecute(DiffViewModel currentDiffViewModel)

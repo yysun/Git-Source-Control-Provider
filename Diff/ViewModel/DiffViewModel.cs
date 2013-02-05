@@ -1,6 +1,7 @@
 ﻿namespace GitScc.Diff.ViewModel
 {
     using System;
+    using System.Linq;
     using System.Windows;
     using System.Windows.Input;
     using System.Windows.Media;
@@ -8,7 +9,6 @@
     using GalaSoft.MvvmLight.Command;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
-    using System.Linq;
     using Microsoft.VisualStudio.Text.Formatting;
 
     public class DiffViewModel : ViewModelBase
@@ -17,12 +17,13 @@
         private readonly HunkRangeInfo _hunkRangeInfo;
         private readonly IWpfTextView _textView;
 
+        private readonly ICommand _copyOldTextCommand;
+        private readonly ICommand _rollbackCommand;
+        private readonly ICommand _showPopUpCommand;
+
         private bool _isDiffTextVisible;
         private bool _showPopup;
         private bool _reverted;
-        private ICommand _copyOldTextCommand;
-        private ICommand _rollbackCommand;
-        private ICommand _showPopUpCommand;
 
         private bool _isVisible;
         private double _height;
@@ -33,6 +34,10 @@
             _margin = margin;
             _hunkRangeInfo = hunkRangeInfo;
             _textView = textView;
+
+            _copyOldTextCommand = new RelayCommand(CopyOldText, CopyOldTextCanExecute);
+            _showPopUpCommand = new RelayCommand(ShowPopUp);
+            _rollbackCommand = new RelayCommand(Rollback, RollbackCanExecute);
 
             ShowPopup = false;
 
@@ -240,7 +245,10 @@
 
         public ICommand ShowPopUpCommand
         {
-            get { return _showPopUpCommand ?? (_showPopUpCommand = new RelayCommand(ShowPopUp)); }
+            get
+            {
+                return _showPopUpCommand;
+            }
         }
 
         public bool ShowPopup
@@ -278,12 +286,18 @@
 
         public ICommand CopyOldTextCommand
         {
-            get { return _copyOldTextCommand ?? (_copyOldTextCommand = new RelayCommand(CopyOldText, CopyOldTextCanExecute)); }
+            get
+            {
+                return _copyOldTextCommand;
+            }
         }
 
         public ICommand RollbackCommand
         {
-            get { return _rollbackCommand ?? (_rollbackCommand = new RelayCommand(Rollback, RollbackCanExecute)); }
+            get
+            {
+                return _rollbackCommand;
+            }
         }
 
         private bool CopyOldTextCanExecute()

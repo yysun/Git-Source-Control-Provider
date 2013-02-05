@@ -118,7 +118,7 @@ namespace GitScc.Diff.ViewModel
 
         private void HandleParseComplete(object sender, ParseResultEventArgs e)
         {
-            _margin.Dispatcher.BeginInvoke((Action)(() =>
+            _margin.VisualElement.Dispatcher.BeginInvoke((Action)(() =>
             {
                 DiffViewModels.Clear();
 

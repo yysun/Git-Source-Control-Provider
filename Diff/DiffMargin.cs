@@ -11,7 +11,7 @@
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Editor.OptionsExtensionMethods;
 
-    public class DiffMargin : Canvas, IWpfTextViewMargin
+    public class DiffMargin : IWpfTextViewMargin
     {
         public const string MarginName = "GitDiffMargin";
 
@@ -34,7 +34,6 @@
         /// <param name="textView"> The <see cref="IWpfTextView" /> to attach the margin to. </param>
         public DiffMargin(IWpfTextView textView, ITextDocumentFactoryService textDocumentFactoryService, IEditorFormatMapService editorFormatMapService)
         {
-            Width = MarginWidth;
             _textView = textView;
             _editorFormatMap = editorFormatMapService.GetEditorFormatMap(textView);
 
@@ -45,17 +44,9 @@
             HandleOptionChanged(null, null);
             _textView.Options.OptionChanged += HandleOptionChanged;
 
-            IsVisibleChanged += (sender, e) =>
-            {
-                if ((bool)e.NewValue)
-                    _textView.LayoutChanged += HandleLayoutChanged;
-                else
-                    _textView.LayoutChanged -= HandleLayoutChanged;
-            };
-
             _gitDiffBarControl = new DiffMarginControl();
             _gitDiffBarControl.DataContext = new DiffMarginViewModel(this, _textView, textDocumentFactoryService, new GitCommands());
-            Children.Add(_gitDiffBarControl);
+            _gitDiffBarControl.Width = MarginWidth;
         }
 
         /// <summary>
@@ -66,7 +57,7 @@
             get
             {
                 ThrowIfDisposed();
-                return this;
+                return _gitDiffBarControl;
             }
         }
 
@@ -75,7 +66,7 @@
             get
             {
                 ThrowIfDisposed();
-                return this.ActualWidth;
+                return _gitDiffBarControl.ActualWidth;
             }
         }
 
@@ -139,11 +130,6 @@
 
         private void HandleOptionChanged(object sender, EditorOptionChangedEventArgs e)
         {
-        }
-
-        private void HandleLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
-        {
-            InvalidateVisual();
         }
 
         private void UpdateBrushes()

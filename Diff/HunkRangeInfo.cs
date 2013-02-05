@@ -9,6 +9,8 @@ namespace GitScc.Diff
     public class HunkRangeInfo
     {
         private readonly ITextSnapshot _snapshot;
+        private readonly Edit _edit;
+        private readonly List<string> _originalText;
 
         public HunkRangeInfo(ITextSnapshot snapshot, Edit edit, RawText originalText, RawText workingText)
         {
@@ -22,29 +24,8 @@ namespace GitScc.Diff
                 throw new ArgumentNullException("workingText");
 
             _snapshot = snapshot;
-
-            OriginalHunkRange = new HunkRange(edit.GetBeginA(), edit.GetLengthA());
-            NewHunkRange = new HunkRange(edit.GetBeginB(), edit.GetLengthB());
-            OriginalText = originalText.GetString(edit.GetBeginA(), edit.GetEndA(), true).Split('\n').Select(i => i.TrimEnd('\r')).ToList();
-
-            switch (edit.GetType())
-            {
-            case Edit.Type.INSERT:
-                IsAddition = true;
-                break;
-
-            case Edit.Type.DELETE:
-                IsDeletion = true;
-                break;
-
-            case Edit.Type.REPLACE:
-                IsModification = true;
-                break;
-
-            case Edit.Type.EMPTY:
-            default:
-                break;
-            }
+            _edit = edit;
+            _originalText = originalText.GetString(edit.GetBeginA(), edit.GetEndA(), true).Split('\n').Select(i => i.TrimEnd('\r')).ToList();
         }
 
         public ITextSnapshot Snapshot
@@ -55,12 +36,52 @@ namespace GitScc.Diff
             }
         }
 
-        public HunkRange OriginalHunkRange { get; private set; }
-        public HunkRange NewHunkRange { get; private set; }
-        public List<string> OriginalText { get; private set; }
+        public HunkRange OriginalHunkRange
+        {
+            get
+            {
+                return new HunkRange(_edit.GetBeginA(), _edit.GetLengthA());
+            }
+        }
 
-        public bool IsAddition { get; private set; }
-        public bool IsModification { get; private set; }
-        public bool IsDeletion { get; private set; }
+        public HunkRange NewHunkRange
+        {
+            get
+            {
+                return new HunkRange(_edit.GetBeginB(), _edit.GetLengthB());
+            }
+        }
+
+        public List<string> OriginalText
+        {
+            get
+            {
+                return _originalText;
+            }
+        }
+
+        public bool IsAddition
+        {
+            get
+            {
+                return _edit.GetType() == Edit.Type.INSERT;
+            }
+        }
+
+        public bool IsModification
+        {
+            get
+            {
+                return _edit.GetType() == Edit.Type.REPLACE;
+            }
+        }
+
+        public bool IsDeletion
+        {
+            get
+            {
+                return _edit.GetType() == Edit.Type.DELETE;
+            }
+        }
     }
 }

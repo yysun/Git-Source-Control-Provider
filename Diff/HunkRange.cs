@@ -1,14 +1,30 @@
 namespace GitScc.Diff
 {
-    public class HunkRange
+    public struct HunkRange
     {
+        private readonly int _startingLineNumber;
+        private readonly int _numberOfLines;
+
         public HunkRange(int startingLineNumber, int numberOfLines)
         {
-            this.StartingLineNumber = startingLineNumber;
-            this.NumberOfLines = numberOfLines;
+            _startingLineNumber = startingLineNumber;
+            _numberOfLines = numberOfLines;
         }
 
-        public long StartingLineNumber { get; private set; }
-        public long NumberOfLines { get; private set; }
+        public int StartingLineNumber
+        {
+            get
+            {
+                return _startingLineNumber;
+            }
+        }
+
+        public int NumberOfLines
+        {
+            get
+            {
+                return _numberOfLines;
+            }
+        }
     }
 }

@@ -55,7 +55,7 @@
             }
         }
 
-        public int LineNumber { get { return (int)_hunkRangeInfo.NewHunkRange.StartingLineNumber; } }
+        public int LineNumber { get { return _hunkRangeInfo.NewHunkRange.StartingLineNumber; } }
 
         private void SetDisplayProperties()
         {
@@ -84,8 +84,8 @@
 
         private bool GetIsVisible()
         {
-            var hunkStartLineNumber = (int) _hunkRangeInfo.NewHunkRange.StartingLineNumber;
-            var hunkEndLineNumber = (int) (_hunkRangeInfo.NewHunkRange.StartingLineNumber + _hunkRangeInfo.NewHunkRange.NumberOfLines);
+            var hunkStartLineNumber = _hunkRangeInfo.NewHunkRange.StartingLineNumber;
+            var hunkEndLineNumber = _hunkRangeInfo.NewHunkRange.StartingLineNumber + _hunkRangeInfo.NewHunkRange.NumberOfLines;
 
             var hunkStartline = _textView.TextSnapshot.GetLineFromLineNumber(hunkStartLineNumber);
             var hunkEndline = _textView.TextSnapshot.GetLineFromLineNumber(hunkEndLineNumber);
@@ -155,8 +155,8 @@
 
         private double GetTopCoordinate()
         {
-            var start = _textView.TextSnapshot.GetLineFromLineNumber((int) _hunkRangeInfo.NewHunkRange.StartingLineNumber).Extent;
-            var end = _textView.TextSnapshot.GetLineFromLineNumber((int)_hunkRangeInfo.NewHunkRange.StartingLineNumber + (int)_hunkRangeInfo.NewHunkRange.NumberOfLines).Extent;
+            var start = _textView.TextSnapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber).Extent;
+            var end = _textView.TextSnapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber + _hunkRangeInfo.NewHunkRange.NumberOfLines).Extent;
 
             var span = new SnapshotSpan(_textView.TextSnapshot, Span.FromBounds(start.Start, end.End));
             var g = _textView.TextViewLines.GetMarkerGeometry(span);
@@ -287,7 +287,7 @@
             {
                 if (_hunkRangeInfo.NewHunkRange.NumberOfLines == 1)
                 {
-                    var line = snapshot.GetLineFromLineNumber((int) _hunkRangeInfo.NewHunkRange.StartingLineNumber);
+                    var line = snapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber);
 
                     var text = line.ExtentIncludingLineBreak.GetText();
 
@@ -304,11 +304,11 @@
                 {
                     for (var n = 0; n <= _hunkRangeInfo.NewHunkRange.NumberOfLines; n++)
                     {
-                        var line = snapshot.GetLineFromLineNumber((int)_hunkRangeInfo.NewHunkRange.StartingLineNumber + n);
+                        var line = snapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber + n);
                         edit.Delete(line.Start.Position, line.Length);
                     }
 
-                    var startLine = snapshot.GetLineFromLineNumber((int) _hunkRangeInfo.NewHunkRange.StartingLineNumber);
+                    var startLine = snapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber);
 
                     foreach (var line in _hunkRangeInfo.OriginalText)
                     {

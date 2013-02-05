@@ -298,7 +298,10 @@
 
         private bool RollbackCanExecute()
         {
-            return _hunkRangeInfo.IsAddition || _hunkRangeInfo.IsModification || _hunkRangeInfo.IsDeletion;
+            if (!_hunkRangeInfo.CanRollback)
+                return false;
+
+            return _hunkRangeInfo.Snapshot == _textView.TextBuffer.CurrentSnapshot;
         }
 
         private void Rollback()

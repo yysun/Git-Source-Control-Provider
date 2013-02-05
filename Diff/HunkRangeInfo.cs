@@ -11,6 +11,7 @@ namespace GitScc.Diff
         private readonly ITextSnapshot _snapshot;
         private readonly Edit _edit;
         private readonly List<string> _originalText;
+        private readonly bool _canRollback;
 
         public HunkRangeInfo(ITextSnapshot snapshot, Edit edit, RawText originalText, RawText workingText)
         {
@@ -26,6 +27,7 @@ namespace GitScc.Diff
             _snapshot = snapshot;
             _edit = edit;
             _originalText = originalText.GetString(edit.GetBeginA(), edit.GetEndA(), true).Split('\n').Select(i => i.TrimEnd('\r')).ToList();
+            _canRollback = true;
         }
 
         private HunkRangeInfo(ITextSnapshot snapshot, Edit edit, List<string> originalText)
@@ -33,6 +35,7 @@ namespace GitScc.Diff
             _snapshot = snapshot;
             _edit = edit;
             _originalText = originalText;
+            _canRollback = false;
         }
 
         public ITextSnapshot Snapshot
@@ -64,6 +67,17 @@ namespace GitScc.Diff
             get
             {
                 return _originalText;
+            }
+        }
+
+        public bool CanRollback
+        {
+            get
+            {
+                if (!_canRollback)
+                    return false;
+
+                return IsAddition || IsModification || IsDeletion;
             }
         }
 

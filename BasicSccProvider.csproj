@@ -95,6 +95,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Diff\BackgroundParser.cs" />
     <Compile Include="Diff\DiffFormatNames.cs" />
     <Compile Include="Diff\DiffRemovedEditorFormatDefinition.cs" />
     <Compile Include="Diff\DiffModificationEditorFormatDefinition.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Diff\HunkRange.cs" />
     <Compile Include="Diff\HunkRangeInfo.cs" />
     <Compile Include="Diff\IGitCommands.cs" />
+    <Compile Include="Diff\ParseResultEventArgs.cs" />
     <Compile Include="Diff\ViewModel\DiffMarginViewModel.cs" />
     <Compile Include="Diff\ViewModel\DiffViewModel.cs" />
     <Compile Include="Diff\View\DiffMarginControl.xaml.cs">

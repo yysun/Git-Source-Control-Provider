@@ -28,6 +28,13 @@ namespace GitScc.Diff
             _originalText = originalText.GetString(edit.GetBeginA(), edit.GetEndA(), true).Split('\n').Select(i => i.TrimEnd('\r')).ToList();
         }
 
+        private HunkRangeInfo(ITextSnapshot snapshot, Edit edit, List<string> originalText)
+        {
+            _snapshot = snapshot;
+            _edit = edit;
+            _originalText = originalText;
+        }
+
         public ITextSnapshot Snapshot
         {
             get
@@ -81,6 +88,40 @@ namespace GitScc.Diff
             get
             {
                 return _edit.GetType() == Edit.Type.DELETE;
+            }
+        }
+
+        public HunkRangeInfo TranslateTo(ITextSnapshot snapshot)
+        {
+            if (snapshot == null)
+                throw new ArgumentNullException("snapshot");
+
+            if (snapshot == _snapshot)
+                return this;
+
+            if (IsDeletion)
+            {
+                // track a point
+                ITextSnapshotLine line = _snapshot.GetLineFromLineNumber(_edit.GetBeginB());
+                ITrackingPoint trackingPoint = _snapshot.CreateTrackingPoint(line.Start, PointTrackingMode.Negative);
+
+                SnapshotPoint updated = trackingPoint.GetPoint(snapshot);
+                int updatedLineNumber = updated.GetContainingLine().LineNumber;
+                Edit updatedEdit = new Edit(_edit.GetBeginA(), _edit.GetEndA(), updatedLineNumber, updatedLineNumber);
+                return new HunkRangeInfo(snapshot, updatedEdit, _originalText);
+            }
+            else
+            {
+                // track a span
+                ITextSnapshotLine startLine = _snapshot.GetLineFromLineNumber(_edit.GetBeginB());
+                ITextSnapshotLine endLine = _snapshot.GetLineFromLineNumber(_edit.GetEndB() - 1);
+                ITrackingSpan trackingSpan = _snapshot.CreateTrackingSpan(new SnapshotSpan(startLine.Start, endLine.EndIncludingLineBreak), SpanTrackingMode.EdgeInclusive);
+
+                SnapshotSpan updated = trackingSpan.GetSpan(snapshot);
+                int updatedStartLineNumber = updated.Start.GetContainingLine().LineNumber;
+                int updatedEndLineNumber = updated.End.GetContainingLine().LineNumber;
+                Edit updatedEdit = new Edit(_edit.GetBeginA(), _edit.GetEndA(), updatedStartLineNumber, updatedEndLineNumber);
+                return new HunkRangeInfo(snapshot, updatedEdit, _originalText);
             }
         }
     }

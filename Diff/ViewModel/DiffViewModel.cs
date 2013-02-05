@@ -84,8 +84,10 @@
             if (_reverted)
                 return;
 
-            ITextSnapshotLine startLine = _textView.TextSnapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber);
-            ITextSnapshotLine endLine = _textView.TextSnapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber + _hunkRangeInfo.NewHunkRange.NumberOfLines - 1);
+            HunkRangeInfo hunkRangeInfo = _hunkRangeInfo.TranslateTo(_textView.TextBuffer.CurrentSnapshot);
+
+            ITextSnapshotLine startLine = _textView.TextSnapshot.GetLineFromLineNumber(hunkRangeInfo.NewHunkRange.StartingLineNumber);
+            ITextSnapshotLine endLine = _textView.TextSnapshot.GetLineFromLineNumber(hunkRangeInfo.NewHunkRange.StartingLineNumber + hunkRangeInfo.NewHunkRange.NumberOfLines - 1);
             if (startLine != null && endLine != null)
             {
                 IWpfTextViewLine startLineView = _textView.GetTextViewLineContainingBufferPosition(startLine.Start);
@@ -171,7 +173,7 @@
 
                 if (stopBottom <= startTop)
                 {
-                    if (_hunkRangeInfo.IsDeletion)
+                    if (hunkRangeInfo.IsDeletion)
                     {
                         double center = (startTop + stopBottom) / 2.0;
                         Top = center - (_textView.LineHeight / 2.0);
@@ -180,7 +182,7 @@
                     }
                     else
                     {
-                        // shouldn't be reachable, but definitely hide if this is the case
+                        // could be reachable if translation changes an addition to empty
                         IsVisible = false;
                     }
 

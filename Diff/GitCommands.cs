@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using NGit.Diff;
+    using Buffer = System.Buffer;
     using Constants = NGit.Constants;
     using ITextDocument = Microsoft.VisualStudio.Text.ITextDocument;
     using ITextSnapshot = Microsoft.VisualStudio.Text.ITextSnapshot;
@@ -23,7 +24,18 @@
             HistogramDiff diff = new HistogramDiff();
             diff.SetFallbackAlgorithm(null);
             string currentText = snapshot.GetText();
-            RawText b = new RawText(textDocument.Encoding.GetBytes(currentText));
+
+            byte[] preamble = textDocument.Encoding.GetPreamble();
+            byte[] content = textDocument.Encoding.GetBytes(currentText);
+            if (preamble.Length > 0)
+            {
+                byte[] completeContent = new byte[preamble.Length + content.Length];
+                Buffer.BlockCopy(preamble, 0, completeContent, 0, preamble.Length);
+                Buffer.BlockCopy(content, 0, completeContent, preamble.Length, content.Length);
+                content = completeContent;
+            }
+
+            RawText b = new RawText(content);
             RawText a = new RawText(tracker.GetFileContent(fileName) ?? new byte[0]);
             EditList edits = diff.Diff(RawTextComparator.WS_IGNORE_TRAILING, a, b);
             foreach (Edit edit in edits)

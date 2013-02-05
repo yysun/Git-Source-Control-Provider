@@ -59,11 +59,7 @@
 
         private void SetDisplayProperties()
         {
-            Height = GetHeight();
-            Top = GetTopCoordinate();
-
-            IsVisible = GetIsVisible();
-
+            UpdateDimensions();
             Coordinates = string.Format("Top:{0}, Height:{1}, New number of Lines: {2}, StartingLineNumber: {3}", Top, Height, _hunkRangeInfo.NewHunkRange.NumberOfLines, _hunkRangeInfo.NewHunkRange.StartingLineNumber);
         }
 
@@ -82,93 +78,115 @@
             return string.Empty;
         }
 
-        private bool GetIsVisible()
+        private void UpdateDimensions()
         {
-            var hunkStartLineNumber = _hunkRangeInfo.NewHunkRange.StartingLineNumber;
-            var hunkEndLineNumber = _hunkRangeInfo.NewHunkRange.StartingLineNumber + _hunkRangeInfo.NewHunkRange.NumberOfLines;
-
-            var hunkStartline = _textView.TextSnapshot.GetLineFromLineNumber(hunkStartLineNumber);
-            var hunkEndline = _textView.TextSnapshot.GetLineFromLineNumber(hunkEndLineNumber);
-            if (hunkStartline != null && hunkEndline != null)
+            ITextSnapshotLine startLine = _textView.TextSnapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber);
+            ITextSnapshotLine endLine = _textView.TextSnapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber + _hunkRangeInfo.NewHunkRange.NumberOfLines - 1);
+            if (startLine != null && endLine != null)
             {
-                var topLine = _textView.GetTextViewLineContainingBufferPosition(hunkStartline.Start);
-                var bottomLine = _textView.GetTextViewLineContainingBufferPosition(hunkEndline.End);
-
-                if (IsHunkFullyVisible(topLine, bottomLine))
+                IWpfTextViewLine startLineView = _textView.GetTextViewLineContainingBufferPosition(startLine.Start);
+                IWpfTextViewLine endLineView = _textView.GetTextViewLineContainingBufferPosition(endLine.Start);
+                if (startLineView == null || endLineView == null)
                 {
-                    return true;
+                    IsVisible = false;
+                    return;
                 }
 
-                if (topLine.VisibilityState != VisibilityState.FullyVisible && bottomLine.VisibilityState == VisibilityState.FullyVisible)
+                if (_textView.TextViewLines.LastVisibleLine.EndIncludingLineBreak < startLineView.Start
+                    || _textView.TextViewLines.FirstVisibleLine.Start > endLineView.EndIncludingLineBreak)
                 {
-                    Top = 0;
-
-                    var numberofHiddenLines = _textView.ViewportTop/_textView.LineHeight;
-
-                    var hiddenHunkLines = numberofHiddenLines - hunkStartLineNumber;
-
-                    Height = Height - Math.Ceiling(Math.Abs(hiddenHunkLines) * _textView.LineHeight);
-
-                    return true;
+                    IsVisible = false;
+                    return;
                 }
 
-                if (topLine.VisibilityState == VisibilityState.FullyVisible && bottomLine.VisibilityState != VisibilityState.FullyVisible)
+                double startTop;
+                switch (startLineView.VisibilityState)
                 {
-                    Height = _textView.ViewportBottom - (Top + 1);
+                case VisibilityState.FullyVisible:
+                    startTop = startLineView.Top - _textView.ViewportTop;
+                    break;
 
-                    return true;
+                case VisibilityState.Hidden:
+                    startTop = startLineView.Top - _textView.ViewportTop;
+                    break;
+
+                case VisibilityState.PartiallyVisible:
+                    startTop = startLineView.Top - _textView.ViewportTop;
+                    break;
+
+                case VisibilityState.Unattached:
+                    // if the closest line was past the end we would have already returned
+                    startTop = 0;
+                    break;
+
+                default:
+                    // shouldn't be reachable, but definitely hide if this is the case
+                    IsVisible = false;
+                    return;
                 }
 
-                if (topLine.VisibilityState != VisibilityState.FullyVisible && bottomLine.VisibilityState != VisibilityState.FullyVisible)
+                if (startTop >= _textView.ViewportHeight + _textView.LineHeight)
                 {
-                    if ((hunkEndLineNumber - hunkStartLineNumber) * _textView.LineHeight >= _textView.ViewportHeight)
+                    // shouldn't be reachable, but definitely hide if this is the case
+                    IsVisible = false;
+                    return;
+                }
+
+                double stopBottom;
+                switch (endLineView.VisibilityState)
+                {
+                case VisibilityState.FullyVisible:
+                    stopBottom = endLineView.Bottom - _textView.ViewportTop;
+                    break;
+
+                case VisibilityState.Hidden:
+                    stopBottom = endLineView.Bottom - _textView.ViewportTop;
+                    break;
+
+                case VisibilityState.PartiallyVisible:
+                    stopBottom = endLineView.Bottom - _textView.ViewportTop;
+                    break;
+
+                case VisibilityState.Unattached:
+                    // if the closest line was before the start we would have already returned
+                    stopBottom = _textView.ViewportHeight;
+                    break;
+
+                default:
+                    // shouldn't be reachable, but definitely hide if this is the case
+                    IsVisible = false;
+                    return;
+                }
+
+                if (stopBottom <= -_textView.LineHeight)
+                {
+                    // shouldn't be reachable, but definitely hide if this is the case
+                    IsVisible = false;
+                    return;
+                }
+
+                if (stopBottom <= startTop)
+                {
+                    if (_hunkRangeInfo.IsDeletion)
                     {
-                        if ((hunkEndLineNumber + 1) * _textView.LineHeight >= _textView.ViewportBottom)
-                        {
-                            Top = 0;
-                            Height = _textView.ViewportHeight;
-                            return true;
-                        }
+                        double center = (startTop + stopBottom) / 2.0;
+                        Top = center - (_textView.LineHeight / 2.0);
+                        Height = _textView.LineHeight;
+                        IsVisible = true;
                     }
+                    else
+                    {
+                        // shouldn't be reachable, but definitely hide if this is the case
+                        IsVisible = false;
+                    }
+
+                    return;
                 }
+
+                Top = startTop;
+                Height = stopBottom - startTop;
+                IsVisible = true;
             }
-
-            return false;
-        }
-
-        private static bool IsHunkFullyVisible(IWpfTextViewLine topLine, IWpfTextViewLine bottomLine)
-        {
-            return topLine.VisibilityState == VisibilityState.FullyVisible && bottomLine.VisibilityState == VisibilityState.FullyVisible;
-        }
-
-        private double GetHeight()
-        {
-            var lineHeight = _textView.LineHeight;
-
-            if (_hunkRangeInfo.IsDeletion)
-            {
-                return _textView.LineHeight;
-            }
-            
-            return _hunkRangeInfo.NewHunkRange.NumberOfLines*lineHeight;
-        }
-
-        private double GetTopCoordinate()
-        {
-            var start = _textView.TextSnapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber).Extent;
-            var end = _textView.TextSnapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber + _hunkRangeInfo.NewHunkRange.NumberOfLines).Extent;
-
-            var span = new SnapshotSpan(_textView.TextSnapshot, Span.FromBounds(start.Start, end.End));
-            var g = _textView.TextViewLines.GetMarkerGeometry(span);
-
-            if (g != null)
-            {
-                return g.Bounds.Top - _textView.ViewportTop;
-            }
-
-            var ratio = _hunkRangeInfo.NewHunkRange.StartingLineNumber / (_textView.ViewportHeight / _textView.LineHeight);
-            var topCoordinate = Math.Ceiling((ratio * _textView.ViewportHeight) - _textView.ViewportTop);
-            return topCoordinate;
         }
 
         public void RefreshPosition()

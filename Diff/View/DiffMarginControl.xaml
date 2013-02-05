@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:ViewModel="clr-namespace:GitScc.Diff.ViewModel"
              Cursor="Hand"
+             ClipToBounds="True"
              d:DataContext="{d:DesignInstance ViewModel:DiffMarginViewModel}"
              d:DesignHeight="300"
              d:DesignWidth="9"

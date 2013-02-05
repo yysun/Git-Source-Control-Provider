@@ -96,7 +96,7 @@
     <ItemsControl Grid.Column="0"
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Stretch"
-                  ItemsSource="{Binding DiffViewModels, Mode=TwoWay}">
+                  ItemsSource="{Binding DiffViewModels, Mode=OneWay}">
       <ItemsControl.ItemsPanel>
         <ItemsPanelTemplate>
           <Canvas HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />

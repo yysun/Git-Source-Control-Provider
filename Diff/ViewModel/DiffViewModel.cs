@@ -19,6 +19,7 @@
 
         private bool _isDiffTextVisible;
         private bool _showPopup;
+        private bool _reverted;
         private ICommand _copyOldTextCommand;
         private ICommand _rollbackCommand;
         private ICommand _showPopUpCommand;
@@ -80,6 +81,9 @@
 
         private void UpdateDimensions()
         {
+            if (_reverted)
+                return;
+
             ITextSnapshotLine startLine = _textView.TextSnapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber);
             ITextSnapshotLine endLine = _textView.TextSnapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber + _hunkRangeInfo.NewHunkRange.NumberOfLines - 1);
             if (startLine != null && endLine != null)
@@ -336,6 +340,11 @@
                 }
 
                 edit.Apply();
+
+                // immediately hide the change
+                _reverted = true;
+                ShowPopup = false;
+                IsVisible = false;
             }
         }
 

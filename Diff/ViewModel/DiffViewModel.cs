@@ -285,41 +285,36 @@
 
             using (ITextEdit edit = snapshot.TextBuffer.CreateEdit())
             {
+                Span newSpan;
+                if (_hunkRangeInfo.IsDeletion)
+                {
+                    ITextSnapshotLine startLine = snapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber);
+                    newSpan = new Span(startLine.Start.Position, 0);
+                }
+                else
+                {
+                    ITextSnapshotLine startLine = snapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber);
+                    ITextSnapshotLine endLine = snapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber + _hunkRangeInfo.NewHunkRange.NumberOfLines - 1);
+                    newSpan = Span.FromBounds(startLine.Start.Position, endLine.EndIncludingLineBreak.Position);
+                }
+
                 if (_hunkRangeInfo.IsAddition)
                 {
                     ITextSnapshotLine startLine = snapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber);
                     ITextSnapshotLine endLine = snapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber + _hunkRangeInfo.NewHunkRange.NumberOfLines - 1);
                     edit.Delete(Span.FromBounds(startLine.Start.Position, endLine.EndIncludingLineBreak.Position));
                 }
-                else if (_hunkRangeInfo.NewHunkRange.NumberOfLines == 1)
-                {
-                    var line = snapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber);
-
-                    var text = line.ExtentIncludingLineBreak.GetText();
-
-                    if(text.EndsWith("\r\n"))
-                    {
-                        edit.Replace(line.ExtentIncludingLineBreak, _hunkRangeInfo.OriginalText[0] + "\r\n");
-                    }
-                    else
-                    {
-                        edit.Replace(line.ExtentIncludingLineBreak, _hunkRangeInfo.OriginalText[0]);
-                    }
-                }
                 else
                 {
-                    for (var n = 0; n <= _hunkRangeInfo.NewHunkRange.NumberOfLines; n++)
-                    {
-                        var line = snapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber + n);
-                        edit.Delete(line.Start.Position, line.Length);
-                    }
+                    string lineBreak = snapshot.GetLineFromLineNumber(0).GetLineBreakText();
+                    if (string.IsNullOrEmpty(lineBreak))
+                        lineBreak = Environment.NewLine;
 
-                    var startLine = snapshot.GetLineFromLineNumber(_hunkRangeInfo.NewHunkRange.StartingLineNumber);
+                    string originalText = string.Join(lineBreak, _hunkRangeInfo.OriginalText);
+                    if (_hunkRangeInfo.NewHunkRange.StartingLineNumber + _hunkRangeInfo.NewHunkRange.NumberOfLines != snapshot.LineCount)
+                        originalText += lineBreak;
 
-                    foreach (var line in _hunkRangeInfo.OriginalText)
-                    {
-                        edit.Insert(startLine.Start.Position, line + "\r\n");                        
-                    }
+                    edit.Replace(newSpan, originalText);
                 }
 
                 edit.Apply();

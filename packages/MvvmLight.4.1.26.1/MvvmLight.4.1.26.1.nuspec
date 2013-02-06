@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>MvvmLight</id>
+    <version>4.1.26.1</version>
+    <title>MVVM Light</title>
+    <authors>Laurent Bugnion (GalaSoft)</authors>
+    <owners>Laurent Bugnion (GalaSoft)</owners>
+    <licenseUrl>http://mvvmlight.codeplex.com/license</licenseUrl>
+    <projectUrl>http://www.galasoft.ch/mvvm</projectUrl>
+    <iconUrl>http://www.galasoft.ch/mvvm/resources/Logo/icon_100x100_transparent.png</iconUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>The MVVM Light Toolkit is a set of components helping people to get started in the Model-View-ViewModel pattern in Silverlight, WPF, Windows Phone 7 and Windows 8. It is a light and pragmatic framework that contains only the essential components needed. This is V4 RTM!</description>
+    <summary>The MVVM Light Toolkit is a set of components helping people to get started in the Model-View-ViewModel pattern in all versions of Silverlight, WPF, Windows Phone 7 and Windows 8.</summary>
+    <copyright>Copyright 2013 Laurent Bugnion (GalaSoft)</copyright>
+    <language>en-US</language>
+    <tags>mvvm mvvmlight silverlight wp7 windows8 winrt win8 wpf windowsphone windowsphone7 windowsphone8</tags>
+    <references>
+      <reference file="GalaSoft.MvvmLight.dll" />
+      <reference file="GalaSoft.MvvmLight.Extras.dll" />
+      <reference file="Microsoft.Practices.ServiceLocation.dll" />
+      <reference file="System.Windows.Interactivity.dll" />
+      <reference file="GalaSoft.MvvmLight.Extras.WPF4.dll" />
+      <reference file="GalaSoft.MvvmLight.WPF4.dll" />
+      <reference file="GalaSoft.MvvmLight.Extras.WPF45.dll" />
+      <reference file="GalaSoft.MvvmLight.WPF45.dll" />
+      <reference file="GalaSoft.MvvmLight.Extras.Win8.dll" />
+      <reference file="GalaSoft.MvvmLight.Win8.dll" />
+      <reference file="GalaSoft.MvvmLight.Extras.WP7.dll" />
+      <reference file="GalaSoft.MvvmLight.WP7.dll" />
+      <reference file="GalaSoft.MvvmLight.Extras.WP71.dll" />
+      <reference file="GalaSoft.MvvmLight.WP71.dll" />
+      <reference file="GalaSoft.MvvmLight.Extras.SL4.dll" />
+      <reference file="GalaSoft.MvvmLight.SL4.dll" />
+      <reference file="GalaSoft.MvvmLight.Extras.SL5.dll" />
+      <reference file="GalaSoft.MvvmLight.SL5.dll" />
+      <reference file="GalaSoft.MvvmLight.Extras.WP8.dll" />
+      <reference file="GalaSoft.MvvmLight.WP8.dll" />
+    </references>
+  </metadata>
+</package>

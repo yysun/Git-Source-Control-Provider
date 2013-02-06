@@ -9,6 +9,7 @@ using NGit;
 using NGit.Api;
 using NGit.Diff;
 using NGit.Dircache;
+using NGit.Errors;
 using NGit.Ignore;
 using NGit.Revwalk;
 using NGit.Storage.File;
@@ -92,7 +93,12 @@ namespace GitScc
                             var treeId = ObjectId.FromString(repository.Open(head).GetBytes(), 5);
                             this.commitTree = new Tree(repository, treeId, repository.Open(treeId).GetBytes());
                         }
-                        this.index = repository.GetIndex();
+
+                        if (repository.IsBare)
+                            throw new NoWorkTreeException();
+
+                        this.index = new GitIndex(repository);
+                        this.index.Read();
                         this.index.RereadIfNecessary();
 
                         try

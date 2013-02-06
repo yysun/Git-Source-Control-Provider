@@ -1,7 +1,7 @@
 ﻿using GitScc.DataServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
+using Constants = NGit.Constants;
 
 namespace BasicSccProvider.Tests
 {
@@ -82,7 +82,7 @@ namespace BasicSccProvider.Tests
         public void TreeDiffTest()
         {
             RepositoryGraph repo = new RepositoryGraph(repodir);
-            var changes = repo.GetChanges("master", "HEAD");
+            var changes = repo.GetChanges(Constants.MASTER, Constants.HEAD);
             foreach (var change in changes)
             {
                 Console.WriteLine("{0}:{1}", change.ChangeType, change.Name);

@@ -26,6 +26,7 @@ namespace GitScc
         public bool DisableAutoRefresh { get; set; }
         public bool DisableAutoLoad { get; set; }
         public bool NotUseUTF8FileNames { get; set; }
+        public bool DisableDiffMargin { get; set; }
         public bool UseVsDiff { get; set; }
 
         private static GitSccOptions gitSccOptions;

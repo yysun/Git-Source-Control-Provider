@@ -23,5 +23,19 @@
                 return GitTextViewOptions.DiffMarginId;
             }
         }
+
+        [Export(typeof(IWpfTextViewCreationListener))]
+        [ContentType("text")]
+        [TextViewRole(PredefinedTextViewRoles.Document)]
+        private class TextViewListener : IWpfTextViewCreationListener
+        {
+            public void TextViewCreated(IWpfTextView textView)
+            {
+                if (textView == null)
+                    return;
+
+                textView.Options.SetOptionValue(GitTextViewOptions.DiffMarginId, !GitSccOptions.Current.DisableDiffMargin);
+            }
+        }
     }
 }

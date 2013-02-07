@@ -53,6 +53,7 @@ namespace GitScc
         private CheckBox checkBox5;
         private CheckBox checkBox6;
         private CheckBox useVsDiffChk;
+        private CheckBox chkDisableDiffMargin;
         // The parent page, use to persist data
         private SccProviderOptions _customPage;
 
@@ -108,6 +109,7 @@ namespace GitScc
             this.checkBox5 = new System.Windows.Forms.CheckBox();
             this.checkBox6 = new System.Windows.Forms.CheckBox();
             this.useVsDiffChk = new System.Windows.Forms.CheckBox();
+            this.chkDisableDiffMargin = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // openFileDialog1
@@ -133,7 +135,7 @@ namespace GitScc
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 51);
+            this.label2.Location = new System.Drawing.Point(3, 44);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(114, 13);
             this.label2.TabIndex = 13;
@@ -141,7 +143,7 @@ namespace GitScc
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(6, 68);
+            this.textBox2.Location = new System.Drawing.Point(6, 60);
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(283, 20);
             this.textBox2.TabIndex = 14;
@@ -149,7 +151,7 @@ namespace GitScc
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(3, 209);
+            this.label3.Location = new System.Drawing.Point(3, 191);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(321, 13);
             this.label3.TabIndex = 15;
@@ -157,7 +159,7 @@ namespace GitScc
             // 
             // textBox3
             // 
-            this.textBox3.Location = new System.Drawing.Point(6, 226);
+            this.textBox3.Location = new System.Drawing.Point(6, 207);
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(283, 20);
             this.textBox3.TabIndex = 16;
@@ -174,7 +176,7 @@ namespace GitScc
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(295, 66);
+            this.button2.Location = new System.Drawing.Point(295, 58);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 18;
@@ -184,7 +186,7 @@ namespace GitScc
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(295, 224);
+            this.button3.Location = new System.Drawing.Point(295, 205);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(75, 23);
             this.button3.TabIndex = 19;
@@ -195,7 +197,7 @@ namespace GitScc
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(3, 117);
+            this.label4.Location = new System.Drawing.Point(3, 106);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(98, 13);
             this.label4.TabIndex = 20;
@@ -203,14 +205,14 @@ namespace GitScc
             // 
             // textBox4
             // 
-            this.textBox4.Location = new System.Drawing.Point(6, 134);
+            this.textBox4.Location = new System.Drawing.Point(6, 122);
             this.textBox4.Name = "textBox4";
             this.textBox4.Size = new System.Drawing.Size(283, 20);
             this.textBox4.TabIndex = 21;
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(295, 132);
+            this.button4.Location = new System.Drawing.Point(295, 120);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(75, 23);
             this.button4.TabIndex = 22;
@@ -221,7 +223,7 @@ namespace GitScc
             // checkBox1
             // 
             this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(66, 93);
+            this.checkBox1.Location = new System.Drawing.Point(66, 86);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(220, 17);
             this.checkBox1.TabIndex = 23;
@@ -231,7 +233,7 @@ namespace GitScc
             // checkBox2
             // 
             this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(66, 160);
+            this.checkBox2.Location = new System.Drawing.Point(66, 148);
             this.checkBox2.Name = "checkBox2";
             this.checkBox2.Size = new System.Drawing.Size(204, 17);
             this.checkBox2.TabIndex = 24;
@@ -242,7 +244,7 @@ namespace GitScc
             // 
             this.checkBox3.AutoSize = true;
             this.checkBox3.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.checkBox3.Location = new System.Drawing.Point(6, 262);
+            this.checkBox3.Location = new System.Drawing.Point(6, 233);
             this.checkBox3.Name = "checkBox3";
             this.checkBox3.Size = new System.Drawing.Size(163, 17);
             this.checkBox3.TabIndex = 25;
@@ -253,7 +255,7 @@ namespace GitScc
             // 
             this.checkBox4.AutoSize = true;
             this.checkBox4.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.checkBox4.Location = new System.Drawing.Point(244, 262);
+            this.checkBox4.Location = new System.Drawing.Point(6, 252);
             this.checkBox4.Name = "checkBox4";
             this.checkBox4.Size = new System.Drawing.Size(120, 17);
             this.checkBox4.TabIndex = 26;
@@ -264,7 +266,7 @@ namespace GitScc
             // 
             this.checkBox5.AutoSize = true;
             this.checkBox5.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.checkBox5.Location = new System.Drawing.Point(6, 287);
+            this.checkBox5.Location = new System.Drawing.Point(6, 271);
             this.checkBox5.Name = "checkBox5";
             this.checkBox5.Size = new System.Drawing.Size(303, 17);
             this.checkBox5.TabIndex = 27;
@@ -275,7 +277,7 @@ namespace GitScc
             // 
             this.checkBox6.AutoSize = true;
             this.checkBox6.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.checkBox6.Location = new System.Drawing.Point(6, 311);
+            this.checkBox6.Location = new System.Drawing.Point(6, 290);
             this.checkBox6.Name = "checkBox6";
             this.checkBox6.Size = new System.Drawing.Size(205, 17);
             this.checkBox6.TabIndex = 28;
@@ -286,19 +288,30 @@ namespace GitScc
             // 
             this.useVsDiffChk.AutoSize = true;
             this.useVsDiffChk.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.useVsDiffChk.Location = new System.Drawing.Point(6, 189);
+            this.useVsDiffChk.Location = new System.Drawing.Point(6, 171);
             this.useVsDiffChk.Name = "useVsDiffChk";
-            this.useVsDiffChk.Size = new System.Drawing.Size(200, 17);
+            this.useVsDiffChk.Size = new System.Drawing.Size(197, 17);
             this.useVsDiffChk.TabIndex = 29;
-            this.useVsDiffChk.Text = "Use Visual Studio 2012 Diff Window:";
+            this.useVsDiffChk.Text = "Use Visual Studio 2012 Diff Window";
             this.useVsDiffChk.UseVisualStyleBackColor = true;
             this.useVsDiffChk.CheckedChanged += new System.EventHandler(this.useVsDiffChk_CheckedChanged);
+            // 
+            // chkDisableDiffMargin
+            // 
+            this.chkDisableDiffMargin.AutoSize = true;
+            this.chkDisableDiffMargin.Location = new System.Drawing.Point(6, 309);
+            this.chkDisableDiffMargin.Name = "chkDisableDiffMargin";
+            this.chkDisableDiffMargin.Size = new System.Drawing.Size(130, 17);
+            this.chkDisableDiffMargin.TabIndex = 30;
+            this.chkDisableDiffMargin.Text = "Disable the diff margin";
+            this.chkDisableDiffMargin.UseVisualStyleBackColor = true;
             // 
             // SccProviderOptionsControl
             // 
             this.AllowDrop = true;
             this.AutoScroll = true;
             this.AutoSize = true;
+            this.Controls.Add(this.chkDisableDiffMargin);
             this.Controls.Add(this.useVsDiffChk);
             this.Controls.Add(this.checkBox6);
             this.Controls.Add(this.checkBox5);
@@ -347,6 +360,7 @@ namespace GitScc
             this.checkBox4.Checked = GitSccOptions.Current.DisableAutoRefresh;
             this.checkBox5.Checked = GitSccOptions.Current.DisableAutoLoad;
             this.checkBox6.Checked = GitSccOptions.Current.NotUseUTF8FileNames;
+            this.chkDisableDiffMargin.Checked = GitSccOptions.Current.DisableDiffMargin;
             this.useVsDiffChk.Checked = GitSccOptions.Current.UseVsDiff;
         }
 
@@ -392,6 +406,7 @@ namespace GitScc
             GitSccOptions.Current.DisableAutoRefresh = this.checkBox4.Checked;
             GitSccOptions.Current.DisableAutoLoad = this.checkBox5.Checked;
             GitSccOptions.Current.NotUseUTF8FileNames = this.checkBox6.Checked;
+            GitSccOptions.Current.DisableDiffMargin = this.chkDisableDiffMargin.Checked;
             GitSccOptions.Current.UseVsDiff = this.useVsDiffChk.Checked;
 
             GitBash.UseUTF8FileNames = !GitSccOptions.Current.NotUseUTF8FileNames;

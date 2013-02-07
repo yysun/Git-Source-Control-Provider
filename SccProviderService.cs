@@ -672,14 +672,13 @@ namespace GitScc
 
         public int DirectoryChanged(string pszDirectory)
         {
-            //Debug.WriteLine("==== dir changed REFRESH: " + pszDirectory);
-            MarkDirty();
-
+            // git tracks files, not directories. don't mark dirty here.
             return VSConstants.S_OK;
         }
 
         public int FilesChanged(uint cChanges, string[] rgpszFile, uint[] rggrfChange)
         {
+            MarkDirty();
             return VSConstants.S_OK;
         }
 

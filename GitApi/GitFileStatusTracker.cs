@@ -15,7 +15,7 @@ using NGit.Revwalk;
 using NGit.Storage.File;
 using NGit.Treewalk;
 using NGit.Treewalk.Filter;
-using System.Diagnostics;
+using NGit.Util;
 
 namespace GitScc
 {
@@ -54,6 +54,11 @@ namespace GitScc
             {
                 return Git.Open(subDirectories[0].FullName).GetRepository(); ;
             }
+
+            // handling for submodules
+            FileInfo[] files = directory.GetFiles(Constants.DOT_GIT);
+            if (files.Length > 0)
+                return new RepositoryBuilder().SetFS(FS.DETECTED).SetWorkTree(name).SetMustExist(true).Build();
 
             if (directory.Parent == null) return null;
 
@@ -570,7 +575,7 @@ namespace GitScc
 
             var directory = new DirectoryInfo(folder);
 
-            if (directory.GetDirectories(Constants.DOT_GIT).Length > 0)
+            if (directory.GetFileSystemInfos(Constants.DOT_GIT).Length > 0)
             {
                 return folder;
             }

@@ -36,7 +36,7 @@ namespace GitScc
 
         public GitFileStatusTracker(string workingFolder)
         {
-            this.cache = new Dictionary<string, GitFileStatus>();
+            this.cache = new Dictionary<string, GitFileStatus>(StringComparer.OrdinalIgnoreCase);
             this.initFolder = workingFolder;
             Refresh();
         }
@@ -349,7 +349,7 @@ namespace GitScc
 
         private string GetCacheKey(string fileName)
         {
-            return GetRelativeFileName(fileName).ToLower();
+            return GetRelativeFileNameForGit(fileName);
         }
 
         private string GetFullPath(string fileName)

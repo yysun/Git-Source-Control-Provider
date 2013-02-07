@@ -8,7 +8,7 @@
 
     [Export(typeof(IWpfTextViewMarginProvider))]
     [Name(DiffMargin.MarginName)]
-    [Order(After = PredefinedMarginNames.Spacer)]
+    [Order(After = PredefinedMarginNames.Spacer, Before = PredefinedMarginNames.Outlining)]
     [MarginContainer(PredefinedMarginNames.LeftSelection)]
     [ContentType("text")]
     [TextViewRole(PredefinedTextViewRoles.Interactive)]

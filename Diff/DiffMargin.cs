@@ -41,12 +41,12 @@
             _textView.Closed += (sender, e) => _editorFormatMap.FormatMappingChanged -= HandleFormatMappingChanged;
             UpdateBrushes();
 
-            HandleOptionChanged(null, null);
             _textView.Options.OptionChanged += HandleOptionChanged;
 
             _gitDiffBarControl = new DiffMarginControl();
             _gitDiffBarControl.DataContext = new DiffMarginViewModel(this, _textView, textDocumentFactoryService, new GitCommands());
             _gitDiffBarControl.Width = MarginWidth;
+            UpdateVisibility();
         }
 
         /// <summary>
@@ -74,7 +74,7 @@
         {
             get
             {
-                return _textView.Options.IsSelectionMarginEnabled();
+                return _textView.Options.GetOptionValue(GitTextViewOptions.DiffMarginId);
             }
         }
 
@@ -130,6 +130,8 @@
 
         private void HandleOptionChanged(object sender, EditorOptionChangedEventArgs e)
         {
+            if (!_isDisposed && e.OptionId == GitTextViewOptions.DiffMarginName)
+                UpdateVisibility();
         }
 
         private void UpdateBrushes()
@@ -137,6 +139,12 @@
             _additionBrush = GetBrush(_editorFormatMap.GetProperties(DiffFormatNames.Addition));
             _modificationBrush = GetBrush(_editorFormatMap.GetProperties(DiffFormatNames.Modification));
             _removedBrush = GetBrush(_editorFormatMap.GetProperties(DiffFormatNames.Removed));
+        }
+
+        private void UpdateVisibility()
+        {
+            ThrowIfDisposed();
+            _gitDiffBarControl.Visibility = Enabled ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private static Brush GetBrush(ResourceDictionary properties)

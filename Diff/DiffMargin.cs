@@ -49,6 +49,8 @@
             UpdateVisibility();
         }
 
+        public event EventHandler BrushesChanged;
+
         /// <summary>
         ///   The <see cref="Sytem.Windows.FrameworkElement" /> that implements the visual representation of the margin.
         /// </summary>
@@ -118,8 +120,18 @@
             _isDisposed = true;
         }
 
+        protected virtual void OnBrushesChanged(EventArgs e)
+        {
+            var t = BrushesChanged;
+            if (t != null)
+                t(this, e);
+        }
+
         private void HandleFormatMappingChanged(object sender, FormatItemsEventArgs e)
         {
+            if (_isDisposed)
+                return;
+
             if (e.ChangedItems.Contains(DiffFormatNames.Addition)
                 || e.ChangedItems.Contains(DiffFormatNames.Modification)
                 || e.ChangedItems.Contains(DiffFormatNames.Removed))
@@ -139,6 +151,7 @@
             _additionBrush = GetBrush(_editorFormatMap.GetProperties(DiffFormatNames.Addition));
             _modificationBrush = GetBrush(_editorFormatMap.GetProperties(DiffFormatNames.Modification));
             _removedBrush = GetBrush(_editorFormatMap.GetProperties(DiffFormatNames.Removed));
+            OnBrushesChanged(EventArgs.Empty);
         }
 
         private void UpdateVisibility()

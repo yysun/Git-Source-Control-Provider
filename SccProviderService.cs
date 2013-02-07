@@ -12,8 +12,8 @@ using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.Shell;
-using System.Windows.Threading;
+using Interlocked = System.Threading.Interlocked;
+using Thread = System.Threading.Thread;
 
 namespace GitScc
 {
@@ -786,22 +786,39 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
             return VSConstants.S_OK;
         }
 
+        private IDisposable _updateSolutionDisableRefresh;
+
         public int UpdateSolution_Begin(ref int pfCancelUpdate)
         {
             Debug.WriteLine("Git Source Control Provider: suppress refresh before build...");
-            NoRefresh = true;
+            IDisposable disableRefresh = DisableRefresh();
+            disableRefresh = Interlocked.Exchange(ref _updateSolutionDisableRefresh, disableRefresh);
+            if (disableRefresh != null)
+            {
+                // this is unexpected, but if we did overwrite a handle make sure it gets disposed
+                disableRefresh.Dispose();
+            }
+
             return VSConstants.S_OK;
         }
 
         public int UpdateSolution_Cancel()
         {
+            Debug.WriteLine("Git Source Control Provider: resume refresh after cancel...");
+            IDisposable handle = Interlocked.Exchange(ref _updateSolutionDisableRefresh, null);
+            if (handle != null)
+                handle.Dispose();
+
             return VSConstants.S_OK;
         }
 
         public int UpdateSolution_Done(int fSucceeded, int fModified, int fCancelCommand)
         {
             Debug.WriteLine("Git Source Control Provider: resume refresh after build...");
-            NoRefresh = false;
+            IDisposable handle = Interlocked.Exchange(ref _updateSolutionDisableRefresh, null);
+            if (handle != null)
+                handle.Dispose();
+
             return VSConstants.S_OK;
         }
 
@@ -921,9 +938,44 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
         #region new Refresh methods
 
         internal bool NodesGlyphsDirty = false;
-        internal bool NoRefresh = false;
         internal DateTime lastTimeRefresh = DateTime.Now.AddDays(-1);
         internal DateTime nextTimeRefresh = DateTime.Now;
+
+        private int _disableRefresh;
+
+        private bool NoRefresh
+        {
+            get
+            {
+                return Thread.VolatileRead(ref _disableRefresh) != 0;
+            }
+        }
+
+        internal IDisposable DisableRefresh()
+        {
+            return new DisableRefreshHandle(this);
+        }
+
+        private sealed class DisableRefreshHandle : IDisposable
+        {
+            private readonly SccProviderService _service;
+            private bool _disposed;
+
+            public DisableRefreshHandle(SccProviderService service)
+            {
+                _service = service;
+                Interlocked.Increment(ref _service._disableRefresh);
+            }
+
+            public void Dispose()
+            {
+                if (_disposed)
+                    return;
+
+                _disposed = true;
+                Interlocked.Decrement(ref _service._disableRefresh);
+            }
+        }
 
         internal void Refresh()
         {
@@ -951,13 +1003,15 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
                     //Stopwatch stopwatch = new Stopwatch();
                     //stopwatch.Start();
 
-                    NoRefresh = true;
-                    OpenTracker();
-                    foreach (GitFileStatusTracker tracker in trackers.ToArray())
-                        tracker.GetChangedFiles(true);
-                    RefreshNodesGlyphs();
-                    RefreshToolWindows();
-                    NoRefresh = false;  
+                    using (DisableRefresh())
+                    {
+                        OpenTracker();
+                        foreach (GitFileStatusTracker tracker in trackers.ToArray())
+                            tracker.GetChangedFiles(true);
+                        RefreshNodesGlyphs();
+                        RefreshToolWindows();
+                    }
+
                     NodesGlyphsDirty = false;
 
                     nextTimeRefresh = DateTime.Now; //important !!

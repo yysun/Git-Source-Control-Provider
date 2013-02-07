@@ -84,35 +84,35 @@ namespace GitScc
 
             Action act = () =>
             {
-                service.NoRefresh = true;
-                try
+                using (service.DisableRefresh())
                 {
-                    //var ret = tracker.DiffFile(fileName);
-                    //ret = ret.Replace("\r", "").Replace("\n", "\r\n");
-
-                    //var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), ".diff");
-                    //File.WriteAllText(tmpFileName, ret);
-
-                    var tmpFileName = tracker.DiffFile(fileName);
-                    if (!string.IsNullOrWhiteSpace(tmpFileName) && File.Exists(tmpFileName))
+                    try
                     {
-                        if (new FileInfo(tmpFileName).Length > 2 * 1024 * 1024)
+                        //var ret = tracker.DiffFile(fileName);
+                        //ret = ret.Replace("\r", "").Replace("\n", "\r\n");
+
+                        //var tmpFileName = Path.ChangeExtension(Path.GetTempFileName(), ".diff");
+                        //File.WriteAllText(tmpFileName, ret);
+
+                        var tmpFileName = tracker.DiffFile(fileName);
+                        if (!string.IsNullOrWhiteSpace(tmpFileName) && File.Exists(tmpFileName))
                         {
-                            this.DiffEditor.Text = "File is too big to display: " + fileName;
-                        }
-                        else
-                        {
-                            diffLines = File.ReadAllLines(tmpFileName);
-                            this.ShowFile(tmpFileName);
+                            if (new FileInfo(tmpFileName).Length > 2 * 1024 * 1024)
+                            {
+                                this.DiffEditor.Text = "File is too big to display: " + fileName;
+                            }
+                            else
+                            {
+                                diffLines = File.ReadAllLines(tmpFileName);
+                                this.ShowFile(tmpFileName);
+                            }
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        ShowStatusMessage(ex.Message);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    ShowStatusMessage(ex.Message);
-                }
-                service.NoRefresh = false;
-
             };
 
             this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
@@ -230,74 +230,77 @@ namespace GitScc
             this.tracker = tracker;
             if (tracker == null)
             {
-                service.NoRefresh = true;
-                ClearUI();
-                service.NoRefresh = false;
+                using (service.DisableRefresh())
+                {
+                    ClearUI();
+                }
+
                 return;
             }
 
             Action act = () =>
             {
-
-                service.NoRefresh = true;
-                ShowStatusMessage("Getting changed files ...");
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                var selectedFile = GetSelectedFileName();
-                var selectedFiles = this.dataGrid1.Items.Cast<GitFile>()
-                    .Where(i => i.IsSelected)
-                    .Select(i => i.FileName).ToList();
-
-                this.dataGrid1.BeginInit();
-
-                try
+                using (service.DisableRefresh())
                 {
+                    ShowStatusMessage("Getting changed files ...");
 
-                    this.dataGrid1.ItemsSource = tracker.ChangedFiles;
+                    Stopwatch stopwatch = new Stopwatch();
+                    stopwatch.Start();
 
-                    ICollectionView view = CollectionViewSource.GetDefaultView(this.dataGrid1.ItemsSource);
-                    if (view != null)
+                    var selectedFile = GetSelectedFileName();
+                    var selectedFiles = this.dataGrid1.Items.Cast<GitFile>()
+                        .Where(i => i.IsSelected)
+                        .Select(i => i.FileName).ToList();
+
+                    this.dataGrid1.BeginInit();
+
+                    try
                     {
-                        view.SortDescriptions.Clear();
-                        view.SortDescriptions.Add(new SortDescription(sortMemberPath, sortDirection));
-                        view.Refresh();
+
+                        this.dataGrid1.ItemsSource = tracker.ChangedFiles;
+
+                        ICollectionView view = CollectionViewSource.GetDefaultView(this.dataGrid1.ItemsSource);
+                        if (view != null)
+                        {
+                            view.SortDescriptions.Clear();
+                            view.SortDescriptions.Add(new SortDescription(sortMemberPath, sortDirection));
+                            view.Refresh();
+                        }
+
+                        this.dataGrid1.SelectedValue = selectedFile;
+                        selectedFiles.ForEach(fn =>
+                        {
+                            var item = this.dataGrid1.Items.Cast<GitFile>()
+                                .Where(i => i.FileName == fn)
+                                .FirstOrDefault();
+                            if (item != null)
+                                item.IsSelected = true;
+                        });
+
+                        ShowStatusMessage("");
+
+                        var changed = tracker.ChangedFiles;
+                        this.label3.Content = string.Format("Changed files: ({0}) +{1} ~{2} -{3} !{4}", tracker.CurrentBranch,
+                            changed.Where(f => f.Status == GitFileStatus.New || f.Status == GitFileStatus.Added).Count(),
+                            changed.Where(f => f.Status == GitFileStatus.Modified || f.Status == GitFileStatus.Staged).Count(),
+                            changed.Where(f => f.Status == GitFileStatus.Deleted || f.Status == GitFileStatus.Removed).Count(),
+                            changed.Where(f => f.Status == GitFileStatus.Conflict).Count());
                     }
-
-                    this.dataGrid1.SelectedValue = selectedFile;
-                    selectedFiles.ForEach(fn =>
+                    catch (Exception ex)
                     {
-                        var item = this.dataGrid1.Items.Cast<GitFile>()
-                            .Where(i => i.FileName == fn)
-                            .FirstOrDefault();
-                        if (item != null) item.IsSelected = true;
-                    });
+                        ShowStatusMessage(ex.Message);
+                    }
+                    this.dataGrid1.EndInit();
 
-                    ShowStatusMessage("");
+                    stopwatch.Stop();
+                    Debug.WriteLine("**** PendingChangesView Refresh: " + stopwatch.ElapsedMilliseconds);
 
-                    var changed = tracker.ChangedFiles;
-                    this.label3.Content = string.Format("Changed files: ({0}) +{1} ~{2} -{3} !{4}", tracker.CurrentBranch,
-                        changed.Where(f => f.Status == GitFileStatus.New || f.Status == GitFileStatus.Added).Count(),
-                        changed.Where(f => f.Status == GitFileStatus.Modified || f.Status == GitFileStatus.Staged).Count(),
-                        changed.Where(f => f.Status == GitFileStatus.Deleted || f.Status == GitFileStatus.Removed).Count(),
-                        changed.Where(f => f.Status == GitFileStatus.Conflict).Count());
+                    if (!GitSccOptions.Current.DisableAutoRefresh && stopwatch.ElapsedMilliseconds > 1000)
+                        this.label4.Visibility = Visibility.Visible;
+                    else
+                        this.label4.Visibility = Visibility.Collapsed;
                 }
-                catch (Exception ex)
-                {
-                    ShowStatusMessage(ex.Message);
-                }
-                this.dataGrid1.EndInit();
 
-                stopwatch.Stop();
-                Debug.WriteLine("**** PendingChangesView Refresh: " + stopwatch.ElapsedMilliseconds);
-
-                if (!GitSccOptions.Current.DisableAutoRefresh && stopwatch.ElapsedMilliseconds > 1000)
-                    this.label4.Visibility = Visibility.Visible;
-                else
-                    this.label4.Visibility = Visibility.Collapsed;
-
-                service.NoRefresh = false;
                 service.lastTimeRefresh = DateTime.Now; //important!!
 
             };
@@ -346,33 +349,35 @@ namespace GitScc
 
         internal void Commit()
         {
-            service.NoRefresh = true;
-            if (HasComments() && StageSelectedFiles(true))
+            using (service.DisableRefresh())
             {
-                string errorMessage = null;
-                try
+                if (HasComments() && StageSelectedFiles(true))
                 {
-                    ShowStatusMessage("Committing ...");
-                    var result = tracker.Commit(Comments, false, chkSignOff.IsChecked == true);
-                    if (result.IsSha1)
+                    string errorMessage = null;
+                    try
                     {
-                        ShowStatusMessage("Commit successfully. Commit Hash: " + result.Message);
-                        ClearUI();
+                        ShowStatusMessage("Committing ...");
+                        var result = tracker.Commit(Comments, false, chkSignOff.IsChecked == true);
+                        if (result.IsSha1)
+                        {
+                            ShowStatusMessage("Commit successfully. Commit Hash: " + result.Message);
+                            ClearUI();
+                        }
+                        else
+                        {
+                            errorMessage = result.Message;
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        errorMessage = result.Message;
+                        errorMessage = ex.Message;
                     }
-                }
-                catch (Exception ex)
-                {
-                    errorMessage = ex.Message;
-                }
 
-                if (!String.IsNullOrEmpty(errorMessage))
-                    MessageBox.Show(errorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    if (!String.IsNullOrEmpty(errorMessage))
+                        MessageBox.Show(errorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                }
             }
-            service.NoRefresh = false;
+
             //service.lastTimeRefresh = DateTime.Now;
             service.NodesGlyphsDirty = true; // force refresh
         }
@@ -389,23 +394,24 @@ namespace GitScc
                 var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
                 if (dte.ItemOperations.PromptToSave == EnvDTE.vsPromptResult.vsPromptResultCancelled) return;
 
-                service.NoRefresh = true;
-                StageSelectedFiles(false);
-
-                try
+                using (service.DisableRefresh())
                 {
-                    ShowStatusMessage("Amending last Commit ...");
-                    var id = tracker.Commit(Comments, true, chkSignOff.IsChecked == true);
-                    ShowStatusMessage("Amend last commit successfully. Commit Hash: " + id);
-                    ClearUI();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                    ShowStatusMessage(ex.Message);
+                    StageSelectedFiles(false);
+
+                    try
+                    {
+                        ShowStatusMessage("Amending last Commit ...");
+                        var id = tracker.Commit(Comments, true, chkSignOff.IsChecked == true);
+                        ShowStatusMessage("Amend last commit successfully. Commit Hash: " + id);
+                        ClearUI();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                        ShowStatusMessage(ex.Message);
+                    }
                 }
 
-                service.NoRefresh = false;
                 //service.lastTimeRefresh = DateTime.Now;
                 service.NodesGlyphsDirty = true; // force refresh
             }

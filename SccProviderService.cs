@@ -953,6 +953,8 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
 
                     NoRefresh = true;
                     OpenTracker();
+                    foreach (GitFileStatusTracker tracker in trackers.ToArray())
+                        tracker.GetChangedFiles(true);
                     RefreshNodesGlyphs();
                     RefreshToolWindows();
                     NoRefresh = false;  

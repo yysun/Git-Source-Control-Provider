@@ -34,6 +34,7 @@
             _margin = margin;
             _hunkRangeInfo = hunkRangeInfo;
             _textView = textView;
+            _margin.BrushesChanged += HandleBrushesChanged;
 
             _copyOldTextCommand = new RelayCommand(CopyOldText, CopyOldTextCanExecute);
             _showPopUpCommand = new RelayCommand(ShowPopUp);
@@ -62,6 +63,11 @@
         }
 
         public int LineNumber { get { return _hunkRangeInfo.NewHunkRange.StartingLineNumber; } }
+
+        private void HandleBrushesChanged(object sender, EventArgs e)
+        {
+            RaisePropertyChanged(() => DiffBrush);
+        }
 
         private void SetDisplayProperties()
         {

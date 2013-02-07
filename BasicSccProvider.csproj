@@ -97,6 +97,7 @@
   <ItemGroup>
     <Compile Include="Diff\BackgroundParser.cs" />
     <Compile Include="Diff\DiffFormatNames.cs" />
+    <Compile Include="Diff\DiffMarginEnabled.cs" />
     <Compile Include="Diff\DiffParseResultEventArgs.cs" />
     <Compile Include="Diff\DiffRemovedEditorFormatDefinition.cs" />
     <Compile Include="Diff\DiffModificationEditorFormatDefinition.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Diff\DiffMarginFactory.cs" />
     <Compile Include="Diff\DiffUpdateBackgroundParser.cs" />
     <Compile Include="Diff\GitCommands.cs" />
+    <Compile Include="Diff\GitTextViewOptions.cs" />
     <Compile Include="Diff\HunkRange.cs" />
     <Compile Include="Diff\HunkRangeInfo.cs" />
     <Compile Include="Diff\IGitCommands.cs" />

@@ -413,7 +413,7 @@ namespace GitScc
             GitSccOptions.Current.SaveConfig();
 
             SccProviderService sccProviderService = (SccProviderService)GetService(typeof(SccProviderService));
-            sccProviderService.Refresh();
+            sccProviderService.MarkDirty();
         }
 
         private void useVsDiffChk_CheckedChanged(object sender, EventArgs e)

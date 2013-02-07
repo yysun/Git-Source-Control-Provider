@@ -324,6 +324,7 @@ namespace GitScc
 
         private void OnRefreshCommand(object sender, EventArgs e)
         {
+            // explicit user refresh
             sccService.Refresh();
         }
 

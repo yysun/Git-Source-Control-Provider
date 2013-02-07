@@ -83,7 +83,7 @@ namespace GitScc
         {
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Git Source Control Provider set active"));
             _active = true;
-            Refresh();
+            MarkDirty();
             return VSConstants.S_OK;
         }
 
@@ -94,7 +94,7 @@ namespace GitScc
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Git Source Control Provider set inactive"));
             _active = false;
             CloseTracker();
-            NodesGlyphsDirty = true;
+            MarkDirty();
             return VSConstants.S_OK;
         }
 
@@ -251,7 +251,8 @@ namespace GitScc
                     rscp.RegisterSourceControlProvider(GuidList.guidSccProvider);
                 }
             }
-            Refresh(); 
+
+            MarkDirty();
             return VSConstants.S_OK;
         }
 
@@ -648,7 +649,7 @@ namespace GitScc
             Debug.WriteLine("==== Close Tracker");
             trackers.Clear();
             RemoveFolderMonitor();
-            NodesGlyphsDirty = true; // set refresh flag
+            MarkDirty();
             //RefreshToolWindows();
         }
 
@@ -672,7 +673,7 @@ namespace GitScc
         public int DirectoryChanged(string pszDirectory)
         {
             //Debug.WriteLine("==== dir changed REFRESH: " + pszDirectory);
-            Refresh();
+            MarkDirty();
 
             return VSConstants.S_OK;
         }
@@ -937,10 +938,11 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
 
         #region new Refresh methods
 
-        internal bool NodesGlyphsDirty = false;
         internal DateTime lastTimeRefresh = DateTime.Now.AddDays(-1);
         internal DateTime nextTimeRefresh = DateTime.Now;
 
+        private int _nodesGlyphsDirty;
+        private int _explicitRefreshRequested;
         private int _disableRefresh;
 
         private bool NoRefresh
@@ -949,6 +951,12 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
             {
                 return Thread.VolatileRead(ref _disableRefresh) != 0;
             }
+        }
+
+        internal void MarkDirty()
+        {
+            // this doesn't need to be a volatile write since it's fine if the write is delayed
+            _nodesGlyphsDirty = 1;
         }
 
         internal IDisposable DisableRefresh()
@@ -979,45 +987,44 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
 
         internal void Refresh()
         {
-            if (!NoRefresh)
-            {
-                double delta = DateTime.Now.Subtract(lastTimeRefresh).TotalMilliseconds;
-                if (delta > 500)
-                {
-                    NodesGlyphsDirty = true;
-                    lastTimeRefresh = DateTime.Now;
-                    nextTimeRefresh = DateTime.Now;
-                }
-            }
+            // this doesn't need to be a volatile write since it's fine if the write is delayed
+            _explicitRefreshRequested = 1;
         }
 
         public void UpdateNodesGlyphs()
         {
-            if (NodesGlyphsDirty && !NoRefresh)
+            if (NoRefresh)
+                return;
+
+            bool refresh = Interlocked.Exchange(ref _explicitRefreshRequested, 0) != 0;
+            if (!refresh && Thread.VolatileRead(ref _nodesGlyphsDirty) != 0)
             {
-                double delta = DateTime.Now.Subtract(nextTimeRefresh).TotalMilliseconds;
-                if (delta > 200)
+                refresh = DateTime.Now - nextTimeRefresh >= TimeSpan.FromMilliseconds(200);
+            }
+
+            if (refresh)
+            {
+                Debug.WriteLine("==== UpdateNodesGlyphs");
+
+                //Stopwatch stopwatch = new Stopwatch();
+                //stopwatch.Start();
+
+                using (DisableRefresh())
                 {
-                    Debug.WriteLine("==== UpdateNodesGlyphs: " + delta.ToString());
+                    // this comes before the actual refresh, since a change on the file system during
+                    // the refresh may or may not appear in the refresh results
+                    Thread.VolatileWrite(ref _nodesGlyphsDirty, 0);
 
-                    //Stopwatch stopwatch = new Stopwatch();
-                    //stopwatch.Start();
-
-                    using (DisableRefresh())
-                    {
-                        OpenTracker();
-                        foreach (GitFileStatusTracker tracker in trackers.ToArray())
-                            tracker.GetChangedFiles(true);
-                        RefreshNodesGlyphs();
-                        RefreshToolWindows();
-                    }
-
-                    NodesGlyphsDirty = false;
-
-                    nextTimeRefresh = DateTime.Now; //important !!
-                    //stopwatch.Stop();
-                    //Debug.WriteLine("==== UpdateNodesGlyphs: " + stopwatch.ElapsedMilliseconds);
+                    OpenTracker();
+                    foreach (GitFileStatusTracker tracker in trackers.ToArray())
+                        tracker.GetChangedFiles(true);
+                    RefreshNodesGlyphs();
+                    RefreshToolWindows();
                 }
+
+                nextTimeRefresh = DateTime.Now; //important !!
+                //stopwatch.Stop();
+                //Debug.WriteLine("==== UpdateNodesGlyphs: " + stopwatch.ElapsedMilliseconds);
             }
         }
 

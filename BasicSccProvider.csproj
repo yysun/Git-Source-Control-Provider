@@ -141,6 +141,7 @@
     </Compile>
     <Compile Include="SccProviderService.cs" />
     <Compile Include="PendingChangesToolWindow.cs" />
+    <Compile Include="Schedulers\QueuedTaskScheduler.cs" />
     <Compile Include="UI\BranchPicker.xaml.cs">
       <DependentUpon>BranchPicker.xaml</DependentUpon>
     </Compile>

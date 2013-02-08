@@ -9,11 +9,16 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks.Schedulers;
 using System.Windows.Forms;
+using System.Windows.Threading;
 using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell.Interop;
+using CancellationToken = System.Threading.CancellationToken;
 using Interlocked = System.Threading.Interlocked;
+using Task = System.Threading.Tasks.Task;
+using TaskContinuationOptions = System.Threading.Tasks.TaskContinuationOptions;
+using TaskCreationOptions = System.Threading.Tasks.TaskCreationOptions;
 using TaskScheduler = System.Threading.Tasks.TaskScheduler;
 using Thread = System.Threading.Thread;
 
@@ -1022,27 +1027,46 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
 
             if (refresh)
             {
+                IDisposable disableRefresh = DisableRefresh();
+
                 Debug.WriteLine("==== UpdateNodesGlyphs");
 
-                //Stopwatch stopwatch = new Stopwatch();
-                //stopwatch.Start();
+                // this comes before the actual refresh, since a change on the file system during
+                // the refresh may or may not appear in the refresh results
+                Thread.VolatileWrite(ref _nodesGlyphsDirty, 0);
 
-                using (DisableRefresh())
+                Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
+                Action openTrackerAction = () =>
                 {
-                    // this comes before the actual refresh, since a change on the file system during
-                    // the refresh may or may not appear in the refresh results
-                    Thread.VolatileWrite(ref _nodesGlyphsDirty, 0);
-
                     OpenTracker();
                     foreach (GitFileStatusTracker tracker in trackers.ToArray())
                         tracker.GetChangedFiles(true);
-                    RefreshNodesGlyphs();
-                    RefreshToolWindows();
-                }
+                };
 
-                nextTimeRefresh = DateTime.Now; //important !!
-                //stopwatch.Stop();
-                //Debug.WriteLine("==== UpdateNodesGlyphs: " + stopwatch.ElapsedMilliseconds);
+                Action<Task> continuationAction = (task) =>
+                {
+                    if (task.Exception != null)
+                    {
+                        disableRefresh.Dispose();
+                        return;
+                    }
+
+                    Action applyUpdatesAction = () =>
+                    {
+                        using (disableRefresh)
+                        {
+                            RefreshNodesGlyphs();
+                            RefreshToolWindows();
+                            // make sure to defer next refresh
+                            nextTimeRefresh = DateTime.Now;
+                        }
+                    };
+
+                    dispatcher.BeginInvoke(applyUpdatesAction);
+                };
+
+                Task.Factory.StartNew(openTrackerAction, CancellationToken.None, TaskCreationOptions.LongRunning, SccProviderService.TaskScheduler)
+                    .ContinueWith(continuationAction, TaskContinuationOptions.ExecuteSynchronously);
             }
         }
 

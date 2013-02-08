@@ -7,12 +7,14 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks.Schedulers;
 using System.Windows.Forms;
 using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell.Interop;
 using Interlocked = System.Threading.Interlocked;
+using TaskScheduler = System.Threading.Tasks.TaskScheduler;
 using Thread = System.Threading.Thread;
 
 namespace GitScc
@@ -28,6 +30,10 @@ namespace GitScc
         IDisposable,
         IVsUpdateSolutionEvents2
     {
+        private static readonly QueuedTaskScheduler _queuedTaskScheduler =
+            new QueuedTaskScheduler(1, threadName: "Git SCC Tasks");
+        private static readonly TaskScheduler _taskScheduler = _queuedTaskScheduler.ActivateNewQueue();
+
         private bool _active = false;
         private BasicSccProvider _sccProvider = null;
         private List<GitFileStatusTracker> trackers;
@@ -67,6 +73,14 @@ namespace GitScc
             }
         }
         #endregion
+
+        public static TaskScheduler TaskScheduler
+        {
+            get
+            {
+                return _taskScheduler;
+            }
+        }
 
         #region IVsSccProvider interface functions
         /// <summary>

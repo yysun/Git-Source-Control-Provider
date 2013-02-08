@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -12,7 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using GitScc.UI;
-using System.Collections.Generic;
+using CancellationToken = System.Threading.CancellationToken;
 
 namespace GitScc
 {
@@ -99,23 +101,27 @@ namespace GitScc
                         {
                             if (new FileInfo(tmpFileName).Length > 2 * 1024 * 1024)
                             {
-                                this.DiffEditor.Text = "File is too big to display: " + fileName;
+                                Action action = () => this.DiffEditor.Text = "File is too big to display: " + fileName;
+                                Dispatcher.Invoke(action);
                             }
                             else
                             {
                                 diffLines = File.ReadAllLines(tmpFileName);
-                                this.ShowFile(tmpFileName);
+                                Action action = () => this.ShowFile(tmpFileName);
+                                Dispatcher.Invoke(action);
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        ShowStatusMessage(ex.Message);
+                        string message = ex.Message;
+                        Action action = () => ShowStatusMessage(message);
+                        Dispatcher.Invoke(action);
                     }
                 }
             };
 
-            this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+            Task.Factory.StartNew(act, CancellationToken.None, TaskCreationOptions.LongRunning, SccProviderService.TaskScheduler);
         }
 
         private void dataGrid1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -237,12 +243,17 @@ namespace GitScc
                 return;
             }
 
-            Action act = () =>
+            Func<IEnumerable<GitFile>> getChangedFiles = () =>
+            {
+                Action action = () => ShowStatusMessage("Getting changed files ...");
+                Dispatcher.Invoke(action);
+                return tracker.ChangedFiles;
+            };
+
+            Action<IEnumerable<GitFile>> refreshAction = changedFiles =>
             {
                 using (service.DisableRefresh())
                 {
-                    ShowStatusMessage("Getting changed files ...");
-
                     Stopwatch stopwatch = new Stopwatch();
                     stopwatch.Start();
 
@@ -255,8 +266,7 @@ namespace GitScc
 
                     try
                     {
-
-                        this.dataGrid1.ItemsSource = tracker.ChangedFiles;
+                        this.dataGrid1.ItemsSource = changedFiles;
 
                         ICollectionView view = CollectionViewSource.GetDefaultView(this.dataGrid1.ItemsSource);
                         if (view != null)
@@ -278,7 +288,7 @@ namespace GitScc
 
                         ShowStatusMessage("");
 
-                        var changed = tracker.ChangedFiles;
+                        var changed = changedFiles;
                         this.label3.Content = string.Format("Changed files: ({0}) +{1} ~{2} -{3} !{4}", tracker.CurrentBranch,
                             changed.Where(f => f.Status == GitFileStatus.New || f.Status == GitFileStatus.Added).Count(),
                             changed.Where(f => f.Status == GitFileStatus.Modified || f.Status == GitFileStatus.Staged).Count(),
@@ -301,7 +311,13 @@ namespace GitScc
                 }
             };
 
-            this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
+            Action<Task<IEnumerable<GitFile>>> continuationAction = task =>
+            {
+                Dispatcher.Invoke(refreshAction, task.Result);
+            };
+
+            Task.Factory.StartNew(getChangedFiles, CancellationToken.None, TaskCreationOptions.LongRunning, SccProviderService.TaskScheduler)
+                .ContinueWith(continuationAction, TaskContinuationOptions.ExecuteSynchronously);
         }
 
         internal void ClearUI()

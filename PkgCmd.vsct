@@ -53,6 +53,10 @@
         <Parent guid="guidSccProviderCmdSet" id="imnuGitSourceControlMenu"/>
       </Group>
 
+      <Group guid="guidSccProviderCmdSet" id="igrpGeneralSourceControlCommands" priority="0x0080">
+        <Parent guid="guidSccProviderCmdSet" id="imnuGitSourceControlMenu"/>
+      </Group>
+
       <Group guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup" priority="0x0100">
         <Parent guid="guidSccProviderCmdSet" id="imnuPendingChangesToolWindowToolbarMenu"/>
       </Group>
@@ -82,7 +86,7 @@
     <Buttons>
      
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandGitBash" priority="0x0106" type="Button">
-        <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
+        <Parent guid="guidSccProviderCmdSet" id="igrpGeneralSourceControlCommands"/>
         <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
@@ -137,7 +141,7 @@
       </Button>
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandEditIgnore" priority="0x0103" type="Button">
-        <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
+        <Parent guid="guidSccProviderCmdSet" id="igrpGeneralSourceControlCommands"/>
         <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
@@ -148,7 +152,7 @@
       </Button>
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandRefresh" priority="0x0104" type="Button">
-        <!--<Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>-->
+        <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
         <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
@@ -193,6 +197,7 @@
       </Button>
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandPendingChanges" priority="0x0101" type="Button">
+        <Parent guid="guidSccProviderCmdSet" id="igrpGeneralSourceControlCommands"/>
         <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
@@ -203,7 +208,7 @@
       </Button>
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandHistory" priority="0x0105" type="Button">
-        <!--<Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>-->
+        <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
         <Icon guid="guidSccProviderImages" id="iconGitBash" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
@@ -289,16 +294,6 @@
     </CommandPlacement>
 
     <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandPendingChanges" priority="0x0003">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>
-    </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandPendingChanges" priority="0x0003">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_SCC"/>
-    </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandPendingChanges" priority="0x0003">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
-    </CommandPlacement>
-
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandPendingChanges" priority="0x0003">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS0"/>
     </CommandPlacement>
     
@@ -308,26 +303,6 @@
     </CommandPlacement>
     <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandUndo" priority="0x0601">
       <Parent guid="guidSccProviderCmdSet" id="igrpDocTabWnd"/>
-    </CommandPlacement>
-    
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandHistory" priority="0x0004">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>
-    </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandHistory" priority="0x0004">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_SCC"/>
-    </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandHistory" priority="0x0004">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
-    </CommandPlacement>
-
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandRefresh" priority="0x0005">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_SCC"/>
-    </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandRefresh" priority="0x0005">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_SCC"/>
-    </CommandPlacement>
-    <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandRefresh" priority="0x0005">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_SCC"/>
     </CommandPlacement>
     
     <CommandPlacement guid="guidSccProviderCmdSet" id="icmdSccCommandEditIgnore" priority="0x0007">
@@ -389,8 +364,10 @@
       <IDSymbol name="icmdPendingChangesCommitToBranch" value="0x113"/>
 
       <IDSymbol name="icmdPendingChangesRefresh" value="0x114"/>
-      <IDSymbol name="icmdHistoryViewRefresh" value="0x115"/>  
-      
+      <IDSymbol name="icmdHistoryViewRefresh" value="0x115"/>
+
+      <IDSymbol name="igrpGeneralSourceControlCommands" value="0x700"/>
+      <IDSymbol name="imnuGeneralSourceControlCommands" value="0x701"/>
       <IDSymbol name="igrpGitExtCommands" value="0x800"/>
       <IDSymbol name="imnuGitExtMenu" value="0x801"/>
       <IDSymbol name="igrpGitTorCommands" value="0x900"/>

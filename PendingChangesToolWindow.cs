@@ -15,7 +15,7 @@ namespace GitScc
     public class PendingChangesToolWindow : ToolWindowPane
     {
         private SccProviderService sccProviderService;
-        protected UserControl control;
+        protected PendingChangesView control;
 
         public PendingChangesToolWindow()
         {
@@ -62,7 +62,7 @@ namespace GitScc
         public override void OnToolWindowCreated()
         {
             sccProviderService = BasicSccProvider.GetServiceEx<SccProviderService>();
-            Refresh(sccProviderService.CurrentTracker, true); // refresh when the tool window becomes visible
+            Refresh(sccProviderService.CurrentTracker); // refresh when the tool window becomes visible
         }
 
         internal bool hasFileSaved()
@@ -74,28 +74,23 @@ namespace GitScc
         internal void OnCommitCommand()
         {
             if (!hasFileSaved()) return;
-            ((PendingChangesView)control).Commit();
+            control.Commit();
         }
 
         internal void OnAmendCommitCommand()
         {
             if (!hasFileSaved()) return;
-            ((PendingChangesView)control).AmendCommit();
+            control.AmendCommit();
         }
 
         private void OnRefreshCommand(object sender, EventArgs e)
         {
             hasFileSaved(); //just a reminder, refresh anyway
-            sccProviderService.OpenTracker();
-            sccProviderService.RefreshNodesGlyphs();
-            Refresh(sccProviderService.CurrentTracker, true);
+            sccProviderService.Refresh();
         }
 
-        internal void Refresh(GitFileStatusTracker tracker, bool force = false)
+        internal void Refresh(GitFileStatusTracker tracker)
         {
-            //var frame = this.Frame as IVsWindowFrame;
-            //if (frame == null || frame.IsVisible() == 1) return;
-
             try
             {
                 var repository = (tracker == null || !tracker.HasGitRepository) ? "" :
@@ -103,16 +98,11 @@ namespace GitScc
 
                 this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption") + repository;
 
-                if (!GitSccOptions.Current.DisableAutoRefresh || force || tracker == null)
-                {
-                    ((PendingChangesView)control).Refresh(tracker);
-                }
+                control.Refresh(tracker);
                 if (GitSccOptions.Current.DisableAutoRefresh)
                 {
                     this.Caption += " - [AUTO REFRESH DISABLED]";
                 }
-
-                sccProviderService.lastTimeRefresh = DateTime.Now;
             }
             catch (Exception ex)
             {

@@ -671,12 +671,10 @@ namespace GitScc
             trackers.Clear();
             RemoveFolderMonitor();
             MarkDirty(false);
-            //RefreshToolWindows();
         }
 
         private void RemoveFolderMonitor()
         {
-
             if (VSConstants.VSCOOKIE_NIL != _vsIVsFileChangeEventsCookie)
             {
                 IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
@@ -1159,7 +1157,7 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
                     }
                     else
                     {
-                        // Refresh all the glyphs in the project; the project will call back GetSccGlyphs() 
+                        // Refresh all the glyphs in the project; the project will call back GetSccGlyph() 
                         // with the files for each node that will need new glyph
                         sccProject2.SccGlyphChanged(0, null, null, null);
                     }
@@ -1167,7 +1165,7 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
                 else
                 {
                     // It may be easier/faster to simply refresh all the nodes in the project, 
-                    // and let the project call back on GetSccGlyphs, but just for the sake of the demo, 
+                    // and let the project call back on GetSccGlyph, but just for the sake of the demo, 
                     // let's refresh ourselves only one node at a time
                     IList<string> sccFiles = GetNodeFiles(sccProject2, vsItemSel.itemid);
 

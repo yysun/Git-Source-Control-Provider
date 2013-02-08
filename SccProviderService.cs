@@ -214,18 +214,9 @@ namespace GitScc
         /// </summary>
         public int GetSccGlyphFromStatus([InAttribute] uint dwSccStatus, [OutAttribute] VsStateIcon[] psiGlyph)
         {
-            //switch (dwSccStatus)
-            //{
-            //    case (uint)__SccStatus.SCC_STATUS_CHECKEDOUT:
-            //        psiGlyph[0] = VsStateIcon.STATEICON_CHECKEDOUT;
-            //        break;
-            //    case (uint)__SccStatus.SCC_STATUS_CONTROLLED:
-            //        psiGlyph[0] = VsStateIcon.STATEICON_CHECKEDIN;
-            //        break;
-            //    default:
-            //        psiGlyph[0] = VsStateIcon.STATEICON_BLANK;
-            //        break;
-            //}
+            // This method is called when some user (e.g. like classview) wants to combine icons
+            // (Unfortunately classview uses a hardcoded mapping)
+            psiGlyph[0] = VsStateIcon.STATEICON_BLANK;
             return VSConstants.S_OK;
         }
 

@@ -34,6 +34,8 @@ namespace GitScc
             new QueuedTaskScheduler(1, threadName: "Git SCC Tasks");
         private static readonly TaskScheduler _taskScheduler = _queuedTaskScheduler.ActivateNewQueue();
 
+        private static readonly TimeSpan RefreshDelay = TimeSpan.FromMilliseconds(200);
+
         private bool _active = false;
         private BasicSccProvider _sccProvider = null;
         private List<GitFileStatusTracker> trackers;
@@ -1015,7 +1017,7 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
             bool refresh = Interlocked.Exchange(ref _explicitRefreshRequested, 0) != 0;
             if (!refresh && Thread.VolatileRead(ref _nodesGlyphsDirty) != 0)
             {
-                refresh = DateTime.Now - nextTimeRefresh >= TimeSpan.FromMilliseconds(200);
+                refresh = DateTime.Now - nextTimeRefresh >= RefreshDelay;
             }
 
             if (refresh)

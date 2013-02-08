@@ -365,11 +365,14 @@ namespace GitScc
             var difftoolPath = GitSccOptions.Current.DifftoolPath;
             if (string.IsNullOrWhiteSpace(difftoolPath)) difftoolPath = "diffmerge.exe";
 
-            if (!File.Exists(difftoolPath))
-                throw new FileNotFoundException(string.Format("Diff tool '{0}' is not available.", difftoolPath), difftoolPath);
-
-            RunCommand(difftoolPath, "\"" + file1 + "\" \"" + file2 + "\"");
-
+            try
+            {
+                RunCommand(difftoolPath, "\"" + file1 + "\" \"" + file2 + "\"");
+            }
+            catch (FileNotFoundException ex)
+            {
+                throw new FileNotFoundException(string.Format("Diff tool '{0}' is not available.", difftoolPath), difftoolPath, ex);
+            }
         }
 
         private void OnInitCommand(object sender, EventArgs e)

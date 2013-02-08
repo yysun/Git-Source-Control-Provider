@@ -86,9 +86,7 @@ namespace GitScc
         private void OnRefreshCommand(object sender, EventArgs e)
         {
             hasFileSaved(); //just a reminder, refresh anyway
-            sccProviderService.OpenTracker();
-            sccProviderService.RefreshNodesGlyphs();
-            Refresh(sccProviderService.CurrentTracker, true);
+            sccProviderService.Refresh();
         }
 
         internal void Refresh(GitFileStatusTracker tracker, bool force = false)

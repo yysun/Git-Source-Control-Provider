@@ -84,7 +84,7 @@ namespace GitScc.UI
                 GitSccOptions.Current.GitBashPath = GitBash.GitExePath;
                 GitSccOptions.Current.SaveConfig();
                 var sccService = BasicSccProvider.GetServiceEx<SccProviderService>();
-                sccService.MarkDirty();
+                sccService.MarkDirty(false);
             }
             catch (Exception ex)
             {

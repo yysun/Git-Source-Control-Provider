@@ -379,7 +379,7 @@ namespace GitScc
             }
 
             //service.lastTimeRefresh = DateTime.Now;
-            service.MarkDirty();
+            service.MarkDirty(false);
         }
 
         internal void AmendCommit()
@@ -413,7 +413,7 @@ namespace GitScc
                 }
 
                 //service.lastTimeRefresh = DateTime.Now;
-                service.MarkDirty();
+                service.MarkDirty(false);
             }
         }
 

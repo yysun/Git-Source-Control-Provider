@@ -83,7 +83,7 @@ namespace GitScc
         {
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Git Source Control Provider set active"));
             _active = true;
-            MarkDirty();
+            MarkDirty(false);
             return VSConstants.S_OK;
         }
 
@@ -94,7 +94,7 @@ namespace GitScc
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Git Source Control Provider set inactive"));
             _active = false;
             CloseTracker();
-            MarkDirty();
+            MarkDirty(false);
             return VSConstants.S_OK;
         }
 
@@ -252,7 +252,7 @@ namespace GitScc
                 }
             }
 
-            MarkDirty();
+            MarkDirty(false);
             return VSConstants.S_OK;
         }
 
@@ -649,7 +649,7 @@ namespace GitScc
             Debug.WriteLine("==== Close Tracker");
             trackers.Clear();
             RemoveFolderMonitor();
-            MarkDirty();
+            MarkDirty(false);
             //RefreshToolWindows();
         }
 
@@ -678,7 +678,7 @@ namespace GitScc
 
         public int FilesChanged(uint cChanges, string[] rgpszFile, uint[] rggrfChange)
         {
-            MarkDirty();
+            MarkDirty(true);
             return VSConstants.S_OK;
         }
 
@@ -952,8 +952,11 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
             }
         }
 
-        internal void MarkDirty()
+        internal void MarkDirty(bool defer)
         {
+            if (defer)
+                nextTimeRefresh = DateTime.Now;
+
             // this doesn't need to be a volatile write since it's fine if the write is delayed
             _nodesGlyphsDirty = 1;
         }

@@ -28,7 +28,7 @@ namespace GitScc
 {
     [Guid("C4128D99-1000-41D1-A6C3-704E6C1A3DE2")]
     public class SccProviderService : IVsSccProvider,
-        IVsSccManager2,
+        IVsSccManager3,
         IVsSccManagerTooltip,
         IVsSolutionEvents,
         IVsSolutionEvents2,
@@ -234,6 +234,15 @@ namespace GitScc
         public int UnregisterSccProject([InAttribute] IVsSccProject2 pscp2Project)
         {
             return VSConstants.S_OK;
+        }
+
+        #endregion
+
+        #region IVsSccManager3 Members
+
+        public bool IsBSLSupported()
+        {
+            return true;
         }
 
         #endregion

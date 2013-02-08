@@ -679,7 +679,8 @@ namespace GitScc
         private void HandleFileSystemChanged(object sender, FileSystemEventArgs e)
         {
             Action action = () => ProcessFileSystemChange(e);
-            Task.Factory.StartNew(action, CancellationToken.None, TaskCreationOptions.None, SccProviderService.TaskScheduler);
+            Task.Factory.StartNew(action, CancellationToken.None, TaskCreationOptions.None, SccProviderService.TaskScheduler)
+                .HandleNonCriticalExceptions();
         }
 
         private void ProcessFileSystemChange(FileSystemEventArgs e)
@@ -1092,7 +1093,9 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
                 };
 
                 Task.Factory.StartNew(openTrackerAction, CancellationToken.None, TaskCreationOptions.LongRunning, SccProviderService.TaskScheduler)
-                    .ContinueWith(continuationAction, TaskContinuationOptions.ExecuteSynchronously);
+                    .HandleNonCriticalExceptions()
+                    .ContinueWith(continuationAction, TaskContinuationOptions.ExecuteSynchronously)
+                    .HandleNonCriticalExceptions();
             }
         }
 

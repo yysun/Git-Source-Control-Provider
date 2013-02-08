@@ -95,10 +95,22 @@
             if (_reverted)
                 return;
 
-            HunkRangeInfo hunkRangeInfo = _hunkRangeInfo.TranslateTo(_textView.TextBuffer.CurrentSnapshot);
+            ITextSnapshot snapshot = _textView.TextBuffer.CurrentSnapshot;
+            HunkRangeInfo hunkRangeInfo = _hunkRangeInfo.TranslateTo(snapshot);
 
-            ITextSnapshotLine startLine = _textView.TextSnapshot.GetLineFromLineNumber(hunkRangeInfo.NewHunkRange.StartingLineNumber);
-            ITextSnapshotLine endLine = _textView.TextSnapshot.GetLineFromLineNumber(hunkRangeInfo.NewHunkRange.StartingLineNumber + hunkRangeInfo.NewHunkRange.NumberOfLines - 1);
+            int startLineNumber = hunkRangeInfo.NewHunkRange.StartingLineNumber;
+            int endLineNumber = startLineNumber + hunkRangeInfo.NewHunkRange.NumberOfLines - 1;
+            if (startLineNumber < 0
+                || startLineNumber >= snapshot.LineCount
+                || endLineNumber < 0
+                || endLineNumber >= snapshot.LineCount)
+            {
+                IsVisible = false;
+                return;
+            }
+
+            ITextSnapshotLine startLine = _textView.TextSnapshot.GetLineFromLineNumber(startLineNumber);
+            ITextSnapshotLine endLine = _textView.TextSnapshot.GetLineFromLineNumber(endLineNumber);
             if (startLine != null && endLine != null)
             {
                 IWpfTextViewLine startLineView = _textView.GetTextViewLineContainingBufferPosition(startLine.Start);

@@ -121,7 +121,8 @@ namespace GitScc
                 }
             };
 
-            Task.Factory.StartNew(act, CancellationToken.None, TaskCreationOptions.LongRunning, SccProviderService.TaskScheduler);
+            Task.Factory.StartNew(act, CancellationToken.None, TaskCreationOptions.LongRunning, SccProviderService.TaskScheduler)
+                .HandleNonCriticalExceptions();
         }
 
         private void dataGrid1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -317,7 +318,9 @@ namespace GitScc
             };
 
             Task.Factory.StartNew(getChangedFiles, CancellationToken.None, TaskCreationOptions.LongRunning, SccProviderService.TaskScheduler)
-                .ContinueWith(continuationAction, TaskContinuationOptions.ExecuteSynchronously);
+                .HandleNonCriticalExceptions()
+                .ContinueWith(continuationAction, TaskContinuationOptions.ExecuteSynchronously)
+                .HandleNonCriticalExceptions();
         }
 
         internal void ClearUI()

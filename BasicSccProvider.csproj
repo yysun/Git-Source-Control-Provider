@@ -116,6 +116,7 @@
     <Compile Include="Diff\View\DiffMarginControl.xaml.cs">
       <DependentUpon>DiffMarginControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ExceptionExtensions.cs" />
     <Compile Include="GitToolCommands.cs" />
     <Compile Include="GitSccOptions.cs" />
     <Compile Include="PendingChangesView.xaml.cs">
@@ -142,6 +143,7 @@
     <Compile Include="SccProviderService.cs" />
     <Compile Include="PendingChangesToolWindow.cs" />
     <Compile Include="Schedulers\QueuedTaskScheduler.cs" />
+    <Compile Include="TaskExtensions.cs" />
     <Compile Include="UI\BranchPicker.xaml.cs">
       <DependentUpon>BranchPicker.xaml</DependentUpon>
     </Compile>

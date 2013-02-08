@@ -716,6 +716,7 @@ namespace GitScc
             return result;
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public string LastCommitMessage
         {
             get
@@ -905,6 +906,7 @@ namespace GitScc
         #endregion
 
         #region Changed Files
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public IEnumerable<GitFile> ChangedFiles
         {
             get
@@ -1015,6 +1017,8 @@ namespace GitScc
         }
 
         RepositoryGraph repositoryGraph;
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public RepositoryGraph RepositoryGraph
         {
             get
@@ -1166,6 +1170,7 @@ namespace GitScc
             }
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public IEnumerable<string> Remotes
         {
             get
@@ -1180,6 +1185,7 @@ namespace GitScc
             }
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public IDictionary<string, string> Configs
         {
             get

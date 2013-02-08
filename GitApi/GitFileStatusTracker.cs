@@ -36,7 +36,7 @@ namespace GitScc
 
         public GitFileStatusTracker(string workingFolder)
         {
-            this.cache = new Dictionary<string, GitFileStatus>();
+            this.cache = new Dictionary<string, GitFileStatus>(StringComparer.OrdinalIgnoreCase);
             this.initFolder = workingFolder;
             Refresh();
         }
@@ -354,7 +354,7 @@ namespace GitScc
 
         private string GetCacheKey(string fileName)
         {
-            return GetRelativeFileName(fileName).ToLower();
+            return GetRelativeFileNameForGit(fileName);
         }
 
         private string GetFullPath(string fileName)
@@ -721,6 +721,7 @@ namespace GitScc
             return result;
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public string LastCommitMessage
         {
             get
@@ -910,11 +911,12 @@ namespace GitScc
         #endregion
 
         #region Changed Files
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public IEnumerable<GitFile> ChangedFiles
         {
             get
             {
-                if (changedFiles == null) changedFiles = GetChangedFiles();
+                if (changedFiles == null) changedFiles = GetChangedFiles(false);
                 return changedFiles;
             }
         }
@@ -923,11 +925,49 @@ namespace GitScc
         private const int INDEX = 1;
         private const int WORKDIR = 2;
 
-        internal IList<GitFile> GetChangedFiles()
+        /// <summary>
+        /// Recalculates the list of all changed files.
+        /// </summary>
+        /// <param name="initializeCache">
+        /// When true, the internal status cache is updated for all files in the
+        /// repository, including files which have not changed locally.
+        /// </param>
+        public IList<GitFile> GetChangedFiles(bool initializeCache)
+        {
+            IList<GitFile> result = GetChangedFilesImpl(initializeCache);
+            changedFiles = result;
+            return result;
+        }
+
+        private IList<GitFile> GetChangedFilesImpl(bool initializeCache)
         {
             if (!HasGitRepository) return new List<GitFile>();
 
             var list = new List<GitFile>();
+
+            // initialize the cache
+            if (initializeCache)
+            {
+                var treeWalk = new TreeWalk(this.repository);
+                treeWalk.Recursive = true;
+                treeWalk.Filter = TreeFilter.ALL;
+
+                var id = repository.Resolve(Constants.HEAD);
+                if (id != null)
+                    treeWalk.AddTree(new RevWalk(repository).ParseTree(id));
+                else
+                    treeWalk.AddTree(new EmptyTreeIterator());
+
+                while (treeWalk.Next())
+                {
+                    string pathString = treeWalk.PathString;
+                    var fileName = GetFullPath(pathString);
+                    if (Directory.Exists(fileName))
+                        continue; // this excludes sub modules
+
+                    cache[pathString] = GitFileStatus.Tracked;
+                }
+            }
 
             if (GitBash.Exists)
             {
@@ -989,6 +1029,8 @@ namespace GitScc
         }
 
         RepositoryGraph repositoryGraph;
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public RepositoryGraph RepositoryGraph
         {
             get
@@ -1140,6 +1182,7 @@ namespace GitScc
             }
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public IEnumerable<string> Remotes
         {
             get
@@ -1154,6 +1197,7 @@ namespace GitScc
             }
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public IDictionary<string, string> Configs
         {
             get

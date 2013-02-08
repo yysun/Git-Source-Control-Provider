@@ -15,7 +15,7 @@ namespace GitScc
     public class PendingChangesToolWindow : ToolWindowPane
     {
         private SccProviderService sccProviderService;
-        protected UserControl control;
+        protected PendingChangesView control;
 
         public PendingChangesToolWindow()
         {
@@ -74,13 +74,13 @@ namespace GitScc
         internal void OnCommitCommand()
         {
             if (!hasFileSaved()) return;
-            ((PendingChangesView)control).Commit();
+            control.Commit();
         }
 
         internal void OnAmendCommitCommand()
         {
             if (!hasFileSaved()) return;
-            ((PendingChangesView)control).AmendCommit();
+            control.AmendCommit();
         }
 
         private void OnRefreshCommand(object sender, EventArgs e)
@@ -103,7 +103,7 @@ namespace GitScc
 
                 if (!GitSccOptions.Current.DisableAutoRefresh || force || tracker == null)
                 {
-                    ((PendingChangesView)control).Refresh(tracker);
+                    control.Refresh(tracker);
                 }
                 if (GitSccOptions.Current.DisableAutoRefresh)
                 {

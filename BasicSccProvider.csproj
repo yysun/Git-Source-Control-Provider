@@ -119,6 +119,7 @@
     <Compile Include="ExceptionExtensions.cs" />
     <Compile Include="GitToolCommands.cs" />
     <Compile Include="GitSccOptions.cs" />
+    <Compile Include="GlobalCommandHook.cs" />
     <Compile Include="PendingChangesView.xaml.cs">
       <DependentUpon>PendingChangesView.xaml</DependentUpon>
     </Compile>

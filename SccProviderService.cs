@@ -15,6 +15,7 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell.Interop;
 using CancellationToken = System.Threading.CancellationToken;
+using CommandID = System.ComponentModel.Design.CommandID;
 using Constants = NGit.Constants;
 using Interlocked = System.Threading.Interlocked;
 using Task = System.Threading.Tasks.Task;
@@ -28,7 +29,7 @@ namespace GitScc
 {
     [Guid("C4128D99-1000-41D1-A6C3-704E6C1A3DE2")]
     public class SccProviderService : IVsSccProvider,
-        IVsSccManager2,
+        IVsSccManager3,
         IVsSccManagerTooltip,
         IVsSolutionEvents,
         IVsSolutionEvents2,
@@ -107,6 +108,10 @@ namespace GitScc
         {
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Git Source Control Provider set active"));
             _active = true;
+
+            GlobalCommandHook hook = GlobalCommandHook.GetInstance(_sccProvider);
+            hook.HookCommand(new CommandID(VSConstants.VSStd2K, (int)VSConstants.VSStd2KCmdID.SLNREFRESH), HandleSolutionRefresh);
+
             MarkDirty(false);
             return VSConstants.S_OK;
         }
@@ -117,6 +122,10 @@ namespace GitScc
         {
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Git Source Control Provider set inactive"));
             _active = false;
+
+            GlobalCommandHook hook = GlobalCommandHook.GetInstance(_sccProvider);
+            hook.UnhookCommand(new CommandID(VSConstants.VSStd2K, (int)VSConstants.VSStd2KCmdID.SLNREFRESH), HandleSolutionRefresh);
+
             CloseTracker();
             MarkDirty(false);
             return VSConstants.S_OK;
@@ -128,6 +137,11 @@ namespace GitScc
             return VSConstants.S_OK;
         }
         #endregion
+
+        private void HandleSolutionRefresh(object sender, EventArgs e)
+        {
+            Refresh();
+        }
 
         #region IVsSccManager2 interface functions
 
@@ -161,14 +175,10 @@ namespace GitScc
         /// <returns>The method returns S_OK if at least one of the files is controlled, S_FALSE if none of them are</returns>
         public int GetSccGlyph([InAttribute] int cFiles, [InAttribute] string[] rgpszFullPaths, [OutAttribute] VsStateIcon[] rgsiGlyphs, [OutAttribute] uint[] rgdwSccStatus)
         {
-            //Debug.Assert(cFiles == 1, "Only getting one file icon at a time is supported");
-
             for (int i = 0; i < cFiles; i++)
             {
-
                 GitFileStatus status = _active ? GetFileStatus(rgpszFullPaths[i]) : GitFileStatus.NotControlled;
-
-                if (rgdwSccStatus != null) rgdwSccStatus[i] = (uint)__SccStatus.SCC_STATUS_CONTROLLED;
+                __SccStatus sccStatus;
 
                 switch (status)
                 {
@@ -176,35 +186,49 @@ namespace GitScc
                         rgsiGlyphs[i] = GitSccOptions.Current.UseTGitIconSet ?
                                         (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Tracked) :
                                         VsStateIcon.STATEICON_CHECKEDIN;
+                        sccStatus = __SccStatus.SCC_STATUS_CONTROLLED;
                         break;
 
                     case GitFileStatus.Modified:
                         rgsiGlyphs[i] = GitSccOptions.Current.UseTGitIconSet ?
                                         (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Modified) :
                                         VsStateIcon.STATEICON_CHECKEDOUT;
+                        sccStatus = __SccStatus.SCC_STATUS_CONTROLLED | __SccStatus.SCC_STATUS_CHECKEDOUT | __SccStatus.SCC_STATUS_OUTBYUSER;
                         break;
 
                     case GitFileStatus.New:
                         rgsiGlyphs[i] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Untracked);
+                        sccStatus = __SccStatus.SCC_STATUS_CONTROLLED | __SccStatus.SCC_STATUS_CHECKEDOUT | __SccStatus.SCC_STATUS_OUTBYUSER;
                         break;
 
                     case GitFileStatus.Added:
                     case GitFileStatus.Staged:
                         rgsiGlyphs[i] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Staged);
+                        sccStatus = __SccStatus.SCC_STATUS_CONTROLLED | __SccStatus.SCC_STATUS_CHECKEDOUT | __SccStatus.SCC_STATUS_OUTBYUSER;
                         break;
 
                     case GitFileStatus.NotControlled:
-                        rgsiGlyphs[i] = VsStateIcon.STATEICON_BLANK;
+                        rgsiGlyphs[i] = VsStateIcon.STATEICON_NOSTATEICON;
+                        sccStatus = __SccStatus.SCC_STATUS_NOTCONTROLLED;
                         break;
 
                     case GitFileStatus.Ignored:
                         rgsiGlyphs[i] = VsStateIcon.STATEICON_EXCLUDEDFROMSCC;
+                        sccStatus = __SccStatus.SCC_STATUS_NOTCONTROLLED;
                         break;
 
                     case GitFileStatus.Conflict:
                         rgsiGlyphs[i] = VsStateIcon.STATEICON_DISABLED;
+                        sccStatus = __SccStatus.SCC_STATUS_CONTROLLED | __SccStatus.SCC_STATUS_CHECKEDOUT | __SccStatus.SCC_STATUS_OUTBYUSER | __SccStatus.SCC_STATUS_MERGED;
+                        break;
+
+                    default:
+                        sccStatus = __SccStatus.SCC_STATUS_INVALID;
                         break;
                 }
+
+                if (rgdwSccStatus != null)
+                    rgdwSccStatus[i] = (uint)sccStatus;
             }
             return VSConstants.S_OK;
         }
@@ -214,18 +238,9 @@ namespace GitScc
         /// </summary>
         public int GetSccGlyphFromStatus([InAttribute] uint dwSccStatus, [OutAttribute] VsStateIcon[] psiGlyph)
         {
-            //switch (dwSccStatus)
-            //{
-            //    case (uint)__SccStatus.SCC_STATUS_CHECKEDOUT:
-            //        psiGlyph[0] = VsStateIcon.STATEICON_CHECKEDOUT;
-            //        break;
-            //    case (uint)__SccStatus.SCC_STATUS_CONTROLLED:
-            //        psiGlyph[0] = VsStateIcon.STATEICON_CHECKEDIN;
-            //        break;
-            //    default:
-            //        psiGlyph[0] = VsStateIcon.STATEICON_BLANK;
-            //        break;
-            //}
+            // This method is called when some user (e.g. like classview) wants to combine icons
+            // (Unfortunately classview uses a hardcoded mapping)
+            psiGlyph[0] = VsStateIcon.STATEICON_BLANK;
             return VSConstants.S_OK;
         }
 
@@ -243,6 +258,15 @@ namespace GitScc
         public int UnregisterSccProject([InAttribute] IVsSccProject2 pscp2Project)
         {
             return VSConstants.S_OK;
+        }
+
+        #endregion
+
+        #region IVsSccManager3 Members
+
+        public bool IsBSLSupported()
+        {
+            return true;
         }
 
         #endregion

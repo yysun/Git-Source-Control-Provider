@@ -62,7 +62,7 @@ namespace GitScc
         public override void OnToolWindowCreated()
         {
             sccProviderService = BasicSccProvider.GetServiceEx<SccProviderService>();
-            Refresh(sccProviderService.CurrentTracker, true); // refresh when the tool window becomes visible
+            Refresh(sccProviderService.CurrentTracker); // refresh when the tool window becomes visible
         }
 
         internal bool hasFileSaved()
@@ -89,11 +89,8 @@ namespace GitScc
             sccProviderService.Refresh();
         }
 
-        internal void Refresh(GitFileStatusTracker tracker, bool force = false)
+        internal void Refresh(GitFileStatusTracker tracker)
         {
-            //var frame = this.Frame as IVsWindowFrame;
-            //if (frame == null || frame.IsVisible() == 1) return;
-
             try
             {
                 var repository = (tracker == null || !tracker.HasGitRepository) ? "" :
@@ -101,10 +98,7 @@ namespace GitScc
 
                 this.Caption = Resources.ResourceManager.GetString("PendingChangesToolWindowCaption") + repository;
 
-                if (!GitSccOptions.Current.DisableAutoRefresh || force || tracker == null)
-                {
-                    control.Refresh(tracker);
-                }
+                control.Refresh(tracker);
                 if (GitSccOptions.Current.DisableAutoRefresh)
                 {
                     this.Caption += " - [AUTO REFRESH DISABLED]";

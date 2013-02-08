@@ -684,6 +684,9 @@ namespace GitScc
 
         private void ProcessFileSystemChange(FileSystemEventArgs e)
         {
+            if (GitSccOptions.Current.DisableAutoRefresh)
+                return;
+
             if (string.Equals(e.Name, Constants.DOT_GIT, StringComparison.OrdinalIgnoreCase))
                 return;
 

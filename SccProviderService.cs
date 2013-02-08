@@ -21,6 +21,7 @@ using TaskContinuationOptions = System.Threading.Tasks.TaskContinuationOptions;
 using TaskCreationOptions = System.Threading.Tasks.TaskCreationOptions;
 using TaskScheduler = System.Threading.Tasks.TaskScheduler;
 using Thread = System.Threading.Thread;
+using ThreadPriority = System.Threading.ThreadPriority;
 
 namespace GitScc
 {
@@ -36,7 +37,7 @@ namespace GitScc
         IVsUpdateSolutionEvents2
     {
         private static readonly QueuedTaskScheduler _queuedTaskScheduler =
-            new QueuedTaskScheduler(1, threadName: "Git SCC Tasks");
+            new QueuedTaskScheduler(1, threadName: "Git SCC Tasks", threadPriority: ThreadPriority.BelowNormal);
         private static readonly TaskScheduler _taskScheduler = _queuedTaskScheduler.ActivateNewQueue();
 
         private static readonly TimeSpan RefreshDelay = TimeSpan.FromMilliseconds(200);

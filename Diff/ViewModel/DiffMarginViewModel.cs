@@ -78,6 +78,12 @@ namespace GitScc.Diff.ViewModel
             }
         }
 
+        public override void Cleanup()
+        {
+            _parser.Dispose();
+            base.Cleanup();
+        }
+
         private bool PreviousChangeCanExecute(DiffViewModel currentDiffViewModel)
         {
             return DiffViewModels.IndexOf(currentDiffViewModel) > 0;

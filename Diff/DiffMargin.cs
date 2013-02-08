@@ -21,6 +21,7 @@
 
         private readonly IWpfTextView _textView;
         private readonly IEditorFormatMap _editorFormatMap;
+        private readonly DiffMarginViewModel _viewModel;
         private readonly DiffMarginControl _gitDiffBarControl;
         private bool _isDisposed;
 
@@ -44,7 +45,8 @@
             _textView.Options.OptionChanged += HandleOptionChanged;
 
             _gitDiffBarControl = new DiffMarginControl();
-            _gitDiffBarControl.DataContext = new DiffMarginViewModel(this, _textView, textDocumentFactoryService, new GitCommands());
+            _viewModel = new DiffMarginViewModel(this, _textView, textDocumentFactoryService, new GitCommands());
+            _gitDiffBarControl.DataContext = _viewModel;
             _gitDiffBarControl.Width = MarginWidth;
             UpdateVisibility();
         }
@@ -117,6 +119,7 @@
         public void Dispose()
         {
             GC.SuppressFinalize(this);
+            _viewModel.Cleanup();
             _isDisposed = true;
         }
 

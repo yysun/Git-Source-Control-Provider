@@ -135,6 +135,11 @@ namespace GitScc.Diff
 
         protected virtual void Dispose(bool disposing)
         {
+            if (disposing)
+            {
+                _timer.Dispose();
+            }
+
             _disposed = true;
         }
 

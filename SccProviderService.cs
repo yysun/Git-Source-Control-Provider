@@ -937,7 +937,6 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
 
         #region new Refresh methods
 
-        internal DateTime lastTimeRefresh = DateTime.Now.AddDays(-1);
         internal DateTime nextTimeRefresh = DateTime.Now;
 
         private int _nodesGlyphsDirty;

@@ -213,7 +213,6 @@ namespace GitScc
                 Settings.Hide();
         }
 
-        DateTime lastTimeRefresh = DateTime.Now.AddDays(-1);
         internal void Refresh(GitFileStatusTracker tracker)
         {
             //VerifyGit();
@@ -300,9 +299,6 @@ namespace GitScc
                     else
                         this.label4.Visibility = Visibility.Collapsed;
                 }
-
-                service.lastTimeRefresh = DateTime.Now; //important!!
-
             };
 
             this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
@@ -378,7 +374,6 @@ namespace GitScc
                 }
             }
 
-            //service.lastTimeRefresh = DateTime.Now;
             service.MarkDirty(false);
         }
 
@@ -412,7 +407,6 @@ namespace GitScc
                     }
                 }
 
-                //service.lastTimeRefresh = DateTime.Now;
                 service.MarkDirty(false);
             }
         }
@@ -428,7 +422,6 @@ namespace GitScc
             {
                 tracker.StageFile(System.IO.Path.Combine(this.tracker.GitWorkingDirectory, item.FileName));
                 ShowStatusMessage(string.Format("Staged ({0}/{1}): {2}", i++, count, item.FileName));
-                service.lastTimeRefresh = DateTime.Now;
             }
 
             bool hasStaged = tracker == null ? false :

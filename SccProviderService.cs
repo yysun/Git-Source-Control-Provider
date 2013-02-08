@@ -264,6 +264,8 @@ namespace GitScc
 
         public int OnAfterOpenSolution([InAttribute] Object pUnkReserved, [InAttribute] int fNewSolution)
         {
+            RefreshDelay = InitialRefreshDelay;
+
             //automatic switch the scc provider
             if (!Active && !GitSccOptions.Current.DisableAutoLoad)
             {

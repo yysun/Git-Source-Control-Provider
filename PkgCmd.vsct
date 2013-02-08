@@ -125,7 +125,7 @@
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>Git Compare with Last Commit...</ButtonText>
+          <ButtonText>Compare with Last Commit...</ButtonText>
         </Strings>
       </Button>
       
@@ -136,7 +136,7 @@
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>Git Undo File Changes</ButtonText>
+          <ButtonText>Undo File Changes</ButtonText>
         </Strings>
       </Button>
 
@@ -158,7 +158,7 @@
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>Git Refresh</ButtonText>
+          <ButtonText>Refresh</ButtonText>
         </Strings>
       </Button>
 
@@ -203,7 +203,7 @@
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>Git Pending Changes</ButtonText>
+          <ButtonText>Pending Changes</ButtonText>
         </Strings>
       </Button>
 
@@ -214,7 +214,7 @@
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-          <ButtonText>Git History</ButtonText>
+          <ButtonText>History</ButtonText>
         </Strings>
       </Button>
       

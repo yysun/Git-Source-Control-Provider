@@ -929,6 +929,13 @@ namespace GitScc
         /// </param>
         public IList<GitFile> GetChangedFiles(bool initializeCache)
         {
+            IList<GitFile> result = GetChangedFilesImpl(initializeCache);
+            changedFiles = result;
+            return result;
+        }
+
+        private IList<GitFile> GetChangedFilesImpl(bool initializeCache)
+        {
             if (!HasGitRepository) return new List<GitFile>();
 
             var list = new List<GitFile>();

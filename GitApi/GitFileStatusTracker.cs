@@ -85,11 +85,11 @@ namespace GitScc
                 try
                 {
                     this.repository = Open(new DirectoryInfo(initFolder));
-                    dirCache = repository.ReadDirCache();
-                    head = repository.Resolve(Constants.HEAD);
-
                     if (this.repository != null)
                     {
+                        dirCache = repository.ReadDirCache();
+                        head = repository.Resolve(Constants.HEAD);
+
                         if (head == null)
                         {
                             this.commitTree = new Tree(repository);

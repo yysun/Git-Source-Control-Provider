@@ -40,7 +40,8 @@ namespace GitScc
             new QueuedTaskScheduler(1, threadName: "Git SCC Tasks", threadPriority: ThreadPriority.BelowNormal);
         private static readonly TaskScheduler _taskScheduler = _queuedTaskScheduler.ActivateNewQueue();
 
-        private static readonly TimeSpan RefreshDelay = TimeSpan.FromMilliseconds(200);
+        private static readonly TimeSpan InitialRefreshDelay = TimeSpan.FromMilliseconds(500);
+        private static TimeSpan RefreshDelay = InitialRefreshDelay;
 
         private bool _active = false;
         private BasicSccProvider _sccProvider = null;
@@ -1034,12 +1035,19 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
                 // the refresh may or may not appear in the refresh results
                 Thread.VolatileWrite(ref _nodesGlyphsDirty, 0);
 
+                // used for progressive backoff of the update interval for large projects
+                Stopwatch timer = new Stopwatch();
+
                 Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
                 Action openTrackerAction = () =>
                 {
+                    timer.Start();
+
                     OpenTracker();
                     foreach (GitFileStatusTracker tracker in trackers.ToArray())
                         tracker.GetChangedFiles(true);
+
+                    timer.Stop();
                 };
 
                 Action<Task> continuationAction = (task) =>
@@ -1054,10 +1062,17 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
                     {
                         using (disableRefresh)
                         {
+                            timer.Start();
                             RefreshNodesGlyphs();
                             RefreshToolWindows();
                             // make sure to defer next refresh
                             nextTimeRefresh = DateTime.Now;
+                            timer.Stop();
+
+                            TimeSpan totalTime = timer.Elapsed;
+                            TimeSpan minimumRefreshInterval = new TimeSpan(totalTime.Ticks * 2);
+                            if (minimumRefreshInterval > RefreshDelay)
+                                RefreshDelay = minimumRefreshInterval;
                         }
                     };
 

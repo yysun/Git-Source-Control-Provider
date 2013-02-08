@@ -361,8 +361,13 @@ namespace GitScc
                     return;
                 }
             }
+
             var difftoolPath = GitSccOptions.Current.DifftoolPath;
             if (string.IsNullOrWhiteSpace(difftoolPath)) difftoolPath = "diffmerge.exe";
+
+            if (!File.Exists(difftoolPath))
+                throw new FileNotFoundException(string.Format("Diff tool '{0}' is not available.", difftoolPath), difftoolPath);
+
             RunCommand(difftoolPath, "\"" + file1 + "\" \"" + file2 + "\"");
 
         }

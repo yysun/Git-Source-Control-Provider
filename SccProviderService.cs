@@ -15,6 +15,7 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell.Interop;
 using CancellationToken = System.Threading.CancellationToken;
+using Constants = NGit.Constants;
 using Interlocked = System.Threading.Interlocked;
 using Task = System.Threading.Tasks.Task;
 using TaskContinuationOptions = System.Threading.Tasks.TaskContinuationOptions;
@@ -31,7 +32,6 @@ namespace GitScc
         IVsSccManagerTooltip,
         IVsSolutionEvents,
         IVsSolutionEvents2,
-        IVsFileChangeEvents,
         IVsSccGlyphs,
         IDisposable,
         IVsUpdateSolutionEvents2
@@ -46,7 +46,8 @@ namespace GitScc
         private bool _active = false;
         private BasicSccProvider _sccProvider = null;
         private List<GitFileStatusTracker> trackers;
-        private uint _vsSolutionEventsCookie, _vsIVsFileChangeEventsCookie, _vsIVsUpdateSolutionEventsCookie;
+        private uint _vsSolutionEventsCookie;
+        private uint _vsIVsUpdateSolutionEventsCookie;
 
         #region SccProvider Service initialization/unitialization
         public SccProviderService(BasicSccProvider sccProvider, List<GitFileStatusTracker> trackers)
@@ -636,7 +637,8 @@ namespace GitScc
         #endregion
 
         #region open and close tracker
-        string lastMinotorFolder = "";
+        FileSystemWatcher _watcher;
+        string lastMonitorFolder = string.Empty;
         string monitorFolder;
 
         internal void OpenTracker()
@@ -652,21 +654,43 @@ namespace GitScc
 
                 GetLoadedControllableProjects().ForEach(h => AddProject(h as IVsHierarchy));
 
-                if (monitorFolder != lastMinotorFolder)
+                if (monitorFolder != lastMonitorFolder)
                 {
                     RemoveFolderMonitor();
 
-                    IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
-                    if (VSConstants.VSCOOKIE_NIL != _vsIVsFileChangeEventsCookie)
-                    {
-                        fileChangeService.UnadviseDirChange(_vsIVsFileChangeEventsCookie);
-                    }
-                    fileChangeService.AdviseDirChange(monitorFolder, 1, this, out _vsIVsFileChangeEventsCookie);
-                    lastMinotorFolder = monitorFolder;
+                    if (_watcher != null)
+                        _watcher.Dispose();
 
-                    Debug.WriteLine("==== Monitoring: " + monitorFolder + " " + _vsIVsFileChangeEventsCookie);
+                    FileSystemWatcher watcher = new FileSystemWatcher(monitorFolder);
+                    watcher.IncludeSubdirectories = true;
+                    watcher.Changed += HandleFileSystemChanged;
+                    watcher.Created += HandleFileSystemChanged;
+                    watcher.Deleted += HandleFileSystemChanged;
+                    watcher.Renamed += HandleFileSystemChanged;
+                    watcher.EnableRaisingEvents = true;
+                    _watcher = watcher;
+                    lastMonitorFolder = monitorFolder;
+
+                    Debug.WriteLine("==== Monitoring: " + monitorFolder);
                 }
             }
+        }
+
+        private void HandleFileSystemChanged(object sender, FileSystemEventArgs e)
+        {
+            Action action = () => ProcessFileSystemChange(e);
+            Task.Factory.StartNew(action, CancellationToken.None, TaskCreationOptions.None, SccProviderService.TaskScheduler);
+        }
+
+        private void ProcessFileSystemChange(FileSystemEventArgs e)
+        {
+            if (string.Equals(e.Name, Constants.DOT_GIT, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            if (e.FullPath.Contains(Constants.DOT_GIT + Path.DirectorySeparatorChar))
+                return;
+
+            MarkDirty(true);
         }
 
         private void CloseTracker()
@@ -679,30 +703,13 @@ namespace GitScc
 
         private void RemoveFolderMonitor()
         {
-            if (VSConstants.VSCOOKIE_NIL != _vsIVsFileChangeEventsCookie)
+            if (_watcher != null)
             {
-                IVsFileChangeEx fileChangeService = _sccProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
-                fileChangeService.UnadviseDirChange(_vsIVsFileChangeEventsCookie);
-                Debug.WriteLine("==== Stop Monitoring: " + _vsIVsFileChangeEventsCookie.ToString());
-                _vsIVsFileChangeEventsCookie = VSConstants.VSCOOKIE_NIL;
-                lastMinotorFolder = "";
+                _watcher.Dispose();
+                Debug.WriteLine("==== Stop Monitoring");
+                _watcher = null;
+                lastMonitorFolder = "";
             }
-        }
-
-        #endregion
-
-        #region IVsFileChangeEvents
-
-        public int DirectoryChanged(string pszDirectory)
-        {
-            // git tracks files, not directories. don't mark dirty here.
-            return VSConstants.S_OK;
-        }
-
-        public int FilesChanged(uint cChanges, string[] rgpszFile, uint[] rggrfChange)
-        {
-            MarkDirty(true);
-            return VSConstants.S_OK;
         }
 
         #endregion

@@ -11,7 +11,7 @@
     [Order(After = PredefinedMarginNames.Spacer, Before = PredefinedMarginNames.Outlining)]
     [MarginContainer(PredefinedMarginNames.LeftSelection)]
     [ContentType("text")]
-    [TextViewRole(PredefinedTextViewRoles.Interactive)]
+    [TextViewRole(PredefinedTextViewRoles.Editable)]
     internal sealed class DiffMarginFactory : IWpfTextViewMarginProvider
     {
         [Import]

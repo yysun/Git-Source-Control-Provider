@@ -15,6 +15,7 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell.Interop;
 using CancellationToken = System.Threading.CancellationToken;
+using CommandID = System.ComponentModel.Design.CommandID;
 using Constants = NGit.Constants;
 using Interlocked = System.Threading.Interlocked;
 using Task = System.Threading.Tasks.Task;
@@ -107,6 +108,10 @@ namespace GitScc
         {
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Git Source Control Provider set active"));
             _active = true;
+
+            GlobalCommandHook hook = GlobalCommandHook.GetInstance(_sccProvider);
+            hook.HookCommand(new CommandID(VSConstants.VSStd2K, (int)VSConstants.VSStd2KCmdID.SLNREFRESH), HandleSolutionRefresh);
+
             MarkDirty(false);
             return VSConstants.S_OK;
         }
@@ -117,6 +122,10 @@ namespace GitScc
         {
             Trace.WriteLine(String.Format(CultureInfo.CurrentUICulture, "Git Source Control Provider set inactive"));
             _active = false;
+
+            GlobalCommandHook hook = GlobalCommandHook.GetInstance(_sccProvider);
+            hook.UnhookCommand(new CommandID(VSConstants.VSStd2K, (int)VSConstants.VSStd2KCmdID.SLNREFRESH), HandleSolutionRefresh);
+
             CloseTracker();
             MarkDirty(false);
             return VSConstants.S_OK;
@@ -128,6 +137,11 @@ namespace GitScc
             return VSConstants.S_OK;
         }
         #endregion
+
+        private void HandleSolutionRefresh(object sender, EventArgs e)
+        {
+            Refresh();
+        }
 
         #region IVsSccManager2 interface functions
 

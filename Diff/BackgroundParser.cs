@@ -137,6 +137,7 @@ namespace GitScc.Diff
         {
             if (disposing)
             {
+                _textBuffer.PostChanged -= TextBufferPostChanged;
                 _timer.Dispose();
             }
 

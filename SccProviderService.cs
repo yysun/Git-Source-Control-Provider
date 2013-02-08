@@ -712,11 +712,14 @@ namespace GitScc
             if (GitSccOptions.Current.DisableAutoRefresh)
                 return;
 
-            if (string.Equals(e.Name, Constants.DOT_GIT, StringComparison.OrdinalIgnoreCase))
+            if (e.ChangeType == WatcherChangeTypes.Changed && Directory.Exists(e.FullPath))
                 return;
 
-            if (e.FullPath.Contains(Constants.DOT_GIT + Path.DirectorySeparatorChar))
-                return;
+            if (string.Equals(Path.GetExtension(e.Name), ".lock", StringComparison.OrdinalIgnoreCase))
+            {
+                if (e.FullPath.Contains(Constants.DOT_GIT + Path.DirectorySeparatorChar))
+                    return;
+            }
 
             MarkDirty(true);
         }

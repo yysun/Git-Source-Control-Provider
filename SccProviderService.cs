@@ -856,7 +856,8 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
         {
             get
             {
-                return CurrentTracker == null ? null : CurrentTracker.CurrentBranch;
+                GitFileStatusTracker tracker = CurrentTracker;
+                return tracker != null ? tracker.CurrentBranch : null;
             }
         }
 
@@ -864,7 +865,8 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
         {
             get
             {
-                return CurrentTracker == null ? null : CurrentTracker.GitWorkingDirectory;
+                GitFileStatusTracker tracker = CurrentTracker;
+                return tracker != null ? tracker.GitWorkingDirectory : null;
             }
         }
 
@@ -872,11 +874,10 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
         {
             get
             {
-                string fileName = GetSelectFileName();
                 if (trackers.Count == 1) 
                     return trackers[0];
                 else
-                    return GetTracker(fileName);
+                    return GetTracker(GetSelectFileName());
             }
         }
 

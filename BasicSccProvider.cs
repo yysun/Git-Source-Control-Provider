@@ -457,7 +457,7 @@ namespace GitScc
                 }
             }
 
-            if (File.Exists(tmpPath))
+            if (File.Exists(tmpPath) && sccService.CurrentTracker != null)
             {
                 Process.Start(tmpPath, "\"" + sccService.CurrentTracker.GitWorkingDirectory + "\"");
             }

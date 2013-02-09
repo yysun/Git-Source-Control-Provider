@@ -66,6 +66,7 @@
  
 				<DataGrid.CellStyle>
 					<Style TargetType="DataGridCell">
+						<Setter Property="FocusVisualStyle" Value="{x:Null}"/>
 						<Setter Property="BorderThickness" Value="0"/>
 						<Setter Property="Padding" Value="1"/>
 						<Setter Property="Template">

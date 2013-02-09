@@ -129,27 +129,32 @@ namespace GitScc
 
         private void dataGrid1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            // only enable double-click to open when exactly one item is selected
             if (dataGrid1.SelectedItems.Count != 1)
                 return;
 
-            var dep = (DependencyObject) e.OriginalSource;
-
-            while ((dep != null) && !(dep is DataGridCell))
-                dep = VisualTreeHelper.GetParent(dep);
-
-            if (dep == null)
-                return;
-
-            var cell = dep as DataGridCell;
-
-            if (cell.Column.DisplayIndex == 0) // Checkbox
+            // disable double-click to open for the checkbox cell
+            var cell = FindAncestorOfType<DataGridCell>(e.OriginalSource as DependencyObject);
+            if (cell == null || cell.Column.DisplayIndex == 0) // Checkbox
                 return;
 
             GetSelectedFileFullName((fileName) =>
             {
                 OpenFile(fileName);
             });
+        }
 
+        private T FindAncestorOfType<T>(DependencyObject dependencyObject)
+            where T : DependencyObject
+        {
+            for (var current = dependencyObject; current != null; current = VisualTreeHelper.GetParent(current))
+            {
+                T typed = current as T;
+                if (typed != null)
+                    return typed;
+            }
+
+            return null;
         }
 
         private void ClearEditor()

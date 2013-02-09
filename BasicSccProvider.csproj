@@ -179,11 +179,17 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Content Include="Resources\Compare.png" />
+    <Content Include="Resources\History.png" />
     <Content Include="Resources\Images_24bit.bmp" />
     <Content Include="Resources\Images_32bit.bmp" />
     <Resource Include="Resources\Loading.png" />
     <Content Include="Resources\Images_32bit.png" />
+    <Content Include="Resources\PendingCheckins.png" />
+    <Content Include="Resources\Refresh.png" />
     <Content Include="Resources\SccGlyphs.bmp" />
+    <Content Include="Resources\Switch.png" />
+    <Content Include="Resources\UndoCheckout.png" />
     <Content Include="solution explorer.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>

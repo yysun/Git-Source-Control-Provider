@@ -1100,19 +1100,27 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
 
                     Action applyUpdatesAction = () =>
                     {
-                        using (disableRefresh)
+                        try
                         {
-                            timer.Start();
-                            RefreshNodesGlyphs();
-                            RefreshToolWindows();
-                            // make sure to defer next refresh
-                            nextTimeRefresh = DateTime.Now;
-                            timer.Stop();
+                            using (disableRefresh)
+                            {
+                                timer.Start();
+                                RefreshNodesGlyphs();
+                                RefreshToolWindows();
+                                // make sure to defer next refresh
+                                nextTimeRefresh = DateTime.Now;
+                                timer.Stop();
 
-                            TimeSpan totalTime = timer.Elapsed;
-                            TimeSpan minimumRefreshInterval = new TimeSpan(totalTime.Ticks * 2);
-                            if (minimumRefreshInterval > RefreshDelay)
-                                RefreshDelay = minimumRefreshInterval;
+                                TimeSpan totalTime = timer.Elapsed;
+                                TimeSpan minimumRefreshInterval = new TimeSpan(totalTime.Ticks * 2);
+                                if (minimumRefreshInterval > RefreshDelay)
+                                    RefreshDelay = minimumRefreshInterval;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            if (ErrorHandler.IsCriticalException(ex))
+                                throw;
                         }
                     };
 

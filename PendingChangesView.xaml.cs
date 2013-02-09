@@ -63,6 +63,8 @@ namespace GitScc
             {
                 ((GitFile)item).IsSelected = checkBox.IsChecked == true;
             }
+
+            e.Handled = true;
         }
 
         private void checkBoxAllStaged_Click(object sender, RoutedEventArgs e)
@@ -127,6 +129,22 @@ namespace GitScc
 
         private void dataGrid1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            if (dataGrid1.SelectedItems.Count != 1)
+                return;
+
+            var dep = (DependencyObject) e.OriginalSource;
+
+            while ((dep != null) && !(dep is DataGridCell))
+                dep = VisualTreeHelper.GetParent(dep);
+
+            if (dep == null)
+                return;
+
+            var cell = dep as DataGridCell;
+
+            if (cell.Column.DisplayIndex == 0) // Checkbox
+                return;
+
             GetSelectedFileFullName((fileName) =>
             {
                 OpenFile(fileName);

@@ -7,6 +7,7 @@
     using System.Windows.Media;
     using GalaSoft.MvvmLight;
     using GalaSoft.MvvmLight.Command;
+    using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Formatting;
@@ -59,6 +60,99 @@
                     return _margin.ModificationBrush;
                 else
                     return _margin.RemovedBrush;
+            }
+        }
+
+        public FontFamily FontFamily
+        {
+            get
+            {
+                if (_margin.ClassificationFormatMap.DefaultTextProperties.TypefaceEmpty)
+                    return new FontFamily("Consolas");
+
+                return _margin.ClassificationFormatMap.DefaultTextProperties.Typeface.FontFamily;
+            }
+        }
+
+        public FontStretch FontStretch
+        {
+            get
+            {
+                if (_margin.ClassificationFormatMap.DefaultTextProperties.TypefaceEmpty)
+                    return FontStretches.Normal;
+
+                return _margin.ClassificationFormatMap.DefaultTextProperties.Typeface.Stretch;
+            }
+        }
+
+        public FontStyle FontStyle
+        {
+            get
+            {
+                if (_margin.ClassificationFormatMap.DefaultTextProperties.TypefaceEmpty)
+                    return FontStyles.Normal;
+
+                return _margin.ClassificationFormatMap.DefaultTextProperties.Typeface.Style;
+            }
+        }
+
+        public FontWeight FontWeight
+        {
+            get
+            {
+                if (_margin.ClassificationFormatMap.DefaultTextProperties.TypefaceEmpty)
+                    return FontWeights.Normal;
+
+                return _margin.ClassificationFormatMap.DefaultTextProperties.Typeface.Weight;
+            }
+        }
+
+        public double FontSize
+        {
+            get
+            {
+                if (_margin.ClassificationFormatMap.DefaultTextProperties.FontRenderingEmSizeEmpty)
+                    return 12.0;
+
+                return _margin.ClassificationFormatMap.DefaultTextProperties.FontRenderingEmSize;
+            }
+        }
+
+        public double MaxWidth
+        {
+            get
+            {
+                return _margin.TextView.ViewportWidth;
+            }
+        }
+
+        public double MaxHeight
+        {
+            get
+            {
+                return Math.Max(_margin.TextView.ViewportHeight * 2.0 / 3.0, 400);
+            }
+        }
+
+        public Brush Background
+        {
+            get
+            {
+                if (_margin.ClassificationFormatMap.DefaultTextProperties.BackgroundBrushEmpty)
+                    return _margin.TextView.Background;
+
+                return _margin.ClassificationFormatMap.DefaultTextProperties.BackgroundBrush;
+            }
+        }
+
+        public Brush Foreground
+        {
+            get
+            {
+                if (_margin.ClassificationFormatMap.DefaultTextProperties.ForegroundBrushEmpty)
+                    return (Brush)Application.Current.Resources[VsBrushes.ToolWindowTextKey];
+
+                return _margin.ClassificationFormatMap.DefaultTextProperties.ForegroundBrush;
             }
         }
 

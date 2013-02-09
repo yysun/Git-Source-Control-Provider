@@ -15,22 +15,29 @@
     internal sealed class DiffMarginFactory : IWpfTextViewMarginProvider
     {
         [Import]
-        private ITextDocumentFactoryService TextDocumentFactoryService
+        internal ITextDocumentFactoryService TextDocumentFactoryService
         {
             get;
-            set;
+            private set;
         }
 
         [Import]
-        private IEditorFormatMapService EditorFormatMapService
+        internal IClassificationFormatMapService ClassificationFormatMapService
         {
             get;
-            set;
+            private set;
+        }
+
+        [Import]
+        internal IEditorFormatMapService EditorFormatMapService
+        {
+            get;
+            private set;
         }
 
         public IWpfTextViewMargin CreateMargin(IWpfTextViewHost textViewHost, IWpfTextViewMargin containerMargin)
         {
-            return new DiffMargin(textViewHost.TextView, TextDocumentFactoryService, EditorFormatMapService);
+            return new DiffMargin(textViewHost.TextView, this);
         }
     }
 }

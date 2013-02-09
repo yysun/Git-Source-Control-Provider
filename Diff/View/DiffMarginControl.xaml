@@ -124,8 +124,7 @@
               </Button>
             <Popup AllowsTransparency="True"
                    HorizontalOffset="8"
-                   IsOpen="{Binding ShowPopup,
-                                    Mode=TwoWay}"
+                   IsOpen="{Binding ShowPopup, Mode=TwoWay}"
                    Placement="MousePoint"
                    PlacementTarget="{Binding ElementName=diffControl}"
                    StaysOpen="False">
@@ -178,11 +177,20 @@
                           Margin="0,-1,0,0"
                           Visibility="{Binding IsDiffTextVisible,
                                                Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <TextBlock Margin="5"
-                               FontFamily="Consolas"
-                               FontSize="12"
-                               Text="{Binding DiffText,
-                                              Mode=OneWay}" />
+                    <TextBox Margin="5"
+                             IsReadOnly="True"
+                             FontFamily="{Binding FontFamily, Mode=OneWay}"
+                             FontStretch="{Binding FontStretch, Mode=OneWay}"
+                             FontStyle="{Binding FontStyle, Mode=OneWay}"
+                             FontWeight="{Binding FontWeight, Mode=OneWay}"
+                             FontSize="{Binding FontSize, Mode=OneWay}"
+                             Text="{Binding DiffText, Mode=OneWay}"
+                             MaxWidth="{Binding MaxWidth, Mode=OneWay}"
+                             MaxHeight="{Binding MaxHeight, Mode=OneWay}"
+                             Background="{Binding Background, Mode=OneWay}"
+                             Foreground="{Binding Foreground, Mode=OneWay}"
+                             VerticalScrollBarVisibility="Auto"
+                             HorizontalScrollBarVisibility="Auto"/>
                   </Border>
                 </StackPanel>
               </Border>

@@ -20,6 +20,7 @@
         private const double MarginWidth = 10.0;
 
         private readonly IWpfTextView _textView;
+        private readonly IClassificationFormatMap _classificationFormatMap;
         private readonly IEditorFormatMap _editorFormatMap;
         private readonly DiffMarginViewModel _viewModel;
         private readonly DiffMarginControl _gitDiffBarControl;
@@ -33,10 +34,11 @@
         ///   Creates a <see cref="GitDiffMargin" /> for a given <see cref="IWpfTextView" /> .
         /// </summary>
         /// <param name="textView"> The <see cref="IWpfTextView" /> to attach the margin to. </param>
-        public DiffMargin(IWpfTextView textView, ITextDocumentFactoryService textDocumentFactoryService, IEditorFormatMapService editorFormatMapService)
+        internal DiffMargin(IWpfTextView textView, DiffMarginFactory factory)
         {
             _textView = textView;
-            _editorFormatMap = editorFormatMapService.GetEditorFormatMap(textView);
+            _classificationFormatMap = factory.ClassificationFormatMapService.GetClassificationFormatMap(textView);
+            _editorFormatMap = factory.EditorFormatMapService.GetEditorFormatMap(textView);
 
             _editorFormatMap.FormatMappingChanged += HandleFormatMappingChanged;
             _textView.Closed += (sender, e) => _editorFormatMap.FormatMappingChanged -= HandleFormatMappingChanged;
@@ -45,7 +47,7 @@
             _textView.Options.OptionChanged += HandleOptionChanged;
 
             _gitDiffBarControl = new DiffMarginControl();
-            _viewModel = new DiffMarginViewModel(this, _textView, textDocumentFactoryService, new GitCommands());
+            _viewModel = new DiffMarginViewModel(this, _textView, factory.TextDocumentFactoryService, new GitCommands());
             _gitDiffBarControl.DataContext = _viewModel;
             _gitDiffBarControl.Width = MarginWidth;
             UpdateVisibility();
@@ -62,6 +64,22 @@
             {
                 ThrowIfDisposed();
                 return _gitDiffBarControl;
+            }
+        }
+
+        public IClassificationFormatMap ClassificationFormatMap
+        {
+            get
+            {
+                return _classificationFormatMap;
+            }
+        }
+
+        public IWpfTextView TextView
+        {
+            get
+            {
+                return _textView;
             }
         }
 

@@ -65,6 +65,14 @@
             }
         }
 
+        public IWpfTextView TextView
+        {
+            get
+            {
+                return _textView;
+            }
+        }
+
         public double MarginSize
         {
             get

@@ -62,6 +62,22 @@
             }
         }
 
+        public double MaxWidth
+        {
+            get
+            {
+                return _margin.TextView.ViewportWidth;
+            }
+        }
+
+        public double MaxHeight
+        {
+            get
+            {
+                return Math.Max(_margin.TextView.ViewportHeight * 2.0 / 3.0, 400);
+            }
+        }
+
         public int LineNumber { get { return _hunkRangeInfo.NewHunkRange.StartingLineNumber; } }
 
         private void HandleBrushesChanged(object sender, EventArgs e)

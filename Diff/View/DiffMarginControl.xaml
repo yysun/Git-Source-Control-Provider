@@ -181,8 +181,11 @@
                     <TextBlock Margin="5"
                                FontFamily="Consolas"
                                FontSize="12"
-                               Text="{Binding DiffText,
-                                              Mode=OneWay}" />
+                               Text="{Binding DiffText, Mode=OneWay}"
+                               MaxWidth="{Binding MaxWidth, Mode=OneWay}"
+                               MaxHeight="{Binding MaxHeight, Mode=OneWay}"
+                               VerticalScrollBarVisibility="Auto"
+                               HorizontalScrollBarVisibility="Auto"/>
                   </Border>
                 </StackPanel>
               </Border>

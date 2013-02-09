@@ -963,7 +963,7 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
                !Directory.Exists(folder)) return false;
 
             bool b = false;
-            var dir = new DirectoryInfo(Path.GetDirectoryName(fileName));
+            var dir = new DirectoryInfo(Path.GetDirectoryName(Path.GetFullPath(fileName)));
             while (!b && dir != null)
             {
                 b = string.Compare(dir.FullName, folder, true) == 0;

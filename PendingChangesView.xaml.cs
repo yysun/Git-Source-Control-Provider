@@ -754,12 +754,17 @@ Note: if the file is included project, you need to delete the file from project 
 
         private void UpdateColumnHeaderTemplate(GridViewColumnHeader header, ListSortDirection direction)
         {
-            if (direction == ListSortDirection.Ascending)
-                header.Column.HeaderTemplate = Resources["HeaderTemplateArrowUp"] as DataTemplate;
-            else
-                header.Column.HeaderTemplate = Resources["HeaderTemplateArrowDown"] as DataTemplate;
+            // don't change the template if we're sorting by the check state
+            GridViewColumn checkStateColumn = ((GridView)listView1.View).Columns[0];
+            if (header.Column != checkStateColumn)
+            {
+                if (direction == ListSortDirection.Ascending)
+                    header.Column.HeaderTemplate = Resources["HeaderTemplateArrowUp"] as DataTemplate;
+                else
+                    header.Column.HeaderTemplate = Resources["HeaderTemplateArrowDown"] as DataTemplate;
+            }
 
-            if (_currentSortedColumn != null && _currentSortedColumn != header)
+            if (_currentSortedColumn != null && _currentSortedColumn != header && _currentSortedColumn.Column != checkStateColumn)
                 _currentSortedColumn.Column.HeaderTemplate = null;
         }
     }

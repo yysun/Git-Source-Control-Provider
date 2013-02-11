@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio;
-using System.Windows.Controls;
 
 namespace GitScc
 {
@@ -12,10 +11,9 @@ namespace GitScc
     /// Summary description for SccProviderToolWindow.
     /// </summary>
     [Guid("75EDECF4-68D8-4B7B-92A9-5915461DA6D9")]
-    public class PendingChangesToolWindow : ToolWindowPane
+    public class PendingChangesToolWindow : ToolWindowWithEditor<PendingChangesView>
     {
         private SccProviderService sccProviderService;
-        protected PendingChangesView control;
 
         public PendingChangesToolWindow()
         {
@@ -33,7 +31,7 @@ namespace GitScc
         protected override void Initialize()
         {
             base.Initialize();
-            control = new PendingChangesView();
+            control = new PendingChangesView(this);
 
             // This is the user control hosted by the tool window; Note that, even if this class implements IDisposable,
             // we are not calling Dispose on this object. This is because ToolWindowPane calls Dispose on 

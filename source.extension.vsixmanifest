@@ -32,6 +32,7 @@
   </References>
   <Content>
     <MefComponent>|%CurrentProject%|</MefComponent>
+    <MefComponent>DiffClassifier.dll</MefComponent>
     <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
     <CustomExtension Type="htm">Readme.htm</CustomExtension>
     <CustomExtension Type="pkg">Dragon.pkg</CustomExtension>

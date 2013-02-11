@@ -16,7 +16,8 @@ using Microsoft.VisualStudio.TextManager.Interop;
 
 namespace GitScc
 {
-    public class ToolWindowWithEditor : ToolWindowPane //, IOleCommandTarget, IVsFindTarget
+    public class ToolWindowWithEditor<T> : ToolWindowPane //, IOleCommandTarget, IVsFindTarget
+        where T : Control
     {
 
         #region Constants
@@ -28,7 +29,7 @@ namespace GitScc
 
         #region Private Fields
 
-        protected UserControl control;
+        protected T control;
 
         private IOleCommandTarget cachedEditorCommandTarget;
         private IVsTextView textView;

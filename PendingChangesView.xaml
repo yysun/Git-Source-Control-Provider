@@ -11,17 +11,100 @@
 			 Loaded="UserControl_Loaded">
 
 	<UserControl.Resources>
+		<ControlTemplate x:Key="ListViewItemTemplate" TargetType="{x:Type ListViewItem}">
+			<Border SnapsToDevicePixels="True" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}">
+				<GridViewRowPresenter Grid.RowSpan="2" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+			</Border>
+			<ControlTemplate.Triggers>
+				<Trigger Property="IsSelected" Value="True">
+					<Setter Value="{DynamicResource {x:Static vsui:TreeViewColors.SelectedItemActiveBrushKey}}" Property="Background" />
+					<Setter Value="{DynamicResource {x:Static vsui:TreeViewColors.SelectedItemActiveTextBrushKey}}" Property="Foreground" />
+				</Trigger>
+				<MultiTrigger>
+					<MultiTrigger.Conditions>
+						<Condition Property="IsSelected" Value="True" />
+						<Condition Property="Selector.IsSelectionActive" Value="False" />
+					</MultiTrigger.Conditions>
+					<Setter Value="{DynamicResource {x:Static vsui:TreeViewColors.SelectedItemInactiveBrushKey}}" Property="Background" />
+					<Setter Value="{DynamicResource {x:Static vsui:TreeViewColors.SelectedItemInactiveTextBrushKey}}" Property="Foreground" />
+				</MultiTrigger>
+			</ControlTemplate.Triggers>
+		</ControlTemplate>
+		<Style x:Key="ListViewItemStyle" TargetType="{x:Type ListViewItem}">
+			<Setter Property="Padding" Value="2" />
+			<Setter Property="Margin" Value="0" />
+			<Setter Property="Template" Value="{StaticResource ListViewItemTemplate}" />
+			<Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarTextActiveKey}}" />
+		</Style>
+		<ControlTemplate x:Key="GridViewColumnHeaderGripperTemplate" TargetType="{x:Type Thumb}">
+			<Border Padding="{TemplateBinding Padding}" Background="Transparent">
+				<Rectangle HorizontalAlignment="Center" Width="1" Fill="{TemplateBinding Background}" />
+			</Border>
+		</ControlTemplate>
+		<Style x:Key="GridViewColumnHeaderGripper" TargetType="{x:Type Thumb}">
+			<Setter Property="Width" Value="8" />
+			<Setter Property="Background" Value="{DynamicResource {x:Static vsui:HeaderColors.SeparatorLineBrushKey}}" />
+			<Setter Property="Template" Value="{StaticResource GridViewColumnHeaderGripperTemplate}" />
+		</Style>
+		<ControlTemplate x:Key="GridViewColumnHeaderTemplate" TargetType="{x:Type GridViewColumnHeader}">
+			<Grid>
+				<Border Name="HeaderBorder" Padding="{TemplateBinding Padding}" BorderThickness="0,0,0,1" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}" Margin="0">
+					<ContentPresenter Name="HeaderContent" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+				</Border>
+				<Thumb Name="PART_HeaderGripper" HorizontalAlignment="Right" Margin="0,0,-4,0" Style="{StaticResource GridViewColumnHeaderGripper}" />
+			</Grid>
+			<ControlTemplate.Triggers>
+				<Trigger Property="IsMouseOver" Value="True">
+					<Setter Value="{DynamicResource {x:Static vsui:HeaderColors.MouseOverBrushKey}}" Property="Background" />
+					<Setter Value="{DynamicResource {x:Static vsui:HeaderColors.MouseOverTextBrushKey}}" Property="Foreground" />
+				</Trigger>
+				<Trigger Property="IsPressed" Value="True">
+					<Setter Value="{DynamicResource {x:Static vsui:HeaderColors.MouseDownBrushKey}}" Property="Background" />
+					<Setter Value="{DynamicResource {x:Static vsui:HeaderColors.MouseDownTextBrushKey}}" Property="Foreground" />
+				</Trigger>
+			</ControlTemplate.Triggers>
+		</ControlTemplate>
+		<Style x:Key="{x:Type Path}" TargetType="{x:Type Path}">
+			<Setter Property="Fill" Value="{DynamicResource {x:Static vsui:HeaderColors.GlyphBrushKey}}" />
+			<Style.Triggers>
+				<DataTrigger Binding="{Binding Path=IsMouseOver,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type GridViewColumnHeader}}}" Value="True">
+					<Setter Property="Fill" Value="{DynamicResource {x:Static vsui:HeaderColors.MouseOverGlyphBrushKey}}" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Path=IsPressed,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type GridViewColumnHeader}}}" Value="True">
+					<Setter Property="Fill" Value="{DynamicResource {x:Static vsui:HeaderColors.MouseDownGlyphBrushKey}}" />
+				</DataTrigger>
+			</Style.Triggers>
+		</Style>
+		<Style x:Key="{x:Type ListView}" TargetType="{x:Type ListView}">
+			<Style.Resources>
+				<ResourceDictionary>
+					<Style TargetType="{x:Type GridViewColumnHeader}">
+						<Setter Property="HorizontalContentAlignment" Value="Left" />
+						<Setter Property="VerticalContentAlignment" Value="Center" />
+						<Setter Property="Foreground" Value="{DynamicResource {x:Static vsui:HeaderColors.DefaultTextBrushKey}}" />
+						<Setter Property="Background" Value="{DynamicResource {x:Static vsui:HeaderColors.DefaultBrushKey}}" />
+						<Setter Property="BorderBrush" Value="{DynamicResource {x:Static vsui:HeaderColors.SeparatorLineBrushKey}}" />
+						<Setter Property="Padding" Value="8,4,4,4" />
+						<Setter Property="Template" Value="{StaticResource GridViewColumnHeaderTemplate}" />
+					</Style>
+				</ResourceDictionary>
+			</Style.Resources>
+			<Setter Property="ItemContainerStyle" Value="{StaticResource ListViewItemStyle}" />
+			<Setter Property="BorderThickness" Value="0" />
+			<Setter Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.BackgroundKey}}" />
+		</Style>
+
 		<DataTemplate x:Key="HeaderTemplateArrowUp">
 			<DockPanel>
 				<TextBlock HorizontalAlignment="Center" Text="{Binding}" />
-				<Path Name="arrow" StrokeThickness="1" Data="M5,10L15,10 10,5 5,10" />
+				<Path Name="arrow" StrokeThickness="1" Style="{StaticResource {x:Type Path}}" Data="M5,10L15,10 10,5 5,10" />
 			</DockPanel>
 		</DataTemplate>
 
 		<DataTemplate x:Key="HeaderTemplateArrowDown">
 			<DockPanel>
 				<TextBlock HorizontalAlignment="Center" Text="{Binding}" />
-				<Path Name="arrow" StrokeThickness="1" Data="M5,5L10,10 15,5 5,5" />
+				<Path Name="arrow" StrokeThickness="1" Style="{StaticResource {x:Type Path}}" Data="M5,5L10,10 15,5 5,5" />
 			</DockPanel>
 		</DataTemplate>
 	</UserControl.Resources>
@@ -85,7 +168,7 @@
 			</RichTextBox>
 
 			<ListView Name="listView1" Grid.Row="3" SelectionChanged="listView1_SelectionChanged" MouseDoubleClick="listView1_MouseDoubleClick" ContextMenuOpening="listView1_ContextMenuOpening"
-					  SelectedValuePath="FileName" KeyUp="listView1_KeyUp" PreviewKeyDown="listView1_PreviewKeyDown" ButtonBase.Click="listView1_Click">
+					  SelectedValuePath="FileName" KeyUp="listView1_KeyUp" PreviewKeyDown="listView1_PreviewKeyDown" ButtonBase.Click="listView1_Click" Background="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}">
 				<ListView.View>
 					<GridView AllowsColumnReorder="False">
 						<GridViewColumn Width="Auto">

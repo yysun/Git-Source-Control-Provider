@@ -1,8 +1,5 @@
 ﻿using System;
-using System.ComponentModel.Design;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Windows;
 using System.Windows.Controls;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
@@ -103,6 +100,8 @@ namespace GitScc
 
                     //Get our WPF host from our text view (from our code window).
                     IWpfTextViewHost textViewHost = editorAdapterFactoryService.GetWpfTextViewHost(this.textView);
+
+                    textViewHost.TextView.Options.SetOptionValue(DefaultTextViewOptions.ViewProhibitUserInputId, true);
 
                     return Tuple.Create<Control, IVsTextView>(textViewHost.HostControl, this.textView);
 

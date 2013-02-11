@@ -1,7 +1,7 @@
 namespace GitScc.Diff.ViewModel
 {
     using System;
-    using System.Collections.ObjectModel;
+    using System.Collections.Generic;
     using GalaSoft.MvvmLight;
     using GalaSoft.MvvmLight.Command;
     using Microsoft.VisualStudio.Text;
@@ -14,10 +14,10 @@ namespace GitScc.Diff.ViewModel
         private readonly DiffMargin _margin;
         private readonly IWpfTextView _textView;
         private readonly IGitCommands _gitCommands;
-        private readonly ObservableCollection<DiffViewModel> _diffViewModels;
         private readonly DiffUpdateBackgroundParser _parser;
         private readonly RelayCommand<DiffViewModel> _previousChangeCommand;
         private readonly RelayCommand<DiffViewModel> _nextChangeCommand;
+        private List<DiffViewModel> _diffViewModels;
 
         public DiffMarginViewModel(DiffMargin margin, IWpfTextView textView, ITextDocumentFactoryService textDocumentFactoryService, IGitCommands gitCommands)
         {
@@ -33,7 +33,7 @@ namespace GitScc.Diff.ViewModel
             _margin = margin;
             _textView = textView;
             _gitCommands = gitCommands;
-            _diffViewModels = new ObservableCollection<DiffViewModel>();
+            _diffViewModels = new List<DiffViewModel>();
             _previousChangeCommand = new RelayCommand<DiffViewModel>(PreviousChange, PreviousChangeCanExecute);
             _nextChangeCommand = new RelayCommand<DiffViewModel>(NextChange, NextChangeCanExecute);
 
@@ -55,11 +55,17 @@ namespace GitScc.Diff.ViewModel
             RefreshDiffViewModelPositions();
         }
 
-        public ObservableCollection<DiffViewModel> DiffViewModels
+        public List<DiffViewModel> DiffViewModels
         {
             get
             {
                 return _diffViewModels;
+            }
+
+            private set
+            {
+                _diffViewModels = value;
+                RaisePropertyChanged(() => DiffViewModels);
             }
         }
 
@@ -129,14 +135,15 @@ namespace GitScc.Diff.ViewModel
             {
                 try
                 {
-                    DiffViewModels.Clear();
-
+                    List<DiffViewModel> diffViewModels = new List<DiffViewModel>();
                     DiffParseResultEventArgs diffResult = e as DiffParseResultEventArgs;
-                    if (diffResult == null)
-                        return;
+                    if (diffResult != null)
+                    {
+                        foreach (HunkRangeInfo hunkRangeInfo in diffResult.Diff)
+                            diffViewModels.Add(new DiffViewModel(_margin, hunkRangeInfo, _textView));
+                    }
 
-                    foreach (HunkRangeInfo hunkRangeInfo in diffResult.Diff)
-                        DiffViewModels.Add(new DiffViewModel(_margin, hunkRangeInfo, _textView));
+                    DiffViewModels = diffViewModels;
                 }
                 catch (Exception ex)
                 {

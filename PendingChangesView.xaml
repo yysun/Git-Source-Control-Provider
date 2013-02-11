@@ -4,35 +4,191 @@
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+			 xmlns:local="clr-namespace:GitScc"
+             xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
+			 xmlns:vsui="clr-namespace:GitScc.PlatformUI"
 			 mc:Ignorable="d" 
-			 d:DesignHeight="300" d:DesignWidth="800" KeyDown="UserControl_KeyDown">
+			 d:DesignHeight="300" d:DesignWidth="800" KeyDown="UserControl_KeyDown"
+			 Foreground="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarTextActiveKey}}"
+			 Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}"
+			 Loaded="UserControl_Loaded">
 
-	<Grid x:Name="Main" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+	<UserControl.Resources>
+		<Style x:Key="VerticalGridSplitter" TargetType="{x:Type GridSplitter}">
+			<Setter Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMenuSeparatorKey}}" />
+			<Setter Property="Width" Value="3" />
+		</Style>
+
+		<Style x:Key="HorizontalGridSplitter" TargetType="{x:Type GridSplitter}">
+			<Setter Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMenuSeparatorKey}}" />
+			<Setter Property="Height" Value="3" />
+		</Style>
+
+		<ControlTemplate x:Key="ListViewItemTemplate2010" TargetType="{x:Type ListViewItem}">
+			<Border SnapsToDevicePixels="True" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}">
+				<GridViewRowPresenter Grid.RowSpan="2" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+			</Border>
+			<ControlTemplate.Triggers>
+				<Trigger Property="IsSelected" Value="True">
+					<Setter Property="Background" Value="#3399FF" />
+					<Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}" />
+				</Trigger>
+				<MultiTrigger>
+					<MultiTrigger.Conditions>
+						<Condition Property="IsSelected" Value="True" />
+						<Condition Property="Selector.IsSelectionActive" Value="False" />
+					</MultiTrigger.Conditions>
+					<Setter Property="Background" Value="#F0F0F0" />
+					<Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" />
+				</MultiTrigger>
+			</ControlTemplate.Triggers>
+		</ControlTemplate>
+
+		<Style x:Key="ListViewItemStyle2010" TargetType="{x:Type ListViewItem}">
+			<Setter Property="Padding" Value="2" />
+			<Setter Property="Margin" Value="0" />
+			<Setter Property="Template" Value="{StaticResource ListViewItemTemplate2010}" />
+			<Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarTextActiveKey}}" />
+		</Style>
+
+		<ControlTemplate x:Key="ListViewItemTemplate2012" TargetType="{x:Type ListViewItem}">
+			<Border SnapsToDevicePixels="True" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}">
+				<GridViewRowPresenter Grid.RowSpan="2" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+			</Border>
+			<ControlTemplate.Triggers>
+				<Trigger Property="IsSelected" Value="True">
+					<Setter Value="{DynamicResource {x:Static vsui:TreeViewColors.SelectedItemActiveBrushKey}}" Property="Background" />
+					<Setter Value="{DynamicResource {x:Static vsui:TreeViewColors.SelectedItemActiveTextBrushKey}}" Property="Foreground" />
+				</Trigger>
+				<MultiTrigger>
+					<MultiTrigger.Conditions>
+						<Condition Property="IsSelected" Value="True" />
+						<Condition Property="Selector.IsSelectionActive" Value="False" />
+					</MultiTrigger.Conditions>
+					<Setter Value="{DynamicResource {x:Static vsui:TreeViewColors.SelectedItemInactiveBrushKey}}" Property="Background" />
+					<Setter Value="{DynamicResource {x:Static vsui:TreeViewColors.SelectedItemInactiveTextBrushKey}}" Property="Foreground" />
+				</MultiTrigger>
+			</ControlTemplate.Triggers>
+		</ControlTemplate>
+
+		<Style x:Key="ListViewItemStyle2012" TargetType="{x:Type ListViewItem}">
+			<Setter Property="Padding" Value="2" />
+			<Setter Property="Margin" Value="0" />
+			<Setter Property="Template" Value="{StaticResource ListViewItemTemplate2012}" />
+			<Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarTextActiveKey}}" />
+		</Style>
+
+		<ControlTemplate x:Key="GridViewColumnHeaderGripperTemplate2012" TargetType="{x:Type Thumb}">
+			<Border Padding="{TemplateBinding Padding}" Background="Transparent">
+				<Rectangle HorizontalAlignment="Center" Width="1" Fill="{TemplateBinding Background}" />
+			</Border>
+		</ControlTemplate>
+
+		<Style x:Key="GridViewColumnHeaderGripper2012" TargetType="{x:Type Thumb}">
+			<Setter Property="Width" Value="8" />
+			<Setter Property="Background" Value="{DynamicResource {x:Static vsui:HeaderColors.SeparatorLineBrushKey}}" />
+			<Setter Property="Template" Value="{StaticResource GridViewColumnHeaderGripperTemplate2012}" />
+		</Style>
+
+		<ControlTemplate x:Key="GridViewColumnHeaderTemplate2012" TargetType="{x:Type GridViewColumnHeader}">
+			<Grid>
+				<Border Name="HeaderBorder" Padding="{TemplateBinding Padding}" BorderThickness="0,0,0,1" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}" Margin="0">
+					<ContentPresenter Name="HeaderContent" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+				</Border>
+				<Thumb Name="PART_HeaderGripper" HorizontalAlignment="Right" Margin="0,0,-4,0" Style="{StaticResource GridViewColumnHeaderGripper2012}" />
+			</Grid>
+			<ControlTemplate.Triggers>
+				<Trigger Property="IsMouseOver" Value="True">
+					<Setter Value="{DynamicResource {x:Static vsui:HeaderColors.MouseOverBrushKey}}" Property="Background" />
+					<Setter Value="{DynamicResource {x:Static vsui:HeaderColors.MouseOverTextBrushKey}}" Property="Foreground" />
+				</Trigger>
+				<Trigger Property="IsPressed" Value="True">
+					<Setter Value="{DynamicResource {x:Static vsui:HeaderColors.MouseDownBrushKey}}" Property="Background" />
+					<Setter Value="{DynamicResource {x:Static vsui:HeaderColors.MouseDownTextBrushKey}}" Property="Foreground" />
+				</Trigger>
+			</ControlTemplate.Triggers>
+		</ControlTemplate>
+
+		<Style x:Key="{x:Type Path}" TargetType="{x:Type Path}">
+			<Setter Property="Fill" Value="{DynamicResource {x:Static vsui:HeaderColors.GlyphBrushKey}}" />
+			<Style.Triggers>
+				<DataTrigger Binding="{Binding Path=IsMouseOver,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type GridViewColumnHeader}}}" Value="True">
+					<Setter Property="Fill" Value="{DynamicResource {x:Static vsui:HeaderColors.MouseOverGlyphBrushKey}}" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Path=IsPressed,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type GridViewColumnHeader}}}" Value="True">
+					<Setter Property="Fill" Value="{DynamicResource {x:Static vsui:HeaderColors.MouseDownGlyphBrushKey}}" />
+				</DataTrigger>
+			</Style.Triggers>
+		</Style>
+
+		<Style x:Key="{x:Type ListView}" TargetType="{x:Type ListView}">
+			<Style.Resources>
+				<Style TargetType="{x:Type GridViewColumnHeader}">
+					<Setter Property="HorizontalContentAlignment" Value="Left" />
+					<Setter Property="VerticalContentAlignment" Value="Center" />
+					<Setter Property="Padding" Value="6,4,4,4" />
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding Source={x:Static local:GitSccOptions.IsVisualStudio2012}, Mode=OneTime}" Value="True">
+							<Setter Property="Foreground" Value="{DynamicResource {x:Static vsui:HeaderColors.DefaultTextBrushKey}}" />
+							<Setter Property="Background" Value="{DynamicResource {x:Static vsui:HeaderColors.DefaultBrushKey}}" />
+							<Setter Property="BorderBrush" Value="{DynamicResource {x:Static vsui:HeaderColors.SeparatorLineBrushKey}}" />
+							<Setter Property="Template" Value="{StaticResource GridViewColumnHeaderTemplate2012}" />
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+			</Style.Resources>
+			<Style.Triggers>
+				<DataTrigger Binding="{Binding Source={x:Static local:GitSccOptions.IsVisualStudio2012}, Mode=OneTime}" Value="True">
+					<Setter Property="ItemContainerStyle" Value="{StaticResource ListViewItemStyle2012}" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Source={x:Static local:GitSccOptions.IsVisualStudio2010}, Mode=OneTime}" Value="True">
+					<Setter Property="ItemContainerStyle" Value="{StaticResource ListViewItemStyle2010}" />
+				</DataTrigger>
+			</Style.Triggers>
+			<Setter Property="BorderThickness" Value="0" />
+			<Setter Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.BackgroundKey}}" />
+		</Style>
+
+		<DataTemplate x:Key="HeaderTemplateArrowUp">
+			<DockPanel>
+				<TextBlock HorizontalAlignment="Center" Text="{Binding}" />
+				<Path Name="arrow" StrokeThickness="1" Style="{StaticResource {x:Type Path}}" Data="M5,10L15,10 10,5 5,10" />
+			</DockPanel>
+		</DataTemplate>
+
+		<DataTemplate x:Key="HeaderTemplateArrowDown">
+			<DockPanel>
+				<TextBlock HorizontalAlignment="Center" Text="{Binding}" />
+				<Path Name="arrow" StrokeThickness="1" Style="{StaticResource {x:Type Path}}" Data="M5,5L10,10 15,5 5,5" />
+			</DockPanel>
+		</DataTemplate>
+	</UserControl.Resources>
+
+	<Grid x:Name="Main" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+          Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}">
 		
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="520" MinWidth="20" MaxWidth="1000" />
-			<ColumnDefinition Width="2" />
+			<ColumnDefinition Width="Auto" />
 			<ColumnDefinition Width="*" />
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
 		</Grid.RowDefinitions>
-		<Grid.Background>
-			<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-				<GradientStop Color="#FFC5E8F8" Offset="1" />
-				<GradientStop Color="White" Offset="0" />
-			</LinearGradientBrush>
-		</Grid.Background>
+
 		<GridSplitter Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
-					  VerticalAlignment="Stretch" HorizontalAlignment="Left" Name="gridSplitter1" Width="4" ResizeDirection="Columns" />
+					  VerticalAlignment="Stretch" HorizontalAlignment="Left" Name="gridSplitter1" ResizeDirection="Columns"
+					  Style="{StaticResource VerticalGridSplitter}"/>
 
-		<Label Content="Comments:" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Center" 
-			   Margin="12,0,0,0" Foreground="#FF333333" />
-		<CheckBox Content="Sign off" Height="16" HorizontalAlignment="Right" Margin="0,5,20,0" Name="chkSignOff" VerticalAlignment="Top" />
+		<Label Content="Comments:" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Center" 
+			   Margin="2,0,0,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" />
 
-		<Label Content="Diff (double click to open file):" Height="28" HorizontalAlignment="Left" Name="label2" VerticalAlignment="Center" 
-			   Margin="12,0,0,0" Foreground="#FF333333"
+		<CheckBox Content="Sign off" HorizontalAlignment="Right" Margin="0,0,6,0" Name="chkSignOff" VerticalAlignment="Center"
+                  Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"/>
+
+		<Label Content="Diff (double click to open file):" HorizontalAlignment="Left" Name="label2" VerticalAlignment="Center" 
+			   Margin="2,0,0,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
 			   Grid.Column="2" Grid.Row="0"/>
 
 		<Grid Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="grid1">
@@ -45,13 +201,17 @@
 			</Grid.RowDefinitions>
 
 			<GridSplitter Grid.Row="1" Grid.ColumnSpan="2"
-					  VerticalAlignment="Top" HorizontalAlignment="Stretch" Name="gridSplitter2" Height="4" />
+						  VerticalAlignment="Top" HorizontalAlignment="Stretch" Name="gridSplitter2"
+						  Style="{StaticResource HorizontalGridSplitter}"/>
 
-			<Label Content="Changed Files" Height="28" HorizontalAlignment="Stretch" Name="label3" VerticalAlignment="Center" 
-			   Margin="12,0,12,0" Foreground="#FF333333" Grid.Row="2" ToolTip="select file to commit, or right click to stage/unstage file" />
+			<Label Content="Changed Files" HorizontalAlignment="Stretch" Name="label3" VerticalAlignment="Center"
+				   Margin="2,0,2,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
+				   Grid.Row="2" ToolTip="select file to commit, or right click to stage/unstage file" />
 
-			<RichTextBox HorizontalAlignment="Stretch" Name="textBoxComments" VerticalAlignment="Stretch" Margin="10,0,10,10" 
-					 AcceptsReturn="True" VerticalScrollBarVisibility="Visible" SpellCheck.IsEnabled="True">
+			<RichTextBox HorizontalAlignment="Stretch" Name="textBoxComments" VerticalAlignment="Stretch" Margin="2,0,2,2"
+					     AcceptsReturn="True" VerticalScrollBarVisibility="Visible" SpellCheck.IsEnabled="True"
+                         Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" 
+                         Background="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}">
 				<RichTextBox.Resources>
 					<Style TargetType="{x:Type Paragraph}">
 						<Setter Property="Margin" Value="0"/>
@@ -59,48 +219,41 @@
 				</RichTextBox.Resources>
 			</RichTextBox>
 
-			<DataGrid AutoGenerateColumns="False" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="dataGrid1" VerticalAlignment="Stretch"
-					  GridLinesVisibility="None"  Foreground="#FF333333" Sorting="dataGrid1_Sorting" IsReadOnly="True" SelectedValuePath="FileName"
-					  SelectionUnit="FullRow" SelectionMode="Extended" SelectionChanged="dataGrid1_SelectionChanged" MouseDoubleClick="dataGrid1_MouseDoubleClick" ContextMenuOpening="dataGrid1_ContextMenuOpening"
-					  CanUserResizeRows="False" CanUserDeleteRows="False" CanUserAddRows="False" CanUserReorderColumns="False" RowHeaderWidth="0" KeyDown="dataGrid1_KeyDown">
- 
-				<DataGrid.CellStyle>
-					<Style TargetType="DataGridCell">
-						<Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-						<Setter Property="BorderThickness" Value="0"/>
-						<Setter Property="Padding" Value="1"/>
-						<Setter Property="Template">
-							<Setter.Value>
-								<ControlTemplate TargetType="{x:Type DataGridCell}">
-									<Border Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
-										<ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-									</Border>
-								</ControlTemplate>
-							</Setter.Value>
-						</Setter>
-					</Style>
-				</DataGrid.CellStyle>
+			<ListView Name="listView1" Grid.Row="3" SelectionChanged="listView1_SelectionChanged" MouseDoubleClick="listView1_MouseDoubleClick" ContextMenuOpening="listView1_ContextMenuOpening"
+					  SelectedValuePath="FileName" KeyUp="listView1_KeyUp" PreviewKeyDown="listView1_PreviewKeyDown" ButtonBase.Click="listView1_Click" Background="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}">
+				<ListView.View>
+					<GridView AllowsColumnReorder="False">
+						<GridViewColumn Width="Auto">
+							<GridViewColumn.Header>
+								<GridViewColumnHeader Content="Staged" Tag="Staged" />
+							</GridViewColumn.Header>
+							<GridViewColumn.HeaderTemplate>
+								<DataTemplate>
+									<CheckBox Name="checkBoxAllStaged" Click="checkBoxAllStaged_Click"
+										  HorizontalAlignment="Left" VerticalAlignment="Center"/>
+								</DataTemplate>
+							</GridViewColumn.HeaderTemplate>
+							<GridViewColumn.CellTemplate>
+								<DataTemplate>
+									<CheckBox Name="checkBoxSelected" Click="checkBoxSelected_Click" IsChecked="{Binding IsSelected}"
+											  HorizontalAlignment="Left" VerticalAlignment="Center"/>
+								</DataTemplate>
+							</GridViewColumn.CellTemplate>
+						</GridViewColumn>
+						<GridViewColumn DisplayMemberBinding="{Binding Status}" Width="Auto">
+							<GridViewColumn.Header>
+								<GridViewColumnHeader Content="Status" Tag="Status" />
+							</GridViewColumn.Header>
+						</GridViewColumn>
+						<GridViewColumn DisplayMemberBinding="{Binding FileName}" Width="800">
+							<GridViewColumn.Header>
+								<GridViewColumnHeader Content="File" Tag="FileName" />
+							</GridViewColumn.Header>
+						</GridViewColumn>
+					</GridView>
+				</ListView.View>
 
-				<DataGrid.Columns>
-					<DataGridTemplateColumn Header="Staged" CanUserResize="False">
-						<DataGridTemplateColumn.HeaderTemplate>
-							<DataTemplate>
-								<CheckBox x:Name="checkBoxAllStaged" Click="checkBoxAllStaged_Click"  
-										  HorizontalAlignment="Center" VerticalAlignment="Center"/>
-							</DataTemplate>
-						</DataGridTemplateColumn.HeaderTemplate>
-						<DataGridTemplateColumn.CellTemplate>
-							<DataTemplate>
-								<CheckBox x:Name="checkBoxSelected" Click="checkBoxSelected_Click"  IsChecked="{Binding IsSelected}"
-										  HorizontalAlignment="Center" VerticalAlignment="Center"/>
-							</DataTemplate>
-						</DataGridTemplateColumn.CellTemplate>
-					</DataGridTemplateColumn>
-					<DataGridTextColumn Header="Status" Binding="{Binding Status}" CanUserResize="True" Width="70" />
-					<DataGridTextColumn Header="File" Binding="{Binding FileName}" Width="*" />
-				</DataGrid.Columns>
-
-				<DataGrid.ContextMenu>
+				<ListView.ContextMenu>
 					<ContextMenu>
 						<MenuItem Header="Stage File" Name="menuStage" Click="menuStage_Click" />
 						<MenuItem Header="Un-Stage File" Name="menuUnstage" Click="menuUnstage_Click" />
@@ -113,8 +266,8 @@
 							<MenuItem Header="Add File Extensions to .gitignore" Name="menuIgnoreFileExt" Click="menuIgnoreFileExt_Click"/>
 						</MenuItem>
 					</ContextMenu>
-				</DataGrid.ContextMenu>
-			</DataGrid>
+				</ListView.ContextMenu>
+			</ListView>
 			<Label Content="(If refreshing is slow, try turn off auto-refresh in Tools | Options)" Foreground="#FF333333" Height="28" HorizontalAlignment="Left" Margin="231,0,0,0" Name="label4" VerticalAlignment="Center" Grid.Row="2" Visibility="Collapsed" />
 		</Grid>
 

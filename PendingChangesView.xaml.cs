@@ -28,6 +28,9 @@ namespace GitScc
 
         private string[] diffLines;
 
+        private GridViewColumnHeader _currentSortedColumn;
+        private ListSortDirection _lastSortDirection;
+
         public PendingChangesView()
         {
             InitializeComponent();
@@ -35,31 +38,32 @@ namespace GitScc
         }
 
         #region Events
-        private string sortMemberPath = "FileName";
-        private ListSortDirection sortDirection = ListSortDirection.Ascending;
-
-        private void dataGrid1_Sorting(object sender, DataGridSortingEventArgs e)
+        private void listView1_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            sortMemberPath = e.Column.SortMemberPath;
-            sortDirection = e.Column.SortDirection != ListSortDirection.Ascending ?
-                ListSortDirection.Ascending : ListSortDirection.Descending;
+            if (e.Key == Key.Space)
+                e.Handled = true;
         }
 
-        private void dataGrid1_KeyDown(object sender, KeyEventArgs e)
+        private void listView1_KeyUp(object sender, KeyEventArgs e)
         {
-            var selectedItem = this.dataGrid1.SelectedItem as GitFile;
-            if (selectedItem == null || e.Key != Key.Space) return;
+            if (e.Key != Key.Space)
+                return;
+
+            var selectedItem = this.listView1.SelectedItem as GitFile;
+            if (selectedItem == null) return;
             var selected = !selectedItem.IsSelected;
-            foreach (var item in this.dataGrid1.SelectedItems)
+            foreach (var item in this.listView1.SelectedItems)
             {
                 ((GitFile)item).IsSelected = selected;
             }
+
+            e.Handled = true;
         }
 
         private void checkBoxSelected_Click(object sender, RoutedEventArgs e)
         {
             var checkBox = sender as CheckBox;
-            foreach (var item in this.dataGrid1.SelectedItems)
+            foreach (var item in this.listView1.SelectedItems)
             {
                 ((GitFile)item).IsSelected = checkBox.IsChecked == true;
             }
@@ -70,13 +74,13 @@ namespace GitScc
         private void checkBoxAllStaged_Click(object sender, RoutedEventArgs e)
         {
             var checkBox = sender as CheckBox;
-            foreach (var item in this.dataGrid1.Items.Cast<GitFile>())
+            foreach (var item in this.listView1.Items.Cast<GitFile>())
             {
                 ((GitFile)item).IsSelected = checkBox.IsChecked == true;
             }
         }
 
-        private void dataGrid1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void listView1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var fileName = GetSelectedFileName();
             if (fileName == null)
@@ -127,15 +131,15 @@ namespace GitScc
                 .HandleNonCriticalExceptions();
         }
 
-        private void dataGrid1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void listView1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             // only enable double-click to open when exactly one item is selected
-            if (dataGrid1.SelectedItems.Count != 1)
+            if (listView1.SelectedItems.Count != 1)
                 return;
 
-            // disable double-click to open for the checkbox cell
-            var cell = FindAncestorOfType<DataGridCell>(e.OriginalSource as DependencyObject);
-            if (cell == null || cell.Column.DisplayIndex == 0) // Checkbox
+            // disable double-click to open for the checkbox
+            var checkBox = FindAncestorOfType<CheckBox>(e.OriginalSource as DependencyObject);
+            if (checkBox != null)
                 return;
 
             GetSelectedFileFullName((fileName) =>
@@ -182,8 +186,9 @@ namespace GitScc
         #region Select File
         private string GetSelectedFileName()
         {
-            if (this.dataGrid1.SelectedCells.Count == 0) return null;
-            var selectedItem = this.dataGrid1.SelectedCells[0].Item as GitFile;
+            if (this.listView1.SelectedItems.Count == 0)
+                return null;
+            var selectedItem = this.listView1.SelectedItems[0] as GitFile;
             if (selectedItem == null) return null;
             return selectedItem.FileName;
         }
@@ -207,7 +212,7 @@ namespace GitScc
         {
             try
             {
-                var files = this.dataGrid1.SelectedItems.Cast<GitFile>()
+                var files = this.listView1.SelectedItems.Cast<GitFile>()
                     .Select(item => System.IO.Path.Combine(this.tracker.GitWorkingDirectory, item.FileName))
                     .ToList();
 
@@ -282,28 +287,22 @@ namespace GitScc
                     stopwatch.Start();
 
                     var selectedFile = GetSelectedFileName();
-                    var selectedFiles = this.dataGrid1.Items.Cast<GitFile>()
+                    var selectedFiles = this.listView1.Items.Cast<GitFile>()
                         .Where(i => i.IsSelected)
                         .Select(i => i.FileName).ToList();
 
-                    this.dataGrid1.BeginInit();
+                    this.listView1.BeginInit();
 
                     try
                     {
-                        this.dataGrid1.ItemsSource = changedFiles;
+                        this.listView1.ItemsSource = changedFiles;
 
-                        ICollectionView view = CollectionViewSource.GetDefaultView(this.dataGrid1.ItemsSource);
-                        if (view != null)
-                        {
-                            view.SortDescriptions.Clear();
-                            view.SortDescriptions.Add(new SortDescription(sortMemberPath, sortDirection));
-                            view.Refresh();
-                        }
+                        SortCurrentColumn();
 
-                        this.dataGrid1.SelectedValue = selectedFile;
+                        this.listView1.SelectedValue = selectedFile;
                         selectedFiles.ForEach(fn =>
                         {
-                            var item = this.dataGrid1.Items.Cast<GitFile>()
+                            var item = this.listView1.Items.Cast<GitFile>()
                                 .Where(i => i.FileName == fn)
                                 .FirstOrDefault();
                             if (item != null)
@@ -323,7 +322,7 @@ namespace GitScc
                     {
                         ShowStatusMessage(ex.Message);
                     }
-                    this.dataGrid1.EndInit();
+                    this.listView1.EndInit();
 
                     stopwatch.Stop();
                     Debug.WriteLine("**** PendingChangesView Refresh: " + stopwatch.ElapsedMilliseconds);
@@ -348,10 +347,10 @@ namespace GitScc
 
         internal void ClearUI()
         {
-            this.dataGrid1.ItemsSource = null;
+            this.listView1.ItemsSource = null;
             this.textBoxComments.Document.Blocks.Clear();
             this.ClearEditor();
-            var chk = this.dataGrid1.FindVisualChild<CheckBox>("checkBoxAllStaged");
+            var chk = this.listView1.FindVisualChild<CheckBox>("checkBoxAllStaged");
             if (chk != null) chk.IsChecked = false;
         }
 
@@ -455,7 +454,7 @@ namespace GitScc
 
         private bool StageSelectedFiles(bool showWarning)
         {
-            var unstaged = this.dataGrid1.Items.Cast<GitFile>()
+            var unstaged = this.listView1.Items.Cast<GitFile>()
                                .Where(item => item.IsSelected && !item.IsStaged)
                                .ToArray();
             var count = unstaged.Length;
@@ -486,13 +485,14 @@ namespace GitScc
 
         #region Menu Events
 
-        private void dataGrid1_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        private void listView1_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            if (this.dataGrid1.SelectedCells.Count == 0) return;
+            if (this.listView1.SelectedItems.Count == 0)
+                return;
 
-            if (this.dataGrid1.SelectedItems.Count == 1)
+            if (this.listView1.SelectedItems.Count == 1)
             {
-                var selectedItem = this.dataGrid1.SelectedCells[0].Item as GitFile;
+                var selectedItem = this.listView1.SelectedItems[0] as GitFile;
                 if (selectedItem == null) return;
 
                 switch (selectedItem.Status)
@@ -702,6 +702,58 @@ Note: if the file is included project, you need to delete the file from project 
             {
                 this.Commit();
             }
+        }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            GridViewColumnCollection columns = ((GridView)listView1.View).Columns;
+            _currentSortedColumn = (GridViewColumnHeader)columns[columns.Count - 1].Header;
+            _lastSortDirection = ListSortDirection.Ascending;
+            UpdateColumnHeaderTemplate(_currentSortedColumn, _lastSortDirection);
+        }
+
+        private void listView1_Click(object sender, RoutedEventArgs e)
+        {
+            GridViewColumnHeader header = e.OriginalSource as GridViewColumnHeader;
+            if (header == null || header.Role == GridViewColumnHeaderRole.Padding)
+                return;
+
+            ListSortDirection direction = ListSortDirection.Ascending;
+            if (header == _currentSortedColumn && _lastSortDirection == ListSortDirection.Ascending)
+                direction = ListSortDirection.Descending;
+
+            Sort(header, direction);
+            UpdateColumnHeaderTemplate(header, direction);
+            _currentSortedColumn = header;
+            _lastSortDirection = direction;
+        }
+
+        private void SortCurrentColumn()
+        {
+            if (_currentSortedColumn != null)
+                Sort(_currentSortedColumn, _lastSortDirection);
+        }
+
+        private void Sort(GridViewColumnHeader header, ListSortDirection direction)
+        {
+            if (listView1.ItemsSource != null)
+            {
+                ICollectionView view = CollectionViewSource.GetDefaultView(listView1.ItemsSource);
+                view.SortDescriptions.Clear();
+                view.SortDescriptions.Add(new SortDescription(header.Tag as string, direction));
+                view.Refresh();
+            }
+        }
+
+        private void UpdateColumnHeaderTemplate(GridViewColumnHeader header, ListSortDirection direction)
+        {
+            if (direction == ListSortDirection.Ascending)
+                header.Column.HeaderTemplate = Resources["HeaderTemplateArrowUp"] as DataTemplate;
+            else
+                header.Column.HeaderTemplate = Resources["HeaderTemplateArrowDown"] as DataTemplate;
+
+            if (_currentSortedColumn != null && _currentSortedColumn != header)
+                _currentSortedColumn.Column.HeaderTemplate = null;
         }
     }
 

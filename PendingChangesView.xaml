@@ -5,8 +5,26 @@
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
+			 xmlns:vsui="clr-namespace:GitScc.PlatformUI"
 			 mc:Ignorable="d" 
-			 d:DesignHeight="300" d:DesignWidth="800" KeyDown="UserControl_KeyDown">
+			 d:DesignHeight="300" d:DesignWidth="800" KeyDown="UserControl_KeyDown"
+			 Loaded="UserControl_Loaded">
+
+	<UserControl.Resources>
+		<DataTemplate x:Key="HeaderTemplateArrowUp">
+			<DockPanel>
+				<TextBlock HorizontalAlignment="Center" Text="{Binding}" />
+				<Path Name="arrow" StrokeThickness="1" Data="M5,10L15,10 10,5 5,10" />
+			</DockPanel>
+		</DataTemplate>
+
+		<DataTemplate x:Key="HeaderTemplateArrowDown">
+			<DockPanel>
+				<TextBlock HorizontalAlignment="Center" Text="{Binding}" />
+				<Path Name="arrow" StrokeThickness="1" Data="M5,5L10,10 15,5 5,5" />
+			</DockPanel>
+		</DataTemplate>
+	</UserControl.Resources>
 
 	<Grid x:Name="Main" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
           Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}">
@@ -66,53 +84,41 @@
 				</RichTextBox.Resources>
 			</RichTextBox>
 
-			<DataGrid AutoGenerateColumns="False" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,10,10" Name="dataGrid1" VerticalAlignment="Stretch"
-					  GridLinesVisibility="None" 
-					  SelectionUnit="FullRow" SelectionMode="Extended" SelectionChanged="dataGrid1_SelectionChanged" MouseDoubleClick="dataGrid1_MouseDoubleClick" ContextMenuOpening="dataGrid1_ContextMenuOpening"
-                      Background="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}"
-                      Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
-                      VerticalGridLinesBrush="{DynamicResource {x:Static vsfx:VsBrushes.TaskListGridLinesKey}}"
-                      HorizontalGridLinesBrush="{DynamicResource {x:Static vsfx:VsBrushes.TaskListGridLinesKey}}"
-                      Sorting="dataGrid1_Sorting" IsReadOnly="True" SelectedValuePath="FileName"
-					  CanUserResizeRows="False" CanUserDeleteRows="False" CanUserAddRows="False" CanUserReorderColumns="True" RowHeaderWidth="0" KeyDown="dataGrid1_KeyDown">
- 
-				<DataGrid.CellStyle>
-					<Style TargetType="DataGridCell">
-						<Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-						<Setter Property="BorderThickness" Value="0"/>
-						<Setter Property="Padding" Value="1"/>
-						<Setter Property="Template">
-							<Setter.Value>
-								<ControlTemplate TargetType="{x:Type DataGridCell}">
-									<Border Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
-										<ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-									</Border>
-								</ControlTemplate>
-							</Setter.Value>
-						</Setter>
-					</Style>
-				</DataGrid.CellStyle>
-
-				<DataGrid.Columns>
-					<DataGridTemplateColumn Header="Staged" CanUserResize="False">
-						<DataGridTemplateColumn.HeaderTemplate>
-							<DataTemplate>
-								<CheckBox x:Name="checkBoxAllStaged" Click="checkBoxAllStaged_Click"  
+			<ListView Name="listView1" Grid.Row="3" SelectionChanged="listView1_SelectionChanged" MouseDoubleClick="listView1_MouseDoubleClick" ContextMenuOpening="listView1_ContextMenuOpening"
+					  SelectedValuePath="FileName" KeyUp="listView1_KeyUp" PreviewKeyDown="listView1_PreviewKeyDown" ButtonBase.Click="listView1_Click">
+				<ListView.View>
+					<GridView AllowsColumnReorder="False">
+						<GridViewColumn Width="Auto">
+							<GridViewColumn.Header>
+								<GridViewColumnHeader Content="Staged" Tag="Staged" />
+							</GridViewColumn.Header>
+							<GridViewColumn.HeaderTemplate>
+								<DataTemplate>
+									<CheckBox x:Name="checkBoxAllStaged" Click="checkBoxAllStaged_Click"  
 										  HorizontalAlignment="Center" VerticalAlignment="Center"/>
-							</DataTemplate>
-						</DataGridTemplateColumn.HeaderTemplate>
-						<DataGridTemplateColumn.CellTemplate>
-							<DataTemplate>
-								<CheckBox x:Name="checkBoxSelected" Click="checkBoxSelected_Click"  IsChecked="{Binding IsSelected}"
-										  HorizontalAlignment="Center" VerticalAlignment="Center"/>
-							</DataTemplate>
-						</DataGridTemplateColumn.CellTemplate>
-					</DataGridTemplateColumn>
-					<DataGridTextColumn Header="Status" Binding="{Binding Status}" CanUserResize="True" Width="70" />
-                    <DataGridTextColumn Header="File" Binding="{Binding FileName}" CanUserResize="True" Width="800" />
-				</DataGrid.Columns>
+								</DataTemplate>
+							</GridViewColumn.HeaderTemplate>
+							<GridViewColumn.CellTemplate>
+								<DataTemplate>
+									<CheckBox Name="checkBoxSelected" Click="checkBoxSelected_Click" IsChecked="{Binding IsSelected}"
+											  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+								</DataTemplate>
+							</GridViewColumn.CellTemplate>
+						</GridViewColumn>
+						<GridViewColumn DisplayMemberBinding="{Binding Status}" Width="Auto">
+							<GridViewColumn.Header>
+								<GridViewColumnHeader Content="Status" Tag="Status" />
+							</GridViewColumn.Header>
+						</GridViewColumn>
+						<GridViewColumn DisplayMemberBinding="{Binding FileName}" Width="800">
+							<GridViewColumn.Header>
+								<GridViewColumnHeader Content="File" Tag="FileName" />
+							</GridViewColumn.Header>
+						</GridViewColumn>
+					</GridView>
+				</ListView.View>
 
-				<DataGrid.ContextMenu>
+				<ListView.ContextMenu>
 					<ContextMenu>
 						<MenuItem Header="Stage File" Name="menuStage" Click="menuStage_Click" />
 						<MenuItem Header="Un-Stage File" Name="menuUnstage" Click="menuUnstage_Click" />
@@ -125,8 +131,8 @@
 							<MenuItem Header="Add File Extensions to .gitignore" Name="menuIgnoreFileExt" Click="menuIgnoreFileExt_Click"/>
 						</MenuItem>
 					</ContextMenu>
-				</DataGrid.ContextMenu>
-			</DataGrid>
+				</ListView.ContextMenu>
+			</ListView>
 			<Label Content="(If refreshing is slow, try turn off auto-refresh in Tools | Options)" Foreground="#FF333333" Height="28" HorizontalAlignment="Left" Margin="231,0,0,0" Name="label4" VerticalAlignment="Center" Grid.Row="2" Visibility="Collapsed" />
 		</Grid>
 

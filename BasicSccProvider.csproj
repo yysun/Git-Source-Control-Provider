@@ -115,6 +115,7 @@
     <Compile Include="Diff\View\DiffMarginControl.xaml.cs">
       <DependentUpon>DiffMarginControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Diff\WeakReference.cs" />
     <Compile Include="ExceptionExtensions.cs" />
     <Compile Include="GitToolCommands.cs" />
     <Compile Include="GitSccOptions.cs" />

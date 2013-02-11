@@ -34,7 +34,7 @@ namespace GitScc.Diff
 
     public abstract class BackgroundParser : IDisposable
     {
-        private readonly ITextBuffer _textBuffer;
+        private readonly WeakReference<ITextBuffer> _textBuffer;
         private readonly TaskScheduler _taskScheduler;
         private readonly ITextDocumentFactoryService _textDocumentFactoryService;
         private readonly Timer _timer;
@@ -56,11 +56,11 @@ namespace GitScc.Diff
             if (textDocumentFactoryService == null)
                 throw new ArgumentNullException("textDocumentFactoryService");
 
-            this._textBuffer = textBuffer;
+            this._textBuffer = new WeakReference<ITextBuffer>(textBuffer);
             this._taskScheduler = taskScheduler;
             this._textDocumentFactoryService = textDocumentFactoryService;
 
-            this._textBuffer.PostChanged += TextBufferPostChanged;
+            textBuffer.PostChanged += TextBufferPostChanged;
 
             this._dirty = true;
             this._reparseDelay = TimeSpan.FromMilliseconds(1500);
@@ -72,7 +72,7 @@ namespace GitScc.Diff
         {
             get
             {
-                return _textBuffer;
+                return _textBuffer.Target;
             }
         }
 
@@ -137,7 +137,10 @@ namespace GitScc.Diff
         {
             if (disposing)
             {
-                _textBuffer.PostChanged -= TextBufferPostChanged;
+                ITextBuffer textBuffer = TextBuffer;
+                if (textBuffer != null)
+                    textBuffer.PostChanged -= TextBufferPostChanged;
+
                 _timer.Dispose();
             }
 
@@ -172,6 +175,12 @@ namespace GitScc.Diff
 
         private void ParseTimerCallback(object state)
         {
+            if (TextBuffer == null)
+            {
+                Dispose();
+                return;
+            }
+
             TryReparse(_dirty);
         }
 

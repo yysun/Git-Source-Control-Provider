@@ -143,7 +143,7 @@
     <value>CIP0H8JCC9JAJMRZE8H3J2IPADZQI9QIRHMKQPH2E8EDPDPEHCJQPDZEZRI1J8D3D8KHZPRQCEEDIPK3MKDDA9IEAACCMIPAQ0JCEQPHD0RPHDZRZKC2RDHERTDCKDPM</value>
   </data>
   <data name="PendingChangesToolWindowCaption" xml:space="preserve">
-    <value>Git Pending Changes</value>
+    <value>Pending Changes</value>
   </data>
   <data name="HistoryToolWindowCaption" xml:space="preserve">
     <value>Git History</value>

@@ -844,6 +844,13 @@ namespace GitScc
                         df.Flush();
                     }
                 }
+
+                // normalize the line endings of the diff so VS doesn't ask to do it for us
+                string text = File.ReadAllText(tmpFileName).Replace("\r\n", "\n").Replace('\r', '\n');
+                // normalize to Environment.NewLine since this is only used for display in the IDE
+                // and we want users to be able to copy from the diff and paste in a document without
+                // changing line endings
+                File.WriteAllText(tmpFileName, text.Replace("\n", Environment.NewLine));
             }
             catch (Exception ex)
             {

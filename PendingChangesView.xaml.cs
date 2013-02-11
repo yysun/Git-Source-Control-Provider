@@ -63,6 +63,13 @@ namespace GitScc
         private void checkBoxSelected_Click(object sender, RoutedEventArgs e)
         {
             var checkBox = sender as CheckBox;
+            var listViewItem = FindAncestorOfType<ListViewItem>(checkBox);
+            if (listViewItem != null && !listViewItem.IsSelected)
+            {
+                listView1.SelectedItem = listViewItem.Content;
+                return;
+            }
+
             foreach (var item in this.listView1.SelectedItems)
             {
                 ((GitFile)item).IsSelected = checkBox.IsChecked == true;

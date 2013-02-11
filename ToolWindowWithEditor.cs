@@ -1,9 +1,7 @@
 ﻿using System;
-using System.ComponentModel.Design;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Windows;
 using System.Windows.Controls;
+using GitScc.Diff;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Editor;
@@ -16,7 +14,8 @@ using Microsoft.VisualStudio.TextManager.Interop;
 
 namespace GitScc
 {
-    public class ToolWindowWithEditor : ToolWindowPane //, IOleCommandTarget, IVsFindTarget
+    public class ToolWindowWithEditor<T> : ToolWindowPane //, IOleCommandTarget, IVsFindTarget
+        where T : Control
     {
 
         #region Constants
@@ -28,7 +27,7 @@ namespace GitScc
 
         #region Private Fields
 
-        protected UserControl control;
+        protected T control;
 
         private IOleCommandTarget cachedEditorCommandTarget;
         private IVsTextView textView;
@@ -102,6 +101,14 @@ namespace GitScc
 
                     //Get our WPF host from our text view (from our code window).
                     IWpfTextViewHost textViewHost = editorAdapterFactoryService.GetWpfTextViewHost(this.textView);
+
+                    textViewHost.TextView.Options.SetOptionValue(GitTextViewOptions.DiffMarginId, false);
+                    textViewHost.TextView.Options.SetOptionValue(DefaultTextViewHostOptions.ChangeTrackingId, false);
+                    textViewHost.TextView.Options.SetOptionValue(DefaultTextViewHostOptions.GlyphMarginId, false);
+                    textViewHost.TextView.Options.SetOptionValue(DefaultTextViewHostOptions.LineNumberMarginId, false);
+                    textViewHost.TextView.Options.SetOptionValue(DefaultTextViewHostOptions.OutliningMarginId, false);
+
+                    textViewHost.TextView.Options.SetOptionValue(DefaultTextViewOptions.ViewProhibitUserInputId, true);
 
                     return Tuple.Create<Control, IVsTextView>(textViewHost.HostControl, this.textView);
 

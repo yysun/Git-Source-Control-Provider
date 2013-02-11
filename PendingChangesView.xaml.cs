@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using GitScc.UI;
 using CancellationToken = System.Threading.CancellationToken;
+using IVsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
 
 namespace GitScc
 {
@@ -25,15 +26,17 @@ namespace GitScc
     {
         private SccProviderService service;
         private GitFileStatusTracker tracker;
-
+        private ToolWindowWithEditor<PendingChangesView> toolWindow;
+        private IVsTextView textView;
         private string[] diffLines;
 
         private GridViewColumnHeader _currentSortedColumn;
         private ListSortDirection _lastSortDirection;
 
-        public PendingChangesView()
+        public PendingChangesView(ToolWindowWithEditor<PendingChangesView> toolWindow)
         {
             InitializeComponent();
+            this.toolWindow = toolWindow;
             this.service = BasicSccProvider.GetServiceEx<SccProviderService>();
         }
 
@@ -114,7 +117,7 @@ namespace GitScc
                         {
                             if (new FileInfo(tmpFileName).Length > 2 * 1024 * 1024)
                             {
-                                Action action = () => this.DiffEditor.Text = "File is too big to display: " + fileName;
+                                Action action = () => this.DiffEditor.Content = "File is too big to display: " + fileName;
                                 Dispatcher.Invoke(action);
                             }
                             else
@@ -170,17 +173,20 @@ namespace GitScc
 
         private void ClearEditor()
         {
-            this.DiffEditor.Text = "";
+            this.toolWindow.ClearEditor();
+            this.DiffEditor.Content = null;
         }
 
         private void ShowFile(string fileName)
         {
             try
             {
-                this.DiffEditor.SyntaxHighlighting = ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance.GetDefinitionByExtension(
-                    Path.GetExtension(fileName));
-                this.DiffEditor.ShowLineNumbers = true;
-                this.DiffEditor.Load(fileName);
+                var tuple = this.toolWindow.SetDisplayedFile(fileName);
+                if (tuple != null)
+                {
+                    this.DiffEditor.Content = tuple.Item1;
+                    this.textView = tuple.Item2;
+                }
             }
             finally
             {
@@ -324,6 +330,11 @@ namespace GitScc
                             changed.Where(f => f.Status == GitFileStatus.Modified || f.Status == GitFileStatus.Staged).Count(),
                             changed.Where(f => f.Status == GitFileStatus.Deleted || f.Status == GitFileStatus.Removed).Count(),
                             changed.Where(f => f.Status == GitFileStatus.Conflict).Count());
+
+                        if (!changedFiles.Any())
+                        {
+                            this.ClearEditor();
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -631,14 +642,13 @@ Note: if the file is included project, you need to delete the file from project 
 
         private void DiffEditor_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-
             int start = 1, column = 1;
             try
             {
-                if (diffLines != null && diffLines.Length > 0)
+                if (this.textView != null && diffLines != null && diffLines.Length > 0)
                 {
-                    int line = this.DiffEditor.TextArea.Caret.Line;
-                    column = this.DiffEditor.TextArea.Caret.Column;
+                    int line;
+                    textView.GetCaretPos(out line, out column);
 
                     string text = diffLines[line];
                     while (line >= 0)
@@ -673,7 +683,7 @@ Note: if the file is included project, you need to delete the file from project 
                 OpenFile(fileName);
                 var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
                 var selection = dte.ActiveDocument.Selection as EnvDTE.TextSelection;
-                selection.MoveToLineAndOffset(start - 1, column);
+                selection.MoveToLineAndOffset(start, column);
             });
         }
 

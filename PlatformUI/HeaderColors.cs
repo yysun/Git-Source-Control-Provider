@@ -10,7 +10,7 @@
         {
             get
             {
-                return GetResourceKey("SeparatorLineBrushKey", VsBrushes.AccentBorderKey);
+                return GetResourceKey("SeparatorLineBrushKey", VsBrushes.CommandBarMenuSeparatorKey);
             }
         }
 
@@ -19,7 +19,7 @@
         {
             get
             {
-                return GetResourceKey("MouseOverBrushKey", VsBrushes.AccentBorderKey);
+                return GetResourceKey("MouseOverBrushKey", VsBrushes.CommandBarMouseOverBackgroundGradientKey);
             }
         }
 
@@ -28,7 +28,7 @@
         {
             get
             {
-                return GetResourceKey("MouseOverTextBrushKey", VsBrushes.AccentBorderKey);
+                return GetResourceKey("MouseOverTextBrushKey", VsBrushes.ButtonTextKey);
             }
         }
 
@@ -37,7 +37,7 @@
         {
             get
             {
-                return GetResourceKey("MouseDownBrushKey", VsBrushes.AccentBorderKey);
+                return GetResourceKey("MouseDownBrushKey", VsBrushes.CommandBarMouseDownBackgroundGradientKey);
             }
         }
 
@@ -46,7 +46,7 @@
         {
             get
             {
-                return GetResourceKey("MouseDownTextBrushKey", VsBrushes.AccentBorderKey);
+                return GetResourceKey("MouseDownTextBrushKey", VsBrushes.ButtonTextKey);
             }
         }
 
@@ -55,7 +55,7 @@
         {
             get
             {
-                return GetResourceKey("GlyphBrushKey", VsBrushes.AccentBorderKey);
+                return GetResourceKey("GlyphBrushKey", VsBrushes.ButtonTextKey);
             }
         }
 
@@ -64,7 +64,7 @@
         {
             get
             {
-                return GetResourceKey("MouseOverGlyphBrushKey", VsBrushes.AccentBorderKey);
+                return GetResourceKey("MouseOverGlyphBrushKey", VsBrushes.ButtonTextKey);
             }
         }
 
@@ -73,7 +73,7 @@
         {
             get
             {
-                return GetResourceKey("MouseDownGlyphBrushKey", VsBrushes.AccentBorderKey);
+                return GetResourceKey("MouseDownGlyphBrushKey", VsBrushes.ButtonTextKey);
             }
         }
 
@@ -82,7 +82,7 @@
         {
             get
             {
-                return GetResourceKey("DefaultBrushKey", VsBrushes.AccentBorderKey);
+                return GetResourceKey("DefaultBrushKey", VsBrushes.CommandBarMenuBackgroundGradientKey);
             }
         }
 
@@ -91,7 +91,7 @@
         {
             get
             {
-                return GetResourceKey("DefaultTextBrushKey", VsBrushes.AccentBorderKey);
+                return GetResourceKey("DefaultTextBrushKey", VsBrushes.ButtonTextKey);
             }
         }
 

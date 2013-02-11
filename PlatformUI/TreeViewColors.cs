@@ -10,7 +10,7 @@
         {
             get
             {
-                return GetResourceKey("SelectedItemActiveBrushKey", VsBrushes.AccentBorderKey);
+                return GetResourceKey("SelectedItemActiveBrushKey", VsBrushes.ActiveCaptionKey);
             }
         }
 
@@ -19,7 +19,7 @@
         {
             get
             {
-                return GetResourceKey("SelectedItemActiveTextBrushKey", VsBrushes.AccentBorderKey);
+                return GetResourceKey("SelectedItemActiveTextBrushKey", VsBrushes.CaptionTextKey);
             }
         }
 
@@ -28,7 +28,7 @@
         {
             get
             {
-                return GetResourceKey("SelectedItemInactiveBrushKey", VsBrushes.AccentBorderKey);
+                return GetResourceKey("SelectedItemInactiveBrushKey", VsBrushes.InactiveCaptionKey);
             }
         }
 
@@ -37,7 +37,7 @@
         {
             get
             {
-                return GetResourceKey("SelectedItemInactiveTextBrushKey", VsBrushes.AccentBorderKey);
+                return GetResourceKey("SelectedItemInactiveTextBrushKey", VsBrushes.InactiveCaptionTextKey);
             }
         }
 

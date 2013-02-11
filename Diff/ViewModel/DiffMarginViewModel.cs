@@ -6,6 +6,7 @@ namespace GitScc.Diff.ViewModel
     using GalaSoft.MvvmLight.Command;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
+    using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
     using TaskScheduler = System.Threading.Tasks.TaskScheduler;
 
     public class DiffMarginViewModel : ViewModelBase
@@ -126,14 +127,22 @@ namespace GitScc.Diff.ViewModel
         {
             _margin.VisualElement.Dispatcher.BeginInvoke((Action)(() =>
             {
-                DiffViewModels.Clear();
+                try
+                {
+                    DiffViewModels.Clear();
 
-                DiffParseResultEventArgs diffResult = e as DiffParseResultEventArgs;
-                if (diffResult == null)
-                    return;
+                    DiffParseResultEventArgs diffResult = e as DiffParseResultEventArgs;
+                    if (diffResult == null)
+                        return;
 
-                foreach (HunkRangeInfo hunkRangeInfo in diffResult.Diff)
-                    DiffViewModels.Add(new DiffViewModel(_margin, hunkRangeInfo, _textView));
+                    foreach (HunkRangeInfo hunkRangeInfo in diffResult.Diff)
+                        DiffViewModels.Add(new DiffViewModel(_margin, hunkRangeInfo, _textView));
+                }
+                catch (Exception ex)
+                {
+                    if (ErrorHandler.IsCriticalException(ex))
+                        throw;
+                }
             }));
         }
     }

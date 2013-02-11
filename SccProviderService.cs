@@ -963,7 +963,7 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
                !Directory.Exists(folder)) return false;
 
             bool b = false;
-            var dir = new DirectoryInfo(Path.GetDirectoryName(fileName));
+            var dir = new DirectoryInfo(Path.GetDirectoryName(Path.GetFullPath(fileName)));
             while (!b && dir != null)
             {
                 b = string.Compare(dir.FullName, folder, true) == 0;
@@ -1100,19 +1100,27 @@ Note: you will need to click 'Show All Files' in solution explorer to see the fi
 
                     Action applyUpdatesAction = () =>
                     {
-                        using (disableRefresh)
+                        try
                         {
-                            timer.Start();
-                            RefreshNodesGlyphs();
-                            RefreshToolWindows();
-                            // make sure to defer next refresh
-                            nextTimeRefresh = DateTime.Now;
-                            timer.Stop();
+                            using (disableRefresh)
+                            {
+                                timer.Start();
+                                RefreshNodesGlyphs();
+                                RefreshToolWindows();
+                                // make sure to defer next refresh
+                                nextTimeRefresh = DateTime.Now;
+                                timer.Stop();
 
-                            TimeSpan totalTime = timer.Elapsed;
-                            TimeSpan minimumRefreshInterval = new TimeSpan(totalTime.Ticks * 2);
-                            if (minimumRefreshInterval > RefreshDelay)
-                                RefreshDelay = minimumRefreshInterval;
+                                TimeSpan totalTime = timer.Elapsed;
+                                TimeSpan minimumRefreshInterval = new TimeSpan(totalTime.Ticks * 2);
+                                if (minimumRefreshInterval > RefreshDelay)
+                                    RefreshDelay = minimumRefreshInterval;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            if (ErrorHandler.IsCriticalException(ex))
+                                throw;
                         }
                     };
 

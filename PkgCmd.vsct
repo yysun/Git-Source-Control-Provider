@@ -120,7 +120,7 @@
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandCompare" priority="0x0101" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
-        <Icon guid="guidSccProviderImages" id="iconGitBash" />
+        <Icon guid="guidSccProviderImageCompare" id="1" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
@@ -131,7 +131,7 @@
       
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandUndo" priority="0x0102" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
-        <Icon guid="guidSccProviderImages" id="iconGitBash" />
+        <Icon guid="guidSccProviderImageUndoCheckout" id="1" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
@@ -153,7 +153,7 @@
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandRefresh" priority="0x0104" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
-        <Icon guid="guidSccProviderImages" id="iconGitBash" />
+        <Icon guid="guidSccProviderImageRefresh" id="1" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
@@ -198,7 +198,7 @@
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandPendingChanges" priority="0x0101" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpGeneralSourceControlCommands"/>
-        <Icon guid="guidSccProviderImages" id="iconGitBash" />
+        <Icon guid="guidSccProviderImagePendingCheckins" id="1" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
@@ -209,7 +209,7 @@
 
       <Button guid="guidSccProviderCmdSet" id="icmdSccCommandHistory" priority="0x0105" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpSourceControlCommands"/>
-        <Icon guid="guidSccProviderImages" id="iconGitBash" />
+        <Icon guid="guidSccProviderImageHistory" id="1" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
@@ -243,7 +243,7 @@
 
       <Button guid="guidSccProviderCmdSet" id="icmdPendingChangesCommitToBranch" priority="0x0006" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
-        <Icon guid="guidSccProviderImages" id="iconGitBash" />
+        <Icon guid="guidSccProviderImageSwitch" id="1" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
@@ -254,7 +254,7 @@
 
       <Button guid="guidSccProviderCmdSet" id="icmdPendingChangesRefresh" priority="0x0007" type="Button">
         <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
-        <Icon guid="guidSccProviderImages" id="iconGitBash" />
+        <Icon guid="guidSccProviderImageRefresh" id="1" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>IconAndText</CommandFlag>
@@ -268,6 +268,13 @@
     <Bitmaps>
       <Bitmap guid="guidSccProviderImages" href="Resources\Images_32bit.png" 
               usedList="iconGitBash, iconGitExt, iconUncheckout, iconCompare, iconRefresh, iconOpenIgnoreFile, iconGitTor, iconGitInit"/>
+
+      <Bitmap guid="guidSccProviderImageSwitch" href="Resources\Switch.png" />
+      <Bitmap guid="guidSccProviderImageHistory" href="Resources\History.png" />
+      <Bitmap guid="guidSccProviderImageRefresh" href="Resources\Refresh.png" />
+      <Bitmap guid="guidSccProviderImagePendingCheckins" href="Resources\PendingCheckins.png" />
+      <Bitmap guid="guidSccProviderImageCompare" href="Resources\Compare.png" />
+      <Bitmap guid="guidSccProviderImageUndoCheckout" href="Resources\UndoCheckout.png" />
     </Bitmaps>
   </Commands>
   
@@ -393,5 +400,12 @@
       <IDSymbol name="iconGitTor" value="7"/>
       <IDSymbol name="iconGitInit" value="8"/>
     </GuidSymbol>
+
+    <GuidSymbol name="guidSccProviderImageSwitch" value="{D29BF411-DEAC-4A50-8D84-389DE40DA2D4}" />
+    <GuidSymbol name="guidSccProviderImageHistory" value="{2544AC47-1DDF-41EF-8FD9-C1FCFAF16E7C}" />
+    <GuidSymbol name="guidSccProviderImageRefresh" value="{254C6918-2499-415F-BD52-5DA291333808}" />
+    <GuidSymbol name="guidSccProviderImagePendingCheckins" value="{8E7C0075-060A-4411-A90C-BE88E4370386}" />
+    <GuidSymbol name="guidSccProviderImageCompare" value="{89C2CE10-4265-462C-83B6-BEC12CF0CDD0}" />
+    <GuidSymbol name="guidSccProviderImageUndoCheckout" value="{78B4AED4-1FEC-4910-A3F7-8FE4022BED8B}" />
   </Symbols>
 </CommandTable>

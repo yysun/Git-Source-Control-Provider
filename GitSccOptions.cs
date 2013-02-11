@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
 using System.IO;
 using System.Xml.Serialization;
 using Microsoft.VisualStudio.Shell;
@@ -31,6 +29,7 @@ namespace GitScc
 
         private static GitSccOptions gitSccOptions;
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public static GitSccOptions Current
         {
             get
@@ -40,6 +39,24 @@ namespace GitScc
                     gitSccOptions = LoadFromConfig();
                 }
                 return gitSccOptions;
+            }
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public static bool IsVisualStudio2010
+        {
+            get
+            {
+                return !IsVisualStudio2012 && BasicSccProvider.GetGlobalService(typeof(SVsSolution)) is IVsSolution4;
+            }
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public static bool IsVisualStudio2012
+        {
+            get
+            {
+                return BasicSccProvider.GetGlobalService(typeof(SVsDifferenceService)) != null;
             }
         }
 

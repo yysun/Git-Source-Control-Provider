@@ -4,6 +4,7 @@
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+			 xmlns:local="clr-namespace:GitScc"
              xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
 			 xmlns:vsui="clr-namespace:GitScc.PlatformUI"
 			 mc:Ignorable="d" 
@@ -17,11 +18,40 @@
 			<Setter Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMenuSeparatorKey}}" />
 			<Setter Property="Width" Value="3" />
 		</Style>
+
 		<Style x:Key="HorizontalGridSplitter" TargetType="{x:Type GridSplitter}">
 			<Setter Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMenuSeparatorKey}}" />
 			<Setter Property="Height" Value="3" />
 		</Style>
-		<ControlTemplate x:Key="ListViewItemTemplate" TargetType="{x:Type ListViewItem}">
+
+		<ControlTemplate x:Key="ListViewItemTemplate2010" TargetType="{x:Type ListViewItem}">
+			<Border SnapsToDevicePixels="True" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}">
+				<GridViewRowPresenter Grid.RowSpan="2" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+			</Border>
+			<ControlTemplate.Triggers>
+				<Trigger Property="IsSelected" Value="True">
+					<Setter Property="Background" Value="#3399FF" />
+					<Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}" />
+				</Trigger>
+				<MultiTrigger>
+					<MultiTrigger.Conditions>
+						<Condition Property="IsSelected" Value="True" />
+						<Condition Property="Selector.IsSelectionActive" Value="False" />
+					</MultiTrigger.Conditions>
+					<Setter Property="Background" Value="#F0F0F0" />
+					<Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" />
+				</MultiTrigger>
+			</ControlTemplate.Triggers>
+		</ControlTemplate>
+
+		<Style x:Key="ListViewItemStyle2010" TargetType="{x:Type ListViewItem}">
+			<Setter Property="Padding" Value="2" />
+			<Setter Property="Margin" Value="0" />
+			<Setter Property="Template" Value="{StaticResource ListViewItemTemplate2010}" />
+			<Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarTextActiveKey}}" />
+		</Style>
+
+		<ControlTemplate x:Key="ListViewItemTemplate2012" TargetType="{x:Type ListViewItem}">
 			<Border SnapsToDevicePixels="True" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}">
 				<GridViewRowPresenter Grid.RowSpan="2" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
 			</Border>
@@ -40,28 +70,32 @@
 				</MultiTrigger>
 			</ControlTemplate.Triggers>
 		</ControlTemplate>
-		<Style x:Key="ListViewItemStyle" TargetType="{x:Type ListViewItem}">
+
+		<Style x:Key="ListViewItemStyle2012" TargetType="{x:Type ListViewItem}">
 			<Setter Property="Padding" Value="2" />
 			<Setter Property="Margin" Value="0" />
-			<Setter Property="Template" Value="{StaticResource ListViewItemTemplate}" />
+			<Setter Property="Template" Value="{StaticResource ListViewItemTemplate2012}" />
 			<Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarTextActiveKey}}" />
 		</Style>
-		<ControlTemplate x:Key="GridViewColumnHeaderGripperTemplate" TargetType="{x:Type Thumb}">
+
+		<ControlTemplate x:Key="GridViewColumnHeaderGripperTemplate2012" TargetType="{x:Type Thumb}">
 			<Border Padding="{TemplateBinding Padding}" Background="Transparent">
 				<Rectangle HorizontalAlignment="Center" Width="1" Fill="{TemplateBinding Background}" />
 			</Border>
 		</ControlTemplate>
-		<Style x:Key="GridViewColumnHeaderGripper" TargetType="{x:Type Thumb}">
+
+		<Style x:Key="GridViewColumnHeaderGripper2012" TargetType="{x:Type Thumb}">
 			<Setter Property="Width" Value="8" />
 			<Setter Property="Background" Value="{DynamicResource {x:Static vsui:HeaderColors.SeparatorLineBrushKey}}" />
-			<Setter Property="Template" Value="{StaticResource GridViewColumnHeaderGripperTemplate}" />
+			<Setter Property="Template" Value="{StaticResource GridViewColumnHeaderGripperTemplate2012}" />
 		</Style>
-		<ControlTemplate x:Key="GridViewColumnHeaderTemplate" TargetType="{x:Type GridViewColumnHeader}">
+
+		<ControlTemplate x:Key="GridViewColumnHeaderTemplate2012" TargetType="{x:Type GridViewColumnHeader}">
 			<Grid>
 				<Border Name="HeaderBorder" Padding="{TemplateBinding Padding}" BorderThickness="0,0,0,1" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}" Margin="0">
 					<ContentPresenter Name="HeaderContent" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
 				</Border>
-				<Thumb Name="PART_HeaderGripper" HorizontalAlignment="Right" Margin="0,0,-4,0" Style="{StaticResource GridViewColumnHeaderGripper}" />
+				<Thumb Name="PART_HeaderGripper" HorizontalAlignment="Right" Margin="0,0,-4,0" Style="{StaticResource GridViewColumnHeaderGripper2012}" />
 			</Grid>
 			<ControlTemplate.Triggers>
 				<Trigger Property="IsMouseOver" Value="True">
@@ -74,6 +108,7 @@
 				</Trigger>
 			</ControlTemplate.Triggers>
 		</ControlTemplate>
+
 		<Style x:Key="{x:Type Path}" TargetType="{x:Type Path}">
 			<Setter Property="Fill" Value="{DynamicResource {x:Static vsui:HeaderColors.GlyphBrushKey}}" />
 			<Style.Triggers>
@@ -85,21 +120,31 @@
 				</DataTrigger>
 			</Style.Triggers>
 		</Style>
+
 		<Style x:Key="{x:Type ListView}" TargetType="{x:Type ListView}">
 			<Style.Resources>
-				<ResourceDictionary>
-					<Style TargetType="{x:Type GridViewColumnHeader}">
-						<Setter Property="HorizontalContentAlignment" Value="Left" />
-						<Setter Property="VerticalContentAlignment" Value="Center" />
-						<Setter Property="Foreground" Value="{DynamicResource {x:Static vsui:HeaderColors.DefaultTextBrushKey}}" />
-						<Setter Property="Background" Value="{DynamicResource {x:Static vsui:HeaderColors.DefaultBrushKey}}" />
-						<Setter Property="BorderBrush" Value="{DynamicResource {x:Static vsui:HeaderColors.SeparatorLineBrushKey}}" />
-						<Setter Property="Padding" Value="6,4,4,4" />
-						<Setter Property="Template" Value="{StaticResource GridViewColumnHeaderTemplate}" />
-					</Style>
-				</ResourceDictionary>
+				<Style TargetType="{x:Type GridViewColumnHeader}">
+					<Setter Property="HorizontalContentAlignment" Value="Left" />
+					<Setter Property="VerticalContentAlignment" Value="Center" />
+					<Setter Property="Padding" Value="6,4,4,4" />
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding Source={x:Static local:GitSccOptions.IsVisualStudio2012}, Mode=OneTime}" Value="True">
+							<Setter Property="Foreground" Value="{DynamicResource {x:Static vsui:HeaderColors.DefaultTextBrushKey}}" />
+							<Setter Property="Background" Value="{DynamicResource {x:Static vsui:HeaderColors.DefaultBrushKey}}" />
+							<Setter Property="BorderBrush" Value="{DynamicResource {x:Static vsui:HeaderColors.SeparatorLineBrushKey}}" />
+							<Setter Property="Template" Value="{StaticResource GridViewColumnHeaderTemplate2012}" />
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
 			</Style.Resources>
-			<Setter Property="ItemContainerStyle" Value="{StaticResource ListViewItemStyle}" />
+			<Style.Triggers>
+				<DataTrigger Binding="{Binding Source={x:Static local:GitSccOptions.IsVisualStudio2012}, Mode=OneTime}" Value="True">
+					<Setter Property="ItemContainerStyle" Value="{StaticResource ListViewItemStyle2012}" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Source={x:Static local:GitSccOptions.IsVisualStudio2010}, Mode=OneTime}" Value="True">
+					<Setter Property="ItemContainerStyle" Value="{StaticResource ListViewItemStyle2010}" />
+				</DataTrigger>
+			</Style.Triggers>
 			<Setter Property="BorderThickness" Value="0" />
 			<Setter Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.BackgroundKey}}" />
 		</Style>

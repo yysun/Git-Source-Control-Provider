@@ -183,43 +183,44 @@ namespace GitScc
                 switch (status)
                 {
                     case GitFileStatus.Tracked:
-                        rgsiGlyphs[i] = GitSccOptions.Current.UseTGitIconSet ?
-                                        (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Tracked) :
-                                        VsStateIcon.STATEICON_CHECKEDIN;
+                        rgsiGlyphs[i] = SccGlyphsHelper.Tracked;
                         sccStatus = __SccStatus.SCC_STATUS_CONTROLLED;
                         break;
 
                     case GitFileStatus.Modified:
-                        rgsiGlyphs[i] = GitSccOptions.Current.UseTGitIconSet ?
-                                        (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Modified) :
-                                        VsStateIcon.STATEICON_CHECKEDOUT;
+                        rgsiGlyphs[i] = SccGlyphsHelper.Modified;
                         sccStatus = __SccStatus.SCC_STATUS_CONTROLLED | __SccStatus.SCC_STATUS_CHECKEDOUT | __SccStatus.SCC_STATUS_OUTBYUSER;
                         break;
 
                     case GitFileStatus.New:
-                        rgsiGlyphs[i] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Untracked);
+                        rgsiGlyphs[i] = SccGlyphsHelper.New;
                         sccStatus = __SccStatus.SCC_STATUS_CONTROLLED | __SccStatus.SCC_STATUS_CHECKEDOUT | __SccStatus.SCC_STATUS_OUTBYUSER;
                         break;
 
                     case GitFileStatus.Added:
                     case GitFileStatus.Staged:
-                        rgsiGlyphs[i] = (VsStateIcon)(this._customSccGlyphBaseIndex + (uint)CustomSccGlyphs.Staged);
+                        rgsiGlyphs[i] = status == GitFileStatus.Added ? SccGlyphsHelper.Added : SccGlyphsHelper.Staged;
                         sccStatus = __SccStatus.SCC_STATUS_CONTROLLED | __SccStatus.SCC_STATUS_CHECKEDOUT | __SccStatus.SCC_STATUS_OUTBYUSER;
                         break;
 
                     case GitFileStatus.NotControlled:
-                        rgsiGlyphs[i] = VsStateIcon.STATEICON_NOSTATEICON;
+                        rgsiGlyphs[i] = SccGlyphsHelper.NotControlled;
                         sccStatus = __SccStatus.SCC_STATUS_NOTCONTROLLED;
                         break;
 
                     case GitFileStatus.Ignored:
-                        rgsiGlyphs[i] = VsStateIcon.STATEICON_EXCLUDEDFROMSCC;
+                        rgsiGlyphs[i] = SccGlyphsHelper.Ignored;
                         sccStatus = __SccStatus.SCC_STATUS_NOTCONTROLLED;
                         break;
 
                     case GitFileStatus.Conflict:
-                        rgsiGlyphs[i] = VsStateIcon.STATEICON_DISABLED;
+                        rgsiGlyphs[i] = SccGlyphsHelper.Conflict;
                         sccStatus = __SccStatus.SCC_STATUS_CONTROLLED | __SccStatus.SCC_STATUS_CHECKEDOUT | __SccStatus.SCC_STATUS_OUTBYUSER | __SccStatus.SCC_STATUS_MERGED;
+                        break;
+
+                    case GitFileStatus.Merged:
+                        rgsiGlyphs[i] = SccGlyphsHelper.Merged;
+                        sccStatus = __SccStatus.SCC_STATUS_CONTROLLED | __SccStatus.SCC_STATUS_CHECKEDOUT | __SccStatus.SCC_STATUS_OUTBYUSER;
                         break;
 
                     default:
@@ -361,50 +362,10 @@ namespace GitScc
 
         #region IVsSccGlyphs Members
 
-        // Remember the base index where our custom scc glyph start
-        private uint _customSccGlyphBaseIndex = 0;
-        // Our custom image list
-        ImageList _customSccGlyphsImageList;
-        // Indexes of icons in our custom image list
-        enum CustomSccGlyphs
-        {
-            Untracked = 0,
-            Staged = 1,
-            Modified = 2,
-            Tracked = 3,
-        };
-
         public int GetCustomGlyphList(uint BaseIndex, out uint pdwImageListHandle)
         {
-            // If this is the first time we got called, construct the image list, remember the index, etc
-            if (this._customSccGlyphsImageList == null)
-            {
-                // The shell calls this function when the provider becomes active to get our custom glyphs
-                // and to tell us what's the first index we can use for our glyphs
-                // Remember the index in the scc glyphs (VsStateIcon) where our custom glyphs will start
-                this._customSccGlyphBaseIndex = BaseIndex;
-
-                // Create a new imagelist
-                this._customSccGlyphsImageList = new ImageList();
-
-                // Set the transparent color for the imagelist (the SccGlyphs.bmp uses magenta for background)
-                this._customSccGlyphsImageList.TransparentColor = Color.FromArgb(255, 0, 255);
-
-                // Set the corret imagelist size (7x16 pixels, otherwise the system will either stretch the image or fill in with black blocks)
-                this._customSccGlyphsImageList.ImageSize = new Size(7, 16);
-
-                // Add the custom scc glyphs we support to the list
-                // NOTE: VS2005 and VS2008 are limited to 4 custom scc glyphs (let's hope this will change in future versions)
-                Image sccGlyphs = (Image)Resources.SccGlyphs;
-                this._customSccGlyphsImageList.Images.AddStrip(sccGlyphs);
-            }
-
-            // Return a Win32 HIMAGELIST handle to our imagelist to the shell (by keeping the ImageList a member of the class we guarantee the Win32 object is still valid when the shell needs it)
-            pdwImageListHandle = (uint)this._customSccGlyphsImageList.Handle;
-
-            // Return success (If you don't want to have custom glyphs return VSConstants.E_NOTIMPL)
+            pdwImageListHandle = SccGlyphsHelper.GetCustomGlyphList(BaseIndex);
             return VSConstants.S_OK;
-
         }
 
         #endregion

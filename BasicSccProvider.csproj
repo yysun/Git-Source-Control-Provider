@@ -134,6 +134,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SccGlyphsHelper.cs" />
     <Compile Include="SccOnIdleEvent.cs" />
     <Compile Include="SccProviderOptions.cs">
       <SubType>Component</SubType>
@@ -181,6 +182,7 @@
     </Content>
     <Content Include="Resources\Images_24bit.bmp" />
     <Content Include="Resources\Images_32bit.bmp" />
+    <Content Include="Resources\SccGlyphs2012.png" />
     <Resource Include="Resources\Loading.png" />
     <Content Include="Resources\Images_32bit.png" />
     <Content Include="Resources\SccGlyphs.bmp" />

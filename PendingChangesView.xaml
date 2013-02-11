@@ -8,9 +8,19 @@
 			 xmlns:vsui="clr-namespace:GitScc.PlatformUI"
 			 mc:Ignorable="d" 
 			 d:DesignHeight="300" d:DesignWidth="800" KeyDown="UserControl_KeyDown"
+			 Foreground="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarTextActiveKey}}"
+			 Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}"
 			 Loaded="UserControl_Loaded">
 
 	<UserControl.Resources>
+		<Style x:Key="VerticalGridSplitter" TargetType="{x:Type GridSplitter}">
+			<Setter Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMenuSeparatorKey}}" />
+			<Setter Property="Width" Value="3" />
+		</Style>
+		<Style x:Key="HorizontalGridSplitter" TargetType="{x:Type GridSplitter}">
+			<Setter Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMenuSeparatorKey}}" />
+			<Setter Property="Height" Value="3" />
+		</Style>
 		<ControlTemplate x:Key="ListViewItemTemplate" TargetType="{x:Type ListViewItem}">
 			<Border SnapsToDevicePixels="True" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}">
 				<GridViewRowPresenter Grid.RowSpan="2" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
@@ -84,7 +94,7 @@
 						<Setter Property="Foreground" Value="{DynamicResource {x:Static vsui:HeaderColors.DefaultTextBrushKey}}" />
 						<Setter Property="Background" Value="{DynamicResource {x:Static vsui:HeaderColors.DefaultBrushKey}}" />
 						<Setter Property="BorderBrush" Value="{DynamicResource {x:Static vsui:HeaderColors.SeparatorLineBrushKey}}" />
-						<Setter Property="Padding" Value="8,4,4,4" />
+						<Setter Property="Padding" Value="6,4,4,4" />
 						<Setter Property="Template" Value="{StaticResource GridViewColumnHeaderTemplate}" />
 					</Style>
 				</ResourceDictionary>
@@ -114,30 +124,26 @@
 		
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="520" MinWidth="20" MaxWidth="1000" />
-			<ColumnDefinition Width="2" />
+			<ColumnDefinition Width="Auto" />
 			<ColumnDefinition Width="*" />
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
 		</Grid.RowDefinitions>
-		<!--<Grid.Background>
-			<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-				<GradientStop Color="#FFC5E8F8" Offset="1" />
-				<GradientStop Color="White" Offset="0" />
-			</LinearGradientBrush>
-		</Grid.Background>-->
-		<GridSplitter Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
-					  VerticalAlignment="Stretch" HorizontalAlignment="Left" Name="gridSplitter1" Width="4" ResizeDirection="Columns" />
 
-		<Label Content="Comments:" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Center" 
-			   Margin="12,0,0,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" />
-        
-		<CheckBox Content="Sign off" Height="16" HorizontalAlignment="Right" Margin="0,5,20,0" Name="chkSignOff" VerticalAlignment="Top"
+		<GridSplitter Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
+					  VerticalAlignment="Stretch" HorizontalAlignment="Left" Name="gridSplitter1" ResizeDirection="Columns"
+					  Style="{StaticResource VerticalGridSplitter}"/>
+
+		<Label Content="Comments:" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Center" 
+			   Margin="2,0,0,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" />
+
+		<CheckBox Content="Sign off" HorizontalAlignment="Right" Margin="0,0,6,0" Name="chkSignOff" VerticalAlignment="Center"
                   Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"/>
 
-		<Label Content="Diff (double click to open file):" Height="28" HorizontalAlignment="Left" Name="label2" VerticalAlignment="Center" 
-			   Margin="12,0,0,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
+		<Label Content="Diff (double click to open file):" HorizontalAlignment="Left" Name="label2" VerticalAlignment="Center" 
+			   Margin="2,0,0,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
 			   Grid.Column="2" Grid.Row="0"/>
 
 		<Grid Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="grid1">
@@ -150,13 +156,14 @@
 			</Grid.RowDefinitions>
 
 			<GridSplitter Grid.Row="1" Grid.ColumnSpan="2"
-					  VerticalAlignment="Top" HorizontalAlignment="Stretch" Name="gridSplitter2" Height="4" />
+						  VerticalAlignment="Top" HorizontalAlignment="Stretch" Name="gridSplitter2"
+						  Style="{StaticResource HorizontalGridSplitter}"/>
 
-			<Label Content="Changed Files" Height="28" HorizontalAlignment="Stretch" Name="label3" VerticalAlignment="Center" 
-			       Margin="12,0,12,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
-                   Grid.Row="2" ToolTip="select file to commit, or right click to stage/unstage file" />
+			<Label Content="Changed Files" HorizontalAlignment="Stretch" Name="label3" VerticalAlignment="Center"
+				   Margin="2,0,2,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
+				   Grid.Row="2" ToolTip="select file to commit, or right click to stage/unstage file" />
 
-			<RichTextBox HorizontalAlignment="Stretch" Name="textBoxComments" VerticalAlignment="Stretch" Margin="10,0,10,10" 
+			<RichTextBox HorizontalAlignment="Stretch" Name="textBoxComments" VerticalAlignment="Stretch" Margin="2,0,2,2"
 					     AcceptsReturn="True" VerticalScrollBarVisibility="Visible" SpellCheck.IsEnabled="True"
                          Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" 
                          Background="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}">
@@ -177,14 +184,14 @@
 							</GridViewColumn.Header>
 							<GridViewColumn.HeaderTemplate>
 								<DataTemplate>
-									<CheckBox x:Name="checkBoxAllStaged" Click="checkBoxAllStaged_Click"  
-										  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+									<CheckBox Name="checkBoxAllStaged" Click="checkBoxAllStaged_Click"
+										  HorizontalAlignment="Left" VerticalAlignment="Center"/>
 								</DataTemplate>
 							</GridViewColumn.HeaderTemplate>
 							<GridViewColumn.CellTemplate>
 								<DataTemplate>
 									<CheckBox Name="checkBoxSelected" Click="checkBoxSelected_Click" IsChecked="{Binding IsSelected}"
-											  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+											  HorizontalAlignment="Left" VerticalAlignment="Center"/>
 								</DataTemplate>
 							</GridViewColumn.CellTemplate>
 						</GridViewColumn>

@@ -174,6 +174,7 @@ namespace GitScc
         private void ClearEditor()
         {
             this.toolWindow.ClearEditor();
+            this.DiffEditor.Content = null;
         }
 
         private void ShowFile(string fileName)
@@ -329,6 +330,11 @@ namespace GitScc
                             changed.Where(f => f.Status == GitFileStatus.Modified || f.Status == GitFileStatus.Staged).Count(),
                             changed.Where(f => f.Status == GitFileStatus.Deleted || f.Status == GitFileStatus.Removed).Count(),
                             changed.Where(f => f.Status == GitFileStatus.Conflict).Count());
+
+                        if (!changedFiles.Any())
+                        {
+                            this.ClearEditor();
+                        }
                     }
                     catch (Exception ex)
                     {

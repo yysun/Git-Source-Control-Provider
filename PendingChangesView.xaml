@@ -148,6 +148,16 @@
 			<Setter Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.BackgroundKey}}" />
 		</Style>
 
+		<Style x:Key="{x:Type RichTextBox}" TargetType="{x:Type RichTextBox}">
+			<Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" />
+			<Setter Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}" />
+			<Style.Triggers>
+				<Trigger Property="IsFocused" Value="True">
+					<Setter Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.ComboBoxBackgroundKey}}" />
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+
 		<DataTemplate x:Key="HeaderTemplateArrowUp">
 			<DockPanel>
 				<TextBlock HorizontalAlignment="Center" Text="{Binding}" />
@@ -208,9 +218,7 @@
 				   Grid.Row="2" ToolTip="select file to commit, or right click to stage/unstage file" />
 
 			<RichTextBox HorizontalAlignment="Stretch" Name="textBoxComments" VerticalAlignment="Stretch" Margin="2,0,2,2"
-					     AcceptsReturn="True" VerticalScrollBarVisibility="Visible" SpellCheck.IsEnabled="True"
-                         Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" 
-                         Background="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}">
+					     AcceptsReturn="True" VerticalScrollBarVisibility="Visible" SpellCheck.IsEnabled="True">
 				<RichTextBox.Resources>
 					<Style TargetType="{x:Type Paragraph}">
 						<Setter Property="Margin" Value="0"/>

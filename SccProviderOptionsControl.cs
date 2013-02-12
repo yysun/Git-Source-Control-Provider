@@ -357,12 +357,14 @@ namespace GitScc
             this.checkBox1.Checked = GitSccOptions.Current.NotExpandGitExtensions;
             this.checkBox2.Checked = GitSccOptions.Current.NotExpandTortoiseGit;
             this.checkBox3.Checked = GitSccOptions.Current.UseTGitIconSet;
-            this.checkBox3.Enabled = GitSccOptions.IsVisualStudio2010;
             this.checkBox4.Checked = GitSccOptions.Current.DisableAutoRefresh;
             this.checkBox5.Checked = GitSccOptions.Current.DisableAutoLoad;
             this.checkBox6.Checked = GitSccOptions.Current.NotUseUTF8FileNames;
             this.chkDisableDiffMargin.Checked = GitSccOptions.Current.DisableDiffMargin;
             this.useVsDiffChk.Checked = GitSccOptions.Current.UseVsDiff;
+
+            if (GitSccOptions.IsVisualStudio2012)
+                checkBox3.Text += " (requires restart)";
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -403,7 +405,7 @@ namespace GitScc
             GitSccOptions.Current.TortoiseGitPath  = this.textBox4.Text;
             GitSccOptions.Current.NotExpandGitExtensions = this.checkBox1.Checked;
             GitSccOptions.Current.NotExpandTortoiseGit = this.checkBox2.Checked;
-            GitSccOptions.Current.UseTGitIconSet = GitSccOptions.IsVisualStudio2010 && this.checkBox3.Checked;
+            GitSccOptions.Current.UseTGitIconSet = this.checkBox3.Checked;
             GitSccOptions.Current.DisableAutoRefresh = this.checkBox4.Checked;
             GitSccOptions.Current.DisableAutoLoad = this.checkBox5.Checked;
             GitSccOptions.Current.NotUseUTF8FileNames = this.checkBox6.Checked;

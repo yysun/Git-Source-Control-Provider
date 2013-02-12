@@ -13,6 +13,7 @@
 
         // Our custom image list
         private static ImageList _customSccGlyphsImageList;
+        private static bool? _usingVisualStudio2010Icons;
 
         // Indexes of icons in our custom image list
         private enum CustomSccGlyphs2010
@@ -36,7 +37,7 @@
         {
             get
             {
-                if (GitSccOptions.IsVisualStudio2010 && GitSccOptions.Current.UseTGitIconSet)
+                if (UsingTortoiseGitIcons)
                     return (VsStateIcon)(_customSccGlyphBaseIndex + (uint)CustomSccGlyphs2010.Tracked);
 
                 return VsStateIcon.STATEICON_CHECKEDIN;
@@ -47,7 +48,7 @@
         {
             get
             {
-                if (GitSccOptions.IsVisualStudio2010 && GitSccOptions.Current.UseTGitIconSet)
+                if (UsingTortoiseGitIcons)
                     return (VsStateIcon)(_customSccGlyphBaseIndex + (uint)CustomSccGlyphs2010.Modified);
 
                 return VsStateIcon.STATEICON_CHECKEDOUT;
@@ -58,7 +59,7 @@
         {
             get
             {
-                if (GitSccOptions.IsVisualStudio2010)
+                if (UsingVisualStudio2010Icons)
                     return (VsStateIcon)(_customSccGlyphBaseIndex + (uint)CustomSccGlyphs2010.Untracked);
 
                 return (VsStateIcon)(_customSccGlyphBaseIndex + (uint)CustomSccGlyphs2012.New);
@@ -77,7 +78,7 @@
         {
             get
             {
-                if (GitSccOptions.IsVisualStudio2010)
+                if (UsingVisualStudio2010Icons)
                     return (VsStateIcon)(_customSccGlyphBaseIndex + (uint)CustomSccGlyphs2010.Staged);
 
                 return (VsStateIcon)(_customSccGlyphBaseIndex + (uint)CustomSccGlyphs2012.Staged);
@@ -104,7 +105,7 @@
         {
             get
             {
-                if (GitSccOptions.IsVisualStudio2010)
+                if (UsingVisualStudio2010Icons)
                     return VsStateIcon.STATEICON_DISABLED;
 
                 return (VsStateIcon)(_customSccGlyphBaseIndex + (uint)CustomSccGlyphs2012.Conflicted);
@@ -115,7 +116,7 @@
         {
             get
             {
-                if (GitSccOptions.IsVisualStudio2010)
+                if (UsingVisualStudio2010Icons)
                     return Modified;
 
                 return (VsStateIcon)(_customSccGlyphBaseIndex + (uint)CustomSccGlyphs2012.Merged);
@@ -127,6 +128,37 @@
             get
             {
                 return VsStateIcon.STATEICON_NOSTATEICON;
+            }
+        }
+
+        private static bool UsingVisualStudio2010Icons
+        {
+            get
+            {
+                if (!_usingVisualStudio2010Icons.HasValue)
+                {
+                    if (GitSccOptions.IsVisualStudio2010)
+                        _usingVisualStudio2010Icons = true;
+                    else
+                        _usingVisualStudio2010Icons = GitSccOptions.Current.UseTGitIconSet;
+                }
+
+                return _usingVisualStudio2010Icons.Value;
+            }
+        }
+
+        private static bool UsingTortoiseGitIcons
+        {
+            get
+            {
+                if (!UsingVisualStudio2010Icons)
+                    return false;
+
+                // only reason to use the 2010 icons in 2012 is if we are using tortoise icons
+                if (GitSccOptions.IsVisualStudio2012)
+                    return true;
+
+                return GitSccOptions.Current.UseTGitIconSet;
             }
         }
 
@@ -151,7 +183,7 @@
 
                 // Add the custom scc glyphs we support to the list
                 // NOTE: VS2005 and VS2008 are limited to 4 custom scc glyphs (let's hope this will change in future versions)
-                Image sccGlyphs = GitSccOptions.IsVisualStudio2010 ? Resources.SccGlyphs : Resources.SccGlyphs2012;
+                Image sccGlyphs = UsingVisualStudio2010Icons ? Resources.SccGlyphs : Resources.SccGlyphs2012;
                 _customSccGlyphsImageList.Images.AddStrip(sccGlyphs);
             }
 

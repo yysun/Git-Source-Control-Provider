@@ -152,6 +152,10 @@
     <Compile Include="UI\BranchPicker.xaml.cs">
       <DependentUpon>BranchPicker.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\GitConsole.xaml.cs">
+      <DependentUpon>GitConsole.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\GitIntellisenseHelper.cs" />
     <Compile Include="UI\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>
@@ -230,6 +234,10 @@
     <Page Include="UI\BranchPicker.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\GitConsole.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\Settings.xaml">
       <SubType>Designer</SubType>

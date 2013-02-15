@@ -18,7 +18,42 @@ namespace GitScc.UI
     /// </summary>
     public partial class GitConsole : UserControl
     {
-        private GitFileStatusTracker tracker { get; set; }
+
+        private Brush BRUSH_PROMPT = new SolidColorBrush(Colors.Black);
+        private Brush BRUSH_ERROR  = new SolidColorBrush(Colors.Crimson);
+        private Brush BRUSH_OUTPUT = new SolidColorBrush(Colors.Navy);
+        private Brush BRUSH_HELP   = new SolidColorBrush(Colors.Black);
+
+        private GitFileStatusTracker _tracker;
+        public GitFileStatusTracker tracker {
+            get { return _tracker; }
+            set
+            {
+                this._tracker = value;
+                this.WorkingDirectory = this._tracker == null ? "" : this.tracker.GitWorkingDirectory;
+            } 
+        }
+
+        public string workingDirectory;
+        public string WorkingDirectory
+        {
+            get { return workingDirectory; }
+            set
+            {
+                if (string.Compare(workingDirectory, value) != 0)
+                {
+                    workingDirectory = value;
+                    prompt = string.Format("[{1}]>", workingDirectory,
+                        GitIntellisenseHelper.GetPrompt(tracker));
+                    this.richTextBox1.Document.Blocks.Clear();
+                    this.WritePrompt();
+                    //ShowWaring();
+                }
+            }
+        }
+
+        public string GitExePath { get { return GitSccOptions.Current.GitBashPath; } }
+
         string prompt = ">";
         
         List<string> commandHistory = new List<string>();
@@ -27,25 +62,6 @@ namespace GitScc.UI
         public GitConsole()
         {
             InitializeComponent();
-        }
-
-        public string GitExePath { get; set; }
-        
-        public string workingDirectory;
-        public string WorkingDirectory 
-        { 
-            get { return workingDirectory; }
-            set
-            {
-                if (string.Compare(workingDirectory, value) != 0)
-                { 
-                    workingDirectory = value;
-                    prompt = string.Format("[{1}]>", workingDirectory,
-                        GitIntellisenseHelper.GetPrompt(tracker));
-                    this.richTextBox1.Document.Blocks.Clear();
-                    ShowWaring();
-                }
-            }
         }
 
         #region keydown event
@@ -90,7 +106,7 @@ namespace GitScc.UI
             }
             else if (e.Key == Key.Escape)
             {
-                ChangePrompt("", new SolidColorBrush(Colors.Black));
+                ChangePrompt("", BRUSH_PROMPT);
                 lstOptions.Visibility = Visibility.Collapsed;
             }
             else if (e.Key == Key.Back)
@@ -120,12 +136,12 @@ namespace GitScc.UI
 
         private void ShowWaring()
         {
-            WriteText(@"Welcome to Dragon console.", new SolidColorBrush(Colors.Black));
+            WriteText(@"Welcome to Dragon console.", BRUSH_PROMPT);
             WriteHelp();
             WriteText(@"WARNING: Git commands that require interactive inputs are not working in this console. E.g. git mergetool, git push/pull with http(s) that need to enter password are not supported. Please use Git Bash instead.
 
 USE AT YOUR OWN RISK.
-", new SolidColorBrush(Colors.Crimson));
+", BRUSH_ERROR);
 
             WritePrompt();
         }
@@ -139,7 +155,7 @@ USE AT YOUR OWN RISK.
     dir:     windows shell command dir 
     git:     launch git bash
     git xxx: launch supported git command xxx
-", new SolidColorBrush(Colors.Black));
+", BRUSH_HELP);
             
         }
 
@@ -155,7 +171,7 @@ USE AT YOUR OWN RISK.
                 else if (idx > commandHistory.Count - 1) idx = commandHistory.Count - 1;
                 var command = commandHistory[idx];
                 commandIdx = idx;
-                ChangePrompt(command, new SolidColorBrush(Colors.Black));
+                ChangePrompt(command, BRUSH_PROMPT);
             }
         }
 
@@ -181,8 +197,9 @@ USE AT YOUR OWN RISK.
             {
                 if (command == "git")
                 {
-                    //command = "/C \"\"" + GitExePath + "\"";
-                    //GitBash.OpenGitBash(this.tracker.GitWorkingDirectory);
+                    GitBash.OpenGitBash(string.IsNullOrWhiteSpace(this.WorkingDirectory)?  
+                        Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments):
+                        this.WorkingDirectory);
                     return;
                 }
                 else if (command.StartsWith("git "))
@@ -247,52 +264,12 @@ USE AT YOUR OWN RISK.
                             WriteError(e.Data);
                     };
                     process.BeginErrorReadLine();
-
-                    //string line = "git status";
-                    ////while (input != null && null != (line = input.ReadLine())) 
-                    //process.StandardInput.WriteLine(line);
-                    //process.StandardInput.Close();
-
                     process.WaitForExit();
                     mreOut.WaitOne();
                     mreErr.WaitOne();
-
-                    //var code = process.ExitCode;
                 }
             }
         }
-
-        //private void RunBashCommand(string command)
-        //{
-        //    if (!string.IsNullOrWhiteSpace(command) &&
-        //       (commandHistory.Count == 0 || commandHistory.Last() != command))
-        //    {
-        //        commandHistory.Add(command);
-        //        commandIdx = commandHistory.Count - 1;
-        //    }
-
-        //    if (!ProcessInternalCommand(command))
-        //    {
-        //        var GitBashPath = GitExePath.Replace("git.exe", "sh.exe");
-        //        ProcessStartInfo startInfo = new ProcessStartInfo(GitBashPath);
-        //        startInfo.Arguments = "--login -i -c \"" + command + " && read -p 'Press <Enter> to continue'\"";
-        //        //startInfo.RedirectStandardInput = true;
-        //        startInfo.RedirectStandardError = false;
-        //        startInfo.RedirectStandardOutput = false;
-        //        startInfo.UseShellExecute = true;
-        //        startInfo.CreateNoWindow = false;
-        //        //startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-        //        //startInfo.ErrorDialog = false;
-        //        startInfo.WorkingDirectory = WorkingDirectory;
-
-        //        using (Process process = Process.Start(startInfo))
-        //        {
-        //            process.WaitForExit();
-        //        }
-
-        //        WritePrompt();
-        //    }
-        //}
 
         void Done()
         {
@@ -310,7 +287,7 @@ USE AT YOUR OWN RISK.
         {
             Action act = () =>
             {
-                WriteText(data, new SolidColorBrush(Colors.Crimson));
+                WriteText(data, BRUSH_ERROR);
             };
             this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
         }
@@ -320,8 +297,8 @@ USE AT YOUR OWN RISK.
             Action act = () =>
             {
                 WriteText(data, isGit ?
-                    new SolidColorBrush(Colors.Navy) :
-                    new SolidColorBrush(Colors.Black));
+                    BRUSH_OUTPUT :
+                    BRUSH_PROMPT);
             };
             this.Dispatcher.BeginInvoke(act, DispatcherPriority.ApplicationIdle);
         }
@@ -351,7 +328,7 @@ USE AT YOUR OWN RISK.
                 this.richTextBox1.Document.Blocks.Remove(last);
                 prompt = newprompt;
                 WritePrompt();
-                ChangePrompt(command, new SolidColorBrush(Colors.Black));
+                ChangePrompt(command, BRUSH_PROMPT);
                 lstOptions.Visibility = Visibility.Collapsed;
             }
         }
@@ -359,7 +336,7 @@ USE AT YOUR OWN RISK.
         private void WritePrompt()
         {
             Paragraph para = new Paragraph();
-            para.Margin = new Thickness(0);
+            para.Margin = new Thickness(0, 10, 0, 0);
             para.FontFamily = new FontFamily("Lucida Console");
             para.LineHeight = 10;
             para.Inlines.Add(new Run(prompt));
@@ -407,7 +384,7 @@ USE AT YOUR OWN RISK.
 
         internal void Run(string command)
         {
-            ChangePrompt(command, new SolidColorBrush(Colors.Green));
+            ChangePrompt(command, BRUSH_PROMPT);
             RunCommand(command);
         }
 

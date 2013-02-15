@@ -39,7 +39,7 @@ namespace GitScc.UI
 
                 case "*commits*":
                     return tracker.RepositoryGraph.Commits
-                        .OrderByDescending(c=>c.CommitDate)
+                        .OrderByDescending(c=>c.AuthorDate)
                         .Select(r => r.ShortId);
             }
 

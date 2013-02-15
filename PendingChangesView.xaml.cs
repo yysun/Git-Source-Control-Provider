@@ -438,6 +438,10 @@ namespace GitScc
 
         internal void AmendCommit()
         {
+            const string amendMsg = @"You are about to amend a commit that has tags or remotes, which could cause issues in local and remote repositories.
+
+Are you sure you want to continue?";
+
             if (string.IsNullOrWhiteSpace(Comments))
             {
                 Comments = tracker.LastCommitMessage;
@@ -445,6 +449,12 @@ namespace GitScc
             }
             else
             {
+                if (tracker.CurrentCommitHasRefs() && MessageBox.Show(amendMsg, "Amend Last Commit", 
+                    MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                {
+                    return;
+                }
+
                 var dte = BasicSccProvider.GetServiceEx<EnvDTE.DTE>();
                 if (dte.ItemOperations.PromptToSave == EnvDTE.vsPromptResult.vsPromptResultCancelled) return;
 

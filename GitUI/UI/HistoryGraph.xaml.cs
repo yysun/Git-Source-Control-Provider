@@ -146,8 +146,8 @@ namespace GitScc.UI
                                     Id = commit.Id,
                                     ShortId = commit.ShortId,
                                     Comments = commit.Message,
-                                    Author = commit.CommitterName,
-                                    Date = commit.CommitDateRelative,
+                                    Author = commit.AuthorName,
+                                    Date = commit.AuthorDateRelative,
                                     Refs = commit.Refs
                                 };
 

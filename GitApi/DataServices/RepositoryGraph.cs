@@ -7,8 +7,8 @@ namespace GitScc.DataServices
 {
     public class RepositoryGraph
     {
-        private const int CommitsToLoad = 2000;
-        private const string LogFormat = "--pretty=format:%H%n%P%n%cr%n%cn%n%ce%n%ci%n%T%n%s%n%b";
+        private const int CommitsToLoad = 200;
+        private const string LogFormat = "--pretty=format:%H%n%P%n%ar%n%an%n%ae%n%ci%n%T%n%s%n%b";
 
         private string workingDirectory;
 
@@ -57,10 +57,10 @@ namespace GitScc.DataServices
             {
                 Id = ss[0],
                 ParentIds = ss[1].Split(' '),
-                CommitDateRelative = ss[2],
-                CommitterName = ss[3],
-                CommitterEmail = ss[4],
-                CommitDate = DateTime.Parse(ss[5]),
+                AuthorDateRelative = ss[2],
+                AuthorName = ss[3],
+                AuthorEmail = ss[4],
+                AuthorDate = DateTime.Parse(ss[5]),
                 TreeId = ss[6],
                 Subject = ss[7],
                 Message = ss[7] + (ss.Length <= 8 ? "" : "\n\n" + string.Join("\n", ss, 8, ss.Length - 8))
@@ -167,8 +167,8 @@ namespace GitScc.DataServices
                     Id = id,
                     Subject = commit.Subject,
                     Message = commit.Message,
-                    CommitterName = commit.CommitterName,
-                    CommitDateRelative = commit.CommitDateRelative,
+                    AuthorName = commit.AuthorName,
+                    AuthorDateRelative = commit.AuthorDateRelative,
                     Refs = refs.ToArray(),
                 };
 

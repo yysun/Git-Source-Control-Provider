@@ -38,7 +38,7 @@ namespace GitUI
 
                 case "*commits*":
                     return GitViewModel.Current.Tracker.RepositoryGraph.Commits
-                        .OrderByDescending(c=>c.CommitDate)
+                        .OrderByDescending(c=>c.AuthorDate)
                         .Select(r => r.ShortId);
             }
 

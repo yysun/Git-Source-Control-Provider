@@ -99,7 +99,7 @@ namespace GitScc.UI
 
                     //this.lblCommit.Content = commit.Id;
                     this.lblMessage.Content = commit.ToString();
-                    this.lblAuthor.Content = commit.CommitterName + " " + commit.CommitDateRelative;
+                    this.lblAuthor.Content = commit.AuthorName + " " + commit.AuthorDateRelative;
                     //this.fileTree.ItemsSource = repositoryGraph.GetTree(commitId).Children;
                     this.patchList.ItemsSource = repositoryGraph.GetChanges(commitId);
                     this.radioShowFileTree.IsEnabled = true;
@@ -142,12 +142,12 @@ namespace GitScc.UI
 
                 var msg1 = repositoryGraph.Commits
                     .Where(r => r.Id.StartsWith(commitId1))
-                    .Select(r => string.Format("{0} ({1}, {2})", r.Subject, r.CommitDateRelative, r.CommitterName))
+                    .Select(r => string.Format("{0} ({1}, {2})", r.Subject, r.AuthorDateRelative, r.AuthorName))
                     .First().Replace("\r", "");
 
                 var msg2 = repositoryGraph.Commits
                     .Where(r => r.Id.StartsWith(commitId2))
-                    .Select(r => string.Format("{0} ({1}, {2})", r.Subject, r.CommitDateRelative, r.CommitterName))
+                    .Select(r => string.Format("{0} ({1}, {2})", r.Subject, r.AuthorDateRelative, r.AuthorName))
                     .First().Replace("\r", "");
 
                 var names1 = repositoryGraph.Refs

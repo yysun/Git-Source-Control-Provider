@@ -13,10 +13,10 @@ namespace GitScc.DataServices
         public string Subject { get; set; }
         public string Message { get; set; }
         public string TreeId { get; set; }
-        public string CommitterName { get; set; }
-        public string CommitterEmail { get; set; }
-        public DateTime CommitDate { get; set; }
-        public string CommitDateRelative { get; set; }
+        public string AuthorName { get; set; }
+        public string AuthorEmail { get; set; }
+        public DateTime AuthorDate { get; set; }
+        public string AuthorDateRelative { get; set; }
         internal bool deleted { get; set; }
 
         public override string ToString()

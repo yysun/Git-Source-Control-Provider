@@ -122,9 +122,9 @@ namespace GitUI.UI
                 lstSearch.ItemsSource = tracker.RepositoryGraph.Commits
                     .Where(c => c.Subject.ToLower().Contains(text) ||
                            c.Id.StartsWith(text) ||
-                           c.CommitterName.ToLower().StartsWith(text) ||
-                           c.CommitterEmail.ToLower().StartsWith(text) ||
-                           c.CommitDateRelative.StartsWith(text));
+                           c.AuthorName.ToLower().StartsWith(text) ||
+                           c.AuthorEmail.ToLower().StartsWith(text) ||
+                           c.AuthorDateRelative.StartsWith(text));
             }
             lstSearch.Visibility = Visibility.Visible;
         }

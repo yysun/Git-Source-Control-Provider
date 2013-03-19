@@ -58,7 +58,7 @@
         /// <summary>
         ///   The <see cref="Sytem.Windows.FrameworkElement" /> that implements the visual representation of the margin.
         /// </summary>
-        public System.Windows.FrameworkElement VisualElement
+        public FrameworkElement VisualElement
         {
             get
             {
@@ -96,6 +96,7 @@
         {
             get
             {
+                ThrowIfDisposed();
                 return _textView.Options.GetOptionValue(GitTextViewOptions.DiffMarginId);
             }
         }

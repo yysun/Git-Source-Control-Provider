@@ -226,6 +226,25 @@
             ITextSnapshotLine endLine = _textView.TextSnapshot.GetLineFromLineNumber(endLineNumber);
             if (startLine != null && endLine != null)
             {
+                if (endLine.LineNumber < startLine.LineNumber)
+                {
+                    SnapshotSpan span = new SnapshotSpan(endLine.Start, startLine.End);
+                    if (!_textView.TextViewLines.FormattedSpan.IntersectsWith(span))
+                    {
+                        IsVisible = false;
+                        return;
+                    }
+                }
+                else
+                {
+                    SnapshotSpan span = new SnapshotSpan(startLine.Start, endLine.End);
+                    if (!_textView.TextViewLines.FormattedSpan.IntersectsWith(span))
+                    {
+                        IsVisible = false;
+                        return;
+                    }
+                }
+
                 IWpfTextViewLine startLineView = _textView.GetTextViewLineContainingBufferPosition(startLine.Start);
                 IWpfTextViewLine endLineView = _textView.GetTextViewLineContainingBufferPosition(endLine.Start);
                 if (startLineView == null || endLineView == null)

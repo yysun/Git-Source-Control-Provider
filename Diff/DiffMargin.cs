@@ -11,7 +11,7 @@
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Editor.OptionsExtensionMethods;
 
-    public class DiffMargin : IWpfTextViewMargin
+    public sealed class DiffMargin : IWpfTextViewMargin
     {
         public const string MarginName = "GitDiffMargin";
 
@@ -58,7 +58,7 @@
         /// <summary>
         ///   The <see cref="Sytem.Windows.FrameworkElement" /> that implements the visual representation of the margin.
         /// </summary>
-        public System.Windows.FrameworkElement VisualElement
+        public FrameworkElement VisualElement
         {
             get
             {
@@ -96,6 +96,7 @@
         {
             get
             {
+                ThrowIfDisposed();
                 return _textView.Options.GetOptionValue(GitTextViewOptions.DiffMarginId);
             }
         }
@@ -136,12 +137,12 @@
 
         public void Dispose()
         {
-            GC.SuppressFinalize(this);
             _viewModel.Cleanup();
             _isDisposed = true;
+            GC.SuppressFinalize(this);
         }
 
-        protected virtual void OnBrushesChanged(EventArgs e)
+        private void OnBrushesChanged(EventArgs e)
         {
             var t = BrushesChanged;
             if (t != null)

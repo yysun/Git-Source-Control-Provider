@@ -43,7 +43,7 @@
 
             ShowPopup = false;
 
-            SetDisplayProperties();
+            SetDisplayProperties(false, null);
 
             DiffText = GetDiffText();
 
@@ -163,9 +163,9 @@
             RaisePropertyChanged(() => DiffBrush);
         }
 
-        private void SetDisplayProperties()
+        private void SetDisplayProperties(bool approximate, TextViewLayoutChangedEventArgs e)
         {
-            UpdateDimensions();
+            UpdateDimensions(approximate, e);
             Coordinates = string.Format("Top:{0}, Height:{1}, New number of Lines: {2}, StartingLineNumber: {3}", Top, Height, _hunkRangeInfo.NewHunkRange.NumberOfLines, _hunkRangeInfo.NewHunkRange.StartingLineNumber);
         }
 
@@ -184,10 +184,29 @@
             return string.Empty;
         }
 
-        private void UpdateDimensions()
+        private void UpdateDimensions(bool approximate, TextViewLayoutChangedEventArgs e)
         {
             if (_reverted)
                 return;
+
+            if (approximate)
+            {
+                // TODO: we might be able to improve support for items initially off screen
+                if (!IsVisible)
+                    return;
+
+                if (e.OldViewState.EditSnapshot != e.NewViewState.EditSnapshot)
+                {
+                    // TODO: handle to prevent flickering during edits
+                    IsVisible = false;
+                    return;
+                }
+
+                double shift = e.NewViewState.ViewportTop - e.OldViewState.ViewportTop;
+                this.Top -= shift;
+                // TODO: update height for blocks which were partially off-screen
+                return;
+            }
 
             ITextSnapshot snapshot = _textView.TextBuffer.CurrentSnapshot;
             HunkRangeInfo hunkRangeInfo = _hunkRangeInfo.TranslateTo(snapshot);
@@ -312,9 +331,9 @@
             }
         }
 
-        public void RefreshPosition()
+        public void RefreshPosition(bool approximate, TextViewLayoutChangedEventArgs e)
         {
-            SetDisplayProperties();
+            SetDisplayProperties(approximate, e);
         }
 
         public Thickness Margin

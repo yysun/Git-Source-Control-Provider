@@ -8,6 +8,7 @@ namespace GitScc.Diff.ViewModel
     using Microsoft.VisualStudio.Text.Editor;
     using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
     using TaskScheduler = System.Threading.Tasks.TaskScheduler;
+    using DispatcherPriority = System.Windows.Threading.DispatcherPriority;
 
     public class DiffMarginViewModel : ViewModelBase
     {
@@ -46,7 +47,10 @@ namespace GitScc.Diff.ViewModel
 
         private void OnLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
         {
-            RefreshDiffViewModelPositions();
+            RefreshDiffViewModelPositions(true, e);
+
+            Action action = RefreshDiffViewModelPositions;
+            _margin.VisualElement.Dispatcher.BeginInvoke(action, DispatcherPriority.ApplicationIdle);
         }
 
         public List<DiffViewModel> DiffViewModels
@@ -119,8 +123,13 @@ namespace GitScc.Diff.ViewModel
 
         private void RefreshDiffViewModelPositions()
         {
+            RefreshDiffViewModelPositions(false, null);
+        }
+
+        private void RefreshDiffViewModelPositions(bool approximate, TextViewLayoutChangedEventArgs e)
+        {
             foreach (var diffViewModel in DiffViewModels)
-                diffViewModel.RefreshPosition();
+                diffViewModel.RefreshPosition(approximate, e);
         }
 
         private void HandleParseComplete(object sender, ParseResultEventArgs e)

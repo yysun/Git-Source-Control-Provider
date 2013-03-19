@@ -38,16 +38,10 @@ namespace GitScc.Diff.ViewModel
             _nextChangeCommand = new RelayCommand<DiffViewModel>(NextChange, NextChangeCanExecute);
 
             _textView.LayoutChanged += OnLayoutChanged;
-            _textView.ViewportHeightChanged += OnViewportHeightChanged;
 
             _parser = new DiffUpdateBackgroundParser(textView.TextBuffer, TaskScheduler.Default, textDocumentFactoryService, gitCommands);
             _parser.ParseComplete += HandleParseComplete;
             _parser.RequestParse(false);
-        }
-
-        private void OnViewportHeightChanged(object sender, EventArgs e)
-        {
-            RefreshDiffViewModelPositions();
         }
 
         private void OnLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)

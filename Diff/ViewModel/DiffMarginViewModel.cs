@@ -40,7 +40,7 @@ namespace GitScc.Diff.ViewModel
             _textView.LayoutChanged += OnLayoutChanged;
             _textView.ViewportHeightChanged += OnViewportHeightChanged;
 
-            _parser = new DiffUpdateBackgroundParser(textView.TextBuffer, TaskScheduler.Default, textDocumentFactoryService, gitCommands);
+            _parser = new DiffUpdateBackgroundParser(textView.TextBuffer, textView.TextDataModel.DocumentBuffer, TaskScheduler.Default, textDocumentFactoryService, gitCommands);
             _parser.ParseComplete += HandleParseComplete;
             _parser.RequestParse(false);
         }

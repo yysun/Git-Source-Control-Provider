@@ -10,10 +10,12 @@
     public class DiffUpdateBackgroundParser : BackgroundParser
     {
         private readonly IGitCommands _commands;
+        private readonly ITextBuffer _documentBuffer;
 
-        public DiffUpdateBackgroundParser(ITextBuffer textBuffer, TaskScheduler taskScheduler, ITextDocumentFactoryService textDocumentFactoryService, IGitCommands commands)
+        public DiffUpdateBackgroundParser(ITextBuffer textBuffer, ITextBuffer documentBuffer, TaskScheduler taskScheduler, ITextDocumentFactoryService textDocumentFactoryService, IGitCommands commands)
             : base(textBuffer, taskScheduler, textDocumentFactoryService)
         {
+            _documentBuffer = documentBuffer;
             _commands = commands;
             ReparseDelay = TimeSpan.FromMilliseconds(500);
         }
@@ -26,6 +28,14 @@
             }
         }
 
+        public ITextBuffer DocumentBuffer
+        {
+            get
+            {
+                return _documentBuffer;
+            }
+        }
+
         protected override void ReParseImpl()
         {
             try
@@ -34,7 +44,7 @@
 
                 ITextSnapshot snapshot = TextBuffer.CurrentSnapshot;
                 ITextDocument textDocument;
-                if (!TextDocumentFactoryService.TryGetTextDocument(TextBuffer, out textDocument))
+                if (!TextDocumentFactoryService.TryGetTextDocument(DocumentBuffer, out textDocument))
                     textDocument = null;
 
                 IEnumerable<HunkRangeInfo> diff;

@@ -195,12 +195,7 @@
 
 		<CheckBox Content="Sign off" HorizontalAlignment="Right" Margin="0,0,6,0" Name="chkSignOff" VerticalAlignment="Center"
                   Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"/>
-
-		<Label Content="Diff (double click to open file):" HorizontalAlignment="Left" Name="label2" VerticalAlignment="Center" 
-			   Margin="2,0,0,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
-			   Grid.Column="2" Grid.Row="0"/>
-
-		<Grid Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="grid1">
+        <Grid Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="grid1">
 
 			<Grid.RowDefinitions>
 				<RowDefinition Height="50" />
@@ -278,11 +273,21 @@
 			<Label Content="(If refreshing is slow, try turn off auto-refresh in Tools | Options)" Foreground="#FF333333" Height="28" HorizontalAlignment="Left" Margin="231,0,0,0" Name="label4" VerticalAlignment="Center" Grid.Row="2" Visibility="Collapsed" />
 		</Grid>
 
-		<Grid Grid.Column="2" Grid.Row="1" Background="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}">
-			<ContentControl x:Name="DiffEditor" MouseDoubleClick="DiffEditor_MouseDoubleClick" />
-		</Grid>
+        <Grid Grid.Column="2" Grid.Row="0" Grid.RowSpan="2"
+              Background="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}">
 
-		<my:Settings HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="Settings" Grid.ColumnSpan="3" Grid.RowSpan="3" Visibility="Collapsed" />
+            <TabControl Name="tabControl1">
+                <TabItem Header="Diff View" Name="tabItem1">
+                    <ContentControl x:Name="DiffEditor" MouseDoubleClick="DiffEditor_MouseDoubleClick"></ContentControl>
+                </TabItem>
+                <TabItem Header="Git Console (Experimental)" Name="tabItem2">
+                    <my:GitConsole x:Name="gitConsole1" />
+                </TabItem>
+            </TabControl>
+
+        </Grid>
+
+        <my:Settings HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="Settings" Grid.ColumnSpan="3" Grid.RowSpan="3" Visibility="Collapsed" />
 		
 	</Grid>
 </UserControl>

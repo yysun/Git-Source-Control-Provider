@@ -74,7 +74,8 @@
         {
             if (disposing)
             {
-                _watcher.Dispose();
+                if (_watcher != null)
+                    _watcher.Dispose();
             }
 
             base.Dispose(disposing);

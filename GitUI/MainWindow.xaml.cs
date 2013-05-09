@@ -296,6 +296,8 @@ namespace GitUI
 					MessageBox.Show("Do you want to open Git repository from " + gitWorkingFolder,
 					"Git repository found", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
 				{
+                    HistoryViewCommands.CloseCommitDetails.Execute(null, this);
+                    HistoryViewCommands.CloseCommitDetails.Execute("PendingChanges", this);
 					this.gitViewModel.Open(dropped);
 					this.gitViewModel.Refresh(true);
 				}

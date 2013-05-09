@@ -31,7 +31,10 @@ namespace GitUI.UI
                 gitViewModel = value;
                 tracker = gitViewModel.Tracker;
 
-                if (tracker.HasGitRepository)
+                this.branchList.ItemsSource = null;
+                this.tagList.ItemsSource = null;
+
+                if (tracker.HasGitRepository && tracker.RepositoryGraph.Refs != null)
                 {
                     this.branchList.ItemsSource = tracker.RepositoryGraph.Refs
                             .Where(r => (r.Type == RefTypes.Branch || r.Type == RefTypes.HEAD) && isLoaded(r))
@@ -71,7 +74,7 @@ namespace GitUI.UI
 
         private void branchList_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (tracker == null || !tracker.HasGitRepository) return;
+            if (tracker == null || !tracker.HasGitRepository || tracker.RepositoryGraph.Refs == null) return;
             var name = branchList.SelectedValue as string;
             var id = tracker.RepositoryGraph.Refs
                             .Where(r => (r.Type == RefTypes.Branch || r.Type == RefTypes.HEAD) && r.Name == name)
@@ -86,7 +89,7 @@ namespace GitUI.UI
 
         private void tagList_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (tracker == null || !tracker.HasGitRepository) return;
+            if (tracker == null || !tracker.HasGitRepository || tracker.RepositoryGraph.Refs == null) return;
             var name = tagList.SelectedValue as string;
             var id = tracker.RepositoryGraph.Refs
                             .Where(r => r.Type == RefTypes.Tag && r.Name == name)

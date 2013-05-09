@@ -390,7 +390,7 @@ namespace GitScc.DataServices
             tmpFileName = Path.ChangeExtension(tmpFileName, Path.GetExtension(fileName));
             try
             {
-                GitBash.RunCmd(string.Format("cat-file blob {0}:{1} > {2}", commitId, fileName, tmpFileName),
+                GitBash.RunCmd(string.Format("cat-file blob {0}:./{1} > {2}", commitId, fileName, tmpFileName),
                     this.workingDirectory);
             }
             catch (Exception ex)

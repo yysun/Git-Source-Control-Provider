@@ -168,37 +168,43 @@ namespace GitUI
 
 		#region Git commands
 
-		internal GitUI.UI.GitConsole console = null;
+        //internal GitUI.UI.GitConsole console = null;
 
 		private string GitRun(string cmd)
 		{
 			if (!GitBash.Exists) throw new Exception("git.exe is not found.");
 			if (this.Tracker == null) throw new Exception("Git repository is not found.");
 
-			if (console != null)
-			{
-				console.Run("git " + cmd);
-				return "";
-			}
-			else
-			{
-				var result = GitBash.Run(cmd, this.Tracker.GitWorkingDirectory);
-				return result.Output;
-			}
+            //if (console != null)
+            //{
+            //    console.Run("git " + cmd);
+            //    return "";
+            //}
+            //else
+            //{
+            //    var result = GitBash.Run(cmd, this.Tracker.GitWorkingDirectory);
+            //    return result.Output;
+            //}
+
+            var result = GitBash.Run(cmd, this.Tracker.GitWorkingDirectory);
+            return result.Output;
 		}
 
 		private void GitRunCmd(string cmd)
 		{
 			if (!GitBash.Exists) throw new Exception("git.exe is not found.");
-			if (this.Tracker == null) throw new Exception("Git repository is not found.");
-			if (console != null)
-			{
-				console.Run("git " + cmd);
-			}
-			else
-			{
-				GitBash.RunCmd(cmd, this.Tracker.GitWorkingDirectory);
-			}
+
+            //if (this.Tracker == null) throw new Exception("Git repository is not found.");
+            //if (console != null)
+            //{
+            //    console.Run("git " + cmd);
+            //}
+            //else
+            //{
+            //    GitBash.RunCmd(cmd, this.Tracker.GitWorkingDirectory);
+            //}
+
+            GitBash.RunCmd(cmd, this.Tracker.GitWorkingDirectory);
 		}
 
 		internal string AddTag(string name, string id)

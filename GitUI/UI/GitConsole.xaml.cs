@@ -471,7 +471,7 @@ USE AT YOUR OWN RISK.
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             this.richTextBox1.Focus();
-            GitViewModel.Current.console = this;
+            //GitViewModel.Current.console = this;
             GitViewModel.Current.GraphChanged += new EventHandler(ReplacePrompt);
         }
     }

@@ -46,11 +46,7 @@ namespace GitScc.UI
         private void CheckoutBranch_Click(object sender, RoutedEventArgs e)
         {
             var ret = GitViewModel.Current.CheckoutBranch(BranchName);
-
-            if (!string.IsNullOrWhiteSpace(ret))
-                HistoryViewCommands.ShowMessage.Execute(new { Message = ret, Error = true }, this);
-
-            //if (!string.IsNullOrWhiteSpace(ret)) MessageBox.Show(ret, "Git Checkout Result");
+            HistoryViewCommands.ShowMessage.Execute(new { GitBashResult = ret }, this);
         }
 
         private void DeleteBranch_Click(object sender, RoutedEventArgs e)
@@ -59,16 +55,7 @@ namespace GitScc.UI
                 "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 var ret = GitViewModel.Current.DeleteBranch(BranchName);
-                
-                if (ret.StartsWith("error"))
-                    HistoryViewCommands.ShowMessage.Execute(new { Message = ret, Error = true }, this);
-                else
-                    HistoryViewCommands.ShowMessage.Execute(new { Message = ret, Error = false }, this);
-
-                //if (ret.StartsWith("error"))
-                //    MessageBox.Show(ret, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                //else
-                //    MessageBox.Show(ret, "Branch Deleted", MessageBoxButton.OK, MessageBoxImage.Information);
+                HistoryViewCommands.ShowMessage.Execute(new { GitBashResult = ret }, this);
             }
         }
     }

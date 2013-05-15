@@ -22,7 +22,7 @@ namespace GitUI
 		public static readonly RoutedUICommand GraphLoaded = new RoutedUICommand("GraphLoaded", "GraphLoaded", typeof(MainWindow));
 		public static readonly RoutedUICommand PendingChanges = new RoutedUICommand("PendingChanges", "PendingChanges", typeof(MainWindow));
 		public static readonly RoutedUICommand ShowMessage = new RoutedUICommand("ShowMessage", "ShowMessage", typeof(MainWindow));
-        public static readonly RoutedUICommand OpenRepository = new RoutedUICommand("OpenRepository", "OpenRepository", typeof(MainWindow));
+		public static readonly RoutedUICommand OpenRepository = new RoutedUICommand("OpenRepository", "OpenRepository", typeof(MainWindow));
 	}
 
 	public class GitViewModel
@@ -168,81 +168,84 @@ namespace GitUI
 
 		#region Git commands
 
-        //internal GitUI.UI.GitConsole console = null;
+		//internal GitUI.UI.GitConsole console = null;
 
-		private string GitRun(string cmd)
+		private GitBashResult GitRun(string cmd)
 		{
 			if (!GitBash.Exists) throw new Exception("git.exe is not found.");
 			if (this.Tracker == null) throw new Exception("Git repository is not found.");
 
-            //if (console != null)
-            //{
-            //    console.Run("git " + cmd);
-            //    return "";
-            //}
-            //else
-            //{
-            //    var result = GitBash.Run(cmd, this.Tracker.GitWorkingDirectory);
-            //    return result.Output;
-            //}
+			//if (console != null)
+			//{
+			//    console.Run("git " + cmd);
+			//    return "";
+			//}
+			//else
+			//{
+			//    var result = GitBash.Run(cmd, this.Tracker.GitWorkingDirectory);
+			//    return result.Output;
+			//}
 
-            var result = GitBash.Run(cmd, this.Tracker.GitWorkingDirectory);
-            return result.Output;
+			return GitBash.Run(cmd, this.Tracker.GitWorkingDirectory);
+
+			//if (result.HasError && !string.IsNullOrWhiteSpace(result.Error)) 
+			//    throw new Exception(result.Error); // TODO: add GitExecutionException class
+			//return result.Output;
 		}
 
 		private void GitRunCmd(string cmd)
 		{
 			if (!GitBash.Exists) throw new Exception("git.exe is not found.");
 
-            //if (this.Tracker == null) throw new Exception("Git repository is not found.");
-            //if (console != null)
-            //{
-            //    console.Run("git " + cmd);
-            //}
-            //else
-            //{
-            //    GitBash.RunCmd(cmd, this.Tracker.GitWorkingDirectory);
-            //}
+			//if (this.Tracker == null) throw new Exception("Git repository is not found.");
+			//if (console != null)
+			//{
+			//    console.Run("git " + cmd);
+			//}
+			//else
+			//{
+			//    GitBash.RunCmd(cmd, this.Tracker.GitWorkingDirectory);
+			//}
 
-            GitBash.RunCmd(cmd, this.Tracker.GitWorkingDirectory);
+			GitBash.RunCmd(cmd, this.Tracker.GitWorkingDirectory);
 		}
 
-		internal string AddTag(string name, string id)
+		internal GitBashResult AddTag(string name, string id)
 		{
 			return GitRun(string.Format("tag \"{0}\" {1}", name, id));
 		}
 
-		internal string GetTagId(string name)
+		internal GitBashResult GetTagId(string name)
 		{
 			return GitRun("show-ref refs/tags/" + name);
 		}
 
-		internal string DeleteTag(string name)
+		internal GitBashResult DeleteTag(string name)
 		{
 			return GitRun("tag -d " + name);
 		}
 
-		internal string AddBranch(string name, string id)
+		internal GitBashResult AddBranch(string name, string id)
 		{
 			return GitRun(string.Format("branch \"{0}\" {1}", name, id));
 		}
 
-		internal string GetBranchId(string name)
+		internal GitBashResult GetBranchId(string name)
 		{
 			return GitRun("show-ref refs/heads/" + name);
 		}
 
-		internal string DeleteBranch(string name)
+		internal GitBashResult DeleteBranch(string name)
 		{
 			return GitRun("branch -d " + name);
 		}
 
-		internal string CheckoutBranch(string name)
+		internal GitBashResult CheckoutBranch(string name)
 		{
 			return GitRun("checkout " + name);
 		}
 
-		internal string Archive(string id, string fileName)
+		internal GitBashResult Archive(string id, string fileName)
 		{
 			return GitRun(string.Format("archive {0} --format=zip --output \"{1}\"", id, fileName));
 		}

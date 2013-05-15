@@ -206,10 +206,20 @@ namespace GitUI
 
 		private void ShowMessage_Executed(object sender, ExecutedRoutedEventArgs e)
 		{
+			//dynamic msg = e.Parameter;
+			//txtMessage.Text = msg.Message;
+			//txtMessage.Foreground = new SolidColorBrush(
+			//    msg.Error ? Colors.Red : Colors.Navy);
+
 			dynamic msg = e.Parameter;
-			txtMessage.Text = msg.Message;
+			var ret = msg.GitBashResult as GitBashResult;
+			if (ret == null) return;
+
+			txtMessage.Text = string.Format("{0} {1}", ret.Output, ret.Error);
 			txtMessage.Foreground = new SolidColorBrush(
-				msg.Error ? Colors.Red : Colors.Navy);
+				ret.HasError ? Colors.Red : Colors.Navy);
+
+
 			txtMessage.Visibility = Visibility.Visible;
 			txtMessage.Opacity = 1.0;
 			DoubleAnimation doubleAnimation = new DoubleAnimation

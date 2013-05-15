@@ -70,11 +70,11 @@ namespace GitScc.UI
 
                 if (string.IsNullOrWhiteSpace(tag)) return;
 
-                var tag1 = ((Ref[])commit.Refs).Where(r => r.Type == RefTypes.Tag
-                    && r.Name == tag).FirstOrDefault();
-                if (tag1 != null && tag1.Id.StartsWith(commit.ShortId)) return;
+                //var tag1 = ((Ref[])commit.Refs).Where(r => r.Type == RefTypes.Tag
+                //    && r.Name == tag).FirstOrDefault();
+                //if (tag1 != null && tag1.Id.StartsWith(commit.ShortId)) return;
 
-                string tagId = GitViewModel.Current.GetTagId(tag);
+                string tagId = GitViewModel.Current.GetTagId(tag).Output;
 
                 if (!string.IsNullOrWhiteSpace(tagId))
                 {
@@ -83,11 +83,7 @@ namespace GitScc.UI
                 else
                 {
                     var ret = GitViewModel.Current.AddTag(tag, commit.ShortId);
-                    if (!string.IsNullOrWhiteSpace(ret))
-                        HistoryViewCommands.ShowMessage.Execute(new { Message = ret, Error = true }, this);
-
-                    //if(!string.IsNullOrWhiteSpace(ret)) 
-                    //    MessageBox.Show(ret, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    HistoryViewCommands.ShowMessage.Execute(new { GitBashResult = ret }, this);
                 }
             }
             catch (Exception ex)
@@ -112,7 +108,8 @@ namespace GitScc.UI
                     && r.Name == branch).FirstOrDefault();
                 if (branch1 != null && branch1.Id.StartsWith(commit.ShortId)) return;
 
-                string branchId = GitViewModel.Current.GetBranchId(branch);
+
+                string branchId = GitViewModel.Current.GetBranchId(branch).Output;
 
                 if (!string.IsNullOrWhiteSpace(branchId))
                 {
@@ -121,11 +118,7 @@ namespace GitScc.UI
                 else
                 {
                     var ret = GitViewModel.Current.AddBranch(branch, commit.ShortId);
-                    if (!string.IsNullOrWhiteSpace(ret))
-                        HistoryViewCommands.ShowMessage.Execute(new { Message = ret, Error = true }, this);
-
-                    //if (!string.IsNullOrWhiteSpace(ret))
-                    //    MessageBox.Show(ret, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    HistoryViewCommands.ShowMessage.Execute(new { GitBashResult = ret }, this);
                 }
             }
             catch (Exception ex)
@@ -148,13 +141,7 @@ namespace GitScc.UI
             if (dlg.ShowDialog() == true)
             {
                 var ret = GitViewModel.Current.Archive(this.txtId.Text, dlg.FileName);
-                if (!string.IsNullOrWhiteSpace(ret))
-                    HistoryViewCommands.ShowMessage.Execute(new { Message = ret, Error = true }, this);
-
-                //if (!string.IsNullOrWhiteSpace(ret))
-                //{
-                //    MessageBox.Show(ret, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                //}
+                HistoryViewCommands.ShowMessage.Execute(new { GitBashResult = ret }, this);
             }
         }
     }

@@ -20,6 +20,7 @@
         <CommandBinding Command="cmd:HistoryViewCommands.GraphLoaded"  Executed="GraphLoaded_Executed" />
         <CommandBinding Command="cmd:HistoryViewCommands.PendingChanges"  Executed="PendingChanges_Executed" />
         <CommandBinding Command="cmd:HistoryViewCommands.ShowMessage"  Executed="ShowMessage_Executed" />
+        <CommandBinding Command="cmd:HistoryViewCommands.OpenRepository"  Executed="OpenRepository_Executed" />
     </Window.CommandBindings>
     
     <Window.Resources>

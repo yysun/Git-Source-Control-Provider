@@ -76,6 +76,7 @@
         	x:Name="btnPendingChanges" ToolTip="Pending Changes" Click="btnPendingChanges_Click"
         	Template="{DynamicResource PendingChangesButtonControlTemplate}" RenderTransformOrigin="11.042,1.083" />
         <Button Content="Repositories" HorizontalAlignment="Right" Margin="0,5,107,41" Template="{DynamicResource OpenRepositoriesButtonControlTemplate}" ToolTip="Repositories"  Visibility="Hidden"/>
+        <Button Command="cmd:HistoryViewCommands.OpenRepository" Content="Export" HorizontalAlignment="Right" Margin="0,16,107,0" Template="{DynamicResource OpenRepositoryButtonControlTemplate}" ToolTip="Open Repository ..." VerticalAlignment="Top" />
         <!--<Button Content="0" HorizontalAlignment="Right" Margin="0,8,100,0" x:Name="btnCommitCount" VerticalAlignment="Top" Template="{DynamicResource CommitCountControlTemplate}" RenderTransformOrigin="-1.125,0.438" Click="btnCommitCount_Click" ToolTip="Click to clear selection" />-->
      </Grid>
 </UserControl>

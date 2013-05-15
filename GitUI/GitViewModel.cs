@@ -22,6 +22,7 @@ namespace GitUI
 		public static readonly RoutedUICommand GraphLoaded = new RoutedUICommand("GraphLoaded", "GraphLoaded", typeof(MainWindow));
 		public static readonly RoutedUICommand PendingChanges = new RoutedUICommand("PendingChanges", "PendingChanges", typeof(MainWindow));
 		public static readonly RoutedUICommand ShowMessage = new RoutedUICommand("ShowMessage", "ShowMessage", typeof(MainWindow));
+        public static readonly RoutedUICommand OpenRepository = new RoutedUICommand("OpenRepository", "OpenRepository", typeof(MainWindow));
 	}
 
 	public class GitViewModel

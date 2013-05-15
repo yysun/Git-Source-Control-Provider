@@ -379,4 +379,32 @@
 			<TextBlock x:Name="textBlock" Margin="0,1,0,0" TextWrapping="Wrap" d:LayoutOverrides="Width, Height" Foreground="#FF99B6D1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"><Span FontFamily="Wingdings 2" Language="en-us"><Run Text="Ó"/></Span></TextBlock>
 		</Grid>
 	</ControlTemplate>
+	<ControlTemplate x:Key="OpenRepositoryButtonControlTemplate" TargetType="{x:Type Button}">
+		<Grid Width="24" Height="24">
+			<VisualStateManager.VisualStateGroups>
+				<VisualStateGroup x:Name="CommonStates">
+					<VisualState x:Name="Normal"/>
+					<VisualState x:Name="MouseOver">
+						<Storyboard>
+							<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="ellipse">
+								<EasingColorKeyFrame KeyTime="0" Value="#FF99B6D1"/>
+							</ColorAnimationUsingKeyFrames>
+							<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)" Storyboard.TargetName="textBlock">
+								<EasingColorKeyFrame KeyTime="0" Value="White"/>
+							</ColorAnimationUsingKeyFrames>
+						</Storyboard>
+					</VisualState>
+					<VisualState x:Name="Pressed"/>
+					<VisualState x:Name="Disabled"/>
+				</VisualStateGroup>
+				<VisualStateGroup x:Name="ValidationStates">
+					<VisualState x:Name="Valid"/>
+					<VisualState x:Name="InvalidFocused"/>
+					<VisualState x:Name="InvalidUnfocused"/>
+				</VisualStateGroup>
+			</VisualStateManager.VisualStateGroups>
+			<Ellipse x:Name="ellipse" Stroke="#FF99B6D1" StrokeThickness="2" Fill="White"/>
+			<TextBlock x:Name="textBlock" TextWrapping="Wrap" d:LayoutOverrides="Width, Height" Foreground="#FF99B6D1" FontFamily="Webdings" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontSize="13.333" Margin="3.975,4.134,2.107,5.068"><Span FontFamily="Wingdings" Language="en-us"><Run Text="1"/></Span></TextBlock>
+		</Grid>
+	</ControlTemplate>
 </ResourceDictionary>

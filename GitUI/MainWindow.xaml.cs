@@ -37,7 +37,7 @@ namespace GitUI
 			this.Style = (Style)Resources["GradientStyle"];
 
 			GitBash.GitExePath = GitSccOptions.Current.GitBashPath;
-            GitBash.UseUTF8FileNames = !GitSccOptions.Current.NotUseUTF8FileNames;
+			GitBash.UseUTF8FileNames = !GitSccOptions.Current.NotUseUTF8FileNames;
 
 			if (!GitBash.Exists) GitBash.GitExePath = TryFindFile(new string[] {
 					@"C:\Program Files\Git\bin\sh.exe",
@@ -60,7 +60,7 @@ namespace GitUI
 				////this.Dispatcher.BeginInvoke(a, DispatcherPriority.Render);
 
 				loading.Visibility = Visibility.Visible;
-				Action act = () => 
+				Action act = () =>
 				{
 					if (gitViewModel.Tracker.HasGitRepository)
 					{
@@ -215,7 +215,8 @@ namespace GitUI
 			DoubleAnimation doubleAnimation = new DoubleAnimation
 			{
 				Duration = new Duration(TimeSpan.FromMilliseconds(10000)),
-				From = 1.0, To = 0.0
+				From = 1.0,
+				To = 0.0
 			};
 			doubleAnimation.Completed += (o, _) => txtMessage.Visibility = Visibility.Collapsed;
 			txtMessage.BeginAnimation(UIElement.OpacityProperty, doubleAnimation);
@@ -224,7 +225,7 @@ namespace GitUI
 		#endregion
 
 		#region select and comapre commits
-		
+
 		private void SelectCommit_Executed(object sender, ExecutedRoutedEventArgs e)
 		{
 			this.topToolBar.SelectCommit(e.Parameter as string, null);
@@ -273,14 +274,22 @@ namespace GitUI
 					loading.Visibility = Visibility.Collapsed;
 				};
 				this.pendingChanges.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animation);
-				
+
 			}
 			catch (Exception ex)
 			{
 				Log.WriteLine("MainWindow.PendingChanges_Executed {0}", ex.ToString());
 			}
 		}
-		#endregion    
+		#endregion
+
+		private void OpenRepository(string path)
+		{
+			HistoryViewCommands.CloseCommitDetails.Execute(null, this);
+			HistoryViewCommands.CloseCommitDetails.Execute("PendingChanges", this);
+			this.gitViewModel.Open(path);
+			this.gitViewModel.Refresh(true);
+		}
 
 		private void Window_Drop(object sender, DragEventArgs e)
 		{
@@ -296,10 +305,7 @@ namespace GitUI
 					MessageBox.Show("Do you want to open Git repository from " + gitWorkingFolder,
 					"Git repository found", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
 				{
-                    HistoryViewCommands.CloseCommitDetails.Execute(null, this);
-                    HistoryViewCommands.CloseCommitDetails.Execute("PendingChanges", this);
-					this.gitViewModel.Open(dropped);
-					this.gitViewModel.Refresh(true);
+					this.OpenRepository(dropped);
 				}
 			}
 		}
@@ -307,6 +313,15 @@ namespace GitUI
 		private void _OnSystemCommandCloseWindow(object sender, ExecutedRoutedEventArgs e)
 		{
 			SystemCommands.CloseWindow(this);
+		}
+
+		private void OpenRepository_Executed(object sender, ExecutedRoutedEventArgs e)
+		{
+			var dlg = new System.Windows.Forms.FolderBrowserDialog();
+			if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+			{
+				this.OpenRepository(dlg.SelectedPath);
+			}
 		}
 	}
 }

@@ -275,15 +275,17 @@
 
         <Grid Grid.Column="2" Grid.Row="0" Grid.RowSpan="2"
               Background="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}">
-
-            <TabControl Name="tabControl1">
+            
+            <ContentControl x:Name="DiffEditor" MouseDoubleClick="DiffEditor_MouseDoubleClick"></ContentControl>
+            
+            <!--<TabControl Name="tabControl1">
                 <TabItem Header="Diff View" Name="tabItem1">
                     <ContentControl x:Name="DiffEditor" MouseDoubleClick="DiffEditor_MouseDoubleClick"></ContentControl>
                 </TabItem>
                 <TabItem Header="Git Console (Experimental)" Name="tabItem2">
                     <my:GitConsole x:Name="gitConsole1" />
                 </TabItem>
-            </TabControl>
+            </TabControl>-->
 
         </Grid>
 

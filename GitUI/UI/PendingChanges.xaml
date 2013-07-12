@@ -26,7 +26,7 @@
 			<Button Content="close" HorizontalAlignment="Right" Margin="0,19,20,17" Padding="10,0"
 					Command="cmd:HistoryViewCommands.CloseCommitDetails" CommandParameter="PendingChanges"
 					Template="{DynamicResource CloseButtonControlTemplate}" ToolTip="Back to graphic view" d:LayoutOverrides="Height" />
-			<Button Content="Pending Changes" HorizontalAlignment="Right" Margin="0,9,46,7" Name="btnPendingChanges" Padding="10,0" RenderTransformOrigin="11.042,1.083" Template="{DynamicResource PendingChangesButtonControlTemplate}" ToolTip="Pending Changes" Click="btnPendingChanges_Click" />
+			<Button Content="Commit" HorizontalAlignment="Right" Margin="0,9,46,7" Name="btnPendingChanges" Padding="10,0" RenderTransformOrigin="11.042,1.083" Template="{DynamicResource PendingChangesButtonControlTemplate}" ToolTip="Pending Changes" Click="btnPendingChanges_Click" />
 			<CheckBox Content="Amend last commit" Height="16" HorizontalAlignment="Left" Margin="292,34,0,0" Name="chkAmend" VerticalAlignment="Top" Checked="chkAmend_Checked" />
 			<CheckBox Content="Commit to new branch" Height="16" HorizontalAlignment="Left" Margin="12,34,0,0" Name="chkNewBranch" VerticalAlignment="Top" Checked="chkNewBranch_Checked" />
 			<TextBox Height="23" HorizontalAlignment="Left" Margin="156,31,0,0" Name="txtNewBranch" VerticalAlignment="Top" Width="120" TextChanged="txtNewBranch_TextChanged" />

@@ -204,7 +204,7 @@ namespace GitScc
         {
             //Debug.WriteLine(string.Format("===+ GetFileStatusNoCache {0}", fileName));
 
-            var fileNameRel = GetRelativeFileName(fileName);
+            var fileNameRel = GetRelativeFileNameForGit(fileName);
 
             IndexDiff indexDiff = new IndexDiff(repository, Constants.HEAD, new FileTreeIterator(repository));
             indexDiff.SetFilter(PathFilterGroup.CreateFromStrings(fileNameRel));

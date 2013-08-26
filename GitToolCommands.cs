@@ -28,6 +28,7 @@ namespace GitScc
     {
         internal static List<GitToolCommand> GitTorCommands = new List<GitToolCommand> { 
             new GitToolCommand("TortoiseGit", "/command:log"), // workaround to missing of the first command in menu
+            new GitToolCommand("Blame", "/command:blame", CommandScope.File), 
             new GitToolCommand("Branch", "/command:branch"), 
             new GitToolCommand("Commit", "/command:commit"), 
             new GitToolCommand("Export", "/command:export"), 

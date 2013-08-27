@@ -225,7 +225,6 @@
     <EmbeddedResource Include="Resources\GitApi.dll" />
     <EmbeddedResource Include="Resources\ICSharpCode.AvalonEdit.dll" />
     <EmbeddedResource Include="Resources\ICSharpCode.SharpZipLib.dll" />
-    <EmbeddedResource Include="Resources\Mono.Posix.dll" />
     <EmbeddedResource Include="Resources\Mono.Security.dll" />
     <EmbeddedResource Include="Resources\NGit.dll" />
     <EmbeddedResource Include="Resources\NSch.dll" />

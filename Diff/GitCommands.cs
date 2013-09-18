@@ -44,7 +44,7 @@
 
             byte[] previousContent = GetPreviousRevision(tracker, fileName);
             RawText b = new RawText(content);
-            RawText a = new RawText(previousContent);
+            RawText a = new RawText(previousContent ?? new byte[0]);
             EditList edits = diff.Diff(RawTextComparator.DEFAULT, a, b);
             foreach (Edit edit in edits)
                 yield return new HunkRangeInfo(snapshot, edit, a, b);

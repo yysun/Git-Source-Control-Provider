@@ -492,7 +492,7 @@ namespace GitScc
 
             var fileNameRel = GetRelativeFileName(fileName);
 
-            if (GitBash.Exists && false)
+            if (GitBash.Exists)
             {
                 if (head == null)
                 {
@@ -524,7 +524,7 @@ namespace GitScc
             if (!this.HasGitRepository) return;
             //var index = repository.GetIndex();
             //index.RereadIfNecessary();
-            if (GitBash.Exists && false)
+            if (GitBash.Exists)
             {
                 if (File.Exists(fileName))
                 {

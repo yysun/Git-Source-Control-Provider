@@ -41,6 +41,21 @@
 
         private static PlatformColorHelper LookupPlatformColorHelper(Type wrapperType)
         {
+            // first try to find the Visual Studio 2013 assembly
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                AssemblyName name = assembly.GetName();
+                if (!name.Name.Equals("Microsoft.VisualStudio.Shell.12.0"))
+                    continue;
+
+                Type type = assembly.GetType("Microsoft.VisualStudio.PlatformUI." + wrapperType.Name, false);
+                if (type == null)
+                    continue;
+
+                return new PlatformColorHelper(type);
+            }
+
+            // fall back to the Visual Studio 2012 assembly
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 AssemblyName name = assembly.GetName();

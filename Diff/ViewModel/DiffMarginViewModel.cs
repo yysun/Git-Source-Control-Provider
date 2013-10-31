@@ -123,7 +123,15 @@ namespace GitScc.Diff.ViewModel
 
         private void RefreshDiffViewModelPositions()
         {
-            RefreshDiffViewModelPositions(false, null);
+            try
+            {
+                RefreshDiffViewModelPositions(false, null);
+            }
+            catch (Exception ex)
+            {
+                if (ErrorHandler.IsCriticalException(ex))
+                    throw;
+            }
         }
 
         private void RefreshDiffViewModelPositions(bool approximate, TextViewLayoutChangedEventArgs e)

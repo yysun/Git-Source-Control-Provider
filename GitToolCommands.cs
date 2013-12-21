@@ -36,6 +36,7 @@ namespace GitScc
             new GitToolCommand("Rebase", "/command:rebase"), 
             new GitToolCommand("Resolve", "/command:resolve"), 
             new GitToolCommand("Revert", "/command:revert"), 
+            new GitToolCommand("Settings", "/command:settings"), 
             new GitToolCommand("Show Log", "/command:log", CommandScope.File), 
             new GitToolCommand("Switch", "/command:switch"), 
             new GitToolCommand("Sync", "/command:sync"), 

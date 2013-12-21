@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Diagnostics;
 
 namespace GitScc.UI
 {
@@ -50,6 +51,18 @@ namespace GitScc.UI
                 txtUserName.Text = result.Output;
                 result = GitBash.Run("config --global user.email", "");
                 txtUserEmail.Text = result.Output;
+                result = GitBash.Run("config --global credential.helper", "");
+                var msg = string.IsNullOrWhiteSpace(result.Output) ? 
+                    "Click here to install Windows Credential for Git":
+                    "Git credential helper is installed";
+                txtGitCredentialHelper.Inlines.Clear();
+                txtGitCredentialHelper.Inlines.Add(msg);
+                result = GitBash.Run("config --global merge.tool", "");
+                msg = string.IsNullOrWhiteSpace(result.Output) ?
+                   "Git merge tool is not configured." :
+                   "Git merge tool is " +  result.Output;
+                txtGitMergeTool.Inlines.Clear();
+                txtGitMergeTool.Inlines.Add(msg);
             }
             catch (Exception ex)
             {
@@ -122,6 +135,12 @@ namespace GitScc.UI
             {
                 CheckGitBash();
             }
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
         }
 
 

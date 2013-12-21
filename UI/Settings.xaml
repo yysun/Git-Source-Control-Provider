@@ -27,15 +27,26 @@
     </UserControl.Resources>
     <Grid Background="White">
         <Label Content="Browse or type the path to Git for Windows (git.exe)" Height="28" HorizontalAlignment="Left" Margin="7,12,0,0" Name="label1" VerticalAlignment="Top" />
-        <TextBox Height="23" HorizontalAlignment="Left" Margin="12,38,0,0" Name="txtGitExePath" VerticalAlignment="Top" Width="368" MouseDown="txtGitExePath_MouseDown" KeyUp="txtGitExePath_KeyUp" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="12,38,0,0" Name="txtGitExePath" VerticalAlignment="Top" Width="368" KeyUp="txtGitExePath_KeyUp" />
         <Button Content="Browse ..." Height="23" HorizontalAlignment="Left" Margin="386,38,0,0" Name="btnBrowse" VerticalAlignment="Top" Width="75" Click="btnBrowse_Click" />
         <Label Content="." Height="28" HorizontalAlignment="Left" Margin="12,66,0,0" Name="txtMessage" VerticalAlignment="Top" />
+
+        <TextBlock Height="27" HorizontalAlignment="Left" Margin="388,71,0,0" VerticalAlignment="Top">
+            <Hyperlink Name="txtGitSite" NavigateUri="http://git-scm.com/" RequestNavigate="Hyperlink_RequestNavigate">Download Git</Hyperlink>
+        </TextBlock>
+
         <Label Content="Git User Name" Height="28" HorizontalAlignment="Left" Margin="12,100,0,0" Name="label2" VerticalAlignment="Top" />
         <TextBox Height="23" HorizontalAlignment="Left" Margin="105,105,0,0" Name="txtUserName" VerticalAlignment="Top" Width="275" />
         <Label Content="Git User Email" Height="28" HorizontalAlignment="Left" Margin="12,129,0,0" Name="label3" VerticalAlignment="Top" />
         <TextBox Height="23" HorizontalAlignment="Left" Margin="105,134,0,0" Name="txtUserEmail" VerticalAlignment="Top" Width="275" />
         <Button Content="Verify" Height="23" HorizontalAlignment="Left" Margin="386,71,0,0" Name="btnVerify" VerticalAlignment="Top" Width="75" Click="btnVerify_Click" Visibility="Hidden" />
-        <Button Content="Cancel" Height="23" HorizontalAlignment="Left" Margin="12,172,0,0" Name="btnCancel" VerticalAlignment="Top" Width="75" Click="btnCancel_Click" />
-        <Button Content="OK" Height="23" HorizontalAlignment="Left" Margin="105,172,0,0" Name="btnOK" VerticalAlignment="Top" Width="75" Click="btnOK_Click"/>
+        <Button Content="Cancel" Height="23" HorizontalAlignment="Left" Margin="12,217,0,0" Name="btnCancel" VerticalAlignment="Top" Width="75" Click="btnCancel_Click" />
+        <Button Content="OK" Height="23" HorizontalAlignment="Left" Margin="105,217,0,0" Name="btnOK" VerticalAlignment="Top" Width="75" Click="btnOK_Click"/>
+        <TextBlock Height="36" HorizontalAlignment="Left" Margin="16,167,0,0" VerticalAlignment="Top">
+            <Hyperlink Name="txtGitCredentialHelper" NavigateUri="http://gitcredentialstore.codeplex.com/" RequestNavigate="Hyperlink_RequestNavigate">Credential Helper</Hyperlink>
+            <LineBreak/>
+            <Hyperlink Name="txtGitMergeTool" NavigateUri="http://git-scm.com/docs/git-mergetool" RequestNavigate="Hyperlink_RequestNavigate">Merge Tool</Hyperlink>
+        </TextBlock>
+
     </Grid>
 </UserControl>

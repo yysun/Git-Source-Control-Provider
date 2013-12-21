@@ -56,10 +56,7 @@ namespace GitScc.UI
                 txtMessage.Content = ex.Message;
             }
 
-            if (GitBash.Exists && txtMessage.Content.ToString().StartsWith("git version"))
-            {
-                btnOK.Visibility = Visibility.Visible;
-            }
+            btnOK.IsEnabled = GitBash.Exists && txtMessage.Content.ToString().StartsWith("git version");
         }
 
         private void btnOK_Click(object sender, RoutedEventArgs e)
@@ -96,9 +93,10 @@ namespace GitScc.UI
         {
             this.Visibility = Visibility.Visible;
             txtGitExePath.Text = GitBash.GitExePath;
-            btnOK.Visibility = Visibility.Collapsed;
+            btnOK.IsEnabled = false;
             txtGitExePath.Text = GitSccOptions.Current.GitBashPath;
             txtMessage.Content = "";
+            CheckGitBash();
         }
 
         internal void Hide()
@@ -108,9 +106,24 @@ namespace GitScc.UI
 
         private void btnVerify_Click(object sender, RoutedEventArgs e)
         {
-            btnOK.Visibility = Visibility.Collapsed;
+            btnOK.IsEnabled = false;
             txtMessage.Content = "";
             CheckGitBash();
         }
+
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            Hide();
+        }
+
+        private void txtGitExePath_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                CheckGitBash();
+            }
+        }
+
+
     }
 }

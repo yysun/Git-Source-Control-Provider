@@ -261,6 +261,17 @@
           <ButtonText>Refresh</ButtonText>
         </Strings>
       </Button>
+
+      <Button guid="guidSccProviderCmdSet" id="icmdPendingChangesSettings" priority="0x0008" type="Button">
+        <Parent guid="guidSccProviderCmdSet" id="igrpPendingChangesToolWindowToolbarGroup"/>
+        <Icon guid="guidSccProviderImages" id="iconGitBash" />
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <CommandFlag>IconAndText</CommandFlag>
+        <Strings>
+          <ButtonText>Settings</ButtonText>
+        </Strings>
+      </Button>
       
     </Buttons>
     
@@ -369,6 +380,7 @@
 
       <IDSymbol name="icmdPendingChangesRefresh" value="0x114"/>
       <IDSymbol name="icmdHistoryViewRefresh" value="0x115"/>
+      <IDSymbol name="icmdPendingChangesSettings" value="0x116"/>
 
       <IDSymbol name="igrpGeneralSourceControlCommands" value="0x700"/>
       <IDSymbol name="imnuGeneralSourceControlCommands" value="0x701"/>

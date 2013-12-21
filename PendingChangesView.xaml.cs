@@ -789,6 +789,11 @@ Note: if the file is included project, you need to delete the file from project 
             if (_currentSortedColumn != null && _currentSortedColumn != header && _currentSortedColumn.Column != checkStateColumn)
                 _currentSortedColumn.Column.HeaderTemplate = null;
         }
+
+        internal void OnSettings()
+        {
+            Settings.Show();
+        }
     }
 
     public static class ExtHelper

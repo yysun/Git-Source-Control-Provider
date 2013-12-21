@@ -145,6 +145,11 @@ namespace GitScc
                 cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesAmend);
                 menu = new MenuCommand(new EventHandler(OnAmendCommitCommand), cmd);
                 mcs.AddCommand(menu);
+
+                cmd = new CommandID(GuidList.guidSccProviderCmdSet, CommandId.icmdPendingChangesSettings);
+                menu = new MenuCommand(new EventHandler(OnSettings), cmd);
+                mcs.AddCommand(menu);
+                
             }
 
 
@@ -268,7 +273,11 @@ namespace GitScc
                     else
                         cmdf |= OLECMDF.OLECMDF_INVISIBLE;
                     break;
-            
+
+                case CommandId.icmdPendingChangesSettings:
+                    cmdf |= OLECMDF.OLECMDF_ENABLED;
+                    break;
+
                 default:
                     var gitExtPath = GitSccOptions.Current.GitExtensionPath;
                     var torGitPath = GitSccOptions.Current.TortoiseGitPath;
@@ -495,6 +504,11 @@ namespace GitScc
         private void OnAmendCommitCommand(object sender, EventArgs e)
         {
             GetToolWindowPane<PendingChangesToolWindow>().OnAmendCommitCommand();
+        }
+
+        private void OnSettings(object sender, EventArgs e)
+        {
+            GetToolWindowPane<PendingChangesToolWindow>().OnSettings();
         }
 
         #endregion

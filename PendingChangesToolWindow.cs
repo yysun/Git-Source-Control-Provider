@@ -107,5 +107,10 @@ namespace GitScc
                 Log.WriteLine("Pending Changes Tool Window Refresh: {0}", ex.ToString());
             }
         }
+
+        internal void OnSettings()
+        {
+            control.OnSettings();
+        }
     }
 }

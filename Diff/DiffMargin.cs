@@ -13,7 +13,7 @@
 
     public sealed class DiffMargin : IWpfTextViewMargin
     {
-        public const string MarginName = "GitDiffMargin";
+        public const string MarginName = "GitSccDiffMargin";
 
         internal const double ChangeLeft = 2.5;
         internal const double ChangeWidth = 5.0;
